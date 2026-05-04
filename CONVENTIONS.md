@@ -22,7 +22,29 @@ Ce document décrit le **nommage des branches** et les **Conventional Commits** 
 - **On ne pousse pas de travail directement sur `main`** : tout passe par une **branche dédiée** (`feature/…`, `fix/…`, etc.) puis une **pull request** (revue) avant merge.
 - **On ne pousse pas non plus directement sur `develop`** : même principe — intégration via branche + PR.
 
-**Exception (rare)** : commit **direct** sur `main` ou `develop` **uniquement** pour des changements **mineurs** et **très maîtrisés**, sans effet de bord sur le build ni sur l’équipe — en pratique **aucune modification de dépendances** (pas de `package.json` / `pnpm-lock.yaml` / `requirements`, pas de script d’install, pas de conteneur), typiquement une coquille dans un `.md`, un commentaire, un correctif de doc d’une ligne. Dès qu’il y a du code applicatif, une config, ou le moindre doute : **branche + PR**.
+**Exception (rare)** : commit **direct** sur `main` ou `develop` **uniquement** pour des changements **mineurs** et **très maîtrisés**, sans effet de bord sur le build ni sur l’équipe — en pratique **aucune modification de dépendances** (pas de `package.json` / `pnpm-lock.yaml` / `requirements`, pas de script d’install, pas de conteneur), typiquement une coquille dans un `.md`, amélioration de la doc (commit en doc(readme):xxx), un commentaire, un correctif de doc d’une ligne. Dès qu’il y a du code applicatif, une config, ou le moindre doute : **branche + PR**.
+
+## Rebaser souvent sur `develop` ou sur `main`
+
+Rappel sur le fonctionnement du **rebase** et les cas limites : [**Introduction au Git Rebase** (DataCamp, FR)](https://www.datacamp.com/fr/tutorial/git-rebase).
+
+Dans la mesure du possible, **mettre à jour régulièrement** ta branche de travail par **rebase** pour limiter les conflits au moment de la PR et rester aligné avec le flux du dépôt :
+
+- Branche **issue de `develop`** (travail d’intégration vers la suite du cycle) : après `git fetch`, rebaser sur **`develop`**  
+  `git rebase develop`  
+  (ou `git rebase origin/develop` si tu ne trackes que le distant.)
+- Branche **issue de `main`** (correctif ciblé, hotfix, branche alignée dès le départ sur `main`) : rebaser sur **`main`**  
+  `git rebase main`  
+  (même idée : `git fetch` puis rebase sur la branche de base choisie.)
+
+### Push forcé, conflits, branches partagées
+
+Un **rebase réécrit l’historique** de ta branche. Dès que tu as **déjà poussé** cette branche sur le remote, le prochain push des commits « rejoués » exige en général un **`git push --force-with-lease`** (et non un simple `git push`). C’est vrai en particulier si un rebase t’a fait **résoudre des conflits** : l’état local ne correspond plus à l’historique distant.
+
+- **Branche perso / feature seule** : rebase + `--force-with-lease` est l’usage courant.
+- **Branche partagée** (plusieurs personnes travaillent sur la même branche) : le rebase + push forcé peut **écraser** le travail d’autres commits déjà poussés → **à utiliser avec précaution** ; prévenir l’équipe, ou préférer un **`git merge develop`** / **`git merge main`** pour intégrer la base sans réécrire l’historique commun.
+
+Si l’équipe préfère éviter le rebase sur les branches collaboratives, **`merge`** depuis `develop` / `main` reste acceptable ; l’important est de **rafraîchir souvent** pour ne pas livrer une PR avec des mois de retard sur la base.
 
 ## Branches (rôles, sommairement)
 
