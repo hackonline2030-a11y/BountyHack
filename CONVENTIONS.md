@@ -2,6 +2,13 @@
 
 Ce document décrit le **nommage des branches** et les **Conventional Commits** pour ce monorepo. Le dépôt partage une historique commune (`main`, branches `release/*`, `develop` / `srv/dev`, etc.), avec des livrables indépendants en production.
 
+## Pas de commit direct sur `main` ni sur `develop`
+
+- **On ne pousse pas de travail directement sur `main`** : tout passe par une **branche dédiée** (`feature/…`, `fix/…`, etc.) puis une **pull request** (revue) avant merge.
+- **On ne pousse pas non plus directement sur `develop`** : même principe — intégration via branche + PR.
+
+**Exception (rare)** : commit **direct** sur `main` ou `develop` **uniquement** pour des changements **mineurs** et **très maîtrisés**, sans effet de bord sur le build ni sur l’équipe — en pratique **aucune modification de dépendances** (pas de `package.json` / `pnpm-lock.yaml` / `requirements`, pas de script d’install, pas de conteneur), typiquement une coquille dans un `.md`, un commentaire, un correctif de doc d’une ligne. Dès qu’il y a du code applicatif, une config, ou le moindre doute : **branche + PR**.
+
 ## Branches (rôles, sommairement)
 
 | Branche | Rôle |
