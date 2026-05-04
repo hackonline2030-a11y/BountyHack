@@ -61,4 +61,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 src/assets/web-api-firebase-key.json
 templates/assets/
 templates/real-me.png
-pdfs/
+# PDFs générés : ignorer tout le contenu sous pdfs/, mais garder le dossier versionné (pdfs/.gitkeep)
+pdfs/**
+!pdfs/.gitkeep
