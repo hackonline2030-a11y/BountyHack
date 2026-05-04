@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, review_requested, edited, synchronize]
+    branches: 
+      - "**"
+
+jobs:
+  development-ci:
+    name: development-ci
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_PROVIDER: sqlite
+      DATABASE_URL: file:./prisma/dev.db
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+      # https://github.com/actions/setup-node?tab=readme-ov-file
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: linting
+        run: pnpm run lint
+
+      - name: build
+        run: pnpm run build

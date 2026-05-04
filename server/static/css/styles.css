@@ -1,0 +1,239 @@
+/* =========================================================
+   Welcome page
+========================================================= */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #fafafa;
+}
+
+.welcome-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.welcome-page .container {
+  padding: 2rem;
+  background-color: #fceed1;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  text-align: center;
+  max-width: 30rem;
+  width: 100%;
+}
+
+.container .title {
+  font-size: 2rem;
+  color: #7d3cff;
+  margin-bottom: 1rem;
+}
+
+.welcome-page .description {
+  color: #4a5568;
+  margin-bottom: 2rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  color: #ffffff;
+  background-color: #7d3cff;
+  border: none;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  opacity: 0.8;
+}
+
+.button-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.welcome-page .button-row {
+ justify-content: center;
+}
+
+.welcome-page .button-row .button {
+  width: 260px;
+  text-align: center;
+}
+
+.button-secondary {
+  background-color: #545454;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   CV tokens and PDF rules
+========================================================= */
+@page {
+  size: A4;
+  margin: 0;
+}
+
+:root {
+  --accent: #f80040;
+  --purple: #6d4cff;
+  --title-dark: #151941;
+  --text: #000000;
+  --muted: #4f4f4f;
+  --item-meta-color: #545454;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --global-texts-lh: 1.4;
+  --section-title-size: 22px;
+  --item-title-size: 16px;
+  --item-meta-size: 13px;
+  --item-text-size: 12px;
+  --left-column-title-size: 20px;
+  --left-column-subtitle-size: 13px;
+  --left-column-lh-size: 1.35em;
+  --left-column-text-size: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   Dashboard view
+========================================================= */
+.dashboard {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 24px 16px 32px;
+}
+
+.dashboard-header {
+  background-color: #fceed1;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+}
+
+.dashboard-title {
+  margin: 0 0 8px 0;
+  color: #7d3cff;
+  font-size: 1.8rem;
+}
+
+.dashboard-description {
+  margin: 0 0 16px 0;
+  color: #4a5568;
+}
+
+.dashboard-status {
+  min-height: 18px;
+  margin: 12px 0 0 0;
+  color: #2d3748;
+  font-size: 0.95rem;
+}
+
+.dashboard-status-error {
+  color: #c53030;
+}
+
+.dashboard-preview {
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.dashboard-preview-title {
+  margin: 0 0 10px 0;
+  color: #151941;
+  font-size: 1.1rem;
+}
+
+.dashboard-preview-frame {
+  display: block;
+  width: 100%;
+  min-height: 400px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.dashboard-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px 0;
+  font-size: 0.92rem;
+  color: #4a5568;
+}
+
+.dashboard-breadcrumb-link {
+  color: #7d3cff;
+  text-decoration: none;
+}
+
+.dashboard-breadcrumb-link:hover {
+  text-decoration: underline;
+}
+
+.dashboard-breadcrumb-sep {
+  color: #a0aec0;
+}
+
+.dashboard-breadcrumb-current {
+  font-weight: 600;
+  color: #151941;
+}
+
+.dashboard-version-list {
+  list-style: none;
+  margin: 0 0 16px 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dashboard-version-link {
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.dashboard-lang-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px 0;
+}
+
+.dashboard-lang-label {
+  font-size: 0.95rem;
+  color: #4a5568;
+}
+
+.dashboard-lang-select {
+  min-width: 180px;
+  padding: 0.45rem 0.65rem;
+  font-size: 1rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+  background: #fff;
+  color: #151941;
+}

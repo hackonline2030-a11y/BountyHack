@@ -1,0 +1,64 @@
+# NestJS + Nx (server workspace)
+
+# Dependencies
+node_modules/
+.pnpm-store/
+jspm_packages/
+
+# Build
+dist/
+
+# Nx (tout le dossier — cache, graphe, données workspace, fichiers daemon)
+.nx/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Tests & coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
+# Caches & temp
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+.npm/
+*.tgz
+
+# SWC (used by Nx / Jest pipelines)
+.swc/
+
+# Optional: VS Code extension test runner
+.vscode-test/
+
+# Node diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Yarn PnP (if ever used)
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Project — secrets & generated / local-only assets
+src/assets/web-api-firebase-key.json
+templates/assets/
+templates/real-me.png
+pdfs/

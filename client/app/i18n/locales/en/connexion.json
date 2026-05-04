@@ -1,0 +1,39 @@
+{
+  "loginPage": {
+    "metaTitle": "Sign in",
+    "heading": "Sign in to your account"
+  },
+  "registerPage": {
+    "metaTitle": "Register",
+    "heading": "Create your account"
+  },
+  "errors": {
+    "network": "Network error. Please try again."
+  },
+  "loginForm": {
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "••••••••",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "noAccount": "Don't have an account?",
+    "registerLink": "Register",
+    "errorLogin": "Login failed",
+    "successLogin": "Logged in successfully"
+  },
+  "registerForm": {
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "namePlaceholder": "Your name",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "••••••••",
+    "submit": "Create account",
+    "submitting": "Creating account…",
+    "haveAccount": "Already have an account?",
+    "loginLink": "Log in",
+    "errorRegister": "Registration failed",
+    "successRegister": "Account created successfully"
+  }
+}

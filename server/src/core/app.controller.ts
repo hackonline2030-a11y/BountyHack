@@ -1,0 +1,282 @@
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Inject,
+  NotFoundException,
+  Param,
+  Query,
+  Render,
+} from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AppService } from './app.service';
+import { variables } from '../shared/variables.config';
+import {
+  I_CV_REPOSITORY,
+  ICvRepository,
+} from '../document-rendering/application/ports/cv-repository.port';
+import {
+  CvDataInvalidError,
+  CvDataMissingError,
+  CvLocaleInvalidError,
+  CvLocaleNotFoundError,
+  CvVersionNotFoundError,
+} from '../document-rendering/application/errors/pdf-application.errors';
+
+const CV_VERSION_ROUTE = /^v\d+$/i;
+const CV_STYLE_ROUTE = /^[a-z0-9_-]+$/i;
+const LOCALE_ROUTE_CODE = /^[a-z]{2}$/;
+const LANG_LABELS: Record<string, string> = {
+  fr: 'Français',
+  en: 'English',
+};
+
+@ApiTags('root')
+@Controller()
+export class AppController {
+  constructor(
+    private readonly appService: AppService,
+    @Inject(I_CV_REPOSITORY)
+    private readonly cvRepository: ICvRepository,
+  ) {}
+
+  @Get('/')
+  @Render('index')
+  @ApiOperation({
+    summary: 'Render API landing page',
+    description: 'Returns the server-rendered home page used as an API entry point.',
+  })
+  @ApiOkResponse({
+    description: 'HTML landing page returned.',
+    content: {
+      'text/html': {
+        schema: {
+          type: 'string',
+          example: '<!doctype html><html><head><title>NestJs Web Api</title></head><body>...</body></html>',
+        },
+      },
+    },
+  })
+  getHomePage() {
+    const apiPrefix = `/${variables.globalPrefix.replace(/^\/+|\/+$/g, '')}`;
+    return {
+      title: this.appService.getWelcomTexts().title,
+      description: this.appService.getWelcomTexts().description,
+      docsBtnText: this.appService.getHomeActions().docs,
+      dashboardBtnText: this.appService.getHomeActions().dashboard,
+      docsUrl: `${apiPrefix}/docs`,
+      dashboardUrl: `${apiPrefix}/dashboard`,
+    };
+  }
+
+  @Get('/dashboard')
+  @Render('dashboard')
+  @ApiOperation({
+    summary: 'Choose CV dashboard style',
+    description:
+      'Lists available CV styles (`red-curb`, `red-squared`, `hetic-squared`, …); each opens `/dashboard/:style`.',
+  })
+  @ApiOkResponse({
+    description: 'HTML dashboard page returned.',
+    content: {
+      'text/html': {
+        schema: {
+          type: 'string',
+          example:
+            '<!doctype html><html><head><title>Dashboard CV</title></head><body>...</body></html>',
+        },
+      },
+    },
+  })
+  async getDashboardVersionPickerPage() {
+    const apiPrefix = `/${variables.globalPrefix.replace(/^\/+|\/+$/g, '')}`;
+    const texts = this.appService.getDashboardTexts();
+    const styles = await this.cvRepository.listCvStyles();
+    if (!styles.length) {
+      throw new NotFoundException(
+        'No CV style folders found. Add data under `src/document-rendering/data/<style>/v1/cv.json`.',
+      );
+    }
+
+    return {
+      ...texts,
+      mode: 'pick' as const,
+      dashboardBaseUrl: `${apiPrefix}/dashboard`,
+      pickerItems: styles.map((style) => ({
+        href: `${apiPrefix}/dashboard/${style}`,
+        label: `${texts.openVersionPrefix}${style}`,
+      })),
+      homeUrl: `${apiPrefix}`,
+    };
+  }
+
+  @Get('/dashboard/:style')
+  @Render('dashboard')
+  @ApiOperation({
+    summary: 'Choose CV dashboard version for one style',
+    description:
+      'Lists available versions for one style (`/dashboard/:style/:version`).',
+  })
+  @ApiOkResponse({
+    description: 'HTML dashboard page returned.',
+    content: {
+      'text/html': {
+        schema: {
+          type: 'string',
+          example:
+            '<!doctype html><html><head><title>Dashboard CV</title></head><body>...</body></html>',
+        },
+      },
+    },
+  })
+  async getDashboardStylePage(
+    @Param('style') styleParam: string,
+  ) {
+    const apiPrefix = `/${variables.globalPrefix.replace(/^\/+|\/+$/g, '')}`;
+    const texts = this.appService.getDashboardTexts();
+    const style = typeof styleParam === 'string' ? styleParam.trim().toLowerCase() : '';
+
+    if (!CV_STYLE_ROUTE.test(style)) {
+      throw new BadRequestException(
+        `Invalid CV style '${styleParam}'. Expected a slug like red-curb or hetic-squared.`,
+      );
+    }
+
+    const versions = await this.cvRepository.listCvVersions(style);
+    if (!versions.length) {
+      throw new NotFoundException(
+        `No CV version folders found for style '${style}'. Add data under src/document-rendering/data/${style}/v1/cv.json.`,
+      );
+    }
+
+    return {
+      ...texts,
+      mode: 'pick' as const,
+      dashboardBaseUrl: `${apiPrefix}/dashboard`,
+      pickerItems: versions.map((version) => ({
+        href: `${apiPrefix}/dashboard/${style}/${version}`,
+        label: `${texts.openVersionPrefix}${version}`,
+      })),
+      currentStyle: style,
+      homeUrl: `${apiPrefix}`,
+    };
+  }
+
+  @Get('/dashboard/:style/:version')
+  @Render('dashboard')
+  @ApiOperation({
+    summary: 'Render CV dashboard for one style/version',
+    description:
+      'Preview and PDF actions use matching `style`, `version`, and `lang` query parameters.',
+  })
+  @ApiOkResponse({
+    description: 'HTML dashboard page returned.',
+    content: {
+      'text/html': {
+        schema: {
+          type: 'string',
+          example:
+            '<!doctype html><html><head><title>Dashboard CV</title></head><body>...</body></html>',
+        },
+      },
+    },
+  })
+  async getDashboardVersionPage(
+    @Param('style') styleParam: string,
+    @Param('version') versionParam: string,
+    @Query('lang') lang?: string,
+  ) {
+    const apiPrefix = `/${variables.globalPrefix.replace(/^\/+|\/+$/g, '')}`;
+    const texts = this.appService.getDashboardTexts();
+    const style = typeof styleParam === 'string' ? styleParam.trim().toLowerCase() : '';
+    const slug = typeof versionParam === 'string' ? versionParam.trim() : '';
+
+    if (!CV_STYLE_ROUTE.test(style)) {
+      throw new BadRequestException(
+        `Invalid CV style '${styleParam}'. Expected a slug like red-curb or hetic-squared.`,
+      );
+    }
+
+    if (!CV_VERSION_ROUTE.test(slug)) {
+      throw new BadRequestException(
+        `Invalid CV version '${slug}'. Expected a slug like v1 or v2.`,
+      );
+    }
+
+    const version = slug.toLowerCase();
+
+    const locales = await this.cvRepository.listCvLocales(style, version);
+
+    if (!locales.length) {
+      throw new NotFoundException(
+        `No CV locale files found for '${style}/${version}'. Add cv.json or cv.<lang>.json under that folder.`,
+      );
+    }
+
+    const trimmed =
+      typeof lang === 'string' && lang.trim() !== ''
+        ? lang.trim().toLowerCase()
+        : '';
+
+    if (trimmed !== '' && !LOCALE_ROUTE_CODE.test(trimmed)) {
+      throw new BadRequestException(
+        `Invalid language '${lang}'. Expected a code like fr or en.`,
+      );
+    }
+
+    if (trimmed !== '' && !locales.includes(trimmed)) {
+      throw new NotFoundException(
+        `Language '${trimmed}' is not available for version ${version}.`,
+      );
+    }
+
+    try {
+      await this.cvRepository.getCvTemplateData(
+        style,
+        version,
+        trimmed === '' ? undefined : trimmed,
+      );
+    } catch (e) {
+      if (
+        e instanceof CvLocaleInvalidError ||
+        e instanceof CvDataInvalidError
+      ) {
+        throw new BadRequestException(e.message);
+      }
+      if (
+        e instanceof CvLocaleNotFoundError ||
+        e instanceof CvVersionNotFoundError ||
+        e instanceof CvDataMissingError
+      ) {
+        throw new NotFoundException(e.message);
+      }
+      throw e;
+    }
+
+    const effectiveLang = trimmed === '' ? locales[0]! : trimmed;
+    const params = new URLSearchParams();
+    params.set('style', style);
+    params.set('version', version);
+    params.set('lang', effectiveLang);
+
+    const query = `?${params.toString()}`;
+
+    return {
+      ...texts,
+      mode: 'preview' as const,
+      dashboardBaseUrl: `${apiPrefix}/dashboard`,
+      pickerItems: [] as { href: string; label: string }[],
+      currentStyle: style,
+      currentVersion: version,
+      locales,
+      currentLang: effectiveLang,
+      localeOptions: locales.map((code) => ({
+        code,
+        label: LANG_LABELS[code] ?? code.toUpperCase(),
+      })),
+      previewUrl: `${apiPrefix}/pdf/previewHtml${query}`,
+      generateUrl: `${apiPrefix}/pdf/htmlToPDF${query}`,
+      homeUrl: `${apiPrefix}`,
+    };
+  }
+}

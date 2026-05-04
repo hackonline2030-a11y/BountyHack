@@ -1,0 +1,354 @@
+{
+  "labels": {
+    "languages": "Languages",
+    "interests": "Interests",
+    "experience": "Experience",
+    "education": "Education",
+    "previousExperience": "Past experience",
+    "placeholderFullName": "Your name",
+    "placeholderJobTitle": "Full-stack web developer",
+    "portfolioFallback": "Portfolio",
+    "skillGroupFallback": "Skill",
+    "roleFallback": "Role",
+    "profilePhotoAlt": "Profile photo"
+  },
+  "content": {
+    "template": "red-curb",
+    "bullets": false,
+    "bulletStyle": "dot",
+    "bulletsColor": "#F80040",
+    "basics": {
+      "name": "Amaury Franssen",
+      "headline": "Full-stack web developer",
+      "phone": "0612972808",
+      "email": "amauryfranssen@gmail.com",
+      "photoFileName": "amaury.png",
+      "summary": "After a background in law and management, I decided to move into web development: this field resonates with my curiosity and my appetite for tackling complex problems.\n\nTechnology-wise I am agile; while I have worked extensively with Next.js, WordPress and Laravel, I stay open and quick to adopt new stacks—I did so with Go, for instance. I run my projects on Docker and have set up CI/CD pipelines."
+    },
+    "location": {
+      "city": "Linselles",
+      "region": "Hauts-de-France",
+      "country": "France"
+    },
+    "profiles": [
+      {
+        "network": "Portfolio",
+        "url": "https://amaury-franssen-dev.com",
+        "username": ""
+      }
+    ],
+    "work": [
+      {
+        "name": "Self-employed",
+        "section": "experience",
+        "position": "Freelance assignments",
+        "order": 1,
+        "startDate": "Nov. 2025",
+        "endDate": "",
+        "summary": {
+          "intro": "",
+          "list": [
+            "Building websites with WordPress or Next.js (+ Sanity)",
+            "Educational platform project: acting as product owner and developer"
+          ]
+        },
+        "skills": [
+          "TypeScript, React.js, Next.js, Sanity CMS, SCSS, TailwindCSS, WordPress, ACF, Gravity Forms, Laravel, Statamic CMS"
+        ],
+        "keywords": [
+          "WordPress",
+          "Next.js",
+          "Sanity",
+          "Freelance"
+        ]
+      },
+      {
+        "name": "Agence Glanum",
+        "section": "experience",
+        "position": "Frontend web developer",
+        "order": 2,
+        "startDate": "Aug. 2022",
+        "endDate": "Dec. 2025",
+        "summary": {
+          "intro": "",
+          "list": [
+            "Partial redesign of sites carrying \"legacy\" code (e.g., https://ccorca.org/, https://www.fondationeranove.com/, https://www.loffice.org/).",
+            "Maintenance and bug fixes on existing sites (Laravel, WordPress, Magento (e-commerce), Remix)",
+            "Store configurator for Leroy Merlin on Laravel",
+            "Delivering brochure sites (e.g., creno.fr, dci-avocats.fr)",
+            "Building a multi-site with Statamic (Laravel)",
+            "Developing content blocks across Colas websites (Laravel and WordPress)"
+          ]
+        },
+        "keywords": [
+          "Laravel",
+          "WordPress",
+          "Magento",
+          "React",
+          "Remix",
+          "Statamic",
+          "Maintenance",
+          "Refactors"
+        ]
+      },
+      {
+        "name": "Mondial Relay",
+        "section": "previous-experience",
+        "order": 1,
+        "link": "https://talents.mondialrelay.com/qui-sommes-nous/",
+        "position": "Customer advisor – temporary contract",
+        "startDate": "Dec. 2020",
+        "endDate": "Aug. 2021",
+        "summary": {
+          "intro": "",
+          "list": [
+            "Handling omnichannel customer requests",
+            "Resolving delivery incidents and tracking cases"
+          ]
+        },
+        "keywords": []
+      },
+      {
+        "name": "EFFISAC",
+        "section": "previous-experience",
+        "order": 2,
+        "position": "Deputy manager – permanent role",
+        "startDate": "2016",
+        "endDate": "2019",
+        "summary": {
+          "intro": "",
+          "list": [
+            "Supporting the director with day-to-day operations and strategic planning."
+          ]
+        },
+        "keywords": [
+          "Management",
+          "Strategy"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "institution": "École HETIC",
+        "link": "https://www.hetic.net/formations/bachelor-web",
+        "degreeName": "Web developer Bachelor",
+        "area": "Web development",
+        "startDate": "2021",
+        "endDate": "2024",
+        "summary": {
+          "intro": "",
+          "list": [
+            "Full-stack development covering core fundamentals",
+            "UI/UX design—wireframes and mockups on Figma",
+            "DEVOPS basics: Docker, nginx server provisioning, CI/CD, cloud setups (Azure, AWS)"
+          ]
+        },
+        "courses": []
+      },
+      {
+        "institution": "University of Poitiers",
+        "degreeName": "Master in project management within the SSE sector",
+        "area": "SSE project governance",
+        "startDate": "2015",
+        "endDate": "2016",
+        "summary": {
+          "intro": "",
+          "list": [
+            "Programme steering, governance, and issues shaping the social-and-solidarity economy"
+          ]
+        },
+        "courses": []
+      },
+      {
+        "institution": "Toulouse School of Management",
+        "degreeName": "Master 1 in Law & Management",
+        "area": "Law & Management (year one)",
+        "startDate": "2014",
+        "endDate": "2015",
+        "summary": {
+          "intro": "",
+          "list": [
+            "Foundational knowledge in legal, managerial, and organisational topics"
+          ]
+        },
+        "courses": []
+      }
+    ],
+    "languages": [
+      {
+        "language": "French",
+        "fluency": "Native speaker",
+        "keywords": []
+      },
+      {
+        "language": "English",
+        "fluency": "Fluent professional proficiency",
+        "keywords": [
+          "One year lived in India (2008–2009)",
+          "IELTS 6.5 (2009) | BULATS C2 (2015)"
+        ]
+      }
+    ],
+    "skills": [
+      {
+        "name": "Core expertise",
+        "level": "Advanced",
+        "keywords": [
+          "TypeScript",
+          "React.js",
+          "Next.js",
+          "Sanity CMS",
+          "SCSS",
+          "TailwindCSS",
+          "WordPress",
+          "ACF",
+          "Gravity Forms",
+          "Laravel",
+          "Statamic CMS"
+        ],
+        "skills": [
+          "TypeScript, React.js, Next.js, Sanity CMS, WordPress",
+          "SCSS, TailwindCSS",
+          "Laravel, Statamic CMS"
+        ]
+      },
+      {
+        "name": "Secondary expertise",
+        "level": "Intermediate",
+        "skills": [
+          "Golang (including websockets, chi router)"
+        ],
+        "keywords": [
+          "Golang (including websockets, chi router)"
+        ]
+      },
+      {
+        "name": "DevOps",
+        "level": "Intermediate",
+        "skills": [
+          "Docker, dev tooling, Nginx/Apache, CI/CD"
+        ],
+        "keywords": [
+          "Docker",
+          "dev tooling",
+          "Nginx/Apache",
+          "CI/CD"
+        ]
+      },
+      {
+        "name": "Version control",
+        "level": "Advanced",
+        "skills": [
+          "Git, Github, Github Flow"
+        ],
+        "keywords": [
+          "Git",
+          "Github",
+          "Github Flow"
+        ]
+      },
+      {
+        "name": "Agile methods",
+        "level": "Intermediate",
+        "skills": [
+          "Formal training—school and workplace"
+        ],
+        "keywords": [
+          "Formal training—school and workplace"
+        ]
+      },
+      {
+        "name": "LLM tooling",
+        "level": "Intermediate",
+        "skills": [
+          "Cursor, Claude Code, Mistral"
+        ],
+        "keywords": [
+          "Cursor",
+          "Claude Code",
+          "Mistral"
+        ]
+      },
+      {
+        "name": "UI/UX design",
+        "level": "Intermediate",
+        "skills": [
+          "Mockups & wireframes in Figma"
+        ],
+        "keywords": [
+          "Mockups & wireframes in Figma"
+        ]
+      },
+      {
+        "name": "Collaboration",
+        "level": "Advanced",
+        "skills": [
+          "Asana, Jira"
+        ],
+        "keywords": [
+          "Asana",
+          "Jira"
+        ]
+      },
+      {
+        "name": "Technical interests",
+        "level": "Intermediate",
+        "skills": [
+          "Clean code, Clean architecture, TDD, DDD, Automated testing, RAG"
+        ],
+        "keywords": [
+          "Clean code",
+          "Clean architecture",
+          "TDD",
+          "DDD",
+          "Automated testing",
+          "RAG"
+        ]
+      },
+      {
+        "name": "Soft skills",
+        "level": "Advanced",
+        "skills": [
+          "Creative problem solving, Curiosity and openness, Rigour and integrity, Team mindset"
+        ],
+        "keywords": [
+          "Creative problem solving",
+          "Curiosity and openness",
+          "Rigour and integrity",
+          "Team mindset"
+        ]
+      }
+    ],
+    "interests": [
+      {
+        "name": "Interests",
+        "keywords": [
+          "Hackathons (Tech for Good)",
+          "Improvisation theatre",
+          "Martial arts"
+        ]
+      }
+    ],
+    "volunteer": [
+      {
+        "organization": "Association ELS Togo",
+        "position": "Designing a brochure site with Next.js and Sanity CMS (ongoing)",
+        "startDate": "",
+        "endDate": "",
+        "summary": ""
+      }
+    ]
+  },
+  "locale": {
+    "language": "en"
+  },
+  "layouts": [
+    {
+      "engine": "html",
+      "template": "calm",
+      "typography": {
+        "fontSize": "16px"
+      }
+    }
+  ]
+}
