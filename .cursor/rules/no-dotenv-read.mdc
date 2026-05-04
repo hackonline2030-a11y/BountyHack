@@ -1,0 +1,11 @@
+---
+description: Ne pas lire ni afficher les fichiers d'environnement secrets
+alwaysApply: true
+---
+
+# Fichiers `.env` — ne pas lire
+
+- **Ne pas** ouvrir, lire, afficher ni citer le contenu des fichiers d’environnement réels : `.env`, `.env.local`, `.env.*` hors templates, `**/.env` dans `client/`, `server/`, etc.
+- **Autorisé** : **`*.env.example`**, **`*.env.sample`** (et équivalents documentés) — uniquement pour les **noms** de variables et la **forme** attendue, jamais pour deviner des secrets en prod.
+- Si une valeur est nécessaire pour déboguer : demander à l’utilisateur de **coller des valeurs redacted** ou de confirmer les **noms** de variables sans les secrets.
+- Ne **jamais** proposer d’ajouter des clés réelles dans le dépôt ni de copier un `.env` complet dans un message.
