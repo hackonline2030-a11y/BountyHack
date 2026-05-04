@@ -24,7 +24,9 @@ Ce document décrit le **nommage des branches** et les **Conventional Commits** 
 
 **Exception (rare)** : commit **direct** sur `main` ou `develop` **uniquement** pour des changements **mineurs** et **très maîtrisés**, sans effet de bord sur le build ni sur l’équipe — en pratique **aucune modification de dépendances** (pas de `package.json` / `pnpm-lock.yaml` / `requirements`, pas de script d’install, pas de conteneur), typiquement une coquille dans un `.md`, amélioration de la doc (commit en doc(readme):xxx), un commentaire, un correctif de doc d’une ligne. Dès qu’il y a du code applicatif, une config, ou le moindre doute : **branche + PR**.
 
-## Rebaser souvent sur `develop` ou sur `main`
+## Si la branche n'est pas partagé, rebaser souvent sur `develop` ou sur `main`
+
+(sur **ma** branche : git rebase main ou develop)
 
 Rappel sur le fonctionnement du **rebase** et les cas limites : [**Introduction au Git Rebase** (DataCamp, FR)](https://www.datacamp.com/fr/tutorial/git-rebase).
 
@@ -99,14 +101,25 @@ Les messages suivent le préfixe **`type(scope optionnel): description`** (souve
 
 ### Scope dans ce dépôt
 
-Le scope reflète le **dossier / périmètre** touché (pas un sous-domaine libre) :
+Le **scope** est la partie entre parenthèses dans **`type(scope): description`**. Il doit être **précis**, pas un libellé vague.
+
+**Travail sous `client/` ou `server/`** — forme attendue du commit :
+
+```text
+<type>(client-<dossier-ou-zone>): …
+<type>(server-<dossier-ou-zone>): …
+```
+
+`<dossier-ou-zone>` = sous-partie du monorepo en **kebab-case** (module, dossier fonctionnel, couche concernée), pas seulement le mot **`client`** ou **`server`** tout seul.
+
+**Travail transversal** : on **n’utilise pas** les préfixes **`client-…`** ni **`server-…`** dans le scope. On ne « précise pas la zone client ou serveur » : le commit est volontairement **sans coupure monorepo** — le scope est uniquement **`app`** (voir ligne du tableau ci‑dessous).
 
 | Scope dans le message | Quand l’utiliser |
 |------------------------|-------------------|
-| **`(client)`** | Changements centrés sur **`client/`** → par ex. `feat(client): add login form`, `fix(client): correct i18n hydration`, `refactor(client): extract auth hooks`. Idem pour **`fix`**, **`refactor`**, **`perf`**, **`test`**, **`chore`** si le cœur du diff est le front. |
-| **`(server)`** | Changements centrés sur **`server/`** → par ex. `feat(server): expose PDF export route`, `fix(server): Mongo connection retry`. |
-| **`(app)`** | **Uniquement** travail **transversal** : racine du repo (README, `.gitignore`, CI), ou modification coordonnée **`client/` + `server/`**, ou conventions qui englobent tout le monorepo. → par ex. `feat(app): add shared release workflow`, `chore(app): bump root tooling`. **Ne pas** mettre **`(app)`** pour un changement qui concerne **un seul** dossier : dans ce cas **`(client)`** ou **`(server)`**. |
+| **`client-<…>`** | Changements centrés sur **`client/`** → par ex. `feat(client-auth): add login form`, `fix(client-i18n): correct hydration`, `refactor(client-layout): extract header`. Même logique pour **`fix`**, **`refactor`**, **`perf`**, **`test`**, **`chore`** selon le cœur du diff. |
+| **`server-<…>`** | Changements centrés sur **`server/`** → par ex. `feat(server-pdf): expose PDF export route`, `fix(server-mongo): connection retry`, `chore(server-deps): bump nest minor`. |
+| **`app`** | **Uniquement** travail **transversal** (racine du repo, CI, ou **`client/` + `server/`** coordonnés). **Ne pas** ajouter de suffixe du type **`app-client`** ou **`app-server`** : ce n’est **pas** une zone `client-…` / `server-…` à détailler — rester sur **`feat(app): …`**, **`chore(app): …`**, **`docs(app): …`**, etc. **Ne pas** utiliser **`app`** si le changement ne touche qu’un seul des deux dossiers : dans ce cas **`client-<…>`** ou **`server-<…>`**. |
 
-Les branches **`feature/app-…`**, **`fix/app-…`**, **`refactor/app-…`** vont typiquement avec des commits **`…(app): …`** ; pour une branche **`feature/client-…`**, les commits utilisent **`…(client): …`** (et pareil **`server`**).
+Les branches **`feature/app-…`** s’alignent avec des commits **`…(app): …`** ; une branche **`feature/client-auth-…`** va avec des scopes du type **`client-auth`**, **`client-i18n`**, etc.
 
-Exemple : `feat(server): add JWT refresh cookie` — **`feat`** est le type Conventional Commit ; la branche peut être **`feature/server-jwt-refresh`**.
+Exemple : `feat(server-auth): add JWT refresh cookie` — la branche peut être **`feature/server-auth-jwt-refresh`**.
