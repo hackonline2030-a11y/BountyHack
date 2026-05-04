@@ -33,6 +33,20 @@ Un **rebase réécrit l’historique** de ta branche. Dès que tu as **déjà po
 
 Si l’équipe préfère éviter le rebase sur les branches collaboratives, **`merge`** depuis `develop` / `main` reste acceptable ; l’important est de **rafraîchir souvent** pour ne pas livrer une PR avec des mois de retard sur la base.
 
+## Git worktrees (plusieurs dossiers, un seul dépôt)
+
+Tutoriel (FR) : [**Git Worktrees : pratique et exemples**](https://www.datacamp.com/fr/tutorial/git-worktree-tutorial).
+
+**Intérêt** : attacher **plusieurs répertoires de travail** au **même** dépôt Git (même `.git` partagé), chacun sur une **branche différente**, **sans** `git stash` ni clonage complet.
+
+- **Changer de contexte** : une worktree sur `feature/client-…` pour le dev, une autre sur `develop` pour reproduire un bug ou tester une intégration, une troisième pour un **hotfix** depuis `main` — tu ne perds pas l’état non commité de la première.
+- **CI / build** : lancer un `pnpm build` ou des tests sur une branche dans un dossier, tout en continuant à coder une autre branche ailleurs.
+- **Revue** : `git worktree add ../bountyhack-review <branche-pr>` pour ouvrir la branche d’une PR dans un second dossier (diff, exécution locale) sans mélanger avec ton travail courant.
+- **Monorepo** : utile quand tu dois enchaîner vite entre une tâche **`client/`** et une tâche **`server/`** sur des branches distinctes.
+- **Assistant (LLM / IDE)** : en plaçant plusieurs worktrees sous **un même dossier parent** (ex. `bugbountyapp-main/`, `bugbountyapp-feature-xyz/`), tu peux ouvrir ce parent en workspace et laisser l’outil **parcourir ou comparer plusieurs branches** en parallèle (chemins distincts, pas un seul `HEAD` qui change à chaque checkout).
+
+Les worktrees ne remplacent pas les règles ci‑dessus (PR, scopes, rebase) : ils **organisent** juste le **travail local** sur plusieurs branches en parallèle.
+
 ## Branches (rôles, sommairement)
 
 | Branche | Rôle |
@@ -72,9 +86,10 @@ Le **scope** est la partie entre parenthèses dans **`type(scope): description`*
 <type>(server-<dossier-ou-zone>): …
 ```
 
+client ou server sont omis si ça les concerne tous les deux (ou remplacé explicitement par `app`)
+
 `<dossier-ou-zone>` = sous-partie du monorepo en **kebab-case** (module, dossier fonctionnel, couche concernée), pas seulement le mot **`client`** ou **`server`** tout seul.
 
-**Travail transversal** : on **n’utilise pas** les préfixes **`client-…`** ni **`server-…`** dans le scope. On ne « précise pas la zone client ou serveur » : le commit est volontairement **sans coupure monorepo** — le scope est uniquement **`app`** (voir ligne du tableau ci‑dessous).
 
 | Scope dans le message | Quand l’utiliser |
 |------------------------|-------------------|
