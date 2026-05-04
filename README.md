@@ -1,6 +1,9 @@
 # BountyHack
 
-Ce dépôt est un **monorepo** Git : une historique commune (`main`, branches `release/*`, branche de dev, etc.), mais **plusieurs livrables indépendants** en production.
+Ce dépôt est un **monorepo** Git : une historique commune (`main`, branches `release/*`, `develop` / `srv/dev`, etc.), mais **plusieurs livrables indépendants** en production.
+
+Merci de suivre les règles décidé sur le fichier des conventions :
+**Branches, commits (Conventional Commits)** et scopes **`client` / `server` / `app`** : voir **[`CONVENTIONS.md`](CONVENTIONS.md)**.
 
 ## Contenu du dépôt
 
@@ -9,6 +12,7 @@ Ce dépôt est un **monorepo** Git : une historique commune (`main`, branches `r
 
 Documentation détaillée :
 
+- [`CONVENTIONS.md`](CONVENTIONS.md) — branches, messages de commit, scopes monorepo
 - [`client/README.md`](client/README.md)
 - [`server/README.md`](server/README.md)
 - Docker backend (installation, **`start.sh`**, équivalents `docker compose`, **Windows et WSL2**) : [`server/docker/README.md`](server/docker/README.md)
