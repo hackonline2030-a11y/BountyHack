@@ -78,6 +78,8 @@ Choisis **un** parcours : tout lancer avec Docker, ou Node sur ta machine avec M
 
 ### 1. Avec Docker
 
+Guide détaillé (installation Docker, `start.sh`, équivalents `docker compose` bruts) : [`docker/README.md`](docker/README.md).
+
 Construit et exécute toujours l’**API** à partir de `docker/Dockerfile`, via `docker/compose.dev.yaml`.
 
 **MongoDB + mongo-express** ne sont démarrés **que** si `DATABASE_NAME=MONGODB` dans `.env` à la racine du dépôt (valeur par défaut dans `.env.example`). Avec `FIREBASE`, `IN-MEMORY`, etc., ces conteneurs Mongo ne démarrent pas (Raison: inutile de lancer une stack Mongo vide).

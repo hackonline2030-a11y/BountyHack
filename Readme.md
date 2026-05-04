@@ -11,6 +11,9 @@ Documentation détaillée :
 
 - [`client/README.md`](client/README.md)
 - [`server/README.md`](server/README.md)
+- Docker backend (installation, **`start.sh`**, équivalents `docker compose`, **Windows et WSL2**) : [`server/docker/README.md`](server/docker/README.md)
+
+Si tu développes sous **Windows**, pour lancer l’API avec les scripts bash (depuis **`server/`** : `./docker/start.sh`), privilégie **WSL2 + Docker Desktop** (intégration WSL activée) et suis ce guide : évite les incohérences avec PowerShell pur et les chemins sous **`C:\`** seuls pour le mode watch Docker.
 
 ---
 
