@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="dashboard-page">
+<% if (typeof mode !== 'undefined' && mode === 'pick') { %>
+<main class="dashboard">
+    <section class="dashboard-header">
+        <nav class="dashboard-breadcrumb" aria-label="Navigation CV">
+            <% if (typeof dashboardBaseUrl !== 'undefined') { %>
+                <a href="<%= dashboardBaseUrl %>" class="dashboard-breadcrumb-link">Dashboard CV</a>
+            <% } %>
+            <% if (typeof currentStyle !== 'undefined' && currentStyle) { %>
+                <span class="dashboard-breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
+                <span class="dashboard-breadcrumb-current"><%= currentStyle %></span>
+            <% } %>
+        </nav>
+        <h1 class="dashboard-title"><%= title %></h1>
+        <p class="dashboard-description"><%= pickerHint %></p>
+        <ul class="dashboard-version-list">
+            <% (pickerItems || []).forEach(function (item) { %>
+                <li>
+                    <a href="<%= item.href %>" class="button dashboard-version-link"><%= item.label %></a>
+                </li>
+            <% }); %>
+        </ul>
+        <div class="button-row">
+            <a href="<%= homeUrl %>" class="button button-secondary"><%= backButton %></a>
+        </div>
+    </section>
+</main>
+<% } else { %>
+<main class="dashboard">
+    <section class="dashboard-header">
+        <nav class="dashboard-breadcrumb" aria-label="Navigation CV">
+            <% if (typeof dashboardBaseUrl !== 'undefined') { %>
+                <a href="<%= dashboardBaseUrl %>" class="dashboard-breadcrumb-link">Dashboard CV</a>
+            <% } %>
+            <% if (typeof currentStyle !== 'undefined' && currentStyle) { %>
+                <span class="dashboard-breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
+                <a href="<%= dashboardBaseUrl %>/<%= currentStyle %>" class="dashboard-breadcrumb-link"><%= currentStyle %></a>
+            <% } %>
+            <span class="dashboard-breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
+            <span class="dashboard-breadcrumb-current"><%= typeof currentVersion !== 'undefined' ? currentVersion : '' %></span>
+        </nav>
+        <% if (typeof localeOptions !== 'undefined' && localeOptions.length > 1) { %>
+        <div class="dashboard-lang-row">
+            <label class="dashboard-lang-label" for="localeSelect"><%= languageLabel %></label>
+            <select id="localeSelect" class="dashboard-lang-select">
+                <% localeOptions.forEach(function (opt) { %>
+                    <option value="<%= opt.code %>" <%= opt.code === currentLang ? 'selected' : '' %>><%= opt.label %></option>
+                <% }); %>
+            </select>
+        </div>
+        <% } %>
+        <h1 class="dashboard-title"><%= title %></h1>
+        <p class="dashboard-description"><%= description %></p>
+        <div class="button-row">
+            <button id="generatePdfBtn" class="button" type="button"><%= generateButton %></button>
+            <a href="<%= previewUrl %>" class="button" target="_blank" rel="noreferrer">Ouvrir l'aperçu HTML</a>
+            <a href="<%= homeUrl %>" class="button button-secondary"><%= backButton %></a>
+        </div>
+        <p id="dashboardStatus" class="dashboard-status" aria-live="polite"></p>
+    </section>
+
+    <section class="dashboard-preview">
+        <h2 class="dashboard-preview-title"><%= previewTitle %></h2>
+        <iframe
+                id="previewFrame"
+                class="dashboard-preview-frame"
+                src="<%= previewUrl %>"
+                title="Aperçu CV"
+                loading="lazy"
+                scrolling="no"
+        ></iframe>
+    </section>
+</main>
+
+<script>
+    (function () {
+      const statusNode = document.getElementById('dashboardStatus');
+      const generateBtn = document.getElementById('generatePdfBtn');
+      const generateUrl = '<%- generateUrl %>';
+      const previewFrame = document.getElementById('previewFrame');
+
+      const setStatus = (message, isError) => {
+        statusNode.textContent = message;
+        statusNode.classList.toggle('dashboard-status-error', Boolean(isError));
+      };
+
+      const resizePreviewFrame = () => {
+        try {
+          const frameDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+          if (!frameDoc || !frameDoc.body) return;
+          if (frameDoc.documentElement) {
+            frameDoc.documentElement.style.overflow = 'hidden';
+          }
+          frameDoc.body.style.overflow = 'hidden';
+          const contentHeight = Math.max(
+            frameDoc.body.scrollHeight,
+            frameDoc.documentElement ? frameDoc.documentElement.scrollHeight : 0,
+          );
+          if (contentHeight > 0) {
+            previewFrame.style.height = `${Math.ceil(contentHeight)}px`;
+          }
+        } catch (e) {
+          // Ignore cross-origin / transient access errors.
+        }
+      };
+
+      previewFrame.addEventListener('load', () => {
+        resizePreviewFrame();
+        setTimeout(resizePreviewFrame, 150);
+      });
+
+      const localeSelect = document.getElementById('localeSelect');
+      if (localeSelect) {
+        localeSelect.addEventListener('change', () => {
+          const next = new URL(window.location.href);
+          next.searchParams.set('lang', localeSelect.value);
+          window.location.assign(next.toString());
+        });
+      }
+
+      generateBtn.addEventListener('click', async () => {
+        generateBtn.disabled = true;
+        setStatus('Génération du PDF en cours...', false);
+        try {
+          const response = await fetch(generateUrl);
+          if (!response.ok) {
+            throw new Error('Réponse API invalide');
+          }
+          const payload = await response.json();
+          if (!payload || !payload.url) {
+            throw new Error('URL PDF manquante');
+          }
+          setStatus('PDF généré. Ouverture dans un nouvel onglet.', false);
+          window.open(payload.url, '_blank', 'noopener,noreferrer');
+        } catch (error) {
+          setStatus('Erreur lors de la génération du PDF.', true);
+        } finally {
+          generateBtn.disabled = false;
+        }
+      });
+    })();
+</script>
+<% } %>
+</body>
+</html>

@@ -1,0 +1,39 @@
+{
+  "loginPage": {
+    "metaTitle": "Connexion",
+    "heading": "Connectez-vous à votre compte"
+  },
+  "registerPage": {
+    "metaTitle": "Inscription",
+    "heading": "Créez votre compte"
+  },
+  "errors": {
+    "network": "Erreur réseau. Veuillez réessayer."
+  },
+  "loginForm": {
+    "emailLabel": "E-mail",
+    "passwordLabel": "Mot de passe",
+    "emailPlaceholder": "vous@exemple.com",
+    "passwordPlaceholder": "••••••••",
+    "submit": "Se connecter",
+    "submitting": "Connexion…",
+    "noAccount": "Pas encore de compte ?",
+    "registerLink": "S'inscrire",
+    "errorLogin": "Échec de la connexion",
+    "successLogin": "Connexion réussie"
+  },
+  "registerForm": {
+    "nameLabel": "Nom",
+    "emailLabel": "E-mail",
+    "passwordLabel": "Mot de passe",
+    "namePlaceholder": "Votre nom",
+    "emailPlaceholder": "vous@exemple.com",
+    "passwordPlaceholder": "••••••••",
+    "submit": "Créer un compte",
+    "submitting": "Création du compte…",
+    "haveAccount": "Déjà un compte ?",
+    "loginLink": "Se connecter",
+    "errorRegister": "Échec de l'inscription",
+    "successRegister": "Compte créé avec succès"
+  }
+}

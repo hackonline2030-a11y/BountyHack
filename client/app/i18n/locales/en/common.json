@@ -1,0 +1,21 @@
+{
+  "title": "Clean App — Next.js template",
+  "description": "Auth-first Next.js starter with TypeScript, Prisma, and a modular layout — ready to extend.",
+  "tagline": "Ship features faster with a clear structure.",
+  "home": {
+    "metaTitle": "Home",
+    "heroTitle": "Next.js Clean Architectured Template",
+    "heroLead": "Reusable starter with registration and login flows already wired.",
+    "heroHint": "Use the header navigation to access authentication pages and start adapting the template to your project."
+  },
+  "header": {
+    "brand": "CleanApp",
+    "home": "Home",
+    "login": "Log in",
+    "register": "Register"
+  },
+  "footer": {
+    "copyright": "© {{year}} CleanApp",
+    "credit": "Built with Next.js"
+  }
+}

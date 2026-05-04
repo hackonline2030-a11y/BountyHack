@@ -1,0 +1,61 @@
+# Next.js + Prisma (client workspace)
+# See https://help.github.com/articles/ignoring-files/
+
+# Dependencies
+node_modules/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Next.js
+/.next/
+/out/
+
+# `output: standalone` vit sous `.next/` ; tout est ignoré via `/.next/` ci‑dessus.
+
+# Déploiement type OpenNext / adaptateurs tiers (si ajoutés plus tard)
+.open-next/
+
+# Sortie analyse Next (bundles)
+analyze/
+
+# Production build
+/build
+
+# Testing
+/coverage
+
+# Vercel
+.vercel
+
+# Env (.env.example can stay tracked)
+.env*
+!.env.example
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Prisma — generated client (your output path)
+/generated/prisma/
+
+# Prisma — local dev DB files (adjust if you commit a seed DB)
+/prisma/**/*.db*
+/prisma/**/*.db-journal
+
+# Tooling caches
+.turbo
+.eslintcache
+
+# Misc
+*.pem

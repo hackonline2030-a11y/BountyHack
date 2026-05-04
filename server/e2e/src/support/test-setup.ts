@@ -1,0 +1,22 @@
+/* eslint-disable */
+import { config as loadEnv } from 'dotenv';
+import { resolve } from 'node:path';
+import axios from 'axios';
+
+// Load repo .env then e2e/.env (e2e overrides) so E2E_FIREBASE_WEB_API_KEY and friends are available.
+const repoRoot = resolve(__dirname, '../../..');
+const e2eRoot = resolve(__dirname, '../..');
+loadEnv({ path: resolve(repoRoot, '.env'), quiet: true });
+loadEnv({ path: resolve(e2eRoot, '.env'), override: true, quiet: true });
+
+/**
+ * E2E base URL: HOST + PORT (default localhost:3000).
+ * If the API already runs in Docker watch on 3003, do not start another process on 3003:
+ * set PORT=3003 to hit that API, or run a separate `nx serve` on a free port (e.g. 3010) and set PORT to match.
+ */
+module.exports = async function() {
+  // Configure axios for tests to use.
+  const host = process.env.HOST ?? 'localhost';
+  const port = process.env.PORT ?? '3000';
+  axios.defaults.baseURL = `http://${host}:${port}`;
+};

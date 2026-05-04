@@ -1,0 +1,356 @@
+{
+  "labels": {
+    "languages": "Langues",
+    "interests": "Intérêts",
+    "experience": "Expérience",
+    "education": "Formation",
+    "previousExperience": "Expériences antérieures",
+    "placeholderFullName": "Votre Nom",
+    "placeholderJobTitle": "Développeur web fullstack",
+    "portfolioFallback": "Mon portfolio",
+    "skillGroupFallback": "Compétence",
+    "roleFallback": "Poste",
+    "profilePhotoAlt": "Photo de profil"
+  },
+  "content": {
+    "template": "red-curb",
+    "bullets": false,
+    "bulletStyle": "dot",
+    "bulletsColor": "#F80040",
+    "basics": {
+      "name": "Amaury Franssen",
+      "headline": "Développeur web fullstack",
+      "phone": "0612972808",
+      "email": "amauryfranssen@gmail.com",
+      "photoFileName": "amaury.png",
+      "summary": "À la suite d'un parcours en droit et management, j'ai décidé de me reconvertir dans le développement web : ce domaine me passionne car il met en valeur ma soif d'apprentissage et ma capacité à résoudre des problèmes complexes.\n\nJe suis agile en matière de technologie, si j'ai beaucoup travaillé sur Next Js, Wordpress et Laravel, j'ai une forte ouverture et capacité d'adaptation à des langages nouveaux comme je l'ai démontré avec Golang. Je monte mes projets sous Docker et j'ai mis en place des pipelines CI/CD."
+    },
+    "location": {
+      "city": "Linselles",
+      "region": "Hauts-de-France",
+      "country": "France"
+    },
+    "profiles": [
+      {
+        "network": "Mon portfolio",
+        "url": "https://amaury-franssen-dev.com",
+        "username": ""
+      }
+    ],
+    "work": [
+      {
+        "name": "Micro-entreprise",
+        "section": "experience",
+        "position": "Missions free-lance",
+        "order": 1,
+        "startDate": "Nov. 2025",
+        "endDate": "",
+        "summary": {
+          "intro": "",
+          "list": [
+            "Réalisations de sites web sur WordPress ou NextJs (+ Sanity)",
+            "Projet de plateforme pédagogique: role de product owner + développeur"
+          ]
+        },
+        "skills": [
+          "TypeScript, React.js, Next.js, Sanity CMS, SCSS, TailwindCSS, WordPress, ACF, Gravity Forms, Laravel, CMS Statamic"
+        ],
+        "keywords": [
+          "WordPress",
+          "Next.js",
+          "Sanity",
+          "Freelance"
+        ]
+      },
+      {
+        "name": "Agence Glanum",
+        "section": "experience",
+        "position": "Développeur web frontend",
+        "order": 2,
+        "startDate": "Août 2022",
+        "endDate": "Déc. 2025",
+        "summary": {
+          "intro": "",
+          "list": [
+            "Refonte partielle de sites contenant du \"code legacy\" (ex : https://ccorca.org/, https://www.fondationeranove.com/, https://www.loffice.org/).",
+            "Maintenance et correctifs sur des sites existants (Laravel, WordPress, Magento (e-commerce), Remix)",
+            "Configurateur de store (Leroy Merlin) sur Laravel",
+            "Création de sites web (ex : creno.fr, dci-avocats.fr)",
+            "Création d'un multi-site avec Statamic (Laravel)",
+            "Création de blocs au sein des sites Colas (Laravel et WordPress)"
+          ]
+        },
+        "skills": [
+          "Golang (dont websockets, chi router)"
+        ],
+        "keywords": [
+          "Laravel",
+          "WordPress",
+          "Magento",
+          "React",
+          "Remix",
+          "Statamic",
+          "Maintenance",
+          "Refonte"
+        ]
+      },
+      {
+        "name": "Mondial Relay",
+        "section": "previous-experience",
+        "order": 1,
+        "link": "https://talents.mondialrelay.com/qui-sommes-nous/",
+        "position": "Conseiller client - CDD",
+        "startDate": "Déc. 2020",
+        "endDate": "Août 2021",
+        "summary": {
+          "intro": "",
+          "list": [
+            "Gestion des demandes clients multicanal",
+            "Résolution des incidents de livraison et suivi de dossiers"
+          ]
+        },
+        "keywords": []
+      },
+      {
+        "name": "EFFISAC",
+        "section": "previous-experience",
+        "order": 2,
+        "position": "Adjoint de direction - CDI",
+        "startDate": "Sept.2016",
+        "endDate": "Déc. 2019",
+        "summary": {
+          "intro": "",
+          "list": [
+            "J'accompagne le directeur dans le quotidien et la stratégie."
+          ]
+        },
+        "skills": [
+          "Docker, dev, Nginx/Apache, CI/CD"
+        ],
+        "keywords": [
+          "Management",
+          "Strategie"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "institution": "École HETIC",
+        "link": "https://www.hetic.net/formations/bachelor-web",
+        "degreeName": "Bachelor Développeur web (bac + 3)",
+        "area": "Développeur web",
+        "startDate": "2021",
+        "endDate": "2024",
+        "summary": {
+          "intro": "",
+          "list": [
+            "Développement Fullstack et maîtrise des fondamentaux",
+            "UI/UX Design, création de maquettes sur Figma",
+            "DEVOPS : Docker, monter un serveur nginx, CI/CD, solutions cloud (Azure, AWS)"
+          ]
+        },
+        "courses": []
+      },
+      {
+        "institution": "Universite de Poitiers",
+        "degreeName": "Master en gestion de projet de l'ESS",
+        "area": "Master en gestion de projet de l'ESS",
+        "startDate": "2015",
+        "endDate": "2016",
+        "summary": {
+          "intro": "",
+          "list": [
+            "Pilotage de projet, gouvernance et enjeux de l'économie sociale et solidaire"
+          ]
+        },
+        "courses": []
+      },
+      {
+        "institution": "Toulouse School of Management",
+        "degreeName": "Master 1 Droit et Gestion",
+        "area": "Master 1 Droit et Gestion",
+        "startDate": "2014",
+        "endDate": "2015",
+        "summary": {
+          "intro": "",
+          "list": [
+            "Fondamentaux en droit, gestion et organisation d'entreprise"
+          ]
+        },
+        "courses": []
+      }
+    ],
+    "languages": [
+      {
+        "language": "Anglais",
+        "fluency": "Compétence professionnelle complète",
+        "keywords": [
+          "1 an vécu en Inde (2008-2009)",
+          "IELTS 6.5 (2009) | BULATS C2 (2015)"
+        ]
+      }
+    ],
+    "skills": [
+      {
+        "name": "Expertise principale",
+        "level": "Avancé",
+        "skills": [
+          "TypeScript, React.js, Next.js, Sanity CMS, WordPress",
+          "SCSS, TailwindCSS",
+          "Laravel, CMS Statamic"
+        ],
+        "keywords": [
+          "TypeScript",
+          "React.js",
+          "Next.js",
+          "Sanity CMS",
+          "SCSS",
+          "TailwindCSS",
+          "WordPress",
+          "ACF",
+          "Gravity Forms",
+          "Laravel",
+          "CMS Statamic"
+        ]
+      },
+      {
+        "name": "Expertise secondaire",
+        "level": "Intermédiaire",
+        "skills": [
+          "Golang (dont websockets, chi router)"
+        ],
+        "keywords": [
+          "Golang (dont websockets, chi router)"
+        ]
+      },
+      {
+        "name": "DevOps",
+        "level": "Intermédiaire",
+        "skills": [
+          "Docker, ddev, Nginx/Apache, CI/CD"
+        ],
+        "keywords": [
+          "Docker",
+          "dev",
+          "Nginx/Apache",
+          "CI/CD"
+        ]
+      },
+      {
+        "name": "Versioning",
+        "level": "Avancé",
+        "skills": [
+          "Git, Github, Github Flow"
+        ],
+        "keywords": [
+          "Git",
+          "Github",
+          "Github Flow"
+        ]
+      },
+      {
+        "name": "Méthodes agiles",
+        "level": "Intermédiaire",
+        "skills": [
+          "Formation école et entreprise"
+        ],
+        "keywords": [
+          "Formation école et entreprise"
+        ]
+      },
+      {
+        "name": "LLM",
+        "level": "Intermédiaire",
+        "skills": [
+          "Cursor, Claude code, Mistral"
+        ],
+        "keywords": [
+          "Cursor",
+          "Claude code",
+          "Mistral"
+        ]
+      },
+      {
+        "name": "UI/UX design",
+        "level": "Intermédiaire",
+        "keywords": [
+          "Maquettes",
+          "Wireframes sur Figma"
+        ],
+        "skills": [
+          "Maquettes, Wireframes sur Figma"
+        ]
+      },
+      {
+        "name": "Collaboration",
+        "level": "Avancé",
+        "keywords": [
+          "Asana",
+          "Jira"
+        ],
+        "skills": [
+          "Asana, Jira"
+        ]
+      },
+      {
+        "name": "Intérêts techniques",
+        "level": "Intermédiaire",
+        "keywords": [
+          "Clean code",
+          "Clean architecture",
+          "TDD",
+          "DDD",
+          "Tests",
+          "RAG"
+        ],
+        "skills": [
+          "Clean code, Clean architecture, TDD, DDD, Tests, RAG"
+        ]
+      },
+      {
+        "name": "Savoir-être",
+        "level": "Avancé",
+        "keywords": [
+          "Créativité dans la résolution de problèmes",
+          "Curiosité et ouverture d'esprit",
+          "Rigueur et intégrité",
+          "Esprit d'équipe"
+        ],
+        "skills": [
+          "Créativité dans la résolution de problèmes, Curiosité et ouverture d'esprit, Rigueur et intégrité, Esprit d'équipe"
+        ]
+      }
+    ],
+    "interests": [
+      {
+        "name": "Centres d'intérêts",
+        "keywords": [
+          "Hackathons (Tech for Good)",
+          "Improvisation et Théâtre",
+          "Arts Martiaux"
+        ]
+      }
+    ],
+    "volunteer": [
+      {
+        "organization": "Association ELS Togo",
+        "position": "Conception d'un site vitrine avec NextJs et Sanity CMS",
+        "startDate": "",
+        "endDate": "",
+        "summary": ""
+      }
+    ]
+  },
+  "locale": {
+    "language": "fr"
+  },
+  "layouts": [
+    {
+      "engine": "html",
+      "template": "calm",
+      "typography": {
+        "fontSize": "16px"
+      }
+    }
+  ]
+}

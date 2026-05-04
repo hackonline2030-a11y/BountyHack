@@ -1,0 +1,49 @@
+{
+  "name": "web-api",
+  "$schema": "node_modules/nx/schemas/project-schema.json",
+  "includedScripts": [],
+  "sourceRoot": "src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+      "build": {
+        "executor": "@nx/webpack:webpack",
+        "options": {
+          "webpackConfig": "webpack.config.js",
+          "main": "src/main.ts",
+          "tsConfig": "tsconfig.app.json",
+          "optimization": false,
+          "outputHashing": "none",
+          "sourceMap": true,
+          "outputPath": "dist/",
+          "compiler": "tsc",
+          "target": "node"
+        }
+      },
+      "serve": {
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "options": {
+          "buildTarget": "web-api:build"
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "web-api:build:development"
+          },
+          "production": {
+            "buildTarget": "web-api:build:production"
+          }
+        }
+      },
+      "test": {
+        "executor": "@nx/jest:jest",
+        "outputs": [
+          "{workspaceRoot}/coverage/web-api"
+        ],
+        "options": {
+          "jestConfig": "jest.config.ts",
+          "passWithNoTests": true
+        }
+      }
+    }
+}
