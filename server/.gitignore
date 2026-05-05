@@ -64,3 +64,6 @@ templates/real-me.png
 # PDFs générés : ignorer tout le contenu sous pdfs/, mais garder le dossier versionné (pdfs/.gitkeep)
 pdfs/**
 !pdfs/.gitkeep
+
+# Client Prisma généré (décommenter si vous ne versionnez pas `src/generated/prisma`)
+# src/generated/prisma/

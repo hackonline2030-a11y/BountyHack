@@ -42,14 +42,14 @@ describe('PdfController', () => {
 
   it('returns generated pdf url from use case', async () => {
     generateCommandMock.execute.mockResolvedValue({
-      url: 'http://localhost:3000/pdfs/cv-red-squared-1.pdf',
+      url: '/pdfs/cv-red-squared-1.pdf',
     });
 
     const result = await controller.exportPDF();
 
     expect(generateCommandMock.execute).toHaveBeenCalledWith({});
     expect(result).toEqual({
-      url: 'http://localhost:3000/pdfs/cv-red-squared-1.pdf',
+      url: '/pdfs/cv-red-squared-1.pdf',
     });
   });
 });

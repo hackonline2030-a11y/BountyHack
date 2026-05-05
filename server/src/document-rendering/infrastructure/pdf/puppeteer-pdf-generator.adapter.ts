@@ -8,7 +8,23 @@ import { PdfGenerationFailedError } from '../../application/errors/pdf-applicati
 const A4_WIDTH_MM = '210mm';
 const A4_HEIGHT_MM = '297mm';
 
+/** Docker / CI: system Chromium (see CHROMIUM_PATH in Dockerfile — same idea as https://medium.com/@george.benjamin.lopez/running-puppeteer-in-docker-a-simple-guide-to-headless-browsing-25f83d4b492a ). */
+function resolveChromiumExecutablePath(): string | undefined {
+  const p =
+    process.env.CHROMIUM_PATH?.trim() ||
+    process.env.PUPPETEER_EXECUTABLE_PATH?.trim();
+  return p ? p : undefined;
+}
+
 /** Last-resort overrides so Headless Chromium PDF matches one A4 canvas (fixes blank tail / bleed vs template @media print). */
+function injectBaseHref(htmlContent: string, origin: string): string {
+  const href = origin.endsWith('/') ? origin : `${origin}/`;
+  if (/<head[^>]*>/i.test(htmlContent)) {
+    return htmlContent.replace(/<head[^>]*>/i, (m) => `${m}<base href="${href}">`);
+  }
+  return `<!DOCTYPE html><html><head><base href="${href}"><meta charset="utf-8"></head><body>${htmlContent}</body></html>`;
+}
+
 const PDF_LAYOUT_OVERRIDE_CSS = `
   .cv {
     box-shadow: none !important;
@@ -36,18 +52,25 @@ export class PuppeteerPdfGeneratorAdapter implements IPdfGenerator {
   );
 
   async generateFromHtml(htmlContent: string): Promise<Buffer> {
+    const executablePath = resolveChromiumExecutablePath();
     const browser = await puppeteer.launch({
       headless: true,
+      ...(executablePath ? { executablePath } : {}),
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
         '--font-render-hinting=none',
       ],
     });
 
     try {
       const page = await browser.newPage();
-      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+      const port = process.env.PORT ?? '3000';
+      const origin = `http://127.0.0.1:${port}`;
+      await page.setContent(injectBaseHref(htmlContent, origin), {
+        waitUntil: 'networkidle0',
+      });
       await page.emulateMediaType('print');
 
       const cssContent = await readFile(this.cssPath, 'utf-8');

@@ -30,7 +30,7 @@ const siteDescription =
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
-  "http://localhost:3000";
+  "http://localhost:3001";
 
 const rubik = Rubik({
   subsets: ["latin"],

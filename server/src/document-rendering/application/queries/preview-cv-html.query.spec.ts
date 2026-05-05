@@ -20,14 +20,14 @@ describe('PreviewCvHtmlQuery', () => {
       },
       templateName: 'red-squared',
       templateStylesheetUrl:
-        'http://localhost:3000/template-assets/red-squared/styles/styles.css',
+        '/template-assets/red-squared/styles/styles.css',
       bullets: true,
       bulletStyle: 'dot',
       bulletsColor: '#F80040',
       fullName: 'Amaury Franssen',
       jobTitle: 'Développeur web',
       summary: 'Résumé',
-      profileImage: 'http://localhost:3000/template-assets/logo.png',
+      profileImage: '/template-assets/logo.png',
       leftColumn: {
         portfolio: { label: 'Mon portfolio', url: 'https://example.com' },
         contact: ['mail@test.com'],
