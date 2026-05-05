@@ -8,9 +8,14 @@ import {
 } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { getModelToken } from '@nestjs/mongoose';
+import type { Pool } from 'pg';
 import { randomUUID } from 'crypto';
 import { sign } from 'jsonwebtoken';
 import { MongoUser } from '../../users/adapters/mongo/mongo-user';
+import { USER_PG_POOL } from '../../users/adapters/postgre/postgre-pool.token';
+import { PostgreUser } from '../../users/adapters/postgre/postgre-user';
+import { PrismaService } from '../../database/prisma.service';
+import { Prisma } from '../../generated/prisma/client';
 import { variables } from '../../shared/variables.config';
 import { hashPassword, verifyPassword } from '../infra/password.util';
 import { JwtInMemoryRegistry } from '../infra/jwt-in-memory-registry';
@@ -26,7 +31,12 @@ export class JwtCredentialsService {
     private readonly jwtRegistry: JwtInMemoryRegistry,
     @Optional()
     @Inject(getModelToken(MongoUser.CollectionName))
-    private readonly userModel?: Model<MongoUser.SchemaClass>
+    private readonly userModel?: Model<MongoUser.SchemaClass>,
+    @Optional()
+    @Inject(USER_PG_POOL)
+    private readonly pgPool?: Pool,
+    @Optional()
+    private readonly prismaService?: PrismaService
   ) {}
 
   async register(input: {
@@ -43,12 +53,20 @@ export class JwtCredentialsService {
       return this.registerMongo(email, input.username.trim(), input.password);
     }
 
-    if (variables.database === 'IN-MEMORY' || variables.database === 'POSTGRESQL') {
+    if (variables.database === 'POSTGRESQL') {
+      return this.registerPostgres(email, input.username.trim(), input.password);
+    }
+
+    if (variables.database === 'POSTGRESQL_PRISMA') {
+      return this.registerPostgresPrisma(email, input.username.trim(), input.password);
+    }
+
+    if (variables.database === 'IN-MEMORY') {
       return this.registerInMemory(email, input.username.trim(), input.password);
     }
 
     throw new InternalServerErrorException(
-      'JWT register is only supported with DATABASE_NAME=MONGODB, IN-MEMORY or POSTGRESQL (in-memory until Postgres persistence exists)'
+      'JWT register is only supported with DATABASE_NAME=MONGODB, POSTGRESQL, POSTGRESQL_PRISMA, or IN-MEMORY'
     );
   }
 
@@ -65,12 +83,20 @@ export class JwtCredentialsService {
       return this.loginMongo(email, input.password);
     }
 
-    if (variables.database === 'IN-MEMORY' || variables.database === 'POSTGRESQL') {
+    if (variables.database === 'POSTGRESQL') {
+      return this.loginPostgres(email, input.password);
+    }
+
+    if (variables.database === 'POSTGRESQL_PRISMA') {
+      return this.loginPostgresPrisma(email, input.password);
+    }
+
+    if (variables.database === 'IN-MEMORY') {
       return this.loginInMemory(email, input.password);
     }
 
     throw new InternalServerErrorException(
-      'JWT login is only supported with DATABASE_NAME=MONGODB, IN-MEMORY or POSTGRESQL (in-memory until Postgres persistence exists)'
+      'JWT login is only supported with DATABASE_NAME=MONGODB, POSTGRESQL, POSTGRESQL_PRISMA, or IN-MEMORY'
     );
   }
 
@@ -136,6 +162,140 @@ export class JwtCredentialsService {
         email: doc.email ?? email,
         uid: doc._id,
         username: doc.username,
+      },
+    };
+  }
+
+  private async registerPostgres(
+    email: string,
+    username: string,
+    password: string
+  ): Promise<JwtAuthResponseBody> {
+    if (!this.pgPool) {
+      throw new InternalServerErrorException('Postgres pool is not available');
+    }
+
+    const uid = randomUUID();
+    const passwordHash = await hashPassword(password);
+
+    try {
+      await this.pgPool.query(
+        `INSERT INTO ${PostgreUser.TABLE_NAME} (id, username, email, password_hash)
+         VALUES ($1, $2, $3, $4)`,
+        [uid, username, email, passwordHash]
+      );
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code;
+      if (code === '23505') {
+        throw new ConflictException('Email already registered');
+      }
+      throw err;
+    }
+
+    return {
+      token: this.signToken(uid, email),
+      user: { email, uid, username },
+    };
+  }
+
+  private async loginPostgres(
+    email: string,
+    password: string
+  ): Promise<JwtAuthResponseBody> {
+    if (!this.pgPool) {
+      throw new InternalServerErrorException('Postgres pool is not available');
+    }
+
+    const { rows } = await this.pgPool.query<{
+      id: string;
+      username: string;
+      email: string | null;
+      password_hash: string | null;
+    }>(
+      `SELECT id, username, email, password_hash FROM ${PostgreUser.TABLE_NAME}
+       WHERE lower(email) = lower($1)`,
+      [email]
+    );
+
+    const row = rows[0];
+    if (!row?.password_hash) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const ok = await verifyPassword(password, row.password_hash);
+    if (!ok) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return {
+      token: this.signToken(row.id, row.email ?? email),
+      user: {
+        email: row.email ?? email,
+        uid: row.id,
+        username: row.username,
+      },
+    };
+  }
+
+  private async registerPostgresPrisma(
+    email: string,
+    username: string,
+    password: string
+  ): Promise<JwtAuthResponseBody> {
+    if (!this.prismaService) {
+      throw new InternalServerErrorException('PrismaService is not available');
+    }
+
+    const uid = randomUUID();
+    const passwordHash = await hashPassword(password);
+
+    try {
+      await this.prismaService.user.create({
+        data: { id: uid, username, email, passwordHash },
+      });
+    } catch (e: unknown) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        throw new ConflictException('Email already registered');
+      }
+      throw e;
+    }
+
+    return {
+      token: this.signToken(uid, email),
+      user: { email, uid, username },
+    };
+  }
+
+  private async loginPostgresPrisma(
+    email: string,
+    password: string
+  ): Promise<JwtAuthResponseBody> {
+    if (!this.prismaService) {
+      throw new InternalServerErrorException('PrismaService is not available');
+    }
+
+    const row = await this.prismaService.user.findFirst({
+      where: { email },
+    });
+
+    if (!row?.passwordHash) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const ok = await verifyPassword(password, row.passwordHash);
+    if (!ok) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return {
+      token: this.signToken(row.id, row.email ?? email),
+      user: {
+        email: row.email ?? email,
+        uid: row.id,
+        username: row.username,
       },
     };
   }

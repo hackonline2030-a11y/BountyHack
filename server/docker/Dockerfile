@@ -24,6 +24,7 @@ WORKDIR /usr/src/app
 COPY pnpm-lock.yaml ./
 COPY --from=development /usr/src/app/node_modules ./node_modules
 COPY . .
+RUN pnpm exec prisma generate
 RUN pnpm build
 ENV NODE_ENV=production
 RUN pnpm install --prod

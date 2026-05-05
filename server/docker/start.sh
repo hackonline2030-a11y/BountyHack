@@ -58,7 +58,7 @@ USE_POSTGRES=false
 if [[ "$DATABASE_NAME_VALUE" == "MONGODB" ]]; then
   USE_MONGO=true
 fi
-if [[ "$DATABASE_NAME_VALUE" == "POSTGRESQL" ]]; then
+if [[ "$DATABASE_NAME_VALUE" == "POSTGRESQL" || "$DATABASE_NAME_VALUE" == "POSTGRESQL_PRISMA" ]]; then
   USE_POSTGRES=true
 fi
 
