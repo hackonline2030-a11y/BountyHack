@@ -20,6 +20,10 @@ import { DocumentRenderingModule } from '../document-rendering/pdf.module';
 import { CommonModule } from './common.module';
 import { AppController } from './app.controller';
 import { variables } from '../shared/variables.config';
+import { PrismaModule } from '../database/prisma.module';
+
+const prismaImports =
+  variables.database === 'POSTGRESQL_PRISMA' ? [PrismaModule] : [];
 
 const baseImports = [
   PingModule,
@@ -43,7 +47,7 @@ const mongooseRoot =
     : [];
 
 @Module({
-  imports: [...mongooseRoot, ...baseImports],
+  imports: [...prismaImports, ...mongooseRoot, ...baseImports],
   controllers: [AppController],
   providers: [AppService],
 })

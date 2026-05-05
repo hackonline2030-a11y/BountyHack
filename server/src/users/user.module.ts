@@ -1,8 +1,13 @@
 import { forwardRef, Module } from '@nestjs/common';
+import { Pool } from 'pg';
 import { AuthModule } from '../auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongoUser } from './adapters/mongo/mongo-user';
 import { MongoUserRepository } from './adapters/mongo/mongo-user-repository';
+import { PostgreUser } from './adapters/postgre/postgre-user';
+import { PostgreUserRepository } from './adapters/postgre/postgre-user-repository';
+import { USER_PG_POOL } from './adapters/postgre/postgre-pool.token';
+import { PrismaUserRepository } from './adapters/postgre-prisma/prisma-user-repository';
 
 import {
   I_USER_REPOSITORY,
@@ -20,6 +25,10 @@ function resolveUserRepositoryClass() {
   switch (variables.database) {
     case 'MONGODB':
       return MongoUserRepository;
+    case 'POSTGRESQL':
+      return PostgreUserRepository;
+    case 'POSTGRESQL_PRISMA':
+      return PrismaUserRepository;
     case 'FIREBASE':
       return FirebaseUserRepository;
     case 'IN-MEMORY':
@@ -28,6 +37,26 @@ function resolveUserRepositoryClass() {
       return InMemoryUserRepository;
   }
 }
+
+const postgresPoolProvider =
+  variables.database === 'POSTGRESQL'
+    ? [
+        {
+          provide: USER_PG_POOL,
+          useFactory: async (): Promise<Pool> => {
+            const url = process.env.DATABASE_URL?.trim();
+            if (!url) {
+              throw new Error(
+                'DATABASE_URL is required when DATABASE_NAME is POSTGRESQL',
+              );
+            }
+            const pool = new Pool({ connectionString: url });
+            await pool.query(PostgreUser.CREATE_TABLE_SQL);
+            return pool;
+          },
+        },
+      ]
+    : [];
 
 const mongoFeatureImports =
   variables.database === 'MONGODB'
@@ -52,6 +81,7 @@ const inMemoryAuthImports =
   ],
   controllers: [UsersController],
   providers: [
+    ...postgresPoolProvider,
     {
       provide: I_USER_REPOSITORY,
       useClass: resolveUserRepositoryClass(),
@@ -73,6 +103,7 @@ const inMemoryAuthImports =
   ],
   exports: [
     ...(variables.database === 'MONGODB' ? [MongooseModule] : []),
+    ...(variables.database === 'POSTGRESQL' ? [USER_PG_POOL] : []),
     I_USER_REPOSITORY,
   ],
 })
