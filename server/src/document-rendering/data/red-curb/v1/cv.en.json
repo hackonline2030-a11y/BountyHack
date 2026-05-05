@@ -5,8 +5,8 @@
     "experience": "Experience",
     "education": "Education",
     "previousExperience": "Past experience",
-    "placeholderFullName": "Your name",
-    "placeholderJobTitle": "Full-stack web developer",
+    "placeholderFullName": "John Doe",
+    "placeholderJobTitle": "Software Engineer",
     "portfolioFallback": "Portfolio",
     "skillGroupFallback": "Skill",
     "roleFallback": "Role",
@@ -18,157 +18,160 @@
     "bulletStyle": "dot",
     "bulletsColor": "#F80040",
     "basics": {
-      "name": "Amaury Franssen",
-      "headline": "Full-stack web developer",
-      "phone": "0612972808",
-      "email": "amauryfranssen@gmail.com",
-      "photoFileName": "amaury.png",
-      "summary": "After a background in law and management, I decided to move into web development: this field resonates with my curiosity and my appetite for tackling complex problems.\n\nTechnology-wise I am agile; while I have worked extensively with Next.js, WordPress and Laravel, I stay open and quick to adopt new stacks—I did so with Go, for instance. I run my projects on Docker and have set up CI/CD pipelines."
+      "name": "John Doe",
+      "headline": "SOFTWARE ENGINEER",
+      "phone": "0601020304",
+      "email": "john.doe@example.com",
+      "photoFileName": "john-doe.png",
+      "summary": "Software engineer with a focus on building reliable, high-performance web applications. After varied experiences, I specialized in back-end development and integrating front-end features, with a strong emphasis on code quality, tests, and accessibility.\n\nI deliver production-ready systems using modern stacks and CI/CD, and I iterate with product and design to continuously improve the user experience."
     },
     "location": {
-      "city": "Linselles",
-      "region": "Hauts-de-France",
+      "city": "Lyon",
+      "region": "Auvergne-Rhône-Alpes",
       "country": "France"
     },
     "profiles": [
       {
         "network": "Portfolio",
-        "url": "https://amaury-franssen-dev.com",
+        "url": "https://john-doe.dev",
         "username": ""
       }
     ],
     "work": [
       {
-        "name": "Self-employed",
+        "name": "Acme Studio",
         "section": "experience",
-        "position": "Freelance assignments",
+        "position": "Back-end Developer – CDI",
         "order": 1,
-        "startDate": "Nov. 2025",
+        "startDate": "Feb. 2024",
         "endDate": "",
         "summary": {
           "intro": "",
           "list": [
-            "Building websites with WordPress or Next.js (+ Sanity)",
-            "Educational platform project: acting as product owner and developer"
+            "Development of a collaborative CRM (auth, tasks, notifications)",
+            "UI/UX redesign and performance optimization (code-splitting, caching)"
           ]
         },
         "skills": [
-          "TypeScript, React.js, Next.js, Sanity CMS, SCSS, TailwindCSS, WordPress, ACF, Gravity Forms, Laravel, Statamic CMS"
+          "TypeScript, React, Node.js (NestJS), PostgreSQL, CI/CD"
         ],
         "keywords": [
-          "WordPress",
-          "Next.js",
-          "Sanity",
-          "Freelance"
+          "CRM",
+          "React",
+          "TypeScript",
+          "CI/CD"
         ]
       },
       {
-        "name": "Agence Glanum",
+        "name": "Globex Solutions",
         "section": "experience",
-        "position": "Frontend web developer",
+        "position": "Front-end Developer – CDD",
         "order": 2,
         "startDate": "Aug. 2022",
-        "endDate": "Dec. 2025",
+        "endDate": "Jan. 2024",
         "summary": {
           "intro": "",
           "list": [
-            "Partial redesign of sites carrying \"legacy\" code (e.g., https://ccorca.org/, https://www.fondationeranove.com/, https://www.loffice.org/).",
-            "Maintenance and bug fixes on existing sites (Laravel, WordPress, Magento (e-commerce), Remix)",
-            "Store configurator for Leroy Merlin on Laravel",
-            "Delivering brochure sites (e.g., creno.fr, dci-avocats.fr)",
-            "Building a multi-site with Statamic (Laravel)",
-            "Developing content blocks across Colas websites (Laravel and WordPress)"
+            "Creation of reusable components and design system",
+            "Integration of REST services and structured error handling",
+            "Setting up UI tests (Playwright) and unit tests",
+            "SEO and performance optimization (Lighthouse)",
+            "Production support: monitoring, incidents and fixes",
+            "Collaboration with product and design for rapid iteration"
           ]
         },
         "keywords": [
-          "Laravel",
-          "WordPress",
-          "Magento",
           "React",
-          "Remix",
-          "Statamic",
-          "Maintenance",
-          "Refactors"
+          "TypeScript",
+          "Design system",
+          "Testing",
+          "Performance",
+          "Monitoring",
+          "Refactor",
+          "Accessibility"
         ]
       },
       {
-        "name": "Mondial Relay",
+        "name": "Initech Partners",
         "section": "previous-experience",
         "order": 1,
-        "link": "https://talents.mondialrelay.com/qui-sommes-nous/",
-        "position": "Customer advisor – temporary contract",
+        "link": "https://example.com/company",
+        "position": "Customer Advisor – CDD",
         "startDate": "Dec. 2020",
         "endDate": "Aug. 2021",
         "summary": {
           "intro": "",
           "list": [
-            "Handling omnichannel customer requests",
-            "Resolving delivery incidents and tracking cases"
+            "Handling omnichannel customer requests with consistent follow-up",
+            "Improving internal processes and documenting procedures"
           ]
         },
         "keywords": []
       },
       {
-        "name": "EFFISAC",
+        "name": "Northwind",
         "section": "previous-experience",
         "order": 2,
-        "position": "Deputy manager – permanent role",
+        "position": "Deputy Manager – CDI",
         "startDate": "2016",
         "endDate": "2019",
         "summary": {
           "intro": "",
           "list": [
-            "Supporting the director with day-to-day operations and strategic planning."
+            "Coordinating day-to-day activities and supporting strategy.",
+            "Implementing indicators and action plans to continuously improve."
           ]
         },
         "keywords": [
-          "Management",
+          "Operations",
           "Strategy"
         ]
       }
     ],
     "education": [
       {
-        "institution": "École HETIC",
-        "link": "https://www.hetic.net/formations/bachelor-web",
-        "degreeName": "Web developer Bachelor",
-        "area": "Web development",
+        "institution": "Example School",
+        "link": "https://example.com/school",
+        "degreeName": "Software Development Bachelor (bac + 3)",
+        "area": "Software development",
         "startDate": "2021",
         "endDate": "2024",
         "summary": {
           "intro": "",
           "list": [
             "Full-stack development covering core fundamentals",
-            "UI/UX design—wireframes and mockups on Figma",
-            "DEVOPS basics: Docker, nginx server provisioning, CI/CD, cloud setups (Azure, AWS)"
+            "UI/UX and prototyping on Figma",
+            "DevOps basics: Docker, CI/CD and cloud deployment"
           ]
         },
         "courses": []
       },
       {
-        "institution": "University of Poitiers",
-        "degreeName": "Master in project management within the SSE sector",
-        "area": "SSE project governance",
-        "startDate": "2015",
-        "endDate": "2016",
+        "institution": "Fictional University",
+        "degreeName": "Master Software Engineering",
+        "area": "Software Engineering",
+        "startDate": "2019",
+        "endDate": "2021",
         "summary": {
           "intro": "",
           "list": [
-            "Programme steering, governance, and issues shaping the social-and-solidarity economy"
+            "Designing architectures, security and software quality",
+            "Project leadership (Agile/Scrum) and stakeholder management"
           ]
         },
         "courses": []
       },
       {
-        "institution": "Toulouse School of Management",
-        "degreeName": "Master 1 in Law & Management",
-        "area": "Law & Management (year one)",
-        "startDate": "2014",
-        "endDate": "2015",
+        "institution": "Demo Institute",
+        "degreeName": "Computer Science Bachelor",
+        "area": "Computer Science",
+        "startDate": "2016",
+        "endDate": "2018",
         "summary": {
           "intro": "",
           "list": [
-            "Foundational knowledge in legal, managerial, and organisational topics"
+            "Foundational knowledge in programming, data and networking",
+            "Group projects and engineering best practices"
           ]
         },
         "courses": []
@@ -184,8 +187,8 @@
         "language": "English",
         "fluency": "Fluent professional proficiency",
         "keywords": [
-          "One year lived in India (2008–2009)",
-          "IELTS 6.5 (2009) | BULATS C2 (2015)"
+          "Stay in Ireland (2017 – 2018)",
+          "TOEIC : 900 (2019)"
         ]
       }
     ],
@@ -323,16 +326,16 @@
       {
         "name": "Interests",
         "keywords": [
-          "Hackathons (Tech for Good)",
-          "Improvisation theatre",
-          "Martial arts"
+          "Hackathons (new products)",
+          "Improvisation and theater",
+          "Rock climbing and running"
         ]
       }
     ],
     "volunteer": [
       {
-        "organization": "Association ELS Togo",
-        "position": "Designing a brochure site with Next.js and Sanity CMS (ongoing)",
+        "organization": "Association Horizon",
+        "position": "Designing a brochure site for an association with Next.js and Sanity CMS (ongoing)",
         "startDate": "",
         "endDate": "",
         "summary": ""

@@ -5,8 +5,8 @@
     "experience": "Expérience",
     "education": "Formation",
     "previousExperience": "Expériences antérieures",
-    "placeholderFullName": "Votre Nom",
-    "placeholderJobTitle": "Développeur web fullstack",
+    "placeholderFullName": "John Doe",
+    "placeholderJobTitle": "Développeur logiciel",
     "portfolioFallback": "Mon portfolio",
     "skillGroupFallback": "Compétence",
     "roleFallback": "Poste",
@@ -18,163 +18,166 @@
     "bulletStyle": "dot",
     "bulletsColor": "#F80040",
     "basics": {
-      "name": "Amaury Franssen",
-      "headline": "Développeur web fullstack",
-      "phone": "0612972808",
-      "email": "amauryfranssen@gmail.com",
-      "photoFileName": "amaury.png",
-      "summary": "À la suite d'un parcours en droit et management, j'ai décidé de me reconvertir dans le développement web : ce domaine me passionne car il met en valeur ma soif d'apprentissage et ma capacité à résoudre des problèmes complexes.\n\nJe suis agile en matière de technologie, si j'ai beaucoup travaillé sur Next Js, Wordpress et Laravel, j'ai une forte ouverture et capacité d'adaptation à des langages nouveaux comme je l'ai démontré avec Golang. Je monte mes projets sous Docker et j'ai mis en place des pipelines CI/CD."
+      "name": "John Doe",
+      "headline": "Développeur logiciel",
+      "phone": "0601020304",
+      "email": "john.doe@example.com",
+      "photoFileName": "john-doe.png",
+      "summary": "Après une reconversion vers le développement web, je conçois des interfaces et des APIs orientées produit.\n\nJ’apprécie les projets où la qualité compte : tests, performances, accessibilité et bonnes pratiques de sécurité. J’interviens sur des stacks modernes (React/TypeScript, Node.js, bases relationnelles) et je livre via des pipelines CI/CD."
     },
     "location": {
-      "city": "Linselles",
-      "region": "Hauts-de-France",
+      "city": "Lyon",
+      "region": "Auvergne-Rhône-Alpes",
       "country": "France"
     },
     "profiles": [
       {
         "network": "Mon portfolio",
-        "url": "https://amaury-franssen-dev.com",
+        "url": "https://john-doe.dev",
         "username": ""
       }
     ],
     "work": [
       {
-        "name": "Micro-entreprise",
+        "name": "Acme Studio",
         "section": "experience",
-        "position": "Missions free-lance",
+        "position": "Développeur fullstack – CDI",
         "order": 1,
-        "startDate": "Nov. 2025",
+        "startDate": "Fév. 2024",
         "endDate": "",
         "summary": {
           "intro": "",
           "list": [
-            "Réalisations de sites web sur WordPress ou NextJs (+ Sanity)",
-            "Projet de plateforme pédagogique: role de product owner + développeur"
+            "Développement d’un CRM collaboratif (auth, tâches, notifications)",
+            "Refonte UI/UX et optimisation des performances (code-splitting, caching)"
           ]
         },
         "skills": [
-          "TypeScript, React.js, Next.js, Sanity CMS, SCSS, TailwindCSS, WordPress, ACF, Gravity Forms, Laravel, CMS Statamic"
+          "TypeScript, React, Node.js (NestJS), PostgreSQL, CI/CD"
         ],
         "keywords": [
-          "WordPress",
-          "Next.js",
-          "Sanity",
-          "Freelance"
+          "CRM",
+          "React",
+          "TypeScript",
+          "CI/CD"
         ]
       },
       {
-        "name": "Agence Glanum",
+        "name": "Globex Solutions",
         "section": "experience",
-        "position": "Développeur web frontend",
+        "position": "Développeur front-end – CDD",
         "order": 2,
         "startDate": "Août 2022",
-        "endDate": "Déc. 2025",
+        "endDate": "Janv. 2024",
         "summary": {
           "intro": "",
           "list": [
-            "Refonte partielle de sites contenant du \"code legacy\" (ex : https://ccorca.org/, https://www.fondationeranove.com/, https://www.loffice.org/).",
-            "Maintenance et correctifs sur des sites existants (Laravel, WordPress, Magento (e-commerce), Remix)",
-            "Configurateur de store (Leroy Merlin) sur Laravel",
-            "Création de sites web (ex : creno.fr, dci-avocats.fr)",
-            "Création d'un multi-site avec Statamic (Laravel)",
-            "Création de blocs au sein des sites Colas (Laravel et WordPress)"
+            "Création de composants réutilisables et design system",
+            "Intégration de services REST et gestion structurée des erreurs",
+            "Mise en place de tests UI (Playwright) et tests unitaires",
+            "Optimisation SEO et performance (Lighthouse)",
+            "Support production : monitoring, incidents et correctifs",
+            "Collaboration avec produit et design pour itérer rapidement"
           ]
         },
         "skills": [
-          "Golang (dont websockets, chi router)"
+          "TypeScript, React, accessibility, state management"
         ],
         "keywords": [
-          "Laravel",
-          "WordPress",
-          "Magento",
           "React",
-          "Remix",
-          "Statamic",
-          "Maintenance",
-          "Refonte"
+          "TypeScript",
+          "Design system",
+          "Testing",
+          "Performance",
+          "Monitoring",
+          "Refactor",
+          "Accessibilité"
         ]
       },
       {
-        "name": "Mondial Relay",
+        "name": "Initech Partners",
         "section": "previous-experience",
         "order": 1,
-        "link": "https://talents.mondialrelay.com/qui-sommes-nous/",
-        "position": "Conseiller client - CDD",
+        "link": "https://example.com/company",
+        "position": "Conseiller client – CDD",
         "startDate": "Déc. 2020",
         "endDate": "Août 2021",
         "summary": {
           "intro": "",
           "list": [
-            "Gestion des demandes clients multicanal",
-            "Résolution des incidents de livraison et suivi de dossiers"
+            "Gestion des demandes clients multicanal et suivi rigoureux",
+            "Amélioration des processus internes et documentation"
           ]
         },
         "keywords": []
       },
       {
-        "name": "EFFISAC",
+        "name": "Northwind",
         "section": "previous-experience",
         "order": 2,
-        "position": "Adjoint de direction - CDI",
-        "startDate": "Sept.2016",
-        "endDate": "Déc. 2019",
+        "position": "Adjoint de direction – CDI",
+        "startDate": "2016",
+        "endDate": "2019",
         "summary": {
           "intro": "",
           "list": [
-            "J'accompagne le directeur dans le quotidien et la stratégie."
+            "Coordination des activités quotidiennes et support à la stratégie.",
+            "Mise en place d’indicateurs et plans d’action pour l’amélioration continue."
           ]
         },
         "skills": [
-          "Docker, dev, Nginx/Apache, CI/CD"
+          "Organisation, coordination, gestion de projet"
         ],
         "keywords": [
-          "Management",
-          "Strategie"
+          "Operations",
+          "Strategy"
         ]
       }
     ],
     "education": [
       {
-        "institution": "École HETIC",
-        "link": "https://www.hetic.net/formations/bachelor-web",
-        "degreeName": "Bachelor Développeur web (bac + 3)",
-        "area": "Développeur web",
+        "institution": "École Exemple",
+        "link": "https://example.com/school",
+        "degreeName": "Bachelor Développement logiciel (bac + 3)",
+        "area": "Développement logiciel",
         "startDate": "2021",
         "endDate": "2024",
         "summary": {
           "intro": "",
           "list": [
-            "Développement Fullstack et maîtrise des fondamentaux",
-            "UI/UX Design, création de maquettes sur Figma",
-            "DEVOPS : Docker, monter un serveur nginx, CI/CD, solutions cloud (Azure, AWS)"
+            "Développement fullstack et maîtrise des fondamentaux",
+            "UI/UX et prototypage sur Figma",
+            "DevOps : Docker, CI/CD et déploiement"
           ]
         },
         "courses": []
       },
       {
-        "institution": "Universite de Poitiers",
-        "degreeName": "Master en gestion de projet de l'ESS",
-        "area": "Master en gestion de projet de l'ESS",
-        "startDate": "2015",
-        "endDate": "2016",
+        "institution": "Université Fictive",
+        "degreeName": "Master Ingénierie logicielle",
+        "area": "Ingénierie logicielle",
+        "startDate": "2019",
+        "endDate": "2021",
         "summary": {
           "intro": "",
           "list": [
-            "Pilotage de projet, gouvernance et enjeux de l'économie sociale et solidaire"
+            "Conception d’architectures, sécurité et qualité logicielle",
+            "Pilotage de projets (Agile/Scrum) et gestion des parties prenantes"
           ]
         },
         "courses": []
       },
       {
-        "institution": "Toulouse School of Management",
-        "degreeName": "Master 1 Droit et Gestion",
-        "area": "Master 1 Droit et Gestion",
-        "startDate": "2014",
-        "endDate": "2015",
+        "institution": "Institut Démo",
+        "degreeName": "Licence Informatique",
+        "area": "Informatique",
+        "startDate": "2016",
+        "endDate": "2018",
         "summary": {
           "intro": "",
           "list": [
-            "Fondamentaux en droit, gestion et organisation d'entreprise"
+            "Fondamentaux en programmation, données et réseaux",
+            "Projets de groupe et bonnes pratiques d’ingénierie"
           ]
         },
         "courses": []
@@ -185,8 +188,8 @@
         "language": "Anglais",
         "fluency": "Compétence professionnelle complète",
         "keywords": [
-          "1 an vécu en Inde (2008-2009)",
-          "IELTS 6.5 (2009) | BULATS C2 (2015)"
+          "Séjour en Irlande (2017 – 2018)",
+          "TOEIC : 900 (2019)"
         ]
       }
     ],
@@ -195,129 +198,132 @@
         "name": "Expertise principale",
         "level": "Avancé",
         "skills": [
-          "TypeScript, React.js, Next.js, Sanity CMS, WordPress",
-          "SCSS, TailwindCSS",
-          "Laravel, CMS Statamic"
+          "TypeScript, React, Node.js (NestJS), PostgreSQL",
+          "CSS moderne (grid/flex) et design system",
+          "API REST, tests, performance"
         ],
         "keywords": [
           "TypeScript",
-          "React.js",
-          "Next.js",
-          "Sanity CMS",
-          "SCSS",
-          "TailwindCSS",
-          "WordPress",
-          "ACF",
-          "Gravity Forms",
-          "Laravel",
-          "CMS Statamic"
+          "React",
+          "Node.js",
+          "PostgreSQL",
+          "API REST",
+          "Tests",
+          "Performance",
+          "Accessibilité",
+          "Sécurité"
         ]
       },
       {
         "name": "Expertise secondaire",
         "level": "Intermédiaire",
         "skills": [
-          "Golang (dont websockets, chi router)"
+          "Python, FastAPI, automatisations et ETL léger"
         ],
         "keywords": [
-          "Golang (dont websockets, chi router)"
+          "Python",
+          "FastAPI",
+          "Automatisation"
         ]
       },
       {
         "name": "DevOps",
         "level": "Intermédiaire",
         "skills": [
-          "Docker, ddev, Nginx/Apache, CI/CD"
+          "Docker, Nginx, CI/CD et déploiement automatisé"
         ],
         "keywords": [
           "Docker",
-          "dev",
-          "Nginx/Apache",
-          "CI/CD"
+          "Nginx",
+          "CI/CD",
+          "Monitoring"
         ]
       },
       {
         "name": "Versioning",
         "level": "Avancé",
         "skills": [
-          "Git, Github, Github Flow"
+          "Git, GitHub Actions, Conventional Commits"
         ],
         "keywords": [
           "Git",
-          "Github",
-          "Github Flow"
+          "GitHub",
+          "GitHub Actions",
+          "Review"
         ]
       },
       {
         "name": "Méthodes agiles",
         "level": "Intermédiaire",
         "skills": [
-          "Formation école et entreprise"
+          "Scrum, planification, retrospectives et roadmap"
         ],
         "keywords": [
-          "Formation école et entreprise"
+          "Scrum",
+          "Roadmap",
+          "Qualité"
         ]
       },
       {
         "name": "LLM",
         "level": "Intermédiaire",
         "skills": [
-          "Cursor, Claude code, Mistral"
+          "Intégration d’outils LLM (prompting, embeddings) et automatisation"
         ],
         "keywords": [
-          "Cursor",
-          "Claude code",
-          "Mistral"
+          "Embeddings",
+          "RAG",
+          "Automatisation"
         ]
       },
       {
         "name": "UI/UX design",
         "level": "Intermédiaire",
         "keywords": [
-          "Maquettes",
-          "Wireframes sur Figma"
+          "Design system",
+          "Prototypes sur Figma"
         ],
         "skills": [
-          "Maquettes, Wireframes sur Figma"
+          "Prototypage, wireframes et itérations avec design"
         ]
       },
       {
         "name": "Collaboration",
         "level": "Avancé",
         "keywords": [
-          "Asana",
-          "Jira"
+          "Jira",
+          "Notion"
         ],
         "skills": [
-          "Asana, Jira"
+          "Jira, Notion et Slack"
         ]
       },
       {
         "name": "Intérêts techniques",
         "level": "Intermédiaire",
         "keywords": [
-          "Clean code",
-          "Clean architecture",
+          "Clean Architecture",
           "TDD",
-          "DDD",
+          "Observabilité",
+          "Caching",
           "Tests",
-          "RAG"
+          "Sécurité"
         ],
         "skills": [
-          "Clean code, Clean architecture, TDD, DDD, Tests, RAG"
+          "Clean Architecture, TDD, tests, observabilité, sécurité"
         ]
       },
       {
         "name": "Savoir-être",
         "level": "Avancé",
         "keywords": [
-          "Créativité dans la résolution de problèmes",
-          "Curiosité et ouverture d'esprit",
-          "Rigueur et intégrité",
-          "Esprit d'équipe"
+          "Curiosité et apprentissage continu",
+          "Rigueur, intégrité et sens du détail",
+          "Esprit d’équipe",
+          "Communication claire"
         ],
         "skills": [
-          "Créativité dans la résolution de problèmes, Curiosité et ouverture d'esprit, Rigueur et intégrité, Esprit d'équipe"
+          "Communication claire, rigueur, esprit d'équipe, résolution structurée"
         ]
       }
     ],
@@ -325,16 +331,16 @@
       {
         "name": "Centres d'intérêts",
         "keywords": [
-          "Hackathons (Tech for Good)",
+          "Hackathons (nouveaux produits)",
           "Improvisation et Théâtre",
-          "Arts Martiaux"
+          "Escalade et course"
         ]
       }
     ],
     "volunteer": [
       {
-        "organization": "Association ELS Togo",
-        "position": "Conception d'un site vitrine avec NextJs et Sanity CMS",
+        "organization": "Association Horizon",
+        "position": "Conception d'un site vitrine pour une association avec Next.js et Sanity CMS",
         "startDate": "",
         "endDate": "",
         "summary": ""
