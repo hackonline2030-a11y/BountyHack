@@ -25,7 +25,7 @@ Then edit **`server/.env`** following **`.env.example`** (secrets, `DATABASE_NAM
 
 ## Prerequisites
 
-- **Node.js** 20+ and **pnpm**
+- **Node.js** 24+ and **pnpm** (see `server/package.json` → `engines`)
 - **Docker** and Docker Compose (only if you follow the Docker workflow below)
 
 ### Nx Workspace: IDE and Console Logic
@@ -93,17 +93,28 @@ See the comments in **`.env.example`** as well.
 
 ## Getting started
 
-Pick **one** path: run everything with Docker, or Node on your machine with MongoDB installed separately.
+Pick **one** path: **Docker** (API and optional Postgres + watch), or **Node on the host** with a reachable database (**PostgreSQL + Prisma**, MongoDB, … per **`DATABASE_NAME`**).
+
+### PostgreSQL and Prisma
+
+**`DATABASE_NAME=POSTGRESQL_PRISMA`** for the Prisma-backed `users` flow. Run from **`server/`** after `pnpm install` at the monorepo root.
+
+| Context | Commands |
+|--------|----------|
+| **Docker — API in watch** (`web-api-watch` + Postgres) | `pnpm docker:watch`, then `pnpm docker:prisma:generate`, `pnpm docker:prisma:deploy`, optional `pnpm docker:prisma:seed-demo`. Same as `./docker/start.sh watch-up` from **`server/docker/`**. |
+| **Host — Postgres on `localhost`** | `pnpm prisma generate`, `pnpm prisma migrate deploy`, optional `pnpm prisma:seed-demo`. If `DATABASE_URL` still uses `@postgres`, use `pnpm prisma:migrate:deploy:docker` and `pnpm prisma:seed-demo:docker`. |
+
+Details: [`docker/README.md`](docker/README.md#prisma-migrations-et-démo) and **`.env.example`**. Demo login: `demo-user@example.local` / `password123`.
 
 ### 1. With Docker
 
-Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.dev.yaml`.
+Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.dev.yaml`. Full guide: [`docker/README.md`](docker/README.md).
 
-**PostgreSQL + pgweb** start **only** when `DATABASE_NAME=POSTGRESQL` in **`server/.env`** (default in `.env.example`). **MongoDB + mongo-express** start **only** when `DATABASE_NAME=MONGODB` (see Mongo notes in `.env.example`). With `FIREBASE`, `IN-MEMORY`, etc., those database containers are not started (no empty stack). Compose **profiles** (`mongodb`, `pg`) keep these sets separate.
+**PostgreSQL + pgweb** start when **`DATABASE_NAME`** is **`POSTGRESQL`** or **`POSTGRESQL_PRISMA`**. **MongoDB + mongo-express** start when **`DATABASE_NAME=MONGODB`**. With `FIREBASE`, `IN-MEMORY`, etc., those database containers are not started. Compose **profiles** (`mongodb`, `pg`) keep these sets separate.
 
-1. Environment file: follow **[Installation](#installation)** above (`server/.env` from `server/.env.example`). Set `DATABASE_NAME` according to your backend (`MONGODB`, `POSTGRESQL`, `FIREBASE`, `IN-MEMORY`, …), plus `JWT_SECRET`, CORS, etc.
+1. Environment file: follow **[Installation](#installation)** above (`server/.env` from `server/.env.example`). Set `DATABASE_NAME` (`MONGODB`, `POSTGRESQL`, `POSTGRESQL_PRISMA`, `FIREBASE`, `IN-MEMORY`, …), plus `JWT_SECRET`, CORS, etc.
 
-   **`DATABASE_URL`:** `.env.example` defaults to **PostgreSQL** (e.g. `postgres://…@postgres:5432/…` when the API runs in Docker). **API in Docker** + **`DATABASE_NAME=POSTGRESQL`**: host **`postgres`** on the compose network (not `localhost` from the api container). **API on the host** (`nx serve`) + Postgres in Docker: URL to **`localhost`** and **`POSTGRES_HOST_PORT`**. For **Mongo**, see the “alternative MongoDB” comments in `.env.example`; in Docker, host **`mongodb`** (e.g. `mongodb://mongodb:27017/bugbountyapp`).
+   **`DATABASE_URL`:** `.env.example` defaults to **PostgreSQL** (e.g. `postgres://…@postgres:5432/…` when the API runs in Docker). **API in Docker** + **`pg`** profile: host **`postgres`** on the compose network (not `localhost` from the api container). **API on the host** (`nx serve`) + Postgres in Docker: URL to **`localhost`** / **`127.0.0.1`** and **`POSTGRES_HOST_PORT`**. For **Mongo**, see `.env.example`; in Docker, host **`mongodb`** (e.g. `mongodb://mongodb:27017/bugbountyapp`).
 
 2. Start:
 
@@ -117,9 +128,9 @@ Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.
 
    **Fast API cycle (no image rebuild):**
    - `./docker/start.sh api-restart` (or `./docker/start.sh restart-api`): restarts API without rebuilding the image.
-   - `./docker/start.sh api-stop` (or `./docker/start.sh stop-api`): stops the API and, depending on **`DATABASE_NAME`**, the matching Docker DB stack (**MongoDB** when `MONGODB`, **Postgres + pgweb** when `POSTGRESQL`).
+   - `./docker/start.sh api-stop` (or `./docker/start.sh stop-api`): stops the API and, depending on **`DATABASE_NAME`**, the matching Docker DB stack (**MongoDB** when `MONGODB`, **Postgres + pgweb** when **`POSTGRESQL`** or **`POSTGRESQL_PRISMA`**).
    - If `DATABASE_NAME=MONGODB`, the script applies profile **`mongodb`** and targets `mongodb` + `api`.
-   - If `DATABASE_NAME=POSTGRESQL`, the script applies profile **`pg`** and orchestrates **`postgres`**, **`pgweb`**, and **`api`** depending on the command (`api-restart` only brings up **`postgres`** + **`api`** — see `start.sh`).
+   - If `DATABASE_NAME=POSTGRESQL` or `POSTGRESQL_PRISMA`, the script applies profile **`pg`** and orchestrates **`postgres`**, **`pgweb`**, and **`api`** depending on the command (`api-restart` only brings up **`postgres`** + **`api`** — see `start.sh`).
    - Otherwise (`IN-MEMORY`, `FIREBASE`, …), only **`api`** is affected (no compose DB containers).
    - After `./docker/start.sh` (`up`), the script tails API logs in the terminal (`logs -f api`).
      - Exit live tail: `Ctrl+C` (containers keep running).
@@ -145,7 +156,7 @@ Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.
    ```
    - Copy the output into `passwordHash` in `docker/dump/user.json` (hash changes every run because salt is random).
 
-   The script reads **`server/.env`** and adds **`--profile mongodb`** or **`--profile pg`** only when `DATABASE_NAME` is **`MONGODB`** or **`POSTGRESQL`** (including for `down`, so the right services stop).
+   The script reads **`server/.env`** and adds **`--profile mongodb`** or **`--profile pg`** only when `DATABASE_NAME` is **`MONGODB`**, **`POSTGRESQL`**, or **`POSTGRESQL_PRISMA`** (including for `down`, so the right services stop).
 
    **Without** the script — **Mongo**:
 
@@ -171,10 +182,10 @@ Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.
    | ------- | --- |
    | API (REST prefix) | `http://localhost:3003/api` (default host port **3003**; override with **`API_HOST_PORT`** in `server/.env`, read by `compose.dev.yaml`) |
    | OpenAPI (Swagger UI) | `http://localhost:3003/api/docs` (same host port) |
-   | mongo-express | only if `DATABASE_NAME=MONGODB` — `http://localhost:8086` |
-   | pgweb | only if `DATABASE_NAME=POSTGRESQL` — `http://localhost:8087` (override with **`PGWEB_HOST_PORT`**) |
-   | MongoDB (from host) | only if `DATABASE_NAME=MONGODB` — `mongodb://localhost:27017` / database `bugbountyapp` |
-   | PostgreSQL (from host) | only if `DATABASE_NAME=POSTGRESQL` — `localhost:5432` (override with **`POSTGRES_HOST_PORT`**) |
+   | mongo-express | if **`DATABASE_NAME=MONGODB`** — `http://localhost:8086` |
+   | pgweb | if **`pg`** profile (`POSTGRESQL` or `POSTGRESQL_PRISMA`) — `http://localhost:8087` (override **`PGWEB_HOST_PORT`**) |
+   | MongoDB (from host) | if **`DATABASE_NAME=MONGODB`** — `mongodb://localhost:27017` / database `bugbountyapp` |
+   | PostgreSQL (from host) | if **`pg`** profile — `localhost:5432` (override **`POSTGRES_HOST_PORT`**) |
 
    **mongo-express:** in dev, the UI does not ask for a password (`ME_CONFIG_BASICAUTH=false` in `compose.dev.yaml`). Without that, the image often defaults to HTTP Basic **admin** / **pass** for the web UI — only use that on a trusted local machine.
 
@@ -192,31 +203,29 @@ With the **Mongo** profile, ensure ports **27017**, **3003** (or **`API_HOST_POR
 
 ### 2. Manual setup (Node on the host)
 
-Use this when you prefer **not** to run the API in Docker. You still need a **MongoDB** instance the app can reach (local install, or Mongo only in Docker if you prefer).
+Without the **API** container. Provide a database reachable from your machine (Postgres and/or Mongo per **`DATABASE_NAME`**).
 
-1. Install dependencies from the **repository root**:
+1. **Dependencies** (repository root):
 
    ```sh
    pnpm install
    ```
 
-2. Configure **`server/.env`** (see **[Installation](#installation)** if it does not exist yet).
+2. **`server/.env`** (see **[Installation](#installation)**).
 
-   Keep the default **`DATABASE_URL`** with **`localhost`** (leave the `mongodb://mongodb…` line **commented** — that line is only for the API **inside** Docker). Point to your Mongo instance, typically:
+   **PostgreSQL + Prisma:** `DATABASE_NAME=POSTGRESQL_PRISMA`, **`DATABASE_URL`** with host **`localhost`** (or `127.0.0.1`). Then apply the schema — **[PostgreSQL and Prisma](#postgresql-and-prisma)** (`prisma generate`, `migrate deploy`, optional seed).
 
-   ```env
-   DATABASE_URL=mongodb://localhost:27017/bugbountyapp
-   ```
+   **MongoDB:** `DATABASE_URL=mongodb://localhost:27017/bugbountyapp` (`mongodb://mongodb…` in `.env.example` is for the API **in Docker** only).
 
-   Set `JWT_SECRET`, `PORT`, `CORS_ORIGIN`, etc. as needed.
+   Set `JWT_SECRET`, `PORT`, `CORS_ORIGIN`, etc.
 
-3. Run the API in dev (watch mode):
+3. **Dev API:**
 
    ```sh
    npx nx serve web-api
    ```
 
-The app listens on `PORT` from `.env` (see `.env.example`; default **3000** unless you change it).
+   Listens on **`PORT`** from `.env` (default **3000**; align e2e if the Docker API uses **3003** on the host).
 
 ---
 
