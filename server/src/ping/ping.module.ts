@@ -20,6 +20,7 @@ import { InMemoryPingRepository } from './adapters/in-memory-ping-repository';
           case 'FIREBASE':
             return FirebasePingRepository;
           case 'IN-MEMORY':
+          case 'POSTGRESQL':
             return InMemoryPingRepository;
           default:
             throw new Error(`Unsupported database: ${variables.database} - Please add it in module providers and shared variables`);

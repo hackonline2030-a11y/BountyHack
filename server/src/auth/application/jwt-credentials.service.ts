@@ -43,12 +43,12 @@ export class JwtCredentialsService {
       return this.registerMongo(email, input.username.trim(), input.password);
     }
 
-    if (variables.database === 'IN-MEMORY') {
+    if (variables.database === 'IN-MEMORY' || variables.database === 'POSTGRESQL') {
       return this.registerInMemory(email, input.username.trim(), input.password);
     }
 
     throw new InternalServerErrorException(
-      'JWT register is only supported with DATABASE_NAME=MONGODB or IN-MEMORY'
+      'JWT register is only supported with DATABASE_NAME=MONGODB, IN-MEMORY or POSTGRESQL (in-memory until Postgres persistence exists)'
     );
   }
 
@@ -65,12 +65,12 @@ export class JwtCredentialsService {
       return this.loginMongo(email, input.password);
     }
 
-    if (variables.database === 'IN-MEMORY') {
+    if (variables.database === 'IN-MEMORY' || variables.database === 'POSTGRESQL') {
       return this.loginInMemory(email, input.password);
     }
 
     throw new InternalServerErrorException(
-      'JWT login is only supported with DATABASE_NAME=MONGODB or IN-MEMORY'
+      'JWT login is only supported with DATABASE_NAME=MONGODB, IN-MEMORY or POSTGRESQL (in-memory until Postgres persistence exists)'
     );
   }
 

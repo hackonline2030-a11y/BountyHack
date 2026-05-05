@@ -1,6 +1,8 @@
-# Production : image GHCR + Mongo sur le réseau Docker uniquement.
+# Production : image GHCR + Mongo sur le réseau Docker uniquement (par défaut).
+# PostgreSQL optionnel : profil « pg » — ne démarre pas sans `docker compose --profile pg …`.
 # Sur le VPS : copie .env à côté de ce fichier (voir .env.example) avec au minimum
-#   JWT_SECRET, MONGO_ROOT_PASSWORD, et optionnellement API_HOST_PORT (ou QUIZZAM_HOST_PORT), CORS_ORIGIN
+#   JWT_SECRET, MONGO_ROOT_PASSWORD, et optionnellement API_HOST_PORT, CORS_ORIGIN
+# Avec Postgres (profil pg) : ajouter POSTGRES_PASSWORD (et optionnellement POSTGRES_USER, POSTGRES_DB).
 #
 # docker compose -f docker/compose.prod.yml --env-file .env up -d
 
@@ -20,11 +22,11 @@ services:
       DATABASE_NAME: MONGODB
       AUTH_TYPE: ${AUTH_TYPE:-JWT}
       # L’app lit DATABASE_URL (pas MONGO_URL) — voir app.module / Mongoose
-      DATABASE_URL: mongodb://root:${MONGO_ROOT_PASSWORD}@mongo:27017/quizapp?authSource=admin
+      DATABASE_URL: mongodb://root:${MONGO_ROOT_PASSWORD}@mongo:27017/bugbountyapp?authSource=admin
       JWT_SECRET: ${JWT_SECRET}
-      CORS_ORIGIN: ${CORS_ORIGIN:-https://quizzy-front.vercel.app,http://localhost:4200}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://bugbountyapp.vercel.app,http://localhost:3001}
     ports:
-      - "${API_HOST_PORT:-${QUIZZAM_HOST_PORT:-3003}}:3000"
+      - "${API_HOST_PORT:-3003}:3000"
     depends_on:
       mongo:
         condition: service_healthy
@@ -36,7 +38,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: quizapp
+      MONGO_INITDB_DATABASE: bugbountyapp
     volumes:
       - mongo_data:/data/db
     # Pas de ports: — Mongo n’est pas exposé sur l’hôte (sécurité prod)
@@ -47,5 +49,26 @@ services:
       retries: 5
       start_period: 10s
 
+  postgres:
+    profiles:
+      - pg
+    image: postgres:18-alpine
+    container_name: web-api-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bugbountyapp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-bugbountyapp}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # Pas de « ports: » — Postgres n’est pas exposé sur l’hôte (accès depuis les conteneurs du même réseau compose).
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
 volumes:
   mongo_data:
+  postgres_data:
