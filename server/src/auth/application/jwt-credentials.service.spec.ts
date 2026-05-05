@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { JwtCredentialsService } from './jwt-credentials.service';
 import { JwtInMemoryRegistry } from '../infra/jwt-in-memory-registry';
+import { Prisma } from '../../test/mocks/prisma-generated-client';
 import { variables } from '../../shared/variables.config';
 import { hashPassword } from '../infra/password.util';
 
@@ -232,6 +233,119 @@ describe('JwtCredentialsService', () => {
         service.register({
           username: 'mongo-user',
           email: 'mongo@example.com',
+          password: 'password',
+        })
+      ).rejects.toBeInstanceOf(InternalServerErrorException);
+    });
+  });
+
+  describe('POSTGRESQL_PRISMA mode', () => {
+    const buildPrismaMock = () => ({
+      user: {
+        create: jest.fn(),
+        findFirst: jest.fn(),
+      },
+    });
+
+    it('should register and persist user in POSTGRESQL_PRISMA mode', async () => {
+      const prisma = buildPrismaMock();
+      prisma.user.create.mockResolvedValue(undefined);
+      (variables as { database: string }).database = 'POSTGRESQL_PRISMA';
+      service = new JwtCredentialsService(registry, undefined, undefined, prisma as any);
+
+      const response = await service.register({
+        username: 'pg-user',
+        email: 'pg@example.com',
+        password: 'password',
+      });
+
+      expect(prisma.user.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          username: 'pg-user',
+          email: 'pg@example.com',
+          passwordHash: expect.any(String),
+          id: expect.any(String),
+        }),
+      });
+      expect(response.token).toBeDefined();
+      expect(response.user).toEqual(
+        expect.objectContaining({
+          email: 'pg@example.com',
+          username: 'pg-user',
+          uid: expect.any(String),
+        })
+      );
+    });
+
+    it('should map unique constraint (P2002) to conflict in POSTGRESQL_PRISMA mode', async () => {
+      const prisma = buildPrismaMock();
+      prisma.user.create.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+          code: 'P2002',
+        })
+      );
+      (variables as { database: string }).database = 'POSTGRESQL_PRISMA';
+      service = new JwtCredentialsService(registry, undefined, undefined, prisma as any);
+
+      await expect(
+        service.register({
+          username: 'pg-user',
+          email: 'pg@example.com',
+          password: 'password',
+        })
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('should login with valid credentials in POSTGRESQL_PRISMA mode', async () => {
+      const prisma = buildPrismaMock();
+      const passwordHash = await hashPassword('password');
+      prisma.user.findFirst.mockResolvedValue({
+        id: 'pg-uid',
+        email: 'pg@example.com',
+        username: 'pg-user',
+        passwordHash,
+      });
+      (variables as { database: string }).database = 'POSTGRESQL_PRISMA';
+      service = new JwtCredentialsService(registry, undefined, undefined, prisma as any);
+
+      const response = await service.login({
+        email: 'pg@example.com',
+        password: 'password',
+      });
+
+      expect(prisma.user.findFirst).toHaveBeenCalledWith({
+        where: { email: 'pg@example.com' },
+      });
+      expect(response.user).toEqual({
+        email: 'pg@example.com',
+        uid: 'pg-uid',
+        username: 'pg-user',
+      });
+      expect(response.token).toBeDefined();
+    });
+
+    it('should reject login with invalid credentials in POSTGRESQL_PRISMA mode', async () => {
+      const prisma = buildPrismaMock();
+      prisma.user.findFirst.mockResolvedValue(null);
+      (variables as { database: string }).database = 'POSTGRESQL_PRISMA';
+      service = new JwtCredentialsService(registry, undefined, undefined, prisma as any);
+
+      await expect(
+        service.login({
+          email: 'pg@example.com',
+          password: 'password',
+        })
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+
+    it('should fail when PrismaService is missing in POSTGRESQL_PRISMA mode', async () => {
+      (variables as { database: string }).database = 'POSTGRESQL_PRISMA';
+      service = new JwtCredentialsService(registry);
+
+      await expect(
+        service.register({
+          username: 'pg-user',
+          email: 'pg@example.com',
           password: 'password',
         })
       ).rejects.toBeInstanceOf(InternalServerErrorException);

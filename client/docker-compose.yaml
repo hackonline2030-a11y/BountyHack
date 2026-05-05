@@ -22,7 +22,7 @@ services:
         DATABASE_PROVIDER: postgresql
         DATABASE_URL: postgresql://admin:example@127.0.0.1:5432/cleanapp
     ports:
-      - 3000:3000
+      - 3001:3000
     depends_on:
       - db
     environment:
