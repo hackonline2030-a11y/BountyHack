@@ -20,14 +20,14 @@ describe('GenerateCvPdfCommand', () => {
       },
       templateName: 'red-squared',
       templateStylesheetUrl:
-        'http://localhost:3000/template-assets/red-squared/styles/styles.css',
+        '/template-assets/red-squared/styles/styles.css',
       bullets: true,
       bulletStyle: 'dot',
       bulletsColor: '#F80040',
       fullName: 'Amaury Franssen',
       jobTitle: 'Développeur web',
       summary: 'Résumé',
-      profileImage: 'http://localhost:3000/template-assets/logo.png',
+      profileImage: '/template-assets/logo.png',
       leftColumn: {
         portfolio: { label: 'Mon portfolio', url: 'https://example.com' },
         contact: ['mail@test.com'],
@@ -54,7 +54,7 @@ describe('GenerateCvPdfCommand', () => {
     const pdfStorage = {
       savePdf: jest.fn().mockResolvedValue({
         fileName: 'cv-red-squared-1.pdf',
-        publicUrl: 'http://localhost:3000/pdfs/cv-red-squared-1.pdf',
+        publicUrl: '/pdfs/cv-red-squared-1.pdf',
       }),
     };
 
@@ -78,6 +78,6 @@ describe('GenerateCvPdfCommand', () => {
       expect.any(Buffer),
       'red-squared',
     );
-    expect(result).toEqual({ url: 'http://localhost:3000/pdfs/cv-red-squared-1.pdf' });
+    expect(result).toEqual({ url: '/pdfs/cv-red-squared-1.pdf' });
   });
 });

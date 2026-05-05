@@ -11,13 +11,14 @@ import { JwtInMemoryRegistry } from './infra/jwt-in-memory-registry';
 import { UserModule } from '../users/user.module';
 import { variables } from '../shared/variables.config';
 
-const jwtMongoImports =
-  !isFirebaseAuthEnabled() && variables.database === 'MONGODB'
+const jwtUserPersistenceImports =
+  !isFirebaseAuthEnabled() &&
+  (variables.database === 'MONGODB' || variables.database === 'POSTGRESQL')
     ? [forwardRef(() => UserModule)]
     : [];
 
 @Module({
-  imports: [OptionalFirebaseModule.register(), ...jwtMongoImports],
+  imports: [OptionalFirebaseModule.register(), ...jwtUserPersistenceImports],
   controllers: isFirebaseAuthEnabled() ? [] : [JwtAuthController],
   providers: [
     AuthGuard,

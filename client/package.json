@@ -12,9 +12,9 @@
   "scripts": {
     "postinstall": "node scripts/prisma-generate.mjs",
     "db:generate": "node scripts/prisma-generate.mjs",
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3001",
     "lint": "eslint",
     "test": "jest",
     "test:unit": "jest --testPathIgnorePatterns=int --testPathIgnorePatterns=e2e"
