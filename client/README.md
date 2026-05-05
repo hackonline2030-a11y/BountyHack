@@ -4,6 +4,25 @@ Reusable Next.js App Router starter with authentication flows (register/login) a
 
 ## Getting started
 
+### Installation
+
+Create **`client/.env`** from the template (from the **monorepo root**):
+
+```bash
+# at the repo root (if not done yet)
+cp client/.env.example client/.env
+```
+
+Equivalent if you are already in **`client/`**:
+
+```bash
+cp .env.example .env
+```
+
+Adjust **`client/.env`** as needed (see **Environment variables** below and `client/.env.example`).
+
+### Run
+
 This repo uses **[pnpm](https://pnpm.io)** (`packageManager` is pinned in `package.json`). Enable Corepack once, then install and run:
 
 ```bash
@@ -12,7 +31,9 @@ pnpm install
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3001](http://localhost:3001). Le dev Next est sur le port **3001** volontairement (`next dev -p 3001` dans `package.json`) pour ne pas entrer en conflit avec l’API Nest, qui utilise **3000** comme port de processus (`server/.env` / conteneur Docker). Autre port : `pnpm dev -- --port 3010` (et aligner **`CORS_ORIGIN`** côté **`server/.env`**).
+
+**API (CORS)** : l’**origine** du front (`http://localhost:3001` en dev par défaut) doit figurer dans **`CORS_ORIGIN`** du **`server/.env`** — voir **`server/.env.example`** et **`server/src/shared/cors.util.ts`**.
 
 ## Included
 
@@ -23,7 +44,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Environment variables
 
-Create a `.env` file (copy `.env.example`).
+Prérequis : fichier **`client/.env`** — voir **[Installation](#installation)** dans cette page.
 
 - **Database (Prisma)**  
   - Default: **`DATABASE_PROVIDER=sqlite`** and **`DATABASE_URL=file:./prisma/dev.db`** (file under `prisma/`).  
@@ -69,4 +90,4 @@ This template includes a demo endpoint to show how to send emails with Resend.
 ### Test
 
 ```bash
-curl -X POST http://localhost:3000/api/send
+curl -X POST http://localhost:3001/api/send

@@ -3,7 +3,26 @@
 API NestJS (auth, users, ping) — workspace [Nx](https://nx.dev).
 
 *English version : [Go to english version](./README.en.md)*
-    
+
+## Installation
+
+Crée le fichier **`server/.env`** à partir du modèle (tu peux rester à la **racine du monorepo**) :
+
+```bash
+# à la racine du dépôt (si pas encore fait)
+cp server/.env.example server/.env
+```
+
+Équivalent si tu es déjà dans le dossier **`server/`** :
+
+```sh
+cp .env.example .env
+```
+
+Puis édite **`server/.env`** en suivant les commentaires de **`.env.example`** (secrets, `DATABASE_NAME`, `DATABASE_URL`, CORS, etc.).
+
+---
+
 ## Prérequis
 
 - **Node.js** 20+ et **pnpm**
@@ -82,18 +101,11 @@ Guide détaillé (installation Docker, `start.sh`, équivalents `docker compose`
 
 Construit et exécute toujours l’**API** à partir de `docker/Dockerfile`, via `docker/compose.dev.yaml`.
 
-**MongoDB + mongo-express** ne sont démarrés **que** si `DATABASE_NAME=MONGODB` dans `.env` à la racine du dépôt (valeur par défaut dans `.env.example`). Avec `FIREBASE`, `IN-MEMORY`, etc., ces conteneurs Mongo ne démarrent pas (Raison: inutile de lancer une stack Mongo vide).
-Nous utilisons les profiles dans compose pour réaliser cette séparation.
+**PostgreSQL + pgweb** ne sont démarrés **que** si `DATABASE_NAME=POSTGRESQL` dans **`server/.env`** (valeur par défaut dans `.env.example`). **MongoDB + mongo-express** ne sont démarrés **que** si `DATABASE_NAME=MONGODB` (voir commentaires Mongo dans `.env.example`). Avec `FIREBASE`, `IN-MEMORY`, etc., les services de base Docker concernés ne sont pas lancés (inutile de monter une stack vide). Les **profils** Compose (`mongodb`, `pg`) séparent ces jeux de conteneurs.
 
-1. Depuis la **racine du dépôt**, copie les variables d’environnement et ajuste les secrets :
+1. Fichier d’environnement : comme indiqué en **[Installation](#installation)** (`server/.env` depuis `server/.env.example`). Renseigne `DATABASE_NAME` selon ton backend (`MONGODB`, `POSTGRESQL`, `FIREBASE`, `IN-MEMORY`, …), ainsi que `JWT_SECRET`, CORS, etc.
 
-   ```sh
-   cp .env.example .env
-   ```
-
-   Renseigne `DATABASE_NAME` selon ton backend (`MONGODB`, `FIREBASE`, `IN-MEMORY`, …), ainsi que `JWT_SECRET`, CORS, etc.
-
-   **`DATABASE_URL` :** `.env.example` laisse **`localhost`** actif par défaut (`nx serve` ou Mongo sur l’hôte). **Uniquement** si tu lances l’**API dans Docker** avec la stack Mongo du compose (`DATABASE_NAME=MONGODB`), change la valeur en `DATABASE_URL=mongodb://mongodb:27017/quizapp` pour que le conteneur joigne le service `mongodb` sur le réseau compose. Si tu **n’utilises pas** Docker pour l’API, garde la version avec `localhost`.
+   **`DATABASE_URL` :** `.env.example` part sur **PostgreSQL** (ex. `postgres://…@postgres:5432/…` pour l’API dans Docker). **API dans Docker** + **`DATABASE_NAME=POSTGRESQL`** : hôte **`postgres`** sur le réseau Compose (pas `localhost` depuis le conteneur api). **API sur l’hôte** (`nx serve`) + Postgres dans Docker : URL vers **`localhost`** et le port **`POSTGRES_HOST_PORT`**. Pour **Mongo** : voir commentaires « alternative MongoDB » dans `.env.example` ; dans Docker, hôte **`mongodb`** (ex. `mongodb://mongodb:27017/bugbountyapp`).
 
 2. Lancement :
 
@@ -103,28 +115,29 @@ Nous utilisons les profiles dans compose pour réaliser cette séparation.
 
    Raccourci équivalent : `./docker/start` (même script).
 
-   **Arrêt :** `./docker/start.sh down` — arrête **tout** (API classique, **api-watch**, Mongo, mongo-express), supprime le réseau et les orphelins (`--remove-orphans`). Avant, un `down` sans le profil `watch` pouvait laisser `web-api-watch` actif et le réseau « in use ». Volumes (Mongo, `web_api_node_modules`, …) : `./docker/start.sh down -v`.
+   **Arrêt :** `./docker/start.sh down` — arrête **tout** (API classique, **api-watch**, Mongo, mongo-express, Postgres, pgweb selon les profils utilisés), supprime le réseau et les orphelins (`--remove-orphans`). Avant, un `down` sans le profil `watch` pouvait laisser `web-api-watch` actif et le réseau « in use ». Volumes (Mongo, Postgres, `web_api_node_modules`, …) : `./docker/start.sh down -v`.
 
    **Cycle rapide API (sans rebuild image) :**
    - `./docker/start.sh api-restart` (ou `./docker/start.sh restart-api`) : redémarre l’API sans reconstruire l’image.
-   - `./docker/start.sh api-stop` (ou `./docker/start.sh stop-api`) : arrête l’API (et sa dépendance Mongo si activée).
-   - Si `DATABASE_NAME=MONGODB`, le script applique automatiquement le profil Mongo et gère `mongodb` + `api`.
-   - Sinon, seules les opérations sur `api` sont exécutées.
+   - `./docker/start.sh api-stop` (ou `./docker/start.sh stop-api`) : arrête l’API et, selon **`DATABASE_NAME`**, la base Docker associée (**MongoDB** si `MONGODB`, **Postgres + pgweb** si `POSTGRESQL`).
+   - Si `DATABASE_NAME=MONGODB`, le script applique le profil **`mongodb`** et cible `mongodb` + `api`.
+   - Si `DATABASE_NAME=POSTGRESQL`, le script applique le profil **`pg`** et enchaîne **`postgres`**, **`pgweb`** et **`api`** selon la commande (`api-restart` ne relance que **`postgres`** + **`api`** — voir `start.sh`).
+   - Sinon (`IN-MEMORY`, `FIREBASE`, …), seules les opérations sur **`api`** sont concernées (pas de conteneur de base du compose).
    - Après `./docker/start.sh` (`up`), le script suit directement les logs API en live dans le terminal (`logs -f api`).
      - Quitter l’affichage live : `Ctrl+C` (les conteneurs continuent de tourner).
-     - Désactiver ce comportement : `QUIZZAM_FOLLOW_API_LOGS=0 ./docker/start.sh`.
+     - Désactiver ce comportement : `API_FOLLOW_LOGS=0 ./docker/start.sh`.
 
    **Mode watch (dev inside container, sans rebuild à chaque changement) :**
    - `./docker/start.sh watch-up` (alias `dev-up`) : démarre `api-watch` avec bind mount du code (dépôt -> `/usr/src/app`) et watcher Nest/Nx dans le conteneur.
    - Les `node_modules` du conteneur sont dans un **volume Docker** (séparés de l’hôte) : au **démarrage**, un `pnpm install` est lancé pour se caler sur le `package.json` / `pnpm-lock.yaml` montés depuis l’hôte. Le dépôt inclut **`.npmrc`** (`confirm-modules-purge=false`) pour éviter le prompt interactif de pnpm sans TTY (sinon l’install peut s’arrêter avant d’avoir écrit les paquets). Après un changement de dépendance sur l’hôte, **commite le lockfile**, puis **redémarre** le watch — inutile de supprimer le volume à chaque fois.
    - Si le volume de deps semble corrompu : `watch-stop` puis `docker volume rm web-api-dev_web_api_node_modules` (ou le nom listé par `docker volume ls | grep web-api`), puis `watch-up`.
    - Les modifications de code sur l’hôte sont prises en compte automatiquement dans le conteneur (hot reload).
-   - `./docker/start.sh watch-stop` (alias `dev-stop`) : stoppe le mode watch.
+   - `./docker/start.sh watch-stop` (alias `dev-stop`) : stoppe le mode watch (et Mongo ou Postgres + pgweb si le profil correspondant est actif dans le script, comme pour `watch-up`).
    - Le service `api-watch` tourne d’abord en **root** le temps du `pnpm install` (le volume `node_modules` appartient à root par défaut) puis **Nx** en utilisateur **`node`**. TTY : `docker exec -it web-api-watch sh` (root) ou `docker exec -it -u node web-api-watch sh` pour un shell en `node`.
    - En mode watch, les logs `api-watch` sont suivis en live à la fin de la commande.
 
    **Import utilisateurs de démo (Mongo) :**
-   - `./docker/start.sh dump-users` : importe `docker/dump/user.json` dans `quizapp.users` avec `--jsonArray --drop` (écrase la collection avant import).
+   - `./docker/start.sh dump-users` : importe `docker/dump/user.json` dans `bugbountyapp.users` avec `--jsonArray --drop` (écrase la collection avant import).
    - Identifiants de démo à utiliser dans l'écran de connexion :
      - **email** : `demo-user@example.local`
      - **mot de passe** : `password123`
@@ -134,15 +147,21 @@ Nous utilisons les profiles dans compose pour réaliser cette séparation.
    ```
    - Copie la sortie dans le champ `passwordHash` de `docker/dump/user.json` (le hash change à chaque exécution car le sel est aléatoire).
 
-   Le script lit `.env` et n’ajoute `--profile mongodb` que lorsque `DATABASE_NAME=MONGODB` (y compris pour `down`, pour cibler les bons services).
+   Le script lit **`server/.env`** et n’ajoute **`--profile mongodb`** ou **`--profile pg`** que lorsque `DATABASE_NAME` vaut **`MONGODB`** ou **`POSTGRESQL`** (y compris pour `down`, pour arrêter les bons services).
 
-   **Sans** le script (mode Mongo) :
+   **Sans** le script — **Mongo** :
 
    ```sh
    docker compose -f docker/compose.dev.yaml --profile mongodb up --build -d
    ```
 
-   **Sans** Mongo (ex. Firebase / en mémoire) :
+   **Sans** le script — **Postgres** :
+
+   ```sh
+   docker compose -f docker/compose.dev.yaml --profile pg up --build -d
+   ```
+
+   **Sans** base Docker Compose (ex. Firebase / en mémoire) :
 
    ```sh
    docker compose -f docker/compose.dev.yaml up --build -d
@@ -152,16 +171,20 @@ Nous utilisons les profiles dans compose pour réaliser cette séparation.
 
    | Service            | URL |
    | ------------------ | --- |
-   | API (préfixe REST) | `http://localhost:3003/api` (port hôte par défaut ; surcharge avec `API_HOST_PORT`) |
+   | API (préfixe REST) | `http://localhost:3003/api` (port hôte par défaut **3003** ; surcharge avec **`API_HOST_PORT`** dans `server/.env`, utilisé par `compose.dev.yaml`) |
    | OpenAPI (Swagger UI) | `http://localhost:3003/api/docs` (même port hôte) |
    | mongo-express      | uniquement si `DATABASE_NAME=MONGODB` — `http://localhost:8086` |
-   | MongoDB (depuis l’hôte) | uniquement si `DATABASE_NAME=MONGODB` — `mongodb://localhost:27017` / base `quizapp` |
+   | pgweb              | uniquement si `DATABASE_NAME=POSTGRESQL` — `http://localhost:8087` (surcharge possible avec **`PGWEB_HOST_PORT`**) |
+   | MongoDB (depuis l’hôte) | uniquement si `DATABASE_NAME=MONGODB` — `mongodb://localhost:27017` / base `bugbountyapp` |
+   | PostgreSQL (depuis l’hôte) | uniquement si `DATABASE_NAME=POSTGRESQL` — `localhost:5432` (surcharge avec **`POSTGRES_HOST_PORT`**) |
 
    **mongo-express :** l’UI ne demande pas de mot de passe en dev (`ME_CONFIG_BASICAUTH=false` dans `compose.dev.yaml`). Sans cette option, l’image utilise souvent l’ancien couple **admin** / **pass** pour l’auth HTTP de l’interface — à éviter hors machine locale.
 
-En mode profil Mongo, vérifie que les ports **27017**, **3003** (ou `API_HOST_PORT`) et **8086** sont libres.
+En mode profil **Mongo**, vérifie que les ports **27017**, **3003** (ou **`API_HOST_PORT`**) et **8086** sont libres. En mode profil **Postgres**, vérifie **5432** (ou **`POSTGRES_HOST_PORT`**), **8087** (ou **`PGWEB_HOST_PORT`**) et le port API.
 
 **Journaux (mode Mongo) :** `cd docker && docker compose -f compose.dev.yaml --profile mongodb logs -f`
+
+**Journaux (mode Postgres) :** `cd docker && docker compose -f compose.dev.yaml --profile pg logs -f`
 
 **Journaux (API seule) :** `cd docker && docker compose -f compose.dev.yaml logs -f`
 
@@ -179,16 +202,12 @@ En mode profil Mongo, vérifie que les ports **27017**, **3003** (ou `API_HOST_P
    pnpm install
    ```
 
-2. Configure `.env` :
-
-   ```sh
-   cp .env.example .env
-   ```
+2. Configure **`server/.env`** (voir **[Installation](#installation)** si le fichier n’existe pas encore).
 
    Garde le **`DATABASE_URL`** par défaut avec **`localhost`** (la ligne `mongodb://mongodb…` reste **commentée** : elle sert uniquement à l’API **dans** Docker). Pointe vers ton instance Mongo, typiquement :
 
    ```env
-   DATABASE_URL=mongodb://localhost:27017/quizapp
+   DATABASE_URL=mongodb://localhost:27017/bugbountyapp
    ```
 
    Renseigne `JWT_SECRET`, `PORT`, `CORS_ORIGIN`, etc. selon tes besoins.
