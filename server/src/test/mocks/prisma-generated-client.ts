@@ -1,3 +1,4 @@
+/// <reference types="jest" />
 /**
  * Test double for {@link server/src/generated/prisma/client} — the generated bundle uses ESM
  * (`import.meta`) which Jest + ts-jest (CommonJS) cannot execute. Runtime uses the real generated client.
