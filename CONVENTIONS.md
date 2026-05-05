@@ -1,5 +1,20 @@
 # Conventions — branches et commits (BountyHack)
 
+## Sommaire (ultra-rapide)
+
+- [TL;DR — Merge Policy](#tldr--merge-policy) — Quand utiliser `--no-ff` en 4 lignes.
+- [Branches (rôles, sommairement)](#branches-rôles-sommairement) — Quelle branche pour quel type de travail.
+- [Merges — `git merge` vs `git merge --no-ff`](#merges--git-merge-vs-git-merge---no-ff) — Règle d’équipe + cas d’usage.
+- [Commits — Conventional Commits](#commits--conventional-commits) — Format standard des messages.
+- [Scope dans ce dépôt](#scope-dans-ce-dépôt) — Choisir `(client)`, `(server)` ou `(app)` correctement.
+
+## TL;DR — Merge Policy
+
+- **`--no-ff`** pour les merges de **features / lots significatifs** via PR.
+- **Merge classique** possible pour les **petits changements** (docs/chore/fix mineur).
+- Utiliser `--no-ff` quand on veut une **traçabilité claire** et un **revert par bloc**.
+- Rester pragmatique : historique lisible > règle rigide.
+
 Ce document décrit le **nommage des branches** et les **Conventional Commits** pour ce monorepo. Le dépôt partage une historique commune (`main`, branches `release/*`, `develop` / `srv/dev`, etc.), avec des livrables indépendants en production.
 
 ## Pas de commit direct sur `main` ni sur `develop`
@@ -62,6 +77,29 @@ Les worktrees ne remplacent pas les règles ci‑dessus (PR, scopes, rebase) : i
 | **`chore/…`**, **`docs/…`** | Maintenance (deps, CI), documentation seule. |
 
 Les noms utilisent le **kebab-case** ; le détail du changement vit dans les commits et la PR.
+
+## Merges — `git merge` vs `git merge --no-ff`
+
+Référence : [Difference Between Git Merge and Git Merge --no-ff](https://hackr.io/blog/difference-between-git-merge-and-git-merge-no-ff)
+
+### Règle d’équipe
+
+Nous utilisons **`--no-ff` dans certains merges**, pas systématiquement.  
+Objectif : garder un historique lisible quand une branche représente un vrai lot de travail, sans alourdir inutilement le graphe Git.
+
+### Quand utiliser `--no-ff`
+
+- Merge d’une **feature branch** ou d’un **lot métier significatif** via PR.
+- Quand on veut **préserver explicitement le contexte** de la branche (discussion PR, commits associés).
+- Quand on veut pouvoir **revert d’un bloc** (un commit de merge unique) si besoin.
+
+### Quand éviter `--no-ff` (merge classique possible)
+
+- Petits correctifs isolés, changements triviaux, docs/chore mineurs.
+- Branches très courtes avec 1 commit clair, sans enjeu de traçabilité particulier.
+- Merges techniques de synchronisation où un historique linéaire est préférable.
+
+En pratique : **préférer `--no-ff` pour les merges structurants**, et rester pragmatique sur les petits changements.
 
 ## Commits — [Conventional Commits](https://www.conventionalcommits.org/)
 
