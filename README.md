@@ -19,7 +19,7 @@ Documentation détaillée :
 
 ## Installation
 
-- **Backend (NestJS)** : section **Installation** dans [`server/README.md`](server/README.md)
+- **Backend (NestJS)** : section **Installation** dans [`server/README.md`](server/README.md) — persistance **Postgres + Prisma** : section **Démarrage** → **PostgreSQL et Prisma** (Docker watch vs local).
 - **Frontend (Next.js)** : section **Installation** dans [`client/README.md`](client/README.md)
 
 Si tu développes sous **Windows**, pour lancer l’API avec les scripts bash (depuis **`server/`** : `./docker/start.sh`), privilégie **WSL2 + Docker Desktop** (intégration WSL activée) et suis ce guide : évite les incohérences avec PowerShell pur et les chemins sous **`C:\`** seuls pour le mode watch Docker.
