@@ -5,8 +5,8 @@
     "experience": "Expériences",
     "education": "Formation",
     "previousExperience": "Références professionnelles",
-    "placeholderFullName": "Amaury Franssen",
-    "placeholderJobTitle": "Développeur web",
+    "placeholderFullName": "John Doe",
+    "placeholderJobTitle": "Ingénieur logiciel",
     "portfolioFallback": "Portfolio",
     "skillGroupFallback": "Compétences",
     "roleFallback": "Poste",
@@ -18,151 +18,151 @@
     "bulletStyle": "dot",
     "bulletsColor": "#C41E3A",
     "basics": {
-      "name": "Amaury Franssen",
-      "headline": "DEVELOPPEUR WEB",
-      "phone": "0612972808",
-      "email": "a_franssen@hetic.eu",
-      "photoFileName": "amaury.png",
-      "summary": "À la suite d'un parcours dans le secteur du droit et de la gestion d'entreprise, je décide avec passion de devenir développeur web."
+      "name": "John Doe",
+      "headline": "INGENIEUR LOGICIEL",
+      "phone": "0601020304",
+      "email": "john.doe@example.com",
+      "photoFileName": "john-doe.png",
+      "summary": "Ingénieur logiciel autodidacte, je conçois des applications web fiables et performantes. Après des expériences variées, je me suis spécialisé dans le développement back-end et l’intégration front-end, avec une attention particulière à la qualité du code, aux tests et à l’accessibilité."
     },
     "location": {
-      "city": "",
-      "region": "",
-      "country": ""
+      "city": "Lyon",
+      "region": "Auvergne-Rhône-Alpes",
+      "country": "France"
     },
     "contactRows": [
-      { "icon": "mail", "text": "a_franssen@hetic.eu" },
-      { "icon": "phone", "text": "0612972808" },
-      { "icon": "map", "text": "72, rue Claude Erignac, 93100 Montreuil" }
+      { "icon": "mail", "text": "john.doe@example.com" },
+      { "icon": "phone", "text": "0601020304" },
+      { "icon": "map", "text": "15, avenue des Tilleuls, 69000 Lyon" }
     ],
     "profileLinks": [
-      { "label": "Portfolio", "url": "https://amaury-franssen-dev.com" },
-      { "label": "LinkedIn", "url": "https://www.linkedin.com" }
+      { "label": "Portfolio", "url": "https://john-doe.dev" },
+      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/johndoe" }
     ],
     "githubFooter": {
-      "text": "Je suis sur github : ExploryKod.",
-      "url": "https://github.com/ExploryKod"
+      "text": "Je suis sur github : JohnDoe.",
+      "url": "https://github.com/johndoe"
     },
     "projects": [
       {
-        "title": "Site de dessin collaboratif de type « paint ».",
+        "title": "Mini-CRM collaboratif",
         "lines": [
-          { "lead": "Back-end", "body": "PHP/MySql, Laravel, Websockets." },
-          { "lead": "Front-end", "body": "HTML/SCSS et JavaScript/TypeScript." }
+          { "lead": "Back-end", "body": "Node.js, NestJS, PostgreSQL, REST & WebSockets." },
+          { "lead": "Front-end", "body": "React, TypeScript, Material UI, accessibilité." }
         ]
       },
       {
-        "title": "Système de gestion des données clients.",
+        "title": "Portail de gestion de paiements",
         "lines": [
-          { "lead": "Langages", "body": "PHP, SQL, JavaScript (AJAX), HTML/CSS." },
-          { "lead": "design pattern utilisé", "body": "Model View Controller (MVC)." }
+          { "lead": "Langages", "body": "TypeScript, SQL, JavaScript, HTML/CSS." },
+          { "lead": "design pattern utilisé", "body": "Architecture en couches inspirée MVC." }
         ]
       },
       {
-        "title": "Foodcare : site d'information sur l'alimentation saine.",
+        "title": "FoodAtlas : guide de recettes",
         "lines": [
-          { "lead": "Langages", "body": "HTML/SCSS, JavaScript avec la librairie React.js." },
-          { "lead": "Outils", "body": "API Context, React Router, composants fonctionnels." }
+          { "lead": "Langages", "body": "JavaScript avec React, HTML/CSS, optimisation performance." },
+          { "lead": "Outils", "body": "Fetch API, React Router, composants fonctionnels." }
         ]
       },
       {
-        "title": "Jeu de type « mastermind ».",
+        "title": "Jeu Memory Lab",
         "lines": [
-          { "lead": "Langages", "body": "HTML/CSS/JavaScript." }
+          { "lead": "Langages", "body": "HTML/CSS/JavaScript (Canvas & logique de score)." }
         ]
       }
     ],
     "profiles": [
       {
         "network": "Portfolio",
-        "url": "https://amaury-franssen-dev.com",
+        "url": "https://john-doe.dev",
         "username": ""
       }
     ],
     "work": [
       {
-        "name": "ONEPOINT",
+        "name": "Acme Labs",
         "section": "experience",
         "order": 1,
-        "position": "Hackathon sur le numérique responsable.",
+        "position": "Développeur back-end – CDI",
         "link": "",
-        "periodLabel": "31/03 – 01/04 2022",
+        "periodLabel": "Mars 2023 à aujourd'hui",
         "startDate": "",
         "endDate": "",
         "summary": {
-          "intro": "Troisième prix du projet le plus responsable.",
+          "intro": "Conception d’API et automatisations CI pour livrer des fonctionnalités plus vite, tout en réduisant les bugs grâce aux tests.",
           "list": []
         }
       },
       {
-        "name": "MONDIAL RELAY",
+        "name": "Globex Solutions",
         "section": "experience",
         "order": 2,
         "link": "",
-        "position": "Conseiller client à distance – CDD",
-        "periodLabel": "décembre 2020 à août 2021",
+        "position": "Développeur fullstack – CDD",
+        "periodLabel": "Juin 2021 à Février 2023",
         "startDate": "",
         "endDate": "",
         "summary": {
-          "intro": "Gestion des demandes clients multicanal et suivi des relais.",
+          "intro": "Développement d’interfaces riches et intégration de services, avec un focus sur la qualité, la sécurité et la performance.",
           "list": []
         }
       },
       {
-        "name": "EFFISAC",
+        "name": "Initech",
         "section": "experience",
         "order": 3,
-        "position": "Adjoint de direction – CDI",
-        "periodLabel": "octobre 2016 à mars 2019",
+        "position": "Développeur web – Stage",
+        "periodLabel": "Septembre 2020 à Mai 2021",
         "startDate": "",
         "endDate": "",
         "summary": {
-          "intro": "Polyvalence en qualité de bras droit du directeur général.",
+          "intro": "Refonte de pages, amélioration des composants UI et mise en place de petites automatisations.",
           "list": []
         }
       }
     ],
     "education": [
       {
-        "institution": "école HETIC",
+        "institution": "École Exemple",
         "link": "",
-        "degreeName": "Bachelor développeur web",
+        "degreeName": "Bachelor Développeur logiciel",
         "area": "",
-        "periodLabel": "2021 – 2022",
+        "periodLabel": "2021 – 2023",
         "startDate": "",
         "endDate": "",
         "summary": {
-          "intro": "",
+          "intro": "Formation centrée sur le développement et la conception.",
           "list": [
-            "Développement Front et Back",
+            "Conception Front et Back",
             "UI/UX Design",
-            "Gestion de projet agile"
+            "Gestion de projet agile avec Git"
           ]
         }
       },
       {
-        "institution": "Université de Poitiers",
+        "institution": "Université Fictive",
         "link": "",
-        "degreeName": "Master Droit et Développement de l’ESS",
+        "degreeName": "Master Ingénierie logicielle",
         "area": "",
-        "periodLabel": "2015 – 2016",
+        "periodLabel": "2019 – 2021",
         "startDate": "",
         "endDate": "",
         "summary": {
-          "intro": "Formation en gestion de projet dans le cadre de l’ESS.",
+          "intro": "Approche système et architecture (qualité, sécurité et maintenabilité).",
           "list": []
         }
       },
       {
-        "institution": "Toulouse School of Management",
+        "institution": "Institut Démo",
         "link": "",
-        "degreeName": "Maîtrise Droit et Gestion d’entreprise",
+        "degreeName": "Licence Informatique",
         "area": "",
-        "periodLabel": "2014 – 2015",
+        "periodLabel": "2016 – 2018",
         "startDate": "",
         "endDate": "",
         "summary": {
-          "intro": "Formation alliant gestion d’entreprise et droit des affaires.",
+          "intro": "Fondamentaux en programmation, données et réseaux.",
           "list": []
         }
       }
@@ -172,8 +172,8 @@
         "language": "Anglais",
         "fluency": "compétence professionnelle",
         "keywords": [
-          "1 an vécu en Inde (2008 – 2009)",
-          "IELTS : 6,5 (2009), BULATS : C2 (2015)"
+          "Vécu 1 an au Canada (2018 – 2019)",
+          "TOEIC : 940 (2020)"
         ]
       }
     ],
@@ -181,33 +181,33 @@
       {
         "name": "Front end",
         "skills": [
-          "HTML/CSS/Sass (CSS grid et Flexbox), JavaScript (AJAX, DOM), TypeScript, librairie React.js (usage des hooks)."
+          "HTML/CSS/Sass, JavaScript (DOM), TypeScript, React (hooks) et accessibilité."
         ]
       },
       {
         "name": "Back end",
         "skills": [
-          "PHP, Python, bases de données : SQL / MySQL / Firebase."
+          "Node.js, Python, bases de données : PostgreSQL / MongoDB / Redis."
         ]
       },
       {
         "name": "Outils et méthode de collaboration",
         "skills": [
-          "Versioning : git et GitHub, Git Flow, méthodes agiles.",
-          "Interaction avec le système : shell (bash).",
-          "Logiciels : Trello, Slack, GanttProject."
+          "Versioning : git et GitHub, CI avec workflows, méthodes agiles.",
+          "Interaction avec le système : shell (bash) et scripts automatisés.",
+          "Logiciels : Jira, Notion, Trello."
         ]
       },
       {
         "name": "UI design",
         "skills": [
-          "Refonte de sites web, logiciels : suite Adobe, Figma."
+          "Refonte de composants, wireframes et prototypes sur Figma."
         ]
       },
       {
         "name": "Intérêts",
         "skills": [
-          "Clean code, performance, design pattern MVC, API REST, code écologique."
+          "Clean code, performance, API REST, architecture, tests et sécurité."
         ]
       }
     ],
@@ -215,9 +215,9 @@
       {
         "name": "Activités et loisirs",
         "keywords": [
-          "Bénévolat de compétence en droit",
+          "Bénévolat de compétence en informatique",
           "Improvisation théâtrale",
-          "Sports : arts martiaux et footing"
+          "Sports : escalade et course"
         ]
       }
     ]
