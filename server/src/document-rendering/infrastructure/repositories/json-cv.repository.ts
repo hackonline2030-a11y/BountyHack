@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { constants } from 'fs';
 import { access, readdir, readFile } from 'fs/promises';
 import * as path from 'path';
-import { variables } from '../../../shared/variables.config';
 import { ICvRepository } from '../../application/ports/cv-repository.port';
 import {
   CvContactRow,
@@ -372,7 +371,8 @@ export class JsonCvRepositoryAdapter implements ICvRepository {
     'data',
   );
 
-  private readonly templateAssetsBaseUrl = `http://localhost:${variables.port}/template-assets`;
+  /** Root-relative paths — resolve against the browser origin (e.g. host port 3003) instead of in-container PORT. */
+  private readonly templateAssetsBasePath = '/template-assets';
 
   private async listStyleDirectoryNames(): Promise<string[]> {
     let rootEntries;
@@ -681,14 +681,14 @@ export class JsonCvRepositoryAdapter implements ICvRepository {
       htmlLang: localeCode,
       labels,
       templateName,
-      templateStylesheetUrl: `${this.templateAssetsBaseUrl}/${templateName}/styles/styles.css`,
+      templateStylesheetUrl: `${this.templateAssetsBasePath}/${templateName}/styles/styles.css`,
       bullets: content.bullets !== false,
       bulletStyle: normalizeBulletStyle(content.bulletStyle, content.bullets),
       bulletsColor: normalizeBulletsColor(content.bulletsColor),
       fullName: basics.name || labels.placeholderFullName,
       jobTitle: basics.headline || labels.placeholderJobTitle,
       summary: basics.summary || '',
-      profileImage: `${this.templateAssetsBaseUrl}/${templateName}/assets/${photoFileName}`,
+      profileImage: `${this.templateAssetsBasePath}/${templateName}/assets/${photoFileName}`,
       headings,
       profileLinks,
       contactRows: contactRowsResolved,
