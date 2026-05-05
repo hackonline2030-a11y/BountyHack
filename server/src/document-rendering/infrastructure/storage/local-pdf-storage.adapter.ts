@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { mkdir, writeFile } from 'fs/promises';
 import * as path from 'path';
-import { variables } from '../../../shared/variables.config';
 import {
   IPdfStorage,
   SavePdfResult,
@@ -21,7 +20,7 @@ export class LocalPdfStorageAdapter implements IPdfStorage {
 
     return {
       fileName,
-      publicUrl: `http://localhost:${variables.port}/pdfs/${fileName}`,
+      publicUrl: `/pdfs/${fileName}`,
     };
   }
 }

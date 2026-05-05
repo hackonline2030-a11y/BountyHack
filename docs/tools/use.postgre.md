@@ -29,5 +29,5 @@ Dans ce cas, changer uniquement la ligne **`image:`** du service **`postgres`** 
 
 ## Où lancer Postgres dans ce projet
 
-- Profil Compose **`pg`** (`DATABASE_NAME=POSTGRESQL` avec `start.sh`, ou `--profile pg` à la main).
+- Profil Compose **`pg`** (`DATABASE_NAME=POSTGRESQL` ou **`POSTGRESQL_PRISMA`** avec `start.sh`, ou `--profile pg` à la main).
 - Commandes détaillées, ports, variables : **`server/docker/README.md`** (sections profils et PostgreSQL).

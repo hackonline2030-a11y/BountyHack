@@ -114,8 +114,7 @@ export class PdfController {
       properties: {
         url: {
           type: 'string',
-          example:
-            'http://localhost:3000/pdfs/report-1714291500000.pdf',
+          example: '/pdfs/report-1714291500000.pdf',
         },
       },
       required: ['url'],

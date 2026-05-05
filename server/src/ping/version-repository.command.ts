@@ -1,4 +1,4 @@
-import { IPingRepository, I_PING_REPOSITORY, I_PING_STATUS, IPingStatus } from './ping-repository.interface';
+import { IPingRepository, I_PING_REPOSITORY } from './ping-repository.interface';
 import { Executable } from '../shared/executable';
 import { Inject } from '@nestjs/common';
 import { PingResult } from './ping.entity';
@@ -14,7 +14,8 @@ export class GetVersionCommand implements Executable<Request, Response> {
   async execute(): Promise<Response> {
      const databaseStatus = await this.repository.getDatabaseStatus();
      const databaseVersion = await this.repository.getDatabaseVersion();
-     const apiStatus = databaseStatus ? "OK" : "Partial"
+     const apiStatus =
+       databaseStatus.status === 'OK' ? 'OK' : 'Partial';
 
     return {
       status: apiStatus,

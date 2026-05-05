@@ -25,6 +25,7 @@ MONGO_URI_DOCKER="mongodb://mongodb:27017"
 POSTGRES_SERVICE="web-api-postgres"
 PGWEB_DEFAULT_PORT="8087"
 USERS_DUMP_FILE="${PROJECT_DIR}/dump/user.json"
+USERS_PG_DUMP_FILE="${PROJECT_DIR}/dump/users_postgres.sql"
 API_PORT="${API_HOST_PORT:-3003}"
 API_LOGS_UP_COMMAND="docker compose -f compose.dev.yaml logs -f"
 FOLLOW_API_LOGS="${API_FOLLOW_LOGS:-1}"
@@ -190,6 +191,48 @@ case "$ACTION" in
     ok "Users dump imported successfully into bugbountyapp.users."
     exit 0
     ;;
+  dump-users-pg)
+    shift || true
+    if [[ "$USE_POSTGRES" != true ]]; then
+      error "DATABASE_NAME must be POSTGRESQL or POSTGRESQL_PRISMA for dump-users-pg."
+      exit 1
+    fi
+    if [[ ! -f "$USERS_PG_DUMP_FILE" ]]; then
+      error "Dump SQL not found: $USERS_PG_DUMP_FILE"
+      exit 1
+    fi
+
+    info "Ensuring PostgreSQL container is running…"
+    if ! "${compose[@]}" -f "$COMPOSE_BASE" "${PROFILE_ARGS[@]}" up -d postgres; then
+      error "Unable to start postgres service"
+      exit 1
+    fi
+
+    info "Waiting for Postgres to be ready…"
+    n=0
+    until docker exec "$POSTGRES_SERVICE" pg_isready >/dev/null 2>&1; do
+      n=$((n + 1))
+      if [[ "$n" -gt 60 ]]; then
+        error "Postgres did not become ready in time."
+        exit 1
+      fi
+      sleep 1
+    done
+
+    pu=$(docker exec "$POSTGRES_SERVICE" printenv POSTGRES_USER 2>/dev/null | tr -d '\r')
+    pd=$(docker exec "$POSTGRES_SERVICE" printenv POSTGRES_DB 2>/dev/null | tr -d '\r')
+    [[ -z "$pu" ]] && pu=bugbountyapp
+    [[ -z "$pd" ]] && pd=bugbountyapp
+
+    info "Importing users seed SQL into Postgres (idempotent upsert)…"
+    if ! docker exec -i "$POSTGRES_SERVICE" psql -U "$pu" -d "$pd" -v ON_ERROR_STOP=1 < "$USERS_PG_DUMP_FILE"; then
+      error "psql import failed (table users missing? Run: cd server && pnpm prisma:migrate:deploy)"
+      exit 1
+    fi
+
+    ok "Users seed applied — check pgweb (users) or: docker exec -it $POSTGRES_SERVICE psql -U ... -d ... -c 'SELECT * FROM users;'"
+    exit 0
+    ;;
   api-stop|stop-api)
     shift || true
     info "Stopping API only (and DB dependency when enabled)…"
@@ -270,7 +313,7 @@ case "$ACTION" in
     exit 0
     ;;
   -h|--help|help)
-    echo "Usage: $0 [up|stop|down|api-restart|api-stop|logs|watch-up|watch-stop|dump-users] [options]"
+    echo "Usage: $0 [up|stop|down|api-restart|api-stop|logs|watch-up|watch-stop|dump-users|dump-users-pg] [options]"
     echo ""
     echo "  up (default)   Démarre la stack (build si besoin)."
     echo "  stop             Stoppe tous les conteneurs de la stack (up + watch-up), sans supprimer réseau/volumes."
@@ -281,7 +324,8 @@ case "$ACTION" in
     echo "  logs             Suit les logs API uniquement."
     echo "  watch-up         Démarre API en mode watch (bind mount + hot reload dans le conteneur)."
     echo "  watch-stop       Stoppe API watch (et MongoDB / Postgres selon DATABASE_NAME)."
-    echo "  dump-users       Importe docker/dump/user.json dans bugbountyapp.users (--drop --jsonArray)."
+    echo "  dump-users       Importe docker/dump/user.json dans MongoDB (MONGODB uniquement)."
+    echo "  dump-users-pg    Importe docker/dump/users_postgres.sql (POSTGRESQL / POSTGRESQL_PRISMA) — table users requise."
     echo ""
     echo "Depuis le dossier docker/ (ou en passant le chemin) : ./start.sh   ou   ./start"
     exit 0
@@ -290,7 +334,7 @@ case "$ACTION" in
     [[ -n "${1:-}" ]] && shift
     ;;
   *)
-    error "Commande inconnue : $ACTION — utilisation : $0 [up|stop|down|dump-users] (ou $0 --help)"
+    error "Commande inconnue : $ACTION — utilisation : $0 [up|stop|down|dump-users|dump-users-pg] (ou $0 --help)"
     exit 1
     ;;
 esac
@@ -317,7 +361,7 @@ if [[ "$USE_MONGO" == true ]]; then
     fi
   fi
 elif [[ "$USE_POSTGRES" == true ]]; then
-  info "DATABASE_NAME=POSTGRESQL → PostgreSQL + pgweb (l’API n’a pas encore de couche métier Postgres — volume préparatoire)."
+  info "DATABASE_NAME=POSTGRESQL / POSTGRESQL_PRISMA → PostgreSQL + pgweb."
   if [[ -f "${PROJECT_DIR}/../.env" ]]; then
     db_url_line=$(grep -E '^[[:space:]]*DATABASE_URL=' "${PROJECT_DIR}/../.env" | head -1 || true)
     if [[ "$db_url_line" == *localhost* ]] && [[ "$db_url_line" == *postgres* || "$db_url_line" == *postgresql* ]]; then
@@ -403,6 +447,9 @@ if [[ "$USE_POSTGRES" == true ]]; then
 
   ok "PostgreSQL is ready"
 
+  PGWEB_SLUG_PORT="${PGWEB_HOST_PORT:-${PGWEB_DEFAULT_PORT}}"
+  info "pgweb — ouvre http://localhost:${PGWEB_SLUG_PORT}/ (slug / ; conteneur web-api-pgweb, PGWEB_HOST_PORT dans .env)"
+
   echo ""
   info "Recent PostgreSQL logs:"
   docker logs "$POSTGRES_SERVICE" --tail 10
@@ -428,9 +475,11 @@ if [[ "$USE_MONGO" == true ]]; then
   echo "🧭 Mongo Express:  http://localhost:${MONGO_EXPRESS_PORT}"
 fi
 if [[ "$USE_POSTGRES" == true ]]; then
+  PGWEB_SLUG_PORT="${PGWEB_HOST_PORT:-${PGWEB_DEFAULT_PORT}}"
   echo "📡 PostgreSQL — depuis l’hôte : port ${POSTGRES_HOST_PORT:-5432} (utilisateur / mot / base = POSTGRES_* dans .env, défauts bugbountyapp)."
   echo "📡 Depuis le conteneur « api » : hôte « postgres », port 5432 (adapter DATABASE_URL en conséquence)."
-  echo "🧭 pgweb :        http://localhost:${PGWEB_HOST_PORT:-${PGWEB_DEFAULT_PORT}}"
+  echo "🧭 pgweb (UI SQL) : http://localhost:${PGWEB_SLUG_PORT}/"
+  echo "   └─ slug d’accès : / (racine) — conteneur web-api-pgweb — port hôte : ${PGWEB_SLUG_PORT} (surcharge .env : PGWEB_HOST_PORT)"
 fi
 echo "🚀 API (Docker):   http://localhost:${API_PORT}/api"
 echo ""
