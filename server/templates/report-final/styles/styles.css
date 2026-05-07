@@ -31,9 +31,42 @@ body {
 }
 
 .report-page {
-  max-width: 920px;
-  margin: 0 auto;
-  padding: 24px 20px 40px;
+  max-width: none;
+  margin: 0;
+  padding: 12px 0 24px;
+}
+
+.page-frame {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto 12px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.cover-page {
+  padding: 38mm 24mm 20mm;
+}
+
+.cover-title {
+  margin: 0;
+  text-align: center;
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #111827;
+}
+
+.cover-author {
+  margin: 28px 0 80px;
+  text-align: center;
+  font-size: 34px;
+  color: #111827;
+}
+
+.cover-toc-list {
+  margin: 0;
+  padding: 0;
 }
 
 .report-header {
@@ -63,10 +96,11 @@ body {
 
 .card {
   background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 18px;
-  margin-bottom: 14px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 28mm 18mm 22mm;
+  margin-bottom: 12px;
 }
 
 h2 {
@@ -115,14 +149,30 @@ li {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  border-bottom: 1px dotted #c7ccd5;
-  padding: 6px 0;
+  padding: 4px 0;
   gap: 10px;
 }
 
+.toc-label {
+  white-space: nowrap;
+}
+
+.toc-dots {
+  flex: 1;
+  border-bottom: 2px dotted #4b5563;
+  transform: translateY(-4px);
+}
+
 .toc-page {
-  font-weight: 600;
-  color: var(--muted);
+  min-width: 22px;
+  text-align: right;
+  font-weight: 500;
+  color: #111827;
+}
+
+.toc-line--main .toc-label,
+.toc-line--main .toc-page {
+  font-weight: 700;
 }
 
 .page-hint {
@@ -370,6 +420,27 @@ li {
   .report-page {
     max-width: 100%;
     padding: 0;
+  }
+
+  .page-frame {
+    width: 100%;
+    min-height: auto;
+    margin: 0;
+  }
+
+  .cover-page {
+    min-height: 297mm;
+    padding: 38mm 24mm 20mm;
+  }
+
+  .section-card {
+    min-height: auto;
+    padding: 22mm 18mm 18mm;
+  }
+
+  .section-card--page-break {
+    break-before: page;
+    page-break-before: always;
   }
 
   .card {
