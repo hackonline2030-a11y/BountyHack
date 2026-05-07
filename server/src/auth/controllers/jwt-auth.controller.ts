@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Inject } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   ApiHttpConflict,
@@ -6,7 +6,8 @@ import {
   ApiHttpUnauthorized,
 } from '../../core/dto/api-http-responses';
 import { ApiValidationBadRequest } from '../../core/dto/http-validation-error.dto';
-import { JwtCredentialsService } from '../application/jwt-credentials.service';
+import { AuthRepository } from '../ports/auth.repository';
+import { RegisterDto, LoginDto } from '../dto/auth-common.dto';
 import {
   JwtAuthResponseDto,
   JwtLoginRequestDto,
@@ -16,7 +17,9 @@ import {
 @ApiTags('auth')
 @Controller('auth')
 export class JwtAuthController {
-  constructor(private readonly jwtCredentials: JwtCredentialsService) {}
+  constructor(
+    @Inject(AuthRepository) private readonly authRepository: AuthRepository,
+  ) {}
 
   @Post('register')
   @ApiOperation({
@@ -29,11 +32,17 @@ export class JwtAuthController {
   @ApiHttpUnauthorized('Missing or invalid credentials payload.')
   @ApiHttpConflict('Email already registered.')
   @ApiHttpInternalServerError('JWT auth is unavailable for current backend mode.')
-  register(
+  async register(
     @Body()
     body: JwtRegisterRequestDto
   ) {
-    return this.jwtCredentials.register(body);
+    const registerDto: RegisterDto = {
+      email: body.email,
+      username: body.username,
+      password: body.password,
+    };
+
+    return this.authRepository.register(registerDto);
   }
 
   @Post('login')
@@ -46,10 +55,15 @@ export class JwtAuthController {
   @ApiValidationBadRequest('Request body does not pass validation (email, password).')
   @ApiHttpUnauthorized('Invalid credentials.')
   @ApiHttpInternalServerError('JWT auth is unavailable for current backend mode.')
-  login(
+  async login(
     @Body()
     body: JwtLoginRequestDto
   ) {
-    return this.jwtCredentials.login(body);
+    const loginDto: LoginDto = {
+      email: body.email,
+      password: body.password,
+    };
+
+    return this.authRepository.login(loginDto);
   }
 }
