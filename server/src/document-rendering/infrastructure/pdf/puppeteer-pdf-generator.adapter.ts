@@ -8,6 +8,18 @@ import { PdfGenerationFailedError } from '../../application/errors/pdf-applicati
 const A4_WIDTH_MM = '210mm';
 const A4_HEIGHT_MM = '297mm';
 
+/**
+ * Local dev switch:
+ * - true  => use Puppeteer-managed Chromium and do NOT force Docker/system executablePath.
+ * - false => keep Docker/CI behavior by using CHROMIUM_PATH or PUPPETEER_EXECUTABLE_PATH.
+ */
+function isPuppeteerWithChromiumEnabled(): boolean {
+  const flag =
+    process.env.IS_PUPETTEER_WITH_CHROMIUM ??
+    process.env.IS_PUPPETEER_WITH_CHROMIUM;
+  return flag?.trim().toLowerCase() === 'true';
+}
+
 /** Docker / CI: system Chromium (see CHROMIUM_PATH in Dockerfile — same idea as https://medium.com/@george.benjamin.lopez/running-puppeteer-in-docker-a-simple-guide-to-headless-browsing-25f83d4b492a ). */
 function resolveChromiumExecutablePath(): string | undefined {
   const p =
@@ -52,7 +64,9 @@ export class PuppeteerPdfGeneratorAdapter implements IPdfGenerator {
   );
 
   async generateFromHtml(htmlContent: string): Promise<Buffer> {
-    const executablePath = resolveChromiumExecutablePath();
+    const executablePath = isPuppeteerWithChromiumEnabled()
+      ? undefined
+      : resolveChromiumExecutablePath();
     const browser = await puppeteer.launch({
       headless: true,
       ...(executablePath ? { executablePath } : {}),

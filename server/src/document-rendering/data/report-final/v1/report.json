@@ -1,0 +1,517 @@
+{
+  "labels": {
+    "reportTitle": "Rapport challenge n°50 Dojo YesWeHack",
+    "summaryPageTitle": "Synthèse",
+    "tableOfContentsTitle": "Table des matières",
+    "descriptionSectionTitle": "Description du challenge",
+    "informationGatheringSectionTitle": "Collectes d’informations",
+    "exploitationSectionTitle": "Exploitation",
+    "pocSectionTitle": "PoC",
+    "riskSectionTitle": "Risque",
+    "remediationSectionTitle": "Remédiation"
+  },
+  "content": {
+    "template": "report-final",
+    "language": "fr",
+    "author": {
+      "fullName": "Sami HMIDA",
+      "organization": "Dojo YesWeHack",
+      "role": "Security Researcher"
+    },
+    "reportMeta": {
+      "reportId": "dojo-ywh-50-bucket-vault",
+      "title": "Rapport challenge n°50 Dojo YesWeHack",
+      "challengeName": "Bucket Vault",
+      "scopeSlug": "dojo-50",
+      "scopeUrl": "https://dojo.../dojo-50",
+      "classification": "CTF",
+      "status": "final",
+      "generatedAt": "2026-05-06T17:00:00+02:00",
+      "version": "1.0.0"
+    },
+    "summaryPage": {
+      "title": "Synthèse",
+      "overviewLines": [
+        "Le challenge 50, appelé \"Bucket Vault\", consiste à récupérer un fichier secret \"super_secret.txt\" qui contient le flag permettant de valider ce CTF.",
+        "Ce fichier secret est gardé dans un système de stockage sécurisé qui utilise des liens d'accès temporaires.",
+        "Il crée des jetons (tokens) valables seulement une heure pour consulter les fichiers qu'il contient.",
+        "Grâce à une signature numérique, le système vérifie automatiquement que l'accès est bien autorisé avant de livrer le contenu."
+      ],
+      "keyFindings": [
+        "Type de vulnérabilité : Path Traversal (CWE-22)",
+        "Composant vulnérable : paramètre GET `filename`",
+        "Impact principal : lecture de fichier arbitraire et fuite de données",
+        "Exploitation reproductible sans privilège",
+        "Remédiation : valider le chemin après assainissement"
+      ],
+      "executiveImpact": "Accès non autorisé à des ressources sensibles hors répertoire autorisé."
+    },
+    "tableOfContents": [
+      {
+        "title": "Rapport challenge n°50 Dojo YesWeHack",
+        "page": 1
+      },
+      {
+        "title": "Description du challenge",
+        "page": 2
+      },
+      {
+        "title": "Collectes d’informations",
+        "page": 3
+      },
+      {
+        "title": "Exploitation",
+        "page": 10
+      },
+      {
+        "title": "PoC",
+        "page": 11
+      },
+      {
+        "title": "Risque",
+        "page": 12
+      },
+      {
+        "title": "Remédiation",
+        "page": 12
+      }
+    ],
+    "sections": [
+      {
+        "id": "description",
+        "title": "Description du challenge",
+        "pageStart": 2,
+        "contentBlocks": [
+          {
+            "content": "Le challenge 50, appelé \"Bucket Vault\" consiste à récupérer un fichier secret \"super_secret.txt\" qui contient le flag permettant de valider ce CTF. Ce fichier secret est gardé dans un système de stockage sécurisé qui utilise des [strong]liens d'accès temporaires[/strong]. Il crée des jetons (tokens) valables seulement une heure pour consulter les fichiers qu'il contient. Grâce à une [strong]signature numérique[/strong], le système vérifie automatiquement que l'accès est bien autorisé avant de livrer le contenu.",
+            "images_path": [
+              {
+                "path": "/template-assets/report-final/assets/collecte/placeholder.jpg",
+                "alt": "Capture sur YesWeHack du challenge"
+              }
+            ]
+          },
+          {
+            "content": "Ce stockage est créé en [strong]PHP[/strong], et on communique avec lui grâce à des [strong]requêtes GET[/strong]. En retour, nous avons une page [strong]HTML[/strong] qui affiche la réponse du système."
+          }
+        ]
+      },
+      {
+        "id": "information-gathering",
+        "title": "Collectes d’informations",
+        "pageStart": 3,
+        "contentBlocks": [
+          {
+            "content": "Nous avons deux codes à analyser : tout d’abord le code de setup du challenge.\\nOn obtient ce code en appuyant sur l’engrenage en haut à gauche, situé au dessus de la [strong]catégorie Input[/strong] :",
+            "images_path": [
+              {
+                "path": "/template-assets/report-final/assets/collecte/placeholder.jpg",
+                "alt": "Code de setup et traitement des requêtes"
+              }
+            ]
+          },
+          {
+            "content": "Ce code contient les instructions pour [strong]peupler la base données[/strong] sécurisée qui contient les fichiers dont le fichier “super_secret.txt”. Il y a également l’HTML qui va nous être renvoyé à la suite de nos requêtes."
+          },
+          {
+            "content": "On peut déjà obtenir des informations notables : [strong]l’architecture de la base de données[/strong] et les [strong]noms complets des fichiers[/strong] qui s'y trouvent :",
+            "images_path": [
+              {
+                "path": "/template-assets/report-final/assets/collecte/placeholder.jpg",
+                "alt": "Actions sign et download dans l'interface"
+              }
+            ]
+          },
+          {
+            "content": "On peut voir également qu’une page HTML est renvoyée lorsque nous effectuons une [strong]requête sans aucun paramètre[/strong] :",
+            "images_path": [
+              {
+                "path": "/template-assets/report-final/assets/collecte/placeholder.jpg",
+                "alt": "Page HTML renvoyée lorsque nous effectuons une requête sans aucun paramètre"
+              }
+            ]
+          },
+          {
+            "content": "Testons cela en allant dans la catégorie “Input” puis en appuyant sur “Submit” :",
+            "images_path": [
+              {
+                "path": "/template-assets/report-final/assets/collecte/placeholder.jpg",
+                "alt": "Testons cela en allant dans la catégorie “Input” puis en appuyant sur “Submit”"
+              }
+            ]
+          },
+          {
+            "content": "On peut observer en bas à droite une page HTML qui va nous apporter des précisions supplémentaires :",
+            "images_path": [
+              {
+                "path": "/template-assets/report-final/assets/collecte/placeholder.jpg",
+                "alt": "Page HTML qui va nous apporter des précisions supplémentaires"
+              }
+            ]
+          },
+          {
+            "content": "D’après ce qui est indiqué, nous pouvons réaliser deux actions : obtenir une [strong]signature[/strong] pour l’URL d’un fichier stocké ou obtenir le contenu de ce fichier en utilisant cette signature."
+          },
+          {
+            "content": "On voit également la liste des fichiers et leur chemin dans le système de stockage. On remarque que le fichier secret est en mode “accès restreint”."
+          },
+          {
+            "content": "Testons une requête vers un fichier qui est dans le répertoire “/public”."
+          },
+          {
+            "content": "On doit tout d’abord obtenir une signature afin d’y avoir accès. Pour cela je met dans le champ “Action” la valeur : [strong]“sign”[/strong] et dans “Filename” le chemin du fichier :[strong]“public/document_alpha.txt”[/strong] :",
+            "images_path": [
+              {
+                "path": "/template-assets/report-final/assets/collecte/placeholder.jpg",
+                "alt": "Requête pour obtenir une signature"
+              }
+            ]
+          },
+          {
+            "content": "En appuyant sur “Submit”, on obtient deux données : une [strong]signature[/strong] et une [strong]date d’expiration[/strong]."
+          },
+          {
+            "content": "Utilisons les pour lire ce fichier. Dans le champ “Action” je met maintenant “download”, et je complète les champs “Expires” et “Signature” avec ceux obtenus précédemment :",
+            "images_path": [
+              {
+                "path": "/template-assets/report-final/assets/collecte/placeholder.jpg",
+                "alt": "Requête pour obtenir le contenu du fichier"
+              }
+            ]
+          },
+          {
+            "content": "On obtient un message indiquant que le fichier a bien été récupéré, avec son contenu juste en dessous : “YWH-DOJO-50 -- public object alpha”"
+          },
+          {
+            "content": "Essayons maintenant de générer une signature pour le fichier “super_secret.txt” :",
+            "images_path": [
+              {
+                "path": "/template-assets/report-final/assets/collecte/placeholder.jpg",
+                "alt": "Requête pour générer une signature"
+              }
+            ]
+          },
+          {
+            "content": "Le message d’erreur “Accès refusé. La signature est réservée au préfix public/” apparaît. Grâce à ce message on peut en déduire qu’il y a une condition pour [strong]signer[/strong] et qu’on va devoir la [strong]contourner[/strong].​",
+            "images_path": [
+              {
+                "path": "/template-assets/report-final/assets/collecte/placeholder.jpg",
+                "alt": "Message d’erreur “Accès refusé. La signature est réservée au préfix public/”"
+              }
+            ]
+          },
+          {
+            "content": "Analysons maintenant le deuxième code, celui qui s’exécute après chaque requête de notre part : ​"
+          },
+          {
+            "content": "Ce code contient plusieurs fonctions :",
+            "ordered_list": [
+              {
+                "content": "[strong]getFilesContent()[/strong]",
+                "images_path": [
+                  {
+                    "path": "/template-assets/report-final/assets/collecte/placeholder.jpg",
+                    "alt": "Fonction getFilesContent()",
+                    "legend": "Cette fonction permet de récupérer un fichier dans la base de données."
+                  }
+                ]
+              },
+              {
+                "content": "[strong]generatePresignedUrl() :[/strong]",
+                "images_path": [
+                  {
+                    "path": "/template-assets/report-final/assets/collecte/placeholder.jpg",
+                    "alt": "Fonction generatePresignedUrl()",
+                    "legend": "Cette fonction génère la signature nécessaire à l’obtention d’un fichier. On remarque qu’elle fait appel à une autre fonction : [strong]sanitizeFilename()[/strong]. On peut également relever que le nom du fichier, la date actuelle et le temps d’expiration sont utilisés pour générer la signature."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+        "content": "C’est ici que cela devient intéressant :",
+        "list": [
+          {
+            "content": "Tout d’abord le code vérifie qu’ [strong]il n’y a pas deux points collés dans le nom du[/strong] fichier (qui correspond également à son chemin dans le système de stockage par exemple /public/document_alpha.txt). Cela prévient les utilisateurs de remonter dans l’arborescence et donc de sortir du dossier [strong]“/public”[/strong]."
+          },
+          {
+            "content": "Ensuite, on oblige la présence de “/public” dans le nom du fichier."
+          },
+          {
+            "content": "Enfin, si les deux conditions précédentes ont été vérifiées, on génère une clé de signature."
+          }
+        ]
+          },
+          {
+            "content": "On comprend mieux pourquoi la génération de la signature du fichier “super_secret.txt” avait échoué : on ne remplissait pas ces conditions."
+          }
+        ]
+      },
+      {
+        "id": "exploitation",
+        "title": "Exploitation",
+        "pageStart": 10,
+        "contentBlocks": [
+          {
+            "content": "D’après l’arborescence qu’on a pu déduire, le fichier “super_secret.txt” et le dossier “/public” sont à la racine du stockage."
+          },
+          {
+            "content": "Pour accéder au fichier “super_secret.txt”, on doit d’abord générer une signature."
+          },
+          {
+            "content": "En prenant en compte que notre chemin doit obligatoirement commencer par “/public”, nous allons devoir remonter d’un niveau pour revenir à la racine du stockage."
+          },
+          {
+            "content": "Nous devons donc réussir à faire passer les “..” dans la string finale, c’est à dire la string qui ressort de la fonction sanitizeFilename()."
+          },
+          {
+            "content": "La vulnérabilité ici c’est qu’on ne vérifie pas si la string qui ressort de la fonction sanitizeFilename() contient les “..”. On peut donc les séparer d’un caractère pour passer la première condition : if( str_contains($filename, '..') )"
+          },
+          {
+            "content": "Ensuite, il faut profiter du fait que la fonction sanitizeFilename() supprime des caractères de contrôle pour recoller les deux points."
+          },
+          {
+            "content": "Imaginons que nous ayons cette string : '.\\\\n.' :",
+            "list": [
+              {
+                "content": "Elle passe la première condition car les points ne sont pas côte à côte."
+              },
+              {
+                "content": "Lors de son passage dans la fonction sanitizeFilename(), “\\\\n” est supprimé car c’est un caractère de contrôle et on obtient alors “..”."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "poc",
+        "title": "PoC",
+        "pageStart": 11,
+        "contentBlocks": [
+          {
+            "content": "Pour obtenir la signature du fichier “super_secret.txt” :"
+          },
+          {
+            "content": "Action : sign\\nFilename : public/.\\n./super_secret.txt",
+            "images_path": [
+              {
+                "path": "/template-assets/report-final/assets/description/placeholder.jpg",
+                "alt": "Requête sign pour super_secret.txt"
+              }
+            ]
+          },
+          {
+            "content": "On obtient un signature et une date d’expiration :"
+          },
+          {
+            "content": "Expires : 1776265535\\nSignature : th1CxzTjMGNU0aenKuSMR2LXJhEoFCHvR50h+Gbwejk="
+          },
+          {
+            "content": "Pour obtenir les données de “super_secret.txt” on utilise la signature et la date d’expiration obtenues :"
+          },
+          {
+            "content": "Action : download\\nFilename : public/../super_secret.txt\\nExpires : 1776265535\\nSignature : th1CxzTjMGNU0aenKuSMR2LXJhEoFCHvR50h+Gbwejk="
+          }
+        ]
+      },
+      {
+        "id": "risk",
+        "title": "Risque",
+        "pageStart": 12,
+        "contentBlocks": [
+          {
+            "content": "Le risque associé à cette vulnérabilité est la lecture de fichier arbitraire qui entraîne une fuite de données. N’importe quel individu peut s’extraire du répertoire imposé (ici /public) ce qui peut mener à l’accès de données sensibles. En fonction des informations fuitées, un attaquant peut s’infiltrer sur le serveur, sur des comptes, réaliser une élévation de privilège, s’il obtient par exemple des identifiants écrits dans ces fichiers privés."
+          }
+        ]
+      },
+      {
+        "id": "remediation",
+        "title": "Remédiation",
+        "pageStart": 12,
+        "contentBlocks": [
+          {
+            "content": "Ajouter une vérification après l’assainissement du chemin par la fonction sanitizeFilename() semble pertinent. En effet, si la condition de la présence des “..” était présente à la ce niveau, l’exploitation n’aurait pas fonctionnée"
+          }
+        ]
+      }
+    ],
+    "bugDetails": {
+      "bugType": {
+        "value": "Path Traversal (CWE-22)",
+        "required": true
+      },
+      "scope": {
+        "slug": "dojo-50",
+        "url": "https://dojo.../dojo-50",
+        "required": true
+      },
+      "endpoint": {
+        "httpMethod": "GET",
+        "path": "/",
+        "queryPattern": "?action=...&filename=...&expires=...&signature=...",
+        "description": "Endpoint ayant permis de découvrir le flag",
+        "required": true
+      },
+      "vulnerablePart": {
+        "category": "GET parameter",
+        "partName": "filename",
+        "required": true
+      },
+      "payload": {
+        "rawInputForSign": "public/.\\n./super_secret.txt",
+        "normalizedInputForDownload": "public/../super_secret.txt",
+        "bypassExplanation": "Les caractères de contrôle sont supprimés après le contrôle initial de '..', permettant de recomposer un traversal.",
+        "required": true
+      },
+      "technicalEnvironment": {
+        "os": "N/A (Dojo cloud environment)",
+        "browser": "N/A",
+        "tools": [
+          "Dojo YesWeHack web interface"
+        ],
+        "required": true
+      },
+      "applicationFingerprint": {
+        "value": "Application PHP de file storage custom, accès aux fichiers via signature temporaire (expires + signature), validation côté serveur avec assainissement du nom de fichier.",
+        "required": true
+      },
+      "cve": {
+        "value": "",
+        "required": false
+      },
+      "impact": {
+        "value": "Access to unauthorized resources",
+        "required": true
+      },
+      "ipsUsed": {
+        "values": [],
+        "getMyIpEnabled": true,
+        "required": true
+      }
+    },
+    "bugCharacteristics": {
+      "severityTag": "high",
+      "score": 7.0,
+      "cvssVectorReadonly": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+      "attackVector": {
+        "value": "network",
+        "options": [
+          "network",
+          "adjacent",
+          "local",
+          "physical"
+        ],
+        "required": true
+      },
+      "privilegesRequired": {
+        "value": "none",
+        "options": [
+          "none",
+          "low",
+          "high"
+        ],
+        "required": true
+      },
+      "attackComplexity": {
+        "value": "low",
+        "options": [
+          "low",
+          "high"
+        ],
+        "required": true
+      },
+      "userInteraction": {
+        "value": "none",
+        "options": [
+          "none",
+          "required"
+        ],
+        "required": true
+      },
+      "scope": {
+        "value": "unchanged",
+        "options": [
+          "unchanged",
+          "changed"
+        ],
+        "required": true
+      },
+      "integrity": {
+        "value": "none",
+        "options": [
+          "none",
+          "low",
+          "high"
+        ],
+        "required": true
+      },
+      "confidentiality": {
+        "value": "high",
+        "options": [
+          "none",
+          "low",
+          "high"
+        ],
+        "required": true
+      },
+      "availability": {
+        "value": "none",
+        "options": [
+          "none",
+          "low",
+          "high"
+        ],
+        "required": true
+      }
+    },
+    "bugDescription": {
+      "reportTitle": "Path Traversal on dojo-50 through filename query parameter via GET leads to unauthorized file access",
+      "editorMode": {
+        "writeEnabled": true,
+        "previewEnabled": true,
+        "templateSelector": [
+          "YWH Report Template"
+        ]
+      },
+      "descriptionMarkdown": "## DESCRIPTION\\n\\nLe mécanisme de signature protège l’accès aux fichiers, mais la validation du chemin est contournable via caractères de contrôle.\\n\\nLa valeur `filename` est contrôlée avant assainissement, puis transformée, ce qui permet de reconstituer un `..` valide et d’accéder à une ressource hors `/public`.",
+      "exploitationMarkdown": "## EXPLOITATION\\n\\n### Steps to exploit the vulnerability\\n\\n1. Générer une signature avec un `filename` obfusqué qui contourne la détection de `..`.\\n2. Réutiliser `expires` + `signature` avec un chemin normalisé pointant vers `super_secret.txt`.\\n3. Télécharger le contenu sensible.",
+      "pocMarkdown": "## POC\\n\\nIn order to get the secret, use:\\n\\n```http\\n?action=sign&filename=public/.\\n./super_secret.txt\\n```\\n\\nThen:\\n\\n```http\\n?action=download&filename=public/../super_secret.txt&expires=1776265535&signature=th1CxzTjMGNU0aenKuSMR2LXJhEoFCHvR50h+Gbwejk=\\n```\\n\\nFlag: **[TO_FILL_FROM_DOJO_OUTPUT]**",
+      "riskMarkdown": "## RISK\\n\\nThis vulnerability allows an attacker to access unauthorized files.\\n\\nPotential impacts:\\n- leakage of internal application data\\n- exposure of sensitive credentials\\n- pivot for further compromise in real-world systems",
+      "remediationMarkdown": "## REMEDIATION\\n\\nTo fix this vulnerability:\\n- validate path traversal patterns after sanitization\\n- canonicalize and enforce an allow-listed root prefix\\n- avoid signing user-supplied raw paths directly"
+    },
+    "attachments": {
+      "images": {
+        "acceptedTypes": [
+          "jpeg",
+          "jpg",
+          "png"
+        ],
+        "maxSizeMb": 10
+      },
+      "videos": {
+        "acceptedTypes": [
+          "mp4",
+          "webm"
+        ],
+        "maxSizeMb": 100
+      },
+      "items": []
+    },
+    "bugChain": {
+      "enabled": true,
+      "linkedBugs": []
+    }
+  },
+  "locale": {
+    "language": "fr"
+  },
+  "layouts": [
+    {
+      "engine": "html",
+      "template": "report-final",
+      "typography": {
+        "fontSize": "14px"
+      }
+    }
+  ]
+}

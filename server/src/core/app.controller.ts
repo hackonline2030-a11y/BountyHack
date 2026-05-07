@@ -16,11 +16,22 @@ import {
   ICvRepository,
 } from '../document-rendering/application/ports/cv-repository.port';
 import {
+  I_REPORT_REPOSITORY,
+  IReportRepository,
+} from '../document-rendering/application/ports/report-repository.port';
+import {
   CvDataInvalidError,
   CvDataMissingError,
   CvLocaleInvalidError,
   CvLocaleNotFoundError,
+  CvVersionInvalidError,
   CvVersionNotFoundError,
+  ReportDataInvalidError,
+  ReportDataMissingError,
+  ReportLocaleInvalidError,
+  ReportLocaleNotFoundError,
+  ReportVersionInvalidError,
+  ReportVersionNotFoundError,
 } from '../document-rendering/application/errors/pdf-application.errors';
 
 const CV_VERSION_ROUTE = /^v\d+$/i;
@@ -38,6 +49,8 @@ export class AppController {
     private readonly appService: AppService,
     @Inject(I_CV_REPOSITORY)
     private readonly cvRepository: ICvRepository,
+    @Inject(I_REPORT_REPOSITORY)
+    private readonly reportRepository: IReportRepository,
   ) {}
 
   @Get('/')
@@ -119,7 +132,7 @@ export class AppController {
     const styles = await this.cvRepository.listCvStyles();
     if (!styles.length) {
       throw new NotFoundException(
-        'No CV style folders found. Add data under `src/document-rendering/data/<style>/v1/cv.json`.',
+        'No document style folders found. Add data under `src/document-rendering/data/<style>/v1/` with `cv.json` or `report.json` (and optional `*.en.json`).',
       );
     }
 
@@ -170,7 +183,7 @@ export class AppController {
     const versions = await this.cvRepository.listCvVersions(style);
     if (!versions.length) {
       throw new NotFoundException(
-        `No CV version folders found for style '${style}'. Add data under src/document-rendering/data/${style}/v1/cv.json.`,
+        `No populated version folders found for style '${style}'. Add cv.json or report.json under src/document-rendering/data/${style}/v1/ (or another v* folder).`,
       );
     }
 
@@ -230,11 +243,12 @@ export class AppController {
 
     const version = slug.toLowerCase();
 
-    const locales = await this.cvRepository.listCvLocales(style, version);
+    const { documentKind, locales } =
+      await this.cvRepository.listLocalesForDashboard(style, version);
 
     if (!locales.length) {
       throw new NotFoundException(
-        `No CV locale files found for '${style}/${version}'. Add cv.json or cv.<lang>.json under that folder.`,
+        `No document locale files found for '${style}/${version}'. Add cv.json / cv.<lang>.json or report.json / report.<lang>.json under that folder.`,
       );
     }
 
@@ -256,22 +270,37 @@ export class AppController {
     }
 
     try {
-      await this.cvRepository.getCvTemplateData(
-        style,
-        version,
-        trimmed === '' ? undefined : trimmed,
-      );
+      if (documentKind === 'report') {
+        await this.reportRepository.getReportTemplateData(
+          style,
+          version,
+          trimmed === '' ? undefined : trimmed,
+        );
+      } else {
+        await this.cvRepository.getCvTemplateData(
+          style,
+          version,
+          trimmed === '' ? undefined : trimmed,
+        );
+      }
     } catch (e) {
       if (
         e instanceof CvLocaleInvalidError ||
-        e instanceof CvDataInvalidError
+        e instanceof CvDataInvalidError ||
+        e instanceof ReportLocaleInvalidError ||
+        e instanceof ReportDataInvalidError ||
+        e instanceof ReportVersionInvalidError ||
+        e instanceof CvVersionInvalidError
       ) {
         throw new BadRequestException(e.message);
       }
       if (
         e instanceof CvLocaleNotFoundError ||
         e instanceof CvVersionNotFoundError ||
-        e instanceof CvDataMissingError
+        e instanceof CvDataMissingError ||
+        e instanceof ReportLocaleNotFoundError ||
+        e instanceof ReportVersionNotFoundError ||
+        e instanceof ReportDataMissingError
       ) {
         throw new NotFoundException(e.message);
       }
@@ -296,6 +325,8 @@ export class AppController {
     params.set('lang', effectiveLang);
 
     const query = `?${params.toString()}`;
+    const pdfBase =
+      documentKind === 'report' ? `${apiPrefix}/pdf/report` : `${apiPrefix}/pdf`;
 
     return {
       ...texts,
@@ -310,8 +341,9 @@ export class AppController {
         code,
         label: LANG_LABELS[code] ?? code.toUpperCase(),
       })),
-      previewUrl: `${apiPrefix}/pdf/previewHtml${query}`,
-      generateUrl: `${apiPrefix}/pdf/htmlToPDF${query}`,
+      documentKind,
+      previewUrl: `${pdfBase}/previewHtml${query}`,
+      generateUrl: `${pdfBase}/htmlToPDF${query}`,
       homeUrl: `${apiPrefix}`,
     };
   }
