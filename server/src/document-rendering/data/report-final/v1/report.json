@@ -80,7 +80,7 @@
       {
         "id": "description",
         "title": "Description du challenge",
-        "pageStart": 2,
+        "pageRange": [2, 2],
         "contentBlocks": [
           {
             "content": "Le challenge 50, appelé \"Bucket Vault\" consiste à récupérer un fichier secret \"super_secret.txt\" qui contient le flag permettant de valider ce CTF. Ce fichier secret est gardé dans un système de stockage sécurisé qui utilise des [strong]liens d'accès temporaires[/strong]. Il crée des jetons (tokens) valables seulement une heure pour consulter les fichiers qu'il contient. Grâce à une [strong]signature numérique[/strong], le système vérifie automatiquement que l'accès est bien autorisé avant de livrer le contenu.",
@@ -99,7 +99,7 @@
       {
         "id": "information-gathering",
         "title": "Collectes d’informations",
-        "pageStart": 3,
+        "pageRange": [3, 9],
         "contentBlocks": [
           {
             "content": "Nous avons deux codes à analyser : tout d’abord le code de setup du challenge.\\nOn obtient ce code en appuyant sur l’engrenage en haut à gauche, situé au dessus de la [strong]catégorie Input[/strong] :",
@@ -250,7 +250,7 @@
       {
         "id": "exploitation",
         "title": "Exploitation",
-        "pageStart": 10,
+        "pageRange": [10, 10],
         "contentBlocks": [
           {
             "content": "D’après l’arborescence qu’on a pu déduire, le fichier “super_secret.txt” et le dossier “/public” sont à la racine du stockage."
@@ -286,7 +286,7 @@
       {
         "id": "poc",
         "title": "PoC",
-        "pageStart": 11,
+        "pageRange": [11, 11],
         "contentBlocks": [
           {
             "content": "Pour obtenir la signature du fichier “super_secret.txt” :"
@@ -317,7 +317,7 @@
       {
         "id": "risk",
         "title": "Risque",
-        "pageStart": 12,
+        "pageRange": [12, 12],
         "contentBlocks": [
           {
             "content": "Le risque associé à cette vulnérabilité est la lecture de fichier arbitraire qui entraîne une fuite de données. N’importe quel individu peut s’extraire du répertoire imposé (ici /public) ce qui peut mener à l’accès de données sensibles. En fonction des informations fuitées, un attaquant peut s’infiltrer sur le serveur, sur des comptes, réaliser une élévation de privilège, s’il obtient par exemple des identifiants écrits dans ces fichiers privés."
@@ -327,7 +327,7 @@
       {
         "id": "remediation",
         "title": "Remédiation",
-        "pageStart": 12,
+        "pageRange": [12, 12],
         "contentBlocks": [
           {
             "content": "Ajouter une vérification après l’assainissement du chemin par la fonction sanitizeFilename() semble pertinent. En effet, si la condition de la présence des “..” était présente à la ce niveau, l’exploitation n’aurait pas fonctionnée"

@@ -98,6 +98,33 @@
             })
           : [];
 
+      const resolveSectionStartPage = (section) => {
+        const range = section && section.pageRange;
+        if (!Array.isArray(range) || range.length < 1) return null;
+        const start = Number(range[0]);
+        return Number.isFinite(start) ? start : null;
+      };
+
+      const resolveSectionPageCount = (section) => {
+        const range = section && section.pageRange;
+        if (!Array.isArray(range) || range.length < 2) return 1;
+        const start = Number(range[0]);
+        const end = Number(range[1]);
+        if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return 1;
+        return Math.max(1, end - start + 1);
+      };
+
+      const chunkArray = (items, chunkCount) => {
+        const chunks = Array.from({ length: Math.max(1, chunkCount) }, () => []);
+        if (!Array.isArray(items) || items.length === 0) return chunks;
+        const size = Math.max(1, Math.ceil(items.length / chunks.length));
+        items.forEach((item, idx) => {
+          const targetChunk = Math.min(chunks.length - 1, Math.floor(idx / size));
+          chunks[targetChunk].push(item);
+        });
+        return chunks;
+      };
+
       const sectionTitle = (section, index) => section.title || `Section ${index + 1}`;
 
       const endpoint = bugDetails.endpoint || {};
@@ -143,26 +170,35 @@
       </section> -->
 
       <% if (toc.length) { %>
-        <section class="card toc-card">
-          <h2><%= labels.tableOfContentsTitle || 'Table des matières' %></h2>
-          <ol class="toc-list">
-            <% toc.forEach(function(item) { %>
-              <li>
-                <span><%= item.title %></span>
-                <span class="toc-page">p.<%= item.page %></span>
+        <section class="cover-page page-frame">
+          <h1 class="cover-title"><%= reportMeta.title || labels.reportTitle || 'Rapport de sécurité' %></h1>
+          <p class="cover-author">par <%= author.fullName || 'N/A' %></p>
+          <ol class="toc-list cover-toc-list">
+            <% toc.forEach(function(item, itemIndex) { %>
+              <li class="<%= itemIndex === 0 ? 'toc-line--main' : '' %>">
+                <span class="toc-label"><%= item.title %></span>
+                <span class="toc-dots" aria-hidden="true"></span>
+                <span class="toc-page"><%= item.page %></span>
               </li>
             <% }); %>
           </ol>
         </section>
       <% } %>
 
+      <% let previousSectionPageStart = null; %>
       <% sections.forEach(function(section, index) { %>
-        <section class="card section-card" id="<%= section.id || `section-${index + 1}` %>">
-          <h2><%= sectionTitle(section, index) %></h2>
-          <% if (section.pageStart) { %>
-            <p class="page-hint">Page PDF source : <%= section.pageStart %></p>
-          <% } %>
-          <% const sectionBlocks = Array.isArray(section.contentBlocks) && section.contentBlocks.length
+        <% const currentSectionPageStart = resolveSectionStartPage(section); %>
+        <% const shouldForcePageBreakForFirstPart =
+          Number.isFinite(currentSectionPageStart) &&
+          (
+            (index === 0 && currentSectionPageStart > 1) ||
+            (
+              index > 0 &&
+              Number.isFinite(previousSectionPageStart) &&
+              currentSectionPageStart > previousSectionPageStart
+            )
+          ); %>
+        <% const sectionBlocks = Array.isArray(section.contentBlocks) && section.contentBlocks.length
             ? section.contentBlocks.map((block) => ({
                 content: typeof block === 'string' ? block : String((block && block.content) || ''),
                 images_path: Array.isArray(block && block.images_path) ? block.images_path : [],
@@ -176,70 +212,83 @@
                     .map((p) => p.trim())
                     .filter(Boolean))
                 .map((paragraph) => ({ content: paragraph, images_path: [], list: [], ordered_list: [] })); %>
-          <% const sectionImages = Array.isArray(section.images_path) ? section.images_path : []; %>
-          <div class="markdown-body">
-            <% sectionBlocks.forEach(function(block, paragraphIndex) { %>
-              <%- markdownToHtml(block.content) %>
-              <% block.images_path.forEach(function(img) { %>
-                <figure class="section-image">
-                  <img src="<%= String((img && img.path) || '') %>" alt="<%= String((img && img.alt) || '') %>" />
-                  <% if (img && img.legend) { %><figcaption><%- markdownToHtml(String(img.legend || '')) %></figcaption><% } %>
-                </figure>
-              <% }); %>
-              <% if (block.list.length) { %>
-                <ul>
-                  <% block.list.forEach(function(item) { %>
-                    <li>
-                      <%- markdownToHtml(item.content) %>
-                      <% if (item.legend) { %><div class="list-item-legend"><%- markdownToHtml(item.legend) %></div><% } %>
-                      <% item.images_path.forEach(function(img) { %>
-                        <figure class="section-image">
-                          <img src="<%= String((img && img.path) || '') %>" alt="<%= String((img && img.alt) || '') %>" />
-                          <% if (img && img.legend) { %><figcaption><%- markdownToHtml(String(img.legend || '')) %></figcaption><% } %>
-                        </figure>
-                      <% }); %>
-                    </li>
-                  <% }); %>
-                </ul>
-              <% } %>
-              <% if (block.ordered_list.length) { %>
-                <ol>
-                  <% block.ordered_list.forEach(function(item) { %>
-                    <li>
-                      <%- markdownToHtml(item.content) %>
-                      <% if (item.legend) { %><div class="list-item-legend"><%- markdownToHtml(item.legend) %></div><% } %>
-                      <% item.images_path.forEach(function(img) { %>
-                        <figure class="section-image">
-                          <img src="<%= String((img && img.path) || '') %>" alt="<%= String((img && img.alt) || '') %>" />
-                          <% if (img && img.legend) { %><figcaption><%- markdownToHtml(String(img.legend || '')) %></figcaption><% } %>
-                        </figure>
-                      <% }); %>
-                    </li>
-                  <% }); %>
-                </ol>
-              <% } %>
-              <% sectionImages
-                .filter((img) => Number(img && img.index) === paragraphIndex)
-                .forEach(function(img) { %>
+        <% const sectionPageCount = resolveSectionPageCount(section); %>
+        <% const chunkedBlocks = chunkArray(sectionBlocks, sectionPageCount); %>
+        <% const sectionImages = Array.isArray(section.images_path) ? section.images_path : []; %>
+        <% let consumedParagraphCount = 0; %>
+        <% chunkedBlocks.forEach(function(blockChunk, chunkIndex) { %>
+          <% const shouldForcePageBreak = chunkIndex === 0 ? shouldForcePageBreakForFirstPart : true; %>
+          <section class="card section-card page-frame <%= shouldForcePageBreak ? 'section-card--page-break' : '' %>" id="<%= (section.id || `section-${index + 1}`) + (chunkIndex > 0 ? `-part-${chunkIndex + 1}` : '') %>">
+            <h2><%= chunkIndex === 0 ? sectionTitle(section, index) : `${sectionTitle(section, index)} (suite)` %></h2>
+            <div class="markdown-body">
+              <% blockChunk.forEach(function(block, paragraphIndexInChunk) { %>
+                <% const paragraphIndex = consumedParagraphCount + paragraphIndexInChunk; %>
+                <%- markdownToHtml(block.content) %>
+                <% block.images_path.forEach(function(img) { %>
                   <figure class="section-image">
                     <img src="<%= String((img && img.path) || '') %>" alt="<%= String((img && img.alt) || '') %>" />
                     <% if (img && img.legend) { %><figcaption><%- markdownToHtml(String(img.legend || '')) %></figcaption><% } %>
                   </figure>
+                <% }); %>
+                <% if (block.list.length) { %>
+                  <ul>
+                    <% block.list.forEach(function(item) { %>
+                      <li>
+                        <%- markdownToHtml(item.content) %>
+                        <% if (item.legend) { %><div class="list-item-legend"><%- markdownToHtml(item.legend) %></div><% } %>
+                        <% item.images_path.forEach(function(img) { %>
+                          <figure class="section-image">
+                            <img src="<%= String((img && img.path) || '') %>" alt="<%= String((img && img.alt) || '') %>" />
+                            <% if (img && img.legend) { %><figcaption><%- markdownToHtml(String(img.legend || '')) %></figcaption><% } %>
+                          </figure>
+                        <% }); %>
+                      </li>
+                    <% }); %>
+                  </ul>
+                <% } %>
+                <% if (block.ordered_list.length) { %>
+                  <ol>
+                    <% block.ordered_list.forEach(function(item) { %>
+                      <li>
+                        <%- markdownToHtml(item.content) %>
+                        <% if (item.legend) { %><div class="list-item-legend"><%- markdownToHtml(item.legend) %></div><% } %>
+                        <% item.images_path.forEach(function(img) { %>
+                          <figure class="section-image">
+                            <img src="<%= String((img && img.path) || '') %>" alt="<%= String((img && img.alt) || '') %>" />
+                            <% if (img && img.legend) { %><figcaption><%- markdownToHtml(String(img.legend || '')) %></figcaption><% } %>
+                          </figure>
+                        <% }); %>
+                      </li>
+                    <% }); %>
+                  </ol>
+                <% } %>
+                <% sectionImages
+                  .filter((img) => Number(img && img.index) === paragraphIndex)
+                  .forEach(function(img) { %>
+                    <figure class="section-image">
+                      <img src="<%= String((img && img.path) || '') %>" alt="<%= String((img && img.alt) || '') %>" />
+                      <% if (img && img.legend) { %><figcaption><%- markdownToHtml(String(img.legend || '')) %></figcaption><% } %>
+                    </figure>
+                <% }); %>
               <% }); %>
-            <% }); %>
-            <% sectionImages
-              .filter((img) => Number(img && img.index) === -1 || Number(img && img.index) >= sectionBlocks.length)
-              .forEach(function(img) { %>
-                <figure class="section-image">
-                  <img src="<%= String((img && img.path) || '') %>" alt="<%= String((img && img.alt) || '') %>" />
-                  <% if (img && img.legend) { %><figcaption><%- markdownToHtml(String(img.legend || '')) %></figcaption><% } %>
-                </figure>
-            <% }); %>
-          </div>
-        </section>
+              <% if (chunkIndex === chunkedBlocks.length - 1) { %>
+                <% sectionImages
+                  .filter((img) => Number(img && img.index) === -1 || Number(img && img.index) >= sectionBlocks.length)
+                  .forEach(function(img) { %>
+                    <figure class="section-image">
+                      <img src="<%= String((img && img.path) || '') %>" alt="<%= String((img && img.alt) || '') %>" />
+                      <% if (img && img.legend) { %><figcaption><%- markdownToHtml(String(img.legend || '')) %></figcaption><% } %>
+                    </figure>
+                <% }); %>
+              <% } %>
+            </div>
+          </section>
+          <% consumedParagraphCount += blockChunk.length; %>
+        <% }); %>
+        <% if (Number.isFinite(currentSectionPageStart)) { previousSectionPageStart = currentSectionPageStart; } %>
       <% }); %>
 
-      <section class="card section-card">
+      <!-- <section class="card section-card">
         <h2>Détails du bug</h2>
         <p class="section-lead">Champs alignés avec le formulaire de soumission (YesWeHack / interne).</p>
 
@@ -402,7 +451,7 @@
             <p class="fiche-muted">Aucune autre vulnérabilité chaînée n’est renseignée.</p>
           <% } %>
         </section>
-      <% } %>
+      <% } %> -->
     </div>
   </body>
 </html>
