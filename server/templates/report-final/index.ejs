@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="<%= (data && data.language) || (data && data.htmlLang) || 'fr' %>">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      <%= (data && data.reportMeta && data.reportMeta.title) || (data && data.labels && data.labels.reportTitle) || 'Security Report' %>
+    </title>
+    <link rel="stylesheet" href="<%= data.templateStylesheetUrl || '/template-assets/report-final/styles/styles.css' %>" />
+  </head>
+  <body>
+    <%
+      const labels = data.labels || {};
+      const reportMeta = data.reportMeta || {};
+      const author = data.author || {};
+      const summaryPage = data.summaryPage || {};
+      const toc = Array.isArray(data.tableOfContents) ? data.tableOfContents : [];
+      const sections = Array.isArray(data.sections) ? data.sections : [];
+      const bugDetails = data.bugDetails || {};
+      const bugCharacteristics = data.bugCharacteristics || {};
+      const bugDescription = data.bugDescription || {};
+      const bugChain = data.bugChain || {};
+
+      const escapeHtml = (s) =>
+        String(s ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+
+      /** Form fields: either a scalar or `{ value, required?, ... }`. */
+      const displayFormValue = (node) => {
+        if (node === undefined || node === null) return '';
+        if (typeof node === 'object' && !Array.isArray(node) && Object.prototype.hasOwnProperty.call(node, 'value')) {
+          return displayFormValue(node.value);
+        }
+        if (Array.isArray(node)) return node.map((x) => displayFormValue(x)).filter(Boolean).join(', ');
+        if (typeof node === 'boolean') return node ? 'oui' : 'non';
+        return String(node);
+      };
+
+      const normalizeMarkdown = (value) =>
+        String(value || '')
+          // Preserve literal "\\n" in content while still supporting "\n" as formatting newline.
+          .replace(/\\\\n/g, '__LITERAL_BACKSLASH_N__')
+          // Accept both real newlines and literal "\n" sequences from JSON content blocks.
+          .replace(/\\n/g, '\n')
+          .replace(/__LITERAL_BACKSLASH_N__/g, '\\n')
+          .replace(/```[\s\S]*?```/g, (block) => {
+            const raw = block.replace(/^```[a-zA-Z]*\n?/, '').replace(/\n?```$/, '');
+            return `<pre class="code-block code-block--light">${escapeHtml(raw)}</pre>`;
+          })
+          .replace(/\[strong\]([\s\S]*?)\[\/strong\]/gi, '<strong>$1</strong>')
+          .replace(/\[em\]([\s\S]*?)\[\/em\]/gi, '<em>$1</em>')
+          .replace(/\[code\]([\s\S]*?)\[\/code\]/gi, '<code>$1</code>')
+          .replace(/^###\s+(.+)$/gm, '<h4>$1</h4>')
+          .replace(/^##\s+(.+)$/gm, '<h3>$1</h3>')
+          .replace(/^-\s+(.+)$/gm, '<li>$1</li>')
+          .replace(/(?:^|\n)(\d+)\.\s+(.+)/g, (_m, n, txt) => `\n<li value="${n}">${txt}</li>`)
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/`([^`]+)`/g, '<code>$1</code>');
+
+      const markdownToHtml = (value) => {
+        const source = normalizeMarkdown(value || '');
+        if (!source.trim()) return '';
+        const withLists = source
+          .replace(/(<li[\s\S]*?<\/li>\n?)+/g, (list) => {
+            const hasValues = /value="\d+"/.test(list);
+            return hasValues ? `<ol>${list}</ol>` : `<ul>${list}</ul>`;
+          });
+
+        const parts = withLists
+          .split(/\n{2,}/)
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .map((item) => {
+            if (
+              /^<(h3|h4|ul|ol|pre)/.test(item) ||
+              /<\/(ul|ol|pre)>$/.test(item)
+            ) {
+              return item;
+            }
+            return `<p>${item.replace(/\n/g, '<br/>')}</p>`;
+          });
+
+        return parts.join('\n');
+      };
+
+      const normalizeListItems = (items) =>
+        Array.isArray(items)
+          ? items.map((item) => {
+              if (typeof item === 'string') return { content: item, images_path: [] };
+              return {
+                content: String((item && (item.content || item.text)) || ''),
+                images_path: Array.isArray(item && item.images_path) ? item.images_path : [],
+                legend: String((item && item.legend) || ''),
+              };
+            })
+          : [];
+
+      const sectionTitle = (section, index) => section.title || `Section ${index + 1}`;
+
+      const endpoint = bugDetails.endpoint || {};
+      const scope = bugDetails.scope || {};
+      const vulnPart = bugDetails.vulnerablePart || {};
+      const payload = bugDetails.payload || {};
+      const techEnv = bugDetails.technicalEnvironment || {};
+      const appFp = bugDetails.applicationFingerprint || {};
+      const ipsUsed = bugDetails.ipsUsed || {};
+    %>
+
+    <div class="report-page">
+      <!-- <header class="report-header">
+        <h1 class="report-title">
+          <%= reportMeta.title || labels.reportTitle || 'Rapport de sécurité' %>
+        </h1>
+        <div class="meta-grid">
+          <p><strong>Auteur :</strong> <%= author.fullName || 'N/A' %></p>
+          <p><strong>Rôle :</strong> <%= author.role || 'N/A' %></p>
+          <p><strong>Challenge :</strong> <%= reportMeta.challengeName || 'N/A' %></p>
+          <p><strong>Scope :</strong> <%= reportMeta.scopeSlug || 'N/A' %></p>
+          <p><strong>Statut :</strong> <%= reportMeta.status || 'draft' %></p>
+          <p><strong>Version :</strong> <%= reportMeta.version || '1.0.0' %></p>
+        </div>
+      </header> -->
+
+      <!-- <section class="card summary-card">
+        <h2><%= summaryPage.title || labels.summaryPageTitle || 'Synthèse' %></h2>
+        <% if (Array.isArray(summaryPage.overviewLines) && summaryPage.overviewLines.length) { %>
+          <p><%= summaryPage.overviewLines.join(' ') %></p>
+        <% } %>
+        <% if (Array.isArray(summaryPage.keyFindings) && summaryPage.keyFindings.length) { %>
+          <h3>Points clés</h3>
+          <ul>
+            <% summaryPage.keyFindings.forEach(function(item) { %>
+              <li><%= item %></li>
+            <% }); %>
+          </ul>
+        <% } %>
+        <% if (summaryPage.executiveImpact) { %>
+          <p class="impact-line"><strong>Impact :</strong> <%= summaryPage.executiveImpact %></p>
+        <% } %>
+      </section> -->
+
+      <% if (toc.length) { %>
+        <section class="card toc-card">
+          <h2><%= labels.tableOfContentsTitle || 'Table des matières' %></h2>
+          <ol class="toc-list">
+            <% toc.forEach(function(item) { %>
+              <li>
+                <span><%= item.title %></span>
+                <span class="toc-page">p.<%= item.page %></span>
+              </li>
+            <% }); %>
+          </ol>
+        </section>
+      <% } %>
+
+      <% sections.forEach(function(section, index) { %>
+        <section class="card section-card" id="<%= section.id || `section-${index + 1}` %>">
+          <h2><%= sectionTitle(section, index) %></h2>
+          <% if (section.pageStart) { %>
+            <p class="page-hint">Page PDF source : <%= section.pageStart %></p>
+          <% } %>
+          <% const sectionBlocks = Array.isArray(section.contentBlocks) && section.contentBlocks.length
+            ? section.contentBlocks.map((block) => ({
+                content: typeof block === 'string' ? block : String((block && block.content) || ''),
+                images_path: Array.isArray(block && block.images_path) ? block.images_path : [],
+                list: normalizeListItems(block && block.list),
+                ordered_list: normalizeListItems(block && block.ordered_list),
+              }))
+            : (Array.isArray(section.contentMarkdownLines)
+                ? section.contentMarkdownLines
+                : String(section.contentMarkdown || '')
+                    .split(/\n{2,}/)
+                    .map((p) => p.trim())
+                    .filter(Boolean))
+                .map((paragraph) => ({ content: paragraph, images_path: [], list: [], ordered_list: [] })); %>
+          <% const sectionImages = Array.isArray(section.images_path) ? section.images_path : []; %>
+          <div class="markdown-body">
+            <% sectionBlocks.forEach(function(block, paragraphIndex) { %>
+              <%- markdownToHtml(block.content) %>
+              <% block.images_path.forEach(function(img) { %>
+                <figure class="section-image">
+                  <img src="<%= String((img && img.path) || '') %>" alt="<%= String((img && img.alt) || '') %>" />
+                  <% if (img && img.legend) { %><figcaption><%- markdownToHtml(String(img.legend || '')) %></figcaption><% } %>
+                </figure>
+              <% }); %>
+              <% if (block.list.length) { %>
+                <ul>
+                  <% block.list.forEach(function(item) { %>
+                    <li>
+                      <%- markdownToHtml(item.content) %>
+                      <% if (item.legend) { %><div class="list-item-legend"><%- markdownToHtml(item.legend) %></div><% } %>
+                      <% item.images_path.forEach(function(img) { %>
+                        <figure class="section-image">
+                          <img src="<%= String((img && img.path) || '') %>" alt="<%= String((img && img.alt) || '') %>" />
+                          <% if (img && img.legend) { %><figcaption><%- markdownToHtml(String(img.legend || '')) %></figcaption><% } %>
+                        </figure>
+                      <% }); %>
+                    </li>
+                  <% }); %>
+                </ul>
+              <% } %>
+              <% if (block.ordered_list.length) { %>
+                <ol>
+                  <% block.ordered_list.forEach(function(item) { %>
+                    <li>
+                      <%- markdownToHtml(item.content) %>
+                      <% if (item.legend) { %><div class="list-item-legend"><%- markdownToHtml(item.legend) %></div><% } %>
+                      <% item.images_path.forEach(function(img) { %>
+                        <figure class="section-image">
+                          <img src="<%= String((img && img.path) || '') %>" alt="<%= String((img && img.alt) || '') %>" />
+                          <% if (img && img.legend) { %><figcaption><%- markdownToHtml(String(img.legend || '')) %></figcaption><% } %>
+                        </figure>
+                      <% }); %>
+                    </li>
+                  <% }); %>
+                </ol>
+              <% } %>
+              <% sectionImages
+                .filter((img) => Number(img && img.index) === paragraphIndex)
+                .forEach(function(img) { %>
+                  <figure class="section-image">
+                    <img src="<%= String((img && img.path) || '') %>" alt="<%= String((img && img.alt) || '') %>" />
+                    <% if (img && img.legend) { %><figcaption><%- markdownToHtml(String(img.legend || '')) %></figcaption><% } %>
+                  </figure>
+              <% }); %>
+            <% }); %>
+            <% sectionImages
+              .filter((img) => Number(img && img.index) === -1 || Number(img && img.index) >= sectionBlocks.length)
+              .forEach(function(img) { %>
+                <figure class="section-image">
+                  <img src="<%= String((img && img.path) || '') %>" alt="<%= String((img && img.alt) || '') %>" />
+                  <% if (img && img.legend) { %><figcaption><%- markdownToHtml(String(img.legend || '')) %></figcaption><% } %>
+                </figure>
+            <% }); %>
+          </div>
+        </section>
+      <% }); %>
+
+      <section class="card section-card">
+        <h2>Détails du bug</h2>
+        <p class="section-lead">Champs alignés avec le formulaire de soumission (YesWeHack / interne).</p>
+
+        <div class="fiche-grid">
+          <div class="fiche-field">
+            <span class="fiche-label">Type</span>
+            <span class="fiche-value"><%= displayFormValue(bugDetails.bugType) || '—' %></span>
+          </div>
+          <div class="fiche-field fiche-field--full">
+            <span class="fiche-label">Scope</span>
+            <span class="fiche-value">
+              <%= scope.slug ? escapeHtml(scope.slug) : '—' %>
+              <% if (scope.url) { %>
+                <br /><a class="inline-link" href="<%- scope.url %>" target="_blank" rel="noreferrer"><%= scope.url %></a>
+              <% } %>
+            </span>
+          </div>
+          <div class="fiche-field fiche-field--full">
+            <span class="fiche-label">Endpoint</span>
+            <div class="fiche-stack">
+              <p><strong><%= escapeHtml(endpoint.httpMethod || '') %></strong> <code class="kbd"><%= escapeHtml(endpoint.path || '') %></code></p>
+              <% if (endpoint.queryPattern) { %>
+                <pre class="code-block code-block--light"><%= escapeHtml(endpoint.queryPattern) %></pre>
+              <% } %>
+              <% if (endpoint.description) { %>
+                <p class="fiche-muted"><%= endpoint.description %></p>
+              <% } %>
+            </div>
+          </div>
+          <div class="fiche-field">
+            <span class="fiche-label">Partie vulnérable</span>
+            <span class="fiche-value"><%= escapeHtml(vulnPart.category || '') %> — <code><%= escapeHtml(vulnPart.partName || '') %></code></span>
+          </div>
+          <div class="fiche-field fiche-field--full">
+            <span class="fiche-label">Payload / contournement</span>
+            <div class="fiche-stack">
+              <% if (payload.rawInputForSign) { %>
+                <p class="fiche-muted">Signature (entrée brute)</p>
+                <pre class="code-block code-block--light"><%= escapeHtml(payload.rawInputForSign) %></pre>
+              <% } %>
+              <% if (payload.normalizedInputForDownload) { %>
+                <p class="fiche-muted">Téléchargement (chemin résolu)</p>
+                <pre class="code-block code-block--light"><%= escapeHtml(payload.normalizedInputForDownload) %></pre>
+              <% } %>
+              <% if (payload.bypassExplanation) { %>
+                <p><%= payload.bypassExplanation %></p>
+              <% } %>
+            </div>
+          </div>
+          <div class="fiche-field fiche-field--full">
+            <span class="fiche-label">Environnement technique</span>
+            <ul class="fiche-list">
+              <% if (techEnv.os) { %><li><strong>OS :</strong> <%= techEnv.os %></li><% } %>
+              <% if (techEnv.browser) { %><li><strong>Navigateur :</strong> <%= techEnv.browser %></li><% } %>
+              <% if (Array.isArray(techEnv.tools) && techEnv.tools.length) { %>
+                <li><strong>Outils :</strong> <%= techEnv.tools.join(', ') %></li>
+              <% } %>
+            </ul>
+          </div>
+          <div class="fiche-field fiche-field--full">
+            <span class="fiche-label">Empreinte applicative</span>
+            <p><%= displayFormValue(appFp) || '—' %></p>
+          </div>
+          <div class="fiche-field">
+            <span class="fiche-label">CVE</span>
+            <span class="fiche-value"><%= displayFormValue(bugDetails.cve) || '—' %></span>
+          </div>
+          <div class="fiche-field fiche-field--full">
+            <span class="fiche-label">Impact (court)</span>
+            <span class="fiche-value"><%= displayFormValue(bugDetails.impact) || '—' %></span>
+          </div>
+          <div class="fiche-field fiche-field--full">
+            <span class="fiche-label">IP utilisées</span>
+            <% if (Array.isArray(ipsUsed.values) && ipsUsed.values.length) { %>
+              <ul class="fiche-list"><% ipsUsed.values.forEach(function(ip) { %><li><code><%= ip %></code></li><% }); %></ul>
+            <% } else { %>
+              <span class="fiche-muted">Non renseigné</span>
+            <% } %>
+          </div>
+        </div>
+      </section>
+
+      <section class="card section-card">
+        <h2>Caractéristiques &amp; sévérité</h2>
+        <div class="severity-row">
+          <% if (bugCharacteristics.severityTag) { %>
+            <span class="severity-pill severity-pill--<%= String(bugCharacteristics.severityTag).toLowerCase() %>"><%= bugCharacteristics.severityTag %></span>
+          <% } %>
+          <% if (bugCharacteristics.score != null && bugCharacteristics.score !== '') { %>
+            <span class="cvss-score"><%= bugCharacteristics.score %><span class="cvss-score-suffix"> / 10</span></span>
+          <% } %>
+        </div>
+        <% if (bugCharacteristics.cvssVectorReadonly) { %>
+          <p class="cvss-vector"><code><%= bugCharacteristics.cvssVectorReadonly %></code></p>
+        <% } %>
+
+        <table class="metric-table">
+          <thead><tr><th>Métrique</th><th>Valeur</th></tr></thead>
+          <tbody>
+            <% const metrics = [
+              ['Attack vector', bugCharacteristics.attackVector],
+              ['Privileges required', bugCharacteristics.privilegesRequired],
+              ['Attack complexity', bugCharacteristics.attackComplexity],
+              ['User interaction', bugCharacteristics.userInteraction],
+              ['Scope (CVSS)', bugCharacteristics.scope],
+              ['Integrity', bugCharacteristics.integrity],
+              ['Confidentiality', bugCharacteristics.confidentiality],
+              ['Availability', bugCharacteristics.availability],
+            ];
+            metrics.forEach(function(row) {
+              const label = row[0];
+              const obj = row[1];
+              const val = obj && typeof obj === 'object' ? displayFormValue(obj.value !== undefined ? obj : '') : '';
+              if (!val) return;
+            %>
+            <tr>
+              <td><%= label %></td>
+              <td><%= val %></td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card section-card">
+        <h2>Rédaction (aperçu formulaire)</h2>
+        <p class="h2-report-red">Report title</p>
+        <p class="report-title-block"><%= bugDescription.reportTitle || '' %></p>
+
+        <p class="h2-report-red">Description</p>
+        <div class="markdown-body"><%- markdownToHtml(bugDescription.descriptionMarkdown) %></div>
+
+        <p class="h2-report-red">Exploitation</p>
+        <div class="markdown-body"><%- markdownToHtml(bugDescription.exploitationMarkdown) %></div>
+
+        <p class="h2-report-red">PoC</p>
+        <div class="markdown-body"><%- markdownToHtml(bugDescription.pocMarkdown) %></div>
+
+        <p class="h2-report-red">Risk</p>
+        <div class="markdown-body"><%- markdownToHtml(bugDescription.riskMarkdown) %></div>
+
+        <p class="h2-report-red">Remediation</p>
+        <div class="markdown-body"><%- markdownToHtml(bugDescription.remediationMarkdown) %></div>
+      </section>
+
+      <% if (bugChain && bugChain.enabled) { %>
+        <section class="card section-card">
+          <h2>Bug chain</h2>
+          <% var linked = Array.isArray(bugChain.linkedBugs) ? bugChain.linkedBugs : []; %>
+          <% if (linked.length) { %>
+            <ul class="bug-chain-list">
+              <% linked.forEach(function(b) { %>
+                <li class="bug-chain-card">
+                  <h3 class="bug-chain-title"><%= b.title || 'Bug lié' %></h3>
+                  <% if (b.description) { %><p><%= b.description %></p><% } %>
+                </li>
+              <% }); %>
+            </ul>
+          <% } else { %>
+            <p class="fiche-muted">Aucune autre vulnérabilité chaînée n’est renseignée.</p>
+          <% } %>
+        </section>
+      <% } %>
+    </div>
+  </body>
+</html>

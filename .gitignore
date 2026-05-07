@@ -48,4 +48,4 @@ $RECYCLE.BIN/
 
 .env
 
-localdocs/**
+/localdocs/**

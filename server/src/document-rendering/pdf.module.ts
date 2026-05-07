@@ -14,10 +14,13 @@ import { ICvRepository } from './application/ports/cv-repository.port';
 import { ITemplateRenderer } from './application/ports/template-renderer.port';
 import { IPdfGenerator } from './application/ports/pdf-generator.port';
 import { IPdfStorage } from './application/ports/pdf-storage.port';
+import { I_REPORT_REPOSITORY, IReportRepository } from './application/ports/report-repository.port';
+import { PreviewReportHtmlQuery } from './application/queries/preview-report-html.query';
+import { GenerateReportPdfCommand } from './application/commands/generate-report-pdf.command';
 
 @Module({
   controllers: [PdfController],
-  exports: [I_CV_REPOSITORY],
+  exports: [I_CV_REPOSITORY, I_REPORT_REPOSITORY],
   providers: [
     {
       provide: I_CV_REPOSITORY,
@@ -26,6 +29,10 @@ import { IPdfStorage } from './application/ports/pdf-storage.port';
     {
       provide: I_TEMPLATE_RENDERER,
       useClass: EjsTemplateRendererAdapter,
+    },
+    {
+      provide: I_REPORT_REPOSITORY,
+      useClass: JsonCvRepositoryAdapter,
     },
     {
       provide: I_PDF_GENERATOR,
@@ -55,6 +62,31 @@ import { IPdfStorage } from './application/ports/pdf-storage.port';
       ) =>
         new GenerateCvPdfCommand(
           cvRepository,
+          templateRenderer,
+          pdfGenerator,
+          pdfStorage,
+        ),
+    },
+    {
+      provide: PreviewReportHtmlQuery,
+      inject: [I_REPORT_REPOSITORY, I_TEMPLATE_RENDERER],
+      useFactory: (
+        reportRepository: IReportRepository,
+        templateRenderer: ITemplateRenderer,
+      ) =>
+        new PreviewReportHtmlQuery(reportRepository, templateRenderer),
+    },
+    {
+      provide: GenerateReportPdfCommand,
+      inject: [I_REPORT_REPOSITORY, I_TEMPLATE_RENDERER, I_PDF_GENERATOR, I_PDF_STORAGE],
+      useFactory: (
+        reportRepository: IReportRepository,
+        templateRenderer: ITemplateRenderer,
+        pdfGenerator: IPdfGenerator,
+        pdfStorage: IPdfStorage,
+      ) =>
+        new GenerateReportPdfCommand(
+          reportRepository,
           templateRenderer,
           pdfGenerator,
           pdfStorage,
