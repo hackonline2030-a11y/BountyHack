@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import type { JwtPayload } from 'jsonwebtoken';
-import { GetUserByUidQuery } from '../application/queries/get-user-by-uid.query';
+import { GetUserByUidQuery } from '../../../application/queries/get-user-by-uid.query';
 
 type SupportedJwtPayload = JwtPayload & {
   uid?: string;

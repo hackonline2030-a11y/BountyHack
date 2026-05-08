@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UserRecord } from '../../users/models';
+import { UserRecord } from '../../../../../users/models';
 
 @Injectable()
 export class JwtInMemoryRegistry {

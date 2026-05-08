@@ -1,8 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
-import type { AuthResponse } from '../dto/auth-common.dto';
-import { LoginWithPasswordCommand } from '../application/commands/login-with-password.command';
+import type { AuthResponse } from '../../../../dto/auth-common.dto';
+import { LoginWithPasswordCommand } from '../../../../application/commands/login-with-password.command';
 
 @Injectable()
 export class PassportJwtLocalStrategy extends PassportStrategy(

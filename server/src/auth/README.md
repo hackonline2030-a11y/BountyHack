@@ -47,8 +47,8 @@ Mode recommande pour l'auth email/mot de passe locale.
 Fichiers principaux:
 
 - `controllers/passport-jwt-auth.controller.ts`
-- `adapters/passport-jwt-local.strategy.ts`
-- `adapters/passport-jwt.strategy.ts`
+- `adapters/passport-jwt/strategies/local/passport-jwt-local.strategy.ts`
+- `adapters/passport-jwt/strategies/passport-jwt.strategy.ts`
 - `passport-jwt-auth.guard.ts`
 - `auth.decorator.ts`
 
@@ -81,7 +81,7 @@ Mode reserve aux tokens Firebase.
 
 Fichiers principaux:
 
-- `adapters/firebase-auth.repository.ts`
+- `adapters/firebase-auth/firebase-auth.repository.ts`
 - `firebase-auth.middleware.ts`
 - `firebase-auth.guard.ts`
 
@@ -111,8 +111,8 @@ Toute nouvelle condition de mode doit passer par `config/auth-env.ts` (pas de ch
 La couverture auth actuelle cible le mode `PASSPORT_JWT` avec mocks/stubs (sans base reelle):
 
 - `controllers/passport-jwt-auth.controller.spec.ts`
-- `adapters/passport-jwt-local.strategy.spec.ts`
-- `adapters/passport-jwt.strategy.spec.ts`
+- `adapters/passport-jwt/strategies/local/passport-jwt-local.strategy.spec.ts`
+- `adapters/passport-jwt/strategies/passport-jwt.strategy.spec.ts`
 
 Valeurs fake utilisees dans ces tests:
 
