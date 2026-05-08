@@ -3,7 +3,7 @@ import { AuthRepository } from './ports/auth.repository';
 import { FirebaseAuthRepository } from './infra/firebase-auth.repository';
 import { JwtAuthRepository } from './infra/jwt-auth.repository';
 import { forwardRef, Module } from '@nestjs/common';
-import { isFirebaseAuthEnabled } from './config/firebase-env';
+import { isFirebaseAuthEnabled } from './config/auth-env';
 import { OptionalFirebaseModule } from './infra/optional-firebase.module';
 import { JwtAuthController } from './controllers/jwt-auth.controller';
 import { JwtCredentialsService } from './application/jwt-credentials.service';

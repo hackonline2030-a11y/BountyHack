@@ -1,0 +1,25 @@
+{
+  "username": "amaury",
+  "email": "amaury@example.com",
+  "password": "StrongPassword123!"
+}
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMmFlNzUyNjQtNThlZi00MTU4LWFjYTItMDMzYjIyZDU0YjgxIiwiZW1haWwiOiJhbWF1cnlAZXhhbXBsZS5jb20iLCJzdWIiOiIyYWU3NTI2NC01OGVmLTQxNTgtYWNhMi0wMzNiMjJkNTRiODEiLCJpYXQiOjE3NzgxOTQ3MzgsImV4cCI6MTc3ODc5OTUzOH0.Yvd6kuP3FxVu0Ln5Mde7DNYODUKrD2l2rk11sns154c",
+  "user": {
+    "email": "amaury@example.com",
+    "uid": "2ae75264-58ef-4158-aca2-033b22d54b81",
+    "username": "amaury"
+  },
+  "require2FA": false
+}
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMmFlNzUyNjQtNThlZi00MTU4LWFjYTItMDMzYjIyZDU0YjgxIiwiZW1haWwiOiJhbWF1cnlAZXhhbXBsZS5jb20iLCJzdWIiOiIyYWU3NTI2NC01OGVmLTQxNTgtYWNhMi0wMzNiMjJkNTRiODEiLCJpYXQiOjE3NzgxOTUxOTYsImV4cCI6MTc3ODc5OTk5Nn0.8IaPKDtjSzaxF8zxwy0oovIA68VPSauAqNGS7h3NALA",
+  "user": {
+    "email": "amaury@example.com",
+    "uid": "2ae75264-58ef-4158-aca2-033b22d54b81",
+    "username": "amaury"
+  },
+  "require2FA": false
+}

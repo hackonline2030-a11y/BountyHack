@@ -1,0 +1,78 @@
+Bug details
+- bug type (ex: Path Traversal (CWE-22)) > select R
+- scope (slug yesWeHack : https://dojo.../dojo-50) select R | endpoint R
+Endpoint : VERBE HTTP /?action=...&filename=...&expire=...&signature=... (ce qui a permit de découvrir le flag)
+- Vulnerable part R(ex: GET parameter) select - où on a exploité la vul ? | Part name : filename parameter
+- Payload ( Rex: public/%;/my_secret.txt) >> comment j'ai contourner la protection mise en place (script, query, code ...)
+- Technical environment R (OS, browser used, tools used (ex: burpsuit...)) 
+- Application fingerprint (ex: PHP application (custome filestorage), URL encoding, signature_based to access files etc.) > description courte des caractéristiques techniques importante de l'application au regard de la faille
+- CVE
+- Impact (concis : "Access to Unauthorzed resources)
+- IPs used R (avec "get my ip" button)
+
+Bug caracteristics (tag : high 7.0)
+CVSS vector (une chaine en readonly) CVSS:3.1/AV:N/AC....
+Attack vector R : network / adjacent / local / physical
+Priviledges Required R : None, Low, High
+Attack complexity : low / high
+User interaction : None / required
+scope : unchanged | changed (cela nous a t-il fait sortit du scope défini ci-dessus ? autre machine des dojo yeswehack ?)
+Integrity : none, low, high
+confidentiality : none, low, high
+availability: none, low, high
+
+BUG DESCRIPTION
+Report title (text) (ex: Path tranversal on [slug dojo du scope] through [ce qui a permis de réveler la faille comme un query param] via [HTTP verb, dns etc...] lead to [ce qui est vulnérable]
+
+Description (h2 gras et rouge en uppercase)
+Mode Write | Preview du rapport | bouton de select a template (ex: YWH Report Template)
+on peux visualiser en markdown en write et le resultat du markdown en preview
+là on a un text structuré avec du style possible (gras etc.)
+on décris ce qu'est la vulnérabilité et comment l'exploiter
+
+Exploitation (h2 gras et rouge uppercase)
+
+Steps to exploit the vulnérability:
+1. The app generate xyz and verifies 
+--> <code> code </code> (ou ```py [bloc de code] ```)
+bloc de code issue de l'app vulnérable et qui explique cette vulnérabilité
+(lignes ? emplacement ? : il y a pas ça sur la video)
+2. (...)
+
+POC (h2)
+ici on met tout ce qu'il faut pour que quelqu'un puisse tester la vulnérabilité (reproduire l'exploit)
+
+In order to get the secret i made these inputs : (...)
+on y met chaque paramètre d'une query par ex:
+action (ex: sign)
+filename (ex: là ou se trouve le fichier secret vulnérable)
+?action=sign&filename=public[hack pattern here to reach the file]
+Une capture d'écran du résultat obtenu sur le dojo avec les outils > a adapter sur bugbountyapp (= question à, poser la)
+
+on y met en format code les mot clés réservé du code (ex: download, sign, un slug, une key, expire delay etc...)
+After url encoding by our WAF (Web application firewall), we shoud get this as our final string: 
+(...)
+
+surtout : si c'est un CTF on affiche le flag à la fin (il sera aussi à mettre en image dans une capture et en texte la)
+
+RISK (h2)
+
+This vulnerability allows an attacker to ...
+Potential impacts : [list] (ex: leakage of internal application data; potential escalation)
+In real world scenario, this could lead to [list] --> ex: full system compromise, data breach
+
+REMEDIATION (h2)
+To fix this vulnérability ... measures should be implemented : [list]
+
+Attachments (JPEG , PNG, 10 MB max; Videos : mp4 or webm, 100MB max) - live video
+---> ici nos captures
+
+BUG CHAIN
+--> si on peux le relier avec un autre bug/vulnérabilité découvert dans l'app 
+titre (de l'autre bug)
+description
+
+submit
+là aussi write | preview 
+
+

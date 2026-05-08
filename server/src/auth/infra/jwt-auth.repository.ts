@@ -130,7 +130,7 @@ export class JwtAuthRepository implements AuthRepository {
     }
 
     const existing = await this.userModel.findOne({ email });
-    if (!existing) {
+    if (existing) {
       throw new ConflictException('Email already registered');
     }
 
