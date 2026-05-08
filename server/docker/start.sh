@@ -557,7 +557,7 @@ if [[ "$USE_MONGO" == true ]]; then
 elif [[ "$USE_POSTGRES" == true ]]; then
   echo "💡 Préparer DATABASE_URL Postgres côté hôte (psql) vs Docker (host=postgres) selon où tourne le process Node."
 else
-  echo "💡 Vérifie DATABASE_NAME / Firebase / IN-MEMORY dans .env (pas de base Docker pour ce mode)."
+  echo "💡 Vérifie DATABASE_NAME / IN-MEMORY dans .env (pas de base Docker pour ce mode)."
 fi
 echo ""
 echo "🧾 Logs:"

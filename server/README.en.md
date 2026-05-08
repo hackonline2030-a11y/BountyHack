@@ -84,14 +84,15 @@ Both use the same Nx workspace source of truth.
 
 **`AUTH_TYPE`** and **`DATABASE_NAME`** work together. Important rule:
 
-- `AUTH_TYPE` is now fixed to **`PASSPORT_JWT`**.
+- The auth architecture is extensible through `AUTH_TYPE`, but the active implementation is **`PASSPORT_JWT`**.
+- Database options remain multiple via `DATABASE_NAME` (`MONGODB`, `POSTGRESQL`, `POSTGRESQL_PRISMA`, `IN-MEMORY`).
 - With **`DATABASE_NAME=MONGODB`**, users (email, password hash, profile) are stored in the Mongo database from **`DATABASE_URL`**.
 
 See the comments in **`.env.example`** as well.
 
-#### `AUTH_TYPE` switch and `auth-env.ts`
+#### `AUTH_TYPE` configuration and `auth-env.ts`
 
-The authentication mode switch is centralized in **`src/auth/config/auth-env.ts`**.
+Authentication configuration is centralized in **`src/auth/config/auth-env.ts`**.
 
 - This file reads and normalizes environment variables (`AUTH_TYPE`, `DATABASE_NAME`).
 - It centralizes auth/database configuration choices to avoid scattered checks across Nest modules.
@@ -100,7 +101,7 @@ Supported value for **`AUTH_TYPE`**:
 
 - `PASSPORT_JWT`: Passport/Nest JWT flow (`passport-jwt`).
 
-Recommendation: any new authentication-mode condition should go through **`auth-env.ts`** instead of direct `process.env.AUTH_TYPE` checks.
+Recommendation: any new authentication-configuration condition should go through **`auth-env.ts`** instead of direct `process.env.AUTH_TYPE` checks.
 
 ---
 
@@ -123,9 +124,9 @@ Details: [`docker/README.md`](docker/README.md#prisma-migrations-et-démo) and *
 
 Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.dev.yaml`. Full guide: [`docker/README.md`](docker/README.md).
 
-**PostgreSQL + pgweb** start when **`DATABASE_NAME`** is **`POSTGRESQL`** or **`POSTGRESQL_PRISMA`**. **MongoDB + mongo-express** start when **`DATABASE_NAME=MONGODB`**. With `FIREBASE`, `IN-MEMORY`, etc., those database containers are not started. Compose **profiles** (`mongodb`, `pg`) keep these sets separate.
+**PostgreSQL + pgweb** start when **`DATABASE_NAME`** is **`POSTGRESQL`** or **`POSTGRESQL_PRISMA`**. **MongoDB + mongo-express** start when **`DATABASE_NAME=MONGODB`**. With `IN-MEMORY`, those database containers are not started. Compose **profiles** (`mongodb`, `pg`) keep these sets separate.
 
-1. Environment file: follow **[Installation](#installation)** above (`server/.env` from `server/.env.example`). Set `DATABASE_NAME` (`MONGODB`, `POSTGRESQL`, `POSTGRESQL_PRISMA`, `FIREBASE`, `IN-MEMORY`, …), plus `JWT_SECRET`, CORS, etc.
+1. Environment file: follow **[Installation](#installation)** above (`server/.env` from `server/.env.example`). Set `DATABASE_NAME` (`MONGODB`, `POSTGRESQL`, `POSTGRESQL_PRISMA`, `IN-MEMORY`, …), plus `JWT_SECRET`, CORS, etc.
 
    **`DATABASE_URL`:** `.env.example` defaults to **PostgreSQL** (e.g. `postgres://…@postgres:5432/…` when the API runs in Docker). **API in Docker** + **`pg`** profile: host **`postgres`** on the compose network (not `localhost` from the api container). **API on the host** (`nx serve`) + Postgres in Docker: URL to **`localhost`** / **`127.0.0.1`** and **`POSTGRES_HOST_PORT`**. For **Mongo**, see `.env.example`; in Docker, host **`mongodb`** (e.g. `mongodb://mongodb:27017/bugbountyapp`).
 
@@ -144,7 +145,7 @@ Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.
    - `./docker/start.sh api-stop` (or `./docker/start.sh stop-api`): stops the API and, depending on **`DATABASE_NAME`**, the matching Docker DB stack (**MongoDB** when `MONGODB`, **Postgres + pgweb** when **`POSTGRESQL`** or **`POSTGRESQL_PRISMA`**).
    - If `DATABASE_NAME=MONGODB`, the script applies profile **`mongodb`** and targets `mongodb` + `api`.
    - If `DATABASE_NAME=POSTGRESQL` or `POSTGRESQL_PRISMA`, the script applies profile **`pg`** and orchestrates **`postgres`**, **`pgweb`**, and **`api`** depending on the command (`api-restart` only brings up **`postgres`** + **`api`** — see `start.sh`).
-   - Otherwise (`IN-MEMORY`, `FIREBASE`, …), only **`api`** is affected (no compose DB containers).
+   - Otherwise (`IN-MEMORY`, …), only **`api`** is affected (no compose DB containers).
    - After `./docker/start.sh` (`up`), the script tails API logs in the terminal (`logs -f api`).
      - Exit live tail: `Ctrl+C` (containers keep running).
      - Disable this behavior: `API_FOLLOW_LOGS=0 ./docker/start.sh`.
@@ -183,7 +184,7 @@ Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.
    docker compose -f docker/compose.dev.yaml --profile pg up --build -d
    ```
 
-   **Without** a Compose DB (e.g. Firebase / in-memory):
+   **Without** a Compose DB (e.g. in-memory):
 
    ```sh
    docker compose -f docker/compose.dev.yaml up --build -d
@@ -209,10 +210,6 @@ With the **Mongo** profile, ensure ports **27017**, **3003** (or **`API_HOST_POR
 **Logs (Postgres mode):** `cd docker && docker compose -f compose.dev.yaml --profile pg logs -f`
 
 **Logs (API only):** `cd docker && docker compose -f compose.dev.yaml logs -f`
-
-**Firebase:** Compose does not provision Firebase. If `DATABASE_NAME=FIREBASE` (or you rely on Firebase for auth/data), create a project in the [Firebase console](https://console.firebase.google.com/), add credentials, and configure `.env` (mount or supply `FIREBASE_KEY_PATH` in the container if needed). This is separate from the optional Mongo services above.
-
----
 
 ### 2. Manual setup (Node on the host)
 

@@ -84,14 +84,15 @@ Les deux utilisent la même source de vérité Nx du workspace.
 
 Les variables **`AUTH_TYPE`** et **`DATABASE_NAME`** se combinent. Point important :
 
-- `AUTH_TYPE` est maintenant fixe sur **`PASSPORT_JWT`**.
+- L'architecture auth est extensible via `AUTH_TYPE`, mais l'implémentation active est **`PASSPORT_JWT`**.
+- Les options de base de donnees restent multiples via `DATABASE_NAME` (`MONGODB`, `POSTGRESQL`, `POSTGRESQL_PRISMA`, `IN-MEMORY`).
 - Avec **`DATABASE_NAME=MONGODB`**, les utilisateurs (email, hash de mot de passe, profil) sont stockés dans la base Mongo définie par **`DATABASE_URL`**.
 
 Voir aussi les commentaires dans **`.env.example`**.
 
-#### Switch `AUTH_TYPE` et fichier `auth-env.ts`
+#### Configuration `AUTH_TYPE` et fichier `auth-env.ts`
 
-Le switch d'authentification est centralise dans **`src/auth/config/auth-env.ts`**.
+La configuration d'authentification est centralisee dans **`src/auth/config/auth-env.ts`**.
 
 - Ce fichier lit et normalise les variables d'environnement (`AUTH_TYPE`, `DATABASE_NAME`).
 - Il centralise les choix de configuration auth/database pour eviter des checks disperses dans les modules Nest.
@@ -100,7 +101,7 @@ Valeur prise en charge pour **`AUTH_TYPE`** :
 
 - `PASSPORT_JWT` : flux JWT via Passport/Nest (`passport-jwt`).
 
-Recommandation : toute nouvelle condition liee au mode d'authentification doit passer par **`auth-env.ts`** plutot que des checks directs sur `process.env.AUTH_TYPE`.
+Recommandation : toute nouvelle condition liee a la configuration d'authentification doit passer par **`auth-env.ts`** plutot que des checks directs sur `process.env.AUTH_TYPE`.
 
 ---
 
@@ -179,9 +180,9 @@ Guide détaillé (installation Docker, `start.sh`, équivalents `docker compose`
 
 Construit et exécute toujours l’**API** à partir de `docker/Dockerfile`, via `docker/compose.dev.yaml`.
 
-**PostgreSQL + pgweb** sont démarrés si **`DATABASE_NAME`** vaut **`POSTGRESQL`** ou **`POSTGRESQL_PRISMA`** dans **`server/.env`** (voir `.env.example`). **MongoDB + mongo-express** le sont si `DATABASE_NAME=MONGODB`. Avec `FIREBASE`, `IN-MEMORY`, etc., les services de base Docker concernés ne sont pas lancés. Les **profils** Compose (`mongodb`, `pg`) séparent ces jeux de conteneurs.
+**PostgreSQL + pgweb** sont démarrés si **`DATABASE_NAME`** vaut **`POSTGRESQL`** ou **`POSTGRESQL_PRISMA`** dans **`server/.env`** (voir `.env.example`). **MongoDB + mongo-express** le sont si `DATABASE_NAME=MONGODB`. Avec `IN-MEMORY`, les services de base Docker concernés ne sont pas lancés. Les **profils** Compose (`mongodb`, `pg`) séparent ces jeux de conteneurs.
 
-1. Fichier d’environnement : comme indiqué en **[Installation](#installation)** (`server/.env` depuis `server/.env.example`). Renseigne `DATABASE_NAME` selon ton backend (`MONGODB`, `POSTGRESQL`, `POSTGRESQL_PRISMA`, `FIREBASE`, `IN-MEMORY`, …), ainsi que `JWT_SECRET`, CORS, etc.
+1. Fichier d’environnement : comme indiqué en **[Installation](#installation)** (`server/.env` depuis `server/.env.example`). Renseigne `DATABASE_NAME` selon ton backend (`MONGODB`, `POSTGRESQL`, `POSTGRESQL_PRISMA`, `IN-MEMORY`, …), ainsi que `JWT_SECRET`, CORS, etc.
 
    **`DATABASE_URL` :** `.env.example` part sur **PostgreSQL** (ex. `postgres://…@postgres:5432/…` pour l’API dans Docker). **API dans Docker** + profil **pg** : hôte **`postgres`** sur le réseau Compose (pas `localhost` depuis le conteneur). **API sur l’hôte** (`nx serve`) + Postgres dans Docker : URL vers **`localhost`** (ou `127.0.0.1`) et le port **`POSTGRES_HOST_PORT`**. Pour **Mongo** : voir `.env.example` ; dans Docker, hôte **`mongodb`** (ex. `mongodb://mongodb:27017/bugbountyapp`).
 
@@ -200,7 +201,7 @@ Construit et exécute toujours l’**API** à partir de `docker/Dockerfile`, via
    - `./docker/start.sh api-stop` (ou `./docker/start.sh stop-api`) : arrête l’API et, selon **`DATABASE_NAME`**, la base Docker associée (**MongoDB** si `MONGODB`, **Postgres + pgweb** si **`POSTGRESQL`** ou **`POSTGRESQL_PRISMA`**).
    - Si `DATABASE_NAME=MONGODB`, le script applique le profil **`mongodb`** et cible `mongodb` + `api`.
    - Si `DATABASE_NAME=POSTGRESQL` ou `POSTGRESQL_PRISMA`, le script applique le profil **`pg`** et enchaîne **`postgres`**, **`pgweb`** et **`api`** selon la commande (`api-restart` ne relance que **`postgres`** + **`api`** — voir `start.sh`).
-   - Sinon (`IN-MEMORY`, `FIREBASE`, …), seules les opérations sur **`api`** sont concernées (pas de conteneur de base du compose).
+   - Sinon (`IN-MEMORY`, …), seules les opérations sur **`api`** sont concernées (pas de conteneur de base du compose).
    - Après `./docker/start.sh` (`up`), le script suit directement les logs API en live dans le terminal (`logs -f api`).
      - Quitter l’affichage live : `Ctrl+C` (les conteneurs continuent de tourner).
      - Désactiver ce comportement : `API_FOLLOW_LOGS=0 ./docker/start.sh`.
@@ -236,7 +237,7 @@ Construit et exécute toujours l’**API** à partir de `docker/Dockerfile`, via
    docker compose -f docker/compose.dev.yaml --profile pg up --build -d
    ```
 
-   **Sans** base Docker Compose (ex. Firebase / en mémoire) :
+   **Sans** base Docker Compose (ex. en mémoire) :
 
    ```sh
    docker compose -f docker/compose.dev.yaml up --build -d
@@ -262,10 +263,6 @@ En mode profil **Mongo**, vérifie que les ports **27017**, **3003** (ou **`API_
 **Journaux (mode Postgres) :** `cd docker && docker compose -f compose.dev.yaml --profile pg logs -f`
 
 **Journaux (API seule) :** `cd docker && docker compose -f compose.dev.yaml logs -f`
-
-**Firebase :** Compose ne provisionne pas Firebase. Si `DATABASE_NAME=FIREBASE` (ou si tu t’appuies sur Firebase pour l’auth / les données), crée un projet dans la [console Firebase](https://console.firebase.google.com/), ajoute les identifiants et configure `.env` (montage ou fourniture de `FIREBASE_KEY_PATH` dans le conteneur si besoin). C’est indépendant des services Mongo optionnels ci-dessus.
-
----
 
 ### 2. Installation manuelle (Node sur l’hôte)
 
