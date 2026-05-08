@@ -84,8 +84,8 @@ Both use the same Nx workspace source of truth.
 
 **`AUTH_TYPE`** and **`DATABASE_NAME`** work together. Important rule:
 
-- If you use **`DATABASE_NAME=MONGODB`**, you should normally set **`AUTH_TYPE=PASSPORT_JWT`** unless you already have a **working Firebase setup** (Firebase Admin on the API, credentials, **user accounts in Firebase Authentication** managed in Firebase / the console). Without that, **`AUTH_TYPE=FIREBASE`** does **not** give you a standard email/password sign-up and sign-in flow backed by Mongo: **`POST /api/auth/register`** and **`POST /api/auth/login`** are not enabled, and users are not created in Mongo for that Passport JWT flow.
-- **`AUTH_TYPE=PASSPORT_JWT`** with Mongo: users (email, password hash, profile) are stored in the Mongo database from **`DATABASE_URL`**.
+- `AUTH_TYPE` is now fixed to **`PASSPORT_JWT`**.
+- With **`DATABASE_NAME=MONGODB`**, users (email, password hash, profile) are stored in the Mongo database from **`DATABASE_URL`**.
 
 See the comments in **`.env.example`** as well.
 
@@ -94,13 +94,11 @@ See the comments in **`.env.example`** as well.
 The authentication mode switch is centralized in **`src/auth/config/auth-env.ts`**.
 
 - This file reads and normalizes environment variables (`AUTH_TYPE`, `DATABASE_NAME`).
-- It exposes explicit helpers (`isFirebaseAuthEnabled`, `isPassportJwtAuthEnabled`, etc.) to avoid duplicating string checks across Nest modules.
-- It keeps Firebase as one option among others (not as the global source of truth).
+- It centralizes auth/database configuration choices to avoid scattered checks across Nest modules.
 
-Supported values for **`AUTH_TYPE`**:
+Supported value for **`AUTH_TYPE`**:
 
 - `PASSPORT_JWT`: Passport/Nest JWT flow (`passport-jwt`).
-- `FIREBASE`: Firebase Admin/Identity Toolkit auth flow.
 
 Recommendation: any new authentication-mode condition should go through **`auth-env.ts`** instead of direct `process.env.AUTH_TYPE` checks.
 

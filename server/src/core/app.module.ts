@@ -1,8 +1,5 @@
 import {
-  MiddlewareConsumer,
   Module,
-  NestModule,
-  RequestMethod,
 } from '@nestjs/common';
 
 import { AppService } from './app.service';
@@ -10,7 +7,6 @@ import { AppService } from './app.service';
 import { PingModule } from '../ping/ping.module';
 
 import { AuthModule } from '../auth/auth.module';
-import { FirebaseAuthMiddleware } from '../auth/firebase-auth.middleware';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -21,7 +17,6 @@ import { CommonModule } from './common.module';
 import { AppController } from './app.controller';
 import { variables } from '../shared/variables.config';
 import { PrismaModule } from '../database/prisma.module';
-import { isFirebaseAuthEnabled } from '../auth/config/auth-env';
 
 const prismaImports =
   variables.database === 'POSTGRESQL_PRISMA' ? [PrismaModule] : [];
@@ -52,13 +47,4 @@ const mongooseRoot =
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements NestModule {
-  public configure(consumer: MiddlewareConsumer) {
-    if (!isFirebaseAuthEnabled()) {
-      return;
-    }
-    consumer
-      .apply(FirebaseAuthMiddleware)
-      .forRoutes({ path: '*path', method: RequestMethod.ALL });
-  }
-}
+export class AppModule {}

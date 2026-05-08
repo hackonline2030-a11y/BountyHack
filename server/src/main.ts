@@ -88,8 +88,6 @@ async function bootstrap() {
   await app.listen(variables.port);
   console.log("\x1b[36m *************************************** \n 🌞 API - Version 1.0.0 \n 🏡 Architecture : hexagonale \n *************************************** ");
   const databaseAlternativeByCurrent: Record<string, string> = {
-    MONGODB: 'FIREBASE',
-    FIREBASE: 'MONGODB',
     'IN-MEMORY': 'MONGODB',
   };
   const databaseAlternativeValue = databaseAlternativeByCurrent[variables.database];
@@ -105,7 +103,6 @@ async function bootstrap() {
   const authType = (process.env.AUTH_TYPE ?? 'PASSPORT_JWT').toUpperCase();
   const authTypeMessages: Record<string, string> = {
     PASSPORT_JWT: 'Auth provider configured: JWT via Passport (AUTH_TYPE=PASSPORT_JWT).',
-    FIREBASE: 'Auth provider configured: FIREBASE (AUTH_TYPE=FIREBASE).',
   };
   const authTypeMessage =
     authTypeMessages[authType] ??

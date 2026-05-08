@@ -1,6 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { PassportJwtStrategy } from './strategies/passport-jwt.strategy';
-import { GetUserByUidQuery } from '../../application/queries/get-user-by-uid.query';
+import { PassportJwtStrategy } from './passport-jwt.strategy';
+import { GetUserByUidQuery } from '../../../application/queries/get-user-by-uid.query';
 
 describe('PassportJwtStrategy', () => {
   let strategy: PassportJwtStrategy;

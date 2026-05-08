@@ -1,15 +1,10 @@
-import { FirebaseAuthGuard } from './firebase-auth.guard';
 import { forwardRef, Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 
 import { variables } from '../shared/variables.config';
 import { UserModule } from '../users/user.module';
 
-import { isFirebaseAuthEnabled } from './config/auth-env';
 import { AuthRepository } from './ports/auth.repository';
-
-import { FirebaseAuthRepository } from './adapters/firebase-auth/firebase-auth.repository';
-import { OptionalFirebaseModule } from './adapters/firebase-auth/optional-firebase.module';
 import { PassportJwtAuthRepository } from './adapters/passport-jwt/passport-jwt-auth.repository';
 import { PassportJwtLocalStrategy } from './adapters/passport-jwt/strategies/local/passport-jwt-local.strategy';
 import { PassportJwtStrategy } from './adapters/passport-jwt/strategies/passport-jwt.strategy';
@@ -28,32 +23,25 @@ import { GetUserFromTokenQuery } from './application/queries/get-user-from-token
 import { PassportJwtAuthController } from './controllers/passport-jwt-auth.controller';
 import { PassportJwtAuthGuard } from './passport-jwt-auth.guard';
 
-const firebaseEnabled = isFirebaseAuthEnabled();
-const passportEnabled = !firebaseEnabled;
 const usesPersistedJwtStore =
   variables.database === 'MONGODB' ||
   variables.database === 'POSTGRESQL' ||
   variables.database === 'POSTGRESQL_PRISMA';
 
 const authImports = [
-  OptionalFirebaseModule.register(),
-  ...(passportEnabled ? [PassportModule] : []),
-  ...(passportEnabled && usesPersistedJwtStore
+  PassportModule,
+  ...(usesPersistedJwtStore
     ? [forwardRef(() => UserModule)]
     : []),
 ];
 
-const authControllers = passportEnabled ? [PassportJwtAuthController] : [];
+const authControllers = [PassportJwtAuthController];
 
 const coreProviders = [
-  FirebaseAuthGuard,
   {
     provide: AuthRepository,
-    useClass: firebaseEnabled
-      ? FirebaseAuthRepository
-      : PassportJwtAuthRepository,
+    useClass: PassportJwtAuthRepository,
   },
-  FirebaseAuthRepository,
   PassportJwtAuthRepository,
   PassportJwtTokenService,
   InMemoryPassportJwtRepository,
@@ -64,27 +52,21 @@ const coreProviders = [
   LoginWithPasswordCommand,
   GetUserByUidQuery,
   GetUserFromTokenQuery,
+  JwtInMemoryRegistry,
+  PassportJwtLocalStrategy,
+  PassportJwtStrategy,
+  PassportJwtAuthGuard,
 ];
 
-const passportProviders = passportEnabled
-  ? [
-      JwtInMemoryRegistry,
-      PassportJwtLocalStrategy,
-      PassportJwtStrategy,
-      PassportJwtAuthGuard,
-    ]
-  : [];
-
 const authExports = [
-  FirebaseAuthGuard,
   AuthRepository,
-  ...(passportEnabled ? [JwtInMemoryRegistry] : []),
+  JwtInMemoryRegistry,
 ];
 
 @Module({
   imports: authImports,
   controllers: authControllers,
-  providers: [...coreProviders, ...passportProviders],
+  providers: coreProviders,
   exports: authExports,
 })
 export class AuthModule {}

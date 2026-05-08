@@ -84,8 +84,8 @@ Les deux utilisent la même source de vérité Nx du workspace.
 
 Les variables **`AUTH_TYPE`** et **`DATABASE_NAME`** se combinent. Point important :
 
-- Si tu utilises **`DATABASE_NAME=MONGODB`**, fixe en général **`AUTH_TYPE=PASSPORT_JWT`**, sauf si tu as déjà un **projet Firebase** opérationnel (Firebase Admin sur l’API, identifiants, **comptes dans Firebase Authentication** gérés côté Firebase / console). Sans ce socle, **`AUTH_TYPE=FIREBASE`** ne te permet pas un parcours inscription / connexion email–mot de passe classique vers Mongo : les routes **`POST /api/auth/register`** et **`POST /api/auth/login`** ne sont pas exposées, et les utilisateurs ne sont pas créés dans Mongo comme pour le flux Passport JWT.
-- **`AUTH_TYPE=PASSPORT_JWT`** avec Mongo : les utilisateurs (email, hash de mot de passe, profil) sont stockés dans la base Mongo définie par **`DATABASE_URL`**.
+- `AUTH_TYPE` est maintenant fixe sur **`PASSPORT_JWT`**.
+- Avec **`DATABASE_NAME=MONGODB`**, les utilisateurs (email, hash de mot de passe, profil) sont stockés dans la base Mongo définie par **`DATABASE_URL`**.
 
 Voir aussi les commentaires dans **`.env.example`**.
 
@@ -94,13 +94,11 @@ Voir aussi les commentaires dans **`.env.example`**.
 Le switch d'authentification est centralise dans **`src/auth/config/auth-env.ts`**.
 
 - Ce fichier lit et normalise les variables d'environnement (`AUTH_TYPE`, `DATABASE_NAME`).
-- Il expose des helpers explicites (`isFirebaseAuthEnabled`, `isPassportJwtAuthEnabled`, etc.) pour eviter de dupliquer des comparaisons de chaines dans les modules Nest.
-- Il garde la logique Firebase uniquement comme une option parmi d'autres (et non comme source de verite globale).
+- Il centralise les choix de configuration auth/database pour eviter des checks disperses dans les modules Nest.
 
-Valeurs prises en charge pour **`AUTH_TYPE`** :
+Valeur prise en charge pour **`AUTH_TYPE`** :
 
 - `PASSPORT_JWT` : flux JWT via Passport/Nest (`passport-jwt`).
-- `FIREBASE` : auth via Firebase Admin/Identity Toolkit.
 
 Recommandation : toute nouvelle condition liee au mode d'authentification doit passer par **`auth-env.ts`** plutot que des checks directs sur `process.env.AUTH_TYPE`.
 
