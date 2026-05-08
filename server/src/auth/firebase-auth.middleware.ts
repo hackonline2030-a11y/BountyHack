@@ -1,11 +1,10 @@
 import {
-  Inject,
   Injectable,
   Logger,
   NestMiddleware,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthRepository } from './ports/auth.repository';
+import { GetUserFromTokenQuery } from './application/queries/get-user-from-token.query';
 
 export interface TokenDetails {
   email: string;
@@ -21,9 +20,7 @@ export interface RequestModel extends Request {
 export class FirebaseAuthMiddleware implements NestMiddleware {
   private readonly logger = new Logger(FirebaseAuthMiddleware.name);
 
-  constructor(
-    @Inject(AuthRepository) private readonly repository: AuthRepository
-  ) {}
+  constructor(private readonly getUserFromToken: GetUserFromTokenQuery) {}
 
   public async use(
     req: RequestModel,
@@ -48,7 +45,7 @@ export class FirebaseAuthMiddleware implements NestMiddleware {
   async authenticate(authToken: string): Promise<TokenDetails> {
     const tokenString = this.getToken(authToken);
     try {
-      return this.repository.getUserFromToken(tokenString);
+      return this.getUserFromToken.execute(tokenString);
     } catch (err) {
       this.logger.error(`error while authenticate request ${err.message}`);
       throw new UnauthorizedException(err.message);

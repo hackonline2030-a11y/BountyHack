@@ -4,7 +4,7 @@ import { UsersController } from './users.controller';
 import { AddUsername } from '../commands/add-username';
 import { GetUserByIdQuery } from '../queries/get-user-by-id';
 import { UserProfileResponseDto } from '../dto/user.dto';
-import { RequestWithUser } from '../../auth/model/request-with-user';
+import { RequestWithIdentity } from '../../auth/adapters/http/request-with-identity';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -34,7 +34,7 @@ describe('UsersController', () => {
   it('should create user profile for authenticated user', async () => {
     const request = {
       user: { uid: 'uid-1', email: 'test@example.com' },
-    } as RequestWithUser;
+    } as RequestWithIdentity;
 
     await expect(
       controller.create(request, { username: 'test-user' })
@@ -49,7 +49,7 @@ describe('UsersController', () => {
   it('should throw unauthorized when request user has no uid', async () => {
     const request = {
       user: { uid: '', email: 'test@example.com' },
-    } as RequestWithUser;
+    } as RequestWithIdentity;
 
     await expect(
       controller.create(request, { username: 'test-user' })
@@ -62,7 +62,7 @@ describe('UsersController', () => {
 
     const request = {
       user: { uid: 'uid-1', email: 'test@example.com' },
-    } as RequestWithUser;
+    } as RequestWithIdentity;
 
     const result = await controller.getCurrentUser(request);
 

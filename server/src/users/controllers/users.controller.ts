@@ -19,7 +19,7 @@ import {
   ApiHttpUnauthorized,
 } from '../../core/dto/api-http-responses';
 import { ApiValidationBadRequest } from '../../core/dto/http-validation-error.dto';
-import { RequestWithUser } from '../../auth/model/request-with-user';
+import { RequestWithIdentity } from '../../auth/adapters/http/request-with-identity';
 import { Auth } from '../../auth/auth.decorator';
 
 import { AddUsername } from '../commands/add-username';
@@ -28,7 +28,7 @@ import {
   UserProfileResponseDto,
 } from '../dto/user.dto';
 import { GetUserByIdQuery } from '../queries/get-user-by-id';
-import { UserDetails } from '../../auth/model/user-details';
+import { Identity } from '../../auth/domain/models/identity';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -51,14 +51,14 @@ export class UsersController {
   @ApiHttpUnauthorized('Missing or invalid bearer token.')
   @ApiHttpInternalServerError('Unexpected server error while creating profile.')
   async create(
-    @Req() request: RequestWithUser,
+    @Req() request: RequestWithIdentity,
     @Body() body: CreateUserProfileBodyDto
   ) {
-    const user = this.getAuthenticatedUser(request);
+    const identity = this.getAuthenticatedIdentity(request);
 
     try {
       const data = {
-        uid: user.uid,
+        uid: identity.uid,
         username: body.username,
       };
 
@@ -83,12 +83,12 @@ export class UsersController {
   @ApiHttpUnauthorized('Missing or invalid bearer token.')
   @ApiHttpInternalServerError('Unexpected server error while loading profile.')
   async getCurrentUser(
-    @Req() request: RequestWithUser
+    @Req() request: RequestWithIdentity
   ): Promise<UserProfileResponseDto> {
-    const user = this.getAuthenticatedUser(request);
+    const identity = this.getAuthenticatedIdentity(request);
 
     try {
-      const record = await this.getUserByIdQuery.execute(user.uid);
+      const record = await this.getUserByIdQuery.execute(identity.uid);
       return plainToInstance(UserProfileResponseDto, record, {
         excludeExtraneousValues: true,
       });
@@ -98,7 +98,7 @@ export class UsersController {
     }
   }
 
-  private getAuthenticatedUser(request: RequestWithUser): UserDetails {
+  private getAuthenticatedIdentity(request: RequestWithIdentity): Identity {
     if (!request.user?.uid) {
       throw new UnauthorizedException('Utilisateur non authentifie');
     }
