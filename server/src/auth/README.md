@@ -67,6 +67,21 @@ Route protegee (@Auth)
   -> controller metier
 ```
 
+## Schema 2FA (Prisma / Postgres uniquement pour la suite)
+
+**Les prochaines etapes (flux 2FA, services, endpoints) ne ciblent que `DATABASE_NAME=POSTGRESQL_PRISMA`.**  
+Les autres modes (`POSTGRESQL` nu, Mongo, in-memory) restent possibles pour l'auth existante, mais ne seront pas etendus en parallele pour la 2FA.
+
+Le modele de donnees suit l'article [Designing Two-Factor Authentication That Scales](https://medium.com/@a_zeraibi/designing-two-factor-authentication-that-scales-a2f78fab65e4)
+: table pivot `two_factor` (methode active + `verified`), table specifique `two_factor_totp` pour le secret TOTP.
+
+- **Colonnes utilisateur conservees**: la table `users` existante (`id TEXT`, etc.) garde une seule addition : `two_factor_enabled BIGINT NOT NULL DEFAULT 0` (drapeau global a synchroniser avec la logique metier lorsque vous activerez le flux 2FA).
+- **Enum `TwoFactorMethod`**: valeur `APP` (authentificateur TOTP comme dans l'article). Pour du passkey / WebAuthn plus tard : ajouter une valeur a l'enum **et** une table dediee credentiels ; pas de table passkey tant que la fonctionnalite n'existe pas.
+- **DDL canonique**: `prisma/schema.prisma` + migration `prisma/migrations/20260508191300_two_factor_totp/migration.sql`. Appliquer avec `pnpm exec prisma migrate deploy` (et `prisma generate` si besoin). Le `PrismaService` continue de garantir au demarrage la table `users` + la colonne `two_factor_enabled` pour un dev rapide ; les tables `two_factor` / `two_factor_totp` viennent des migrations.
+- **Mongo**: le champ optionnel `twoFactorEnabled` sur `MongoUser` reste un alignement documentaire seulement ; pas d'evolution 2FA prevue de ce cote pour l'instant.
+
+Les endpoints flux 2FA (enable / verify login) restent a implementer ; le squelette DDL + Prisma prepare la persistance.
+
 ## Regle d'architecture
 
 Pipeline actuel :

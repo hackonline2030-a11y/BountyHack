@@ -26,6 +26,9 @@ export class PrismaService
   async onModuleInit(): Promise<void> {
     await this.$connect();
     await this.$executeRawUnsafe(String(PostgreUser.CREATE_TABLE_SQL).trim());
+    await this.$executeRawUnsafe(
+      String(PostgreUser.ENSURE_TWO_FACTOR_ENABLED_COLUMN_SQL).trim(),
+    );
   }
 
   async onModuleDestroy(): Promise<void> {

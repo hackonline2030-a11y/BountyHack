@@ -12,12 +12,52 @@ datasource db {
   provider = "postgresql"
 }
 
+/// Authenticator-app TOTP (`APP`) per https://medium.com/@a_zeraibi/designing-two-factor-authentication-that-scales-a2f78fab65e4
+/// Add enum values and a dedicated credential table when introducing passkeys / WebAuthn.
+enum TwoFactorMethod {
+  APP
+}
+
 /// Aligned with `PostgreUser` table (raw `pg` adapter) — shared table for POSTGRESQL + POSTGRESQL_PRISMA.
 model User {
   id           String  @id
   username     String
   email        String? @unique
   passwordHash String? @map("password_hash")
+  /// Global 2FA flag (e.g. 0 = off, non-zero = required / enabled); keep in sync with `two_factor` rows in app code.
+  twoFactorEnabled BigInt @default(0) @map("two_factor_enabled")
+
+  twoFactors TwoFactor[]
 
   @@map("users")
+}
+
+/// Which 2FA methods exist for a user (source of truth per enabled method).
+model TwoFactor {
+  id        String          @id @default(uuid())
+  userId    String          @map("user_id")
+  method    TwoFactorMethod
+  verified  Boolean         @default(false)
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+
+  user User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totp TwoFactorTotp?
+
+  @@unique([userId, method])
+  @@index([userId])
+  @@map("two_factor")
+}
+
+/// TOTP-specific secret storage (encrypt at rest in application code, see article).
+model TwoFactorTotp {
+  id          String   @id @default(uuid())
+  twoFactorId String   @unique @map("two_factor_id")
+  secret      String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  twoFactor TwoFactor @relation(fields: [twoFactorId], references: [id], onDelete: Cascade)
+
+  @@map("two_factor_totp")
 }

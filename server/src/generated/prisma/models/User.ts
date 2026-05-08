@@ -20,8 +20,18 @@ export type UserModel = runtime.Types.Result.DefaultSelection<Prisma.$UserPayloa
 
 export type AggregateUser = {
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
+}
+
+export type UserAvgAggregateOutputType = {
+  twoFactorEnabled: number | null
+}
+
+export type UserSumAggregateOutputType = {
+  twoFactorEnabled: bigint | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -29,6 +39,7 @@ export type UserMinAggregateOutputType = {
   username: string | null
   email: string | null
   passwordHash: string | null
+  twoFactorEnabled: bigint | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -36,6 +47,7 @@ export type UserMaxAggregateOutputType = {
   username: string | null
   email: string | null
   passwordHash: string | null
+  twoFactorEnabled: bigint | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -43,15 +55,25 @@ export type UserCountAggregateOutputType = {
   username: number
   email: number
   passwordHash: number
+  twoFactorEnabled: number
   _all: number
 }
 
+
+export type UserAvgAggregateInputType = {
+  twoFactorEnabled?: true
+}
+
+export type UserSumAggregateInputType = {
+  twoFactorEnabled?: true
+}
 
 export type UserMinAggregateInputType = {
   id?: true
   username?: true
   email?: true
   passwordHash?: true
+  twoFactorEnabled?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -59,6 +81,7 @@ export type UserMaxAggregateInputType = {
   username?: true
   email?: true
   passwordHash?: true
+  twoFactorEnabled?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -66,6 +89,7 @@ export type UserCountAggregateInputType = {
   username?: true
   email?: true
   passwordHash?: true
+  twoFactorEnabled?: true
   _all?: true
 }
 
@@ -107,6 +131,18 @@ export type UserAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: UserAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: UserSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: UserMinAggregateInputType
@@ -137,6 +173,8 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: UserCountAggregateInputType | true
+  _avg?: UserAvgAggregateInputType
+  _sum?: UserSumAggregateInputType
   _min?: UserMinAggregateInputType
   _max?: UserMaxAggregateInputType
 }
@@ -146,7 +184,10 @@ export type UserGroupByOutputType = {
   username: string
   email: string | null
   passwordHash: string | null
+  twoFactorEnabled: bigint
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
 }
@@ -174,6 +215,8 @@ export type UserWhereInput = {
   username?: Prisma.StringFilter<"User"> | string
   email?: Prisma.StringNullableFilter<"User"> | string | null
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
+  twoFactorEnabled?: Prisma.BigIntFilter<"User"> | bigint | number
+  twoFactors?: Prisma.TwoFactorListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -181,6 +224,8 @@ export type UserOrderByWithRelationInput = {
   username?: Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  twoFactorEnabled?: Prisma.SortOrder
+  twoFactors?: Prisma.TwoFactorOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -191,6 +236,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   username?: Prisma.StringFilter<"User"> | string
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
+  twoFactorEnabled?: Prisma.BigIntFilter<"User"> | bigint | number
+  twoFactors?: Prisma.TwoFactorListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -198,9 +245,12 @@ export type UserOrderByWithAggregationInput = {
   username?: Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  twoFactorEnabled?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
+  _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
+  _sum?: Prisma.UserSumOrderByAggregateInput
 }
 
 export type UserScalarWhereWithAggregatesInput = {
@@ -211,6 +261,7 @@ export type UserScalarWhereWithAggregatesInput = {
   username?: Prisma.StringWithAggregatesFilter<"User"> | string
   email?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   passwordHash?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  twoFactorEnabled?: Prisma.BigIntWithAggregatesFilter<"User"> | bigint | number
 }
 
 export type UserCreateInput = {
@@ -218,6 +269,8 @@ export type UserCreateInput = {
   username: string
   email?: string | null
   passwordHash?: string | null
+  twoFactorEnabled?: bigint | number
+  twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -225,6 +278,8 @@ export type UserUncheckedCreateInput = {
   username: string
   email?: string | null
   passwordHash?: string | null
+  twoFactorEnabled?: bigint | number
+  twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -232,6 +287,8 @@ export type UserUpdateInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -239,6 +296,8 @@ export type UserUncheckedUpdateInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -246,6 +305,7 @@ export type UserCreateManyInput = {
   username: string
   email?: string | null
   passwordHash?: string | null
+  twoFactorEnabled?: bigint | number
 }
 
 export type UserUpdateManyMutationInput = {
@@ -253,6 +313,7 @@ export type UserUpdateManyMutationInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -260,6 +321,7 @@ export type UserUncheckedUpdateManyInput = {
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -267,6 +329,11 @@ export type UserCountOrderByAggregateInput = {
   username?: Prisma.SortOrder
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  twoFactorEnabled?: Prisma.SortOrder
+}
+
+export type UserAvgOrderByAggregateInput = {
+  twoFactorEnabled?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -274,6 +341,7 @@ export type UserMaxOrderByAggregateInput = {
   username?: Prisma.SortOrder
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  twoFactorEnabled?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -281,6 +349,16 @@ export type UserMinOrderByAggregateInput = {
   username?: Prisma.SortOrder
   email?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
+  twoFactorEnabled?: Prisma.SortOrder
+}
+
+export type UserSumOrderByAggregateInput = {
+  twoFactorEnabled?: Prisma.SortOrder
+}
+
+export type UserScalarRelationFilter = {
+  is?: Prisma.UserWhereInput
+  isNot?: Prisma.UserWhereInput
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -291,6 +369,105 @@ export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
 
+export type BigIntFieldUpdateOperationsInput = {
+  set?: bigint | number
+  increment?: bigint | number
+  decrement?: bigint | number
+  multiply?: bigint | number
+  divide?: bigint | number
+}
+
+export type UserCreateNestedOneWithoutTwoFactorsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTwoFactorsInput, Prisma.UserUncheckedCreateWithoutTwoFactorsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTwoFactorsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutTwoFactorsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTwoFactorsInput, Prisma.UserUncheckedCreateWithoutTwoFactorsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTwoFactorsInput
+  upsert?: Prisma.UserUpsertWithoutTwoFactorsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTwoFactorsInput, Prisma.UserUpdateWithoutTwoFactorsInput>, Prisma.UserUncheckedUpdateWithoutTwoFactorsInput>
+}
+
+export type UserCreateWithoutTwoFactorsInput = {
+  id: string
+  username: string
+  email?: string | null
+  passwordHash?: string | null
+  twoFactorEnabled?: bigint | number
+}
+
+export type UserUncheckedCreateWithoutTwoFactorsInput = {
+  id: string
+  username: string
+  email?: string | null
+  passwordHash?: string | null
+  twoFactorEnabled?: bigint | number
+}
+
+export type UserCreateOrConnectWithoutTwoFactorsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutTwoFactorsInput, Prisma.UserUncheckedCreateWithoutTwoFactorsInput>
+}
+
+export type UserUpsertWithoutTwoFactorsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutTwoFactorsInput, Prisma.UserUncheckedUpdateWithoutTwoFactorsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutTwoFactorsInput, Prisma.UserUncheckedCreateWithoutTwoFactorsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutTwoFactorsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutTwoFactorsInput, Prisma.UserUncheckedUpdateWithoutTwoFactorsInput>
+}
+
+export type UserUpdateWithoutTwoFactorsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+}
+
+export type UserUncheckedUpdateWithoutTwoFactorsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+}
+
+
+/**
+ * Count Type UserCountOutputType
+ */
+
+export type UserCountOutputType = {
+  twoFactors: number
+}
+
+export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  twoFactors?: boolean | UserCountOutputTypeCountTwoFactorsArgs
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserCountOutputType
+   */
+  select?: Prisma.UserCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountTwoFactorsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TwoFactorWhereInput
+}
 
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -298,6 +475,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   username?: boolean
   email?: boolean
   passwordHash?: boolean
+  twoFactorEnabled?: boolean
+  twoFactors?: boolean | Prisma.User$twoFactorsArgs<ExtArgs>
+  _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -305,6 +485,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   username?: boolean
   email?: boolean
   passwordHash?: boolean
+  twoFactorEnabled?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -312,6 +493,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   username?: boolean
   email?: boolean
   passwordHash?: boolean
+  twoFactorEnabled?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -319,18 +501,31 @@ export type UserSelectScalar = {
   username?: boolean
   email?: boolean
   passwordHash?: boolean
+  twoFactorEnabled?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "email" | "passwordHash", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "email" | "passwordHash" | "twoFactorEnabled", ExtArgs["result"]["user"]>
+export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  twoFactors?: boolean | Prisma.User$twoFactorsArgs<ExtArgs>
+  _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
-  objects: {}
+  objects: {
+    twoFactors: Prisma.$TwoFactorPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     username: string
     email: string | null
     passwordHash: string | null
+    /**
+     * Global 2FA flag (e.g. 0 = off, non-zero = required / enabled); keep in sync with `two_factor` rows in app code.
+     */
+    twoFactorEnabled: bigint
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -725,6 +920,7 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  twoFactors<T extends Prisma.User$twoFactorsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$twoFactorsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TwoFactorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -758,6 +954,7 @@ export interface UserFieldRefs {
   readonly username: Prisma.FieldRef<"User", 'String'>
   readonly email: Prisma.FieldRef<"User", 'String'>
   readonly passwordHash: Prisma.FieldRef<"User", 'String'>
+  readonly twoFactorEnabled: Prisma.FieldRef<"User", 'BigInt'>
 }
     
 
@@ -774,6 +971,10 @@ export type UserFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the User
    */
   omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
   /**
    * Filter, which User to fetch.
    */
@@ -793,6 +994,10 @@ export type UserFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.UserOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  /**
    * Filter, which User to fetch.
    */
   where: Prisma.UserWhereUniqueInput
@@ -810,6 +1015,10 @@ export type UserFindFirstArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * Omit specific fields from the User
    */
   omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
   /**
    * Filter, which User to fetch.
    */
@@ -859,6 +1068,10 @@ export type UserFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.UserOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  /**
    * Filter, which User to fetch.
    */
   where?: Prisma.UserWhereInput
@@ -906,6 +1119,10 @@ export type UserFindManyArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    * Omit specific fields from the User
    */
   omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
   /**
    * Filter, which Users to fetch.
    */
@@ -955,6 +1172,10 @@ export type UserCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    */
   omit?: Prisma.UserOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  /**
    * The data needed to create a User.
    */
   data: Prisma.XOR<Prisma.UserCreateInput, Prisma.UserUncheckedCreateInput>
@@ -1002,6 +1223,10 @@ export type UserUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    * Omit specific fields from the User
    */
   omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
   /**
    * The data needed to update a User.
    */
@@ -1069,6 +1294,10 @@ export type UserUpsertArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    */
   omit?: Prisma.UserOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  /**
    * The filter to search for the User to update in case it exists.
    */
   where: Prisma.UserWhereUniqueInput
@@ -1095,6 +1324,10 @@ export type UserDeleteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    */
   omit?: Prisma.UserOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  /**
    * Filter which User to delete.
    */
   where: Prisma.UserWhereUniqueInput
@@ -1115,6 +1348,30 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
+ * User.twoFactors
+ */
+export type User$twoFactorsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TwoFactor
+   */
+  select?: Prisma.TwoFactorSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TwoFactor
+   */
+  omit?: Prisma.TwoFactorOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TwoFactorInclude<ExtArgs> | null
+  where?: Prisma.TwoFactorWhereInput
+  orderBy?: Prisma.TwoFactorOrderByWithRelationInput | Prisma.TwoFactorOrderByWithRelationInput[]
+  cursor?: Prisma.TwoFactorWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TwoFactorScalarFieldEnum | Prisma.TwoFactorScalarFieldEnum[]
+}
+
+/**
  * User without action
  */
 export type UserDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1126,4 +1383,8 @@ export type UserDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    * Omit specific fields from the User
    */
   omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
 }
