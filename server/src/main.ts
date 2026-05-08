@@ -88,8 +88,6 @@ async function bootstrap() {
   await app.listen(variables.port);
   console.log("\x1b[36m *************************************** \n 🌞 API - Version 1.0.0 \n 🏡 Architecture : hexagonale \n *************************************** ");
   const databaseAlternativeByCurrent: Record<string, string> = {
-    MONGODB: 'FIREBASE',
-    FIREBASE: 'MONGODB',
     'IN-MEMORY': 'MONGODB',
   };
   const databaseAlternativeValue = databaseAlternativeByCurrent[variables.database];
@@ -102,13 +100,13 @@ async function bootstrap() {
   Logger.log(
     `🔧 e2e tests are in \x1b[38;5;226m${join(__dirname, '..', 'e2e/src/server')}\x1b[0m`,
   );
-  const authType = (process.env.AUTH_TYPE ?? 'FIREBASE').toUpperCase();
+  const authType = (process.env.AUTH_TYPE ?? 'PASSPORT_JWT').toUpperCase();
+  const authTypeMessages: Record<string, string> = {
+    PASSPORT_JWT: 'Auth provider configured: JWT via Passport (AUTH_TYPE=PASSPORT_JWT).',
+  };
   const authTypeMessage =
-    authType === 'JWT'
-      ? 'Run tests with adequate auth provider: JWT (because AUTH_TYPE=JWT). It will be FIREBASE if AUTH_TYPE=FIREBASE.'
-      : authType === 'FIREBASE'
-        ? 'Run tests with adequate auth provider: FIREBASE (because AUTH_TYPE=FIREBASE). It will be JWT if AUTH_TYPE=JWT.'
-        : `Run tests with adequate auth provider: unknown AUTH_TYPE=${authType}. Use AUTH_TYPE=JWT or AUTH_TYPE=FIREBASE.`;
+    authTypeMessages[authType] ??
+    `Auth provider configured: unknown AUTH_TYPE=${authType}.`;
   Logger.log(
     `🔧 ${authTypeMessage}`,
   );

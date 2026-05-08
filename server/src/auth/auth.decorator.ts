@@ -1,8 +1,8 @@
 import { applyDecorators, UseGuards } from '@nestjs/common';
-import { AuthGuard } from './auth.guard';
+import { PassportJwtAuthGuard } from './passport-jwt-auth.guard';
 
 export function Auth() {
   return applyDecorators(
-    UseGuards(AuthGuard)
+    UseGuards(PassportJwtAuthGuard)
   );
 }

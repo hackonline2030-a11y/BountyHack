@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../database/prisma.service';
+import { PrismaService } from '../../core/infrastructure/database/prisma/prisma.service';
 import { IPingRepository } from '../ping-repository.interface';
 import { DatabaseStatus, DatabaseVersion } from '../ping.entity';
 
