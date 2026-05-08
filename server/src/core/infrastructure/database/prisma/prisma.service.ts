@@ -1,12 +1,11 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PostgreUser } from '../users/adapters/postgre/postgre-user';
+import { PrismaClient } from '../../../../generated/prisma/client';
+import { PostgreUser } from '../../../../users/adapters/postgre/postgre-user';
 
 /**
- * Prisma Client with [`pg` driver adapter](https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration/databases-connections/postgresql) — used when `DATABASE_NAME=POSTGRESQL_PRISMA`.
- *
- * Ensures the same `users` DDL as the raw `pg` path (`PostgreUser.CREATE_TABLE_SQL`) for a frictionless switch.
+ * Nest wrapper around Prisma Client (generated code stays in `src/generated/prisma`).
+ * Used when `DATABASE_NAME=POSTGRESQL_PRISMA`.
  */
 @Injectable()
 export class PrismaService
