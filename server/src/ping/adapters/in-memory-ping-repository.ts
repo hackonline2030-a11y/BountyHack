@@ -16,7 +16,7 @@ export class InMemoryPingRepository implements IPingRepository{
         status: "OK"
       };
     } catch (error) {
-      console.error('Firebase database connection error:', error);
+      console.error('Database connection error:', error);
       return {
         status: "KO"
       };

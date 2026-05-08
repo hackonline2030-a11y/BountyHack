@@ -1,8 +1,8 @@
 # Auth Module (`src/auth`)
 
-Ce dossier contient la logique d'authentification Passport JWT de l'API.
+Ce dossier contient la logique d'authentification de l'API.
 
-Le mode d'auth actuel est unique :
+L'architecture auth est extensible (via `AUTH_TYPE`) mais, a ce stade, l'implementation active est :
 
 - `AUTH_TYPE=PASSPORT_JWT` (par defaut)
 
@@ -23,13 +23,12 @@ Choix disponibles:
 - `MONGODB`
 - `POSTGRESQL` (SQL direct, sans Prisma)
 - `POSTGRESQL_PRISMA` (PostgreSQL via Prisma ORM)
-- `FIREBASE` (Firestore)
 - `IN-MEMORY`
 
 Notes:
 
 - `IN-MEMORY` est toujours compatible (sans persistance) pour les tests, et pour demarrer rapidement en local sans monter de base.
-- Les modes PostgreSQL/MongoDB/Firebase sont persistants et dependent de la configuration d'environnement (`DATABASE_URL`, credentials, etc.).
+- Les modes PostgreSQL/MongoDB sont persistants et dependent de la configuration d'environnement (`DATABASE_URL`, credentials, etc.).
 
 ## Comportement auth
 
@@ -50,7 +49,7 @@ Fichiers principaux:
 - `passport-jwt-auth.guard.ts`
 - `auth.decorator.ts`
 
-Schema (mode `PASSPORT_JWT`):
+Schema (`PASSPORT_JWT`) :
 
 ```text
 POST /api/auth/login
@@ -70,15 +69,15 @@ Route protegee (@Auth)
 
 ## Regle d'architecture
 
-Pipeline unique:
+Pipeline actuel :
 
-- En `PASSPORT_JWT`: utiliser uniquement guard/strategies Passport pour l'auth des requetes.
+- Utiliser les guard/strategies Passport pour l'auth des requetes.
 
-Toute nouvelle condition de mode doit passer par `config/auth-env.ts` (pas de check inline `process.env.AUTH_TYPE`).
+Toute nouvelle condition de configuration auth doit passer par `config/auth-env.ts` (pas de check inline `process.env.AUTH_TYPE`).
 
 ## Tests (Passport uniquement)
 
-La couverture auth actuelle cible le mode `PASSPORT_JWT` avec mocks/stubs (sans base reelle):
+La couverture auth actuelle cible `PASSPORT_JWT` avec mocks/stubs (sans base reelle):
 
 - `controllers/passport-jwt-auth.controller.spec.ts`
 - `adapters/passport-jwt/strategies/local/passport-jwt-local.strategy.spec.ts`
@@ -99,7 +98,7 @@ pnpm exec nx run web-api:test --runInBand --testPathPattern=passport-jwt
 
 ## Retirer proprement une strategie d'auth
 
-Quand une strategie n'est plus utile (ex: `FIREBASE`), proceder par etapes pour eviter les regressions:
+Quand une strategie n'est plus utile, proceder par etapes pour eviter les regressions:
 
 1) **Geler la cible**
 - Decider clairement la strategie restante (ex: `PASSPORT_JWT` uniquement).
@@ -126,48 +125,8 @@ Quand une strategie n'est plus utile (ex: `FIREBASE`), proceder par etapes pour 
   - `POST /api/auth/register`
   - `POST /api/auth/login`
   - une route protegee `@Auth()`
-- Verifier qu'il ne reste plus de references textuelles (`rg FIREBASE|firebase|FirebaseAuth`).
+- Verifier qu'il ne reste plus de references textuelles de la strategie retiree.
 
 6) **Finaliser**
 - Corriger naming/structure restants (fichiers devenus trompeurs).
 - Laisser une architecture explicite: un port principal (`AuthRepository`) + adapters de la strategie active.
-
-### Checklist concrete: retirer `FIREBASE` maintenant
-
-1. **Code auth**
-- Supprimer:
-  - `src/auth/adapters/firebase-auth/firebase-auth.repository.ts`
-  - `src/auth/adapters/firebase-auth/optional-firebase.module.ts`
-  - `src/auth/firebase-auth.guard.ts`
-  - `src/auth/firebase-auth.middleware.ts`
-- Mettre a jour:
-  - `src/auth/auth.module.ts` (retirer providers/imports Firebase et tout branch conditionnel Firebase)
-  - `src/auth/auth.decorator.ts` (garder uniquement `PassportJwtAuthGuard`)
-  - `src/core/app.module.ts` (retirer application du middleware Firebase)
-  - `src/auth/config/auth-env.ts` (retirer `AUTH_TYPE=FIREBASE` et helpers associes)
-
-2. **Configuration**
-- Mettre a jour `server/.env.example`:
-  - retirer toute option `AUTH_TYPE=FIREBASE`
-  - retirer variables Firebase non utilisees
-
-3. **Dependances**
-- Dans `server/package.json`, retirer les packages Firebase devenus inutiles.
-- Lancer `pnpm install` pour mettre a jour le lockfile.
-
-4. **Documentation**
-- Mettre a jour:
-  - `server/README.md`
-  - `src/auth/README.md` (ce fichier)
-- Retirer toute mention de mode Firebase.
-
-5. **Verification finale**
-- Rechercher references restantes:
-  - `rg "FIREBASE|firebase|FirebaseAuth" src`
-- Lancer:
-  - `pnpm exec nx run web-api:build`
-  - tests auth Passport
-- Verifier manuellement:
-  - `POST /api/auth/register`
-  - `POST /api/auth/login`
-  - route protegee `@Auth()`
