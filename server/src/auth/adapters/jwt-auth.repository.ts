@@ -156,7 +156,7 @@ export class JwtAuthRepository implements AuthRepository {
     }
 
     throw new InternalServerErrorException(
-      'JWT register is only supported with DATABASE_NAME=MONGODB, POSTGRESQL, POSTGRESQL_PRISMA or IN-MEMORY',
+      `Unsupported DATABASE_NAME for JWT register: ${variables.database}`,
     );
   }
 
@@ -184,7 +184,7 @@ export class JwtAuthRepository implements AuthRepository {
     }
 
     throw new InternalServerErrorException(
-      'JWT login is only supported with DATABASE_NAME=MONGODB, POSTGRESQL, POSTGRESQL_PRISMA or IN-MEMORY',
+      `Unsupported DATABASE_NAME for JWT login: ${variables.database}`,
     );
 
   }
