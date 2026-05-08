@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IUserRepository } from '../../ports/user-repository.interface';
 import { UserRecord } from '../../models';
 import { CreateUserProfilePayload } from '../../payloads';
-import { PrismaService } from '../../../database/prisma.service';
+import { PrismaService } from '../../../core/infrastructure/database/prisma/prisma.service';
 
 @Injectable()
 export class PrismaUserRepository implements IUserRepository {

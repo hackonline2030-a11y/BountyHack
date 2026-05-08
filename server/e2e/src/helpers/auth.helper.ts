@@ -1,9 +1,5 @@
 import request from 'supertest';
-import {
-  defaultUrl,
-  getE2eFirebaseSignInUrl,
-  getE2eFirebaseSignUpUrl,
-} from '../constants';
+import { defaultUrl } from '../constants';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
 export interface TestUser {
@@ -15,8 +11,6 @@ export interface TestUser {
 }
 
 export class AuthHelper {
-  private static readonly AUTH_TYPE = (process.env.AUTH_TYPE || 'JWT').trim().toUpperCase();
-
   static async createAndLoginUser(userData: Partial<TestUser> = {
     email: 'user@email.com',
     password: 'password',
@@ -29,48 +23,29 @@ export class AuthHelper {
       username: userData.username ?? 'TestUser',
     };
 
-    if (this.AUTH_TYPE === 'FIREBASE') {
-      const authResponse = await request(getE2eFirebaseSignUpUrl())
-        .post('')
-        .send({
-          email: testUser.email,
-          password: testUser.password,
-          returnSecureToken: true,
-        });
+    const registerResponse = await request(defaultUrl)
+      .post('/api/auth/register')
+      .send({
+        username: testUser.username,
+        email: testUser.email,
+        password: testUser.password,
+      });
 
-      if (authResponse.status !== 200) {
-        console.error('Firebase signup error:', authResponse.body);
-        throw new Error('Failed to create Firebase user');
-      }
-
-      testUser.token = authResponse.body.idToken;
-      const decodedToken = jwt.decode(testUser.token) as JwtPayload;
-      testUser.uid = decodedToken.user_id;
+    if ([200, 201].includes(registerResponse.status)) {
+      testUser.token = registerResponse.body?.token;
+      testUser.uid = registerResponse.body?.user?.uid;
+    } else if (registerResponse.status === 409) {
+      const token = await this.loginExistingUser(testUser.email, testUser.password);
+      testUser.token = token;
+      const decodedToken = jwt.decode(token) as JwtPayload;
+      testUser.uid = (decodedToken.user_id || decodedToken.uid || decodedToken.sub) as string | undefined;
     } else {
-      const registerResponse = await request(defaultUrl)
-        .post('/api/auth/register')
-        .send({
-          username: testUser.username,
-          email: testUser.email,
-          password: testUser.password,
-        });
+      console.error('PASSPORT_JWT register error:', registerResponse.body);
+      throw new Error(`Failed to register PASSPORT_JWT user: ${registerResponse.status}`);
+    }
 
-      if ([200, 201].includes(registerResponse.status)) {
-        testUser.token = registerResponse.body?.token;
-        testUser.uid = registerResponse.body?.user?.uid;
-      } else if (registerResponse.status === 409) {
-        const token = await this.loginExistingUser(testUser.email, testUser.password);
-        testUser.token = token;
-        const decodedToken = jwt.decode(token) as JwtPayload;
-        testUser.uid = (decodedToken.user_id || decodedToken.uid || decodedToken.sub) as string | undefined;
-      } else {
-        console.error('JWT register error:', registerResponse.body);
-        throw new Error(`Failed to register JWT user: ${registerResponse.status}`);
-      }
-
-      if (!testUser.token || !testUser.uid) {
-        throw new Error('JWT register response is missing token or uid');
-      }
+    if (!testUser.token || !testUser.uid) {
+      throw new Error('PASSPORT_JWT register response is missing token or uid');
     }
 
     // Create user in your application
@@ -79,7 +54,7 @@ export class AuthHelper {
       .set('Authorization', `Bearer ${testUser.token}`)
       .send({ username: testUser.username });
 
-    // In JWT + Mongo mode, register already persists the user in mongo, so /api/users can return 500 on duplicate _id.
+    // In PASSPORT_JWT + Mongo mode, register already persists the user in mongo, so /api/users can return 500 on duplicate _id.
     // We tolerate that here because e2e scenarios only need a valid authenticated identity.
     if (![200, 201, 409, 500].includes(userResponse.status)) {
       throw new Error(`Failed to create application user: ${userResponse.status}`);
@@ -89,28 +64,12 @@ export class AuthHelper {
   }
 
   static async loginExistingUser(email: string, password: string): Promise<string> {
-    if (this.AUTH_TYPE === 'FIREBASE') {
-      const authResponse = await request(getE2eFirebaseSignInUrl())
-        .post('')
-        .send({
-          email,
-          password,
-          returnSecureToken: true,
-        });
-
-      if (authResponse.status !== 200) {
-        throw new Error('Failed to login with Firebase');
-      }
-
-      return authResponse.body.idToken;
-    }
-
     const authResponse = await request(defaultUrl)
       .post('/api/auth/login')
       .send({ email, password });
 
     if (![200, 201].includes(authResponse.status) || !authResponse.body?.token) {
-      throw new Error('Failed to login with JWT');
+      throw new Error('Failed to login with PASSPORT_JWT');
     }
 
     return authResponse.body.token;

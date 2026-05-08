@@ -2,10 +2,9 @@ import {
   Body,
   Controller,
   Get,
-  HttpException,
-  HttpStatus,
   Post,
   Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import {
@@ -20,7 +19,7 @@ import {
   ApiHttpUnauthorized,
 } from '../../core/dto/api-http-responses';
 import { ApiValidationBadRequest } from '../../core/dto/http-validation-error.dto';
-import { RequestWithUser } from '../../auth/model/request-with-user';
+import { RequestWithIdentity } from '../../auth/adapters/http/request-with-identity';
 import { Auth } from '../../auth/auth.decorator';
 
 import { AddUsername } from '../commands/add-username';
@@ -29,7 +28,7 @@ import {
   UserProfileResponseDto,
 } from '../dto/user.dto';
 import { GetUserByIdQuery } from '../queries/get-user-by-id';
-import { DecodedToken } from '../../auth/model/decoded-token.model';
+import { Identity } from '../../auth/domain/models/identity';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -52,15 +51,14 @@ export class UsersController {
   @ApiHttpUnauthorized('Missing or invalid bearer token.')
   @ApiHttpInternalServerError('Unexpected server error while creating profile.')
   async create(
-    @Req() request: RequestWithUser,
+    @Req() request: RequestWithIdentity,
     @Body() body: CreateUserProfileBodyDto
   ) {
-
-    const decodedToken: DecodedToken = await this.generateDecodedToken(request);
+    const identity = this.getAuthenticatedIdentity(request);
 
     try {
       const data = {
-        uid: decodedToken.user_id,
+        uid: identity.uid,
         username: body.username,
       };
 
@@ -85,12 +83,12 @@ export class UsersController {
   @ApiHttpUnauthorized('Missing or invalid bearer token.')
   @ApiHttpInternalServerError('Unexpected server error while loading profile.')
   async getCurrentUser(
-    @Req() request: RequestWithUser
+    @Req() request: RequestWithIdentity
   ): Promise<UserProfileResponseDto> {
-    const decodedToken: DecodedToken = await this.generateDecodedToken(request);
+    const identity = this.getAuthenticatedIdentity(request);
 
     try {
-      const record = await this.getUserByIdQuery.execute(decodedToken.user_id);
+      const record = await this.getUserByIdQuery.execute(identity.uid);
       return plainToInstance(UserProfileResponseDto, record, {
         excludeExtraneousValues: true,
       });
@@ -100,21 +98,11 @@ export class UsersController {
     }
   }
 
-  private async generateDecodedToken(
-    request: RequestWithUser
-  ): Promise<DecodedToken> {
-    const token = request.headers.authorization.split('Bearer ')[1];
-    const jwt = require('jsonwebtoken');
-    const decodedToken = jwt.decode(token) as DecodedToken | null;
-
-    if (!decodedToken?.user_id) {
-      throw new HttpException(
-        'Utilisateur non authentifié',
-        HttpStatus.UNAUTHORIZED
-      );
+  private getAuthenticatedIdentity(request: RequestWithIdentity): Identity {
+    if (!request.user?.uid) {
+      throw new UnauthorizedException('Utilisateur non authentifie');
     }
-
-    return decodedToken;
+    return request.user;
   }
 
 }

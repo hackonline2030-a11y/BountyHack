@@ -340,7 +340,7 @@ Toujours **`cd server/docker`** d’abord.
 docker compose -f compose.dev.yaml --profile mongodb up -d --build
 ```
 
-**Sans Mongo** (ex. **`IN-MEMORY`**, **`FIREBASE`** côté config, sans conteneurs Mongo) :
+**Sans Mongo** (ex. **`IN-MEMORY`** côté config, sans conteneurs Mongo) :
 
 ```bash
 docker compose -f compose.dev.yaml up -d --build

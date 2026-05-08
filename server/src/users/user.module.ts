@@ -17,7 +17,6 @@ import { UsersController } from './controllers/users.controller';
 import { AddUsername } from './commands/add-username';
 import { CommonModule } from '../core/common.module';
 import { variables } from '../shared/variables.config';
-import { FirebaseUserRepository } from './adapters/firebase/firebase-user-repository';
 import { GetUserByIdQuery } from './queries/get-user-by-id';
 import { InMemoryUserRepository } from './adapters/in-memory/in-memory-user-repository';
 
@@ -29,8 +28,6 @@ function resolveUserRepositoryClass() {
       return PostgreUserRepository;
     case 'POSTGRESQL_PRISMA':
       return PrismaUserRepository;
-    case 'FIREBASE':
-      return FirebaseUserRepository;
     case 'IN-MEMORY':
       return InMemoryUserRepository;
     default:
