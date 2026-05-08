@@ -1,4 +1,6 @@
-const FIREBASE_AUTH_TYPE = 'FIREBASE';
+const AUTH_TYPE_FIREBASE = 'FIREBASE';
+const AUTH_TYPE_JWT = 'JWT';
+const AUTH_TYPE_PASSPORT_JWT = 'PASSPORT_JWT';
 const FIREBASE_DATABASE_NAME = 'FIREBASE';
 const DEFAULT_FIREBASE_KEY_PATH = 'src/assets/web-api-firebase-key.json';
 
@@ -7,7 +9,7 @@ function normalizeEnvValue(value?: string): string {
 }
 
 export function getAuthType(): string {
-  return normalizeEnvValue(process.env.AUTH_TYPE);
+  return normalizeEnvValue(process.env.AUTH_TYPE) || AUTH_TYPE_JWT;
 }
 
 export function getDatabaseName(): string {
@@ -15,7 +17,15 @@ export function getDatabaseName(): string {
 }
 
 export function isFirebaseAuthEnabled(): boolean {
-  return getAuthType() === FIREBASE_AUTH_TYPE;
+  return getAuthType() === AUTH_TYPE_FIREBASE;
+}
+
+export function isLegacyJwtAuthEnabled(): boolean {
+  return getAuthType() === AUTH_TYPE_JWT;
+}
+
+export function isPassportJwtAuthEnabled(): boolean {
+  return getAuthType() === AUTH_TYPE_PASSPORT_JWT;
 }
 
 export function isFirebaseDatabaseEnabled(): boolean {

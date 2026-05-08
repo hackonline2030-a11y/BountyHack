@@ -89,6 +89,22 @@ Les variables **`AUTH_TYPE`** et **`DATABASE_NAME`** se combinent. Point importa
 
 Voir aussi les commentaires dans **`.env.example`**.
 
+#### Switch `AUTH_TYPE` et fichier `auth-env.ts`
+
+Le switch d'authentification est centralise dans **`src/auth/config/auth-env.ts`**.
+
+- Ce fichier lit et normalise les variables d'environnement (`AUTH_TYPE`, `DATABASE_NAME`).
+- Il expose des helpers explicites (`isFirebaseAuthEnabled`, `isLegacyJwtAuthEnabled`, `isPassportJwtAuthEnabled`, etc.) pour eviter de dupliquer des comparaisons de chaines dans les modules Nest.
+- Il garde la logique Firebase uniquement comme une option parmi d'autres (et non comme source de verite globale).
+
+Valeurs prises en charge pour **`AUTH_TYPE`** :
+
+- `JWT` : flux JWT historique (legacy/custom).
+- `PASSPORT_JWT` : flux JWT via Passport/Nest (`passport-jwt`).
+- `FIREBASE` : auth via Firebase Admin/Identity Toolkit.
+
+Recommandation : toute nouvelle condition liee au mode d'authentification doit passer par **`auth-env.ts`** plutot que des checks directs sur `process.env.AUTH_TYPE`.
+
 ---
 
 ## Démarrage

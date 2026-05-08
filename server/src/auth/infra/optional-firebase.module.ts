@@ -3,7 +3,7 @@ import { FirebaseModule } from 'nestjs-firebase';
 import {
   getFirebaseCredentialPath,
   isFirebaseRequired,
-} from '../config/firebase-env';
+} from '../config/auth-env';
 
 /**
  * Adaptateur Nest pour firebase-admin (SDK Google), enregistré depuis AuthModule.

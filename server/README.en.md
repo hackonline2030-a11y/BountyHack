@@ -89,6 +89,22 @@ Both use the same Nx workspace source of truth.
 
 See the comments in **`.env.example`** as well.
 
+#### `AUTH_TYPE` switch and `auth-env.ts`
+
+The authentication mode switch is centralized in **`src/auth/config/auth-env.ts`**.
+
+- This file reads and normalizes environment variables (`AUTH_TYPE`, `DATABASE_NAME`).
+- It exposes explicit helpers (`isFirebaseAuthEnabled`, `isLegacyJwtAuthEnabled`, `isPassportJwtAuthEnabled`, etc.) to avoid duplicating string checks across Nest modules.
+- It keeps Firebase as one option among others (not as the global source of truth).
+
+Supported values for **`AUTH_TYPE`**:
+
+- `JWT`: legacy/custom JWT flow.
+- `PASSPORT_JWT`: Passport/Nest JWT flow (`passport-jwt`).
+- `FIREBASE`: Firebase Admin/Identity Toolkit auth flow.
+
+Recommendation: any new authentication-mode condition should go through **`auth-env.ts`** instead of direct `process.env.AUTH_TYPE` checks.
+
 ---
 
 ## Getting started
