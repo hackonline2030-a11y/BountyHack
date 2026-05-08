@@ -1,39 +1,34 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PassportJwtAuthController } from './passport-jwt-auth.controller';
-import { AuthRepository } from '../ports/auth.repository';
-import type { AuthRepository as AuthRepositoryPort } from '../ports/auth.repository';
 import type { JwtLoginRequestDto, JwtRegisterRequestDto } from '../dto/jwt-auth.dto';
 import type { Request } from 'express';
+import { RegisterWithPasswordCommand } from '../application/commands/register-with-password.command';
 
 const FAKE_JWT =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.xcJlZ8F0eB_2oKeNlMJzr45UriVWk5hq80uOq2AMpcI';
 
 describe('PassportJwtAuthController', () => {
   let controller: PassportJwtAuthController;
-  let authRepository: jest.Mocked<AuthRepositoryPort>;
+  let registerWithPassword: jest.Mocked<RegisterWithPasswordCommand>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PassportJwtAuthController],
       providers: [
         {
-          provide: AuthRepository,
+          provide: RegisterWithPasswordCommand,
           useValue: {
-            register: jest.fn(),
-            login: jest.fn(),
-            getUserFromToken: jest.fn(),
-            getUserByUid: jest.fn(),
-            logout: jest.fn(),
+            execute: jest.fn(),
           },
         },
       ],
     }).compile();
 
     controller = module.get(PassportJwtAuthController);
-    authRepository = module.get(AuthRepository);
+    registerWithPassword = module.get(RegisterWithPasswordCommand);
   });
 
-  it('delegates register to AuthRepository with mapped payload', async () => {
+  it('delegates register to RegisterWithPasswordCommand with mapped payload', async () => {
     const payload: JwtRegisterRequestDto = {
       email: 'john@example.com',
       username: 'john',
@@ -43,11 +38,11 @@ describe('PassportJwtAuthController', () => {
       token: FAKE_JWT,
       user: { uid: 'uid-1', email: payload.email, username: payload.username },
     };
-    authRepository.register.mockResolvedValue(expected);
+    registerWithPassword.execute.mockResolvedValue(expected);
 
     const result = await controller.register(payload);
 
-    expect(authRepository.register).toHaveBeenCalledWith({
+    expect(registerWithPassword.execute).toHaveBeenCalledWith({
       email: payload.email,
       username: payload.username,
       password: payload.password,
@@ -67,7 +62,7 @@ describe('PassportJwtAuthController', () => {
     expect(result).toEqual(req.user);
   });
 
-  it('does not call repository.login directly from controller login', () => {
+  it('does not call register command from controller login', () => {
     const payload: JwtLoginRequestDto = {
       email: 'john@example.com',
       password: 'password123',
@@ -79,6 +74,6 @@ describe('PassportJwtAuthController', () => {
 
     controller.login(req as any);
 
-    expect(authRepository.login).not.toHaveBeenCalled();
+    expect(registerWithPassword.execute).not.toHaveBeenCalled();
   });
 });

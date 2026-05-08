@@ -110,6 +110,58 @@ Recommandation : toute nouvelle condition liee au mode d'authentification doit p
 
 Choisis **un** parcours : **Docker** (API et optionnellement Postgres + watch), ou **Node sur l’hôte** avec une base joignable (**PostgreSQL + Prisma**, MongoDB, etc. selon **`DATABASE_NAME`**).
 
+### API locale + DB Docker (recommandé en dev)
+
+Pour itérer vite sur l'API, tu peux faire tourner :
+
+- l'API NestJS en local sur ta machine (hot reload plus rapide, debug IDE plus simple),
+- la base PostgreSQL dans Docker,
+- pgweb dans Docker pour visualiser les tables.
+
+Depuis `server/` :
+
+1. Démarrer uniquement PostgreSQL + pgweb :
+
+   ```sh
+   pnpm run docker:postgre
+   ```
+
+2. Configurer `server/.env` pour exécuter l'API **hors Docker** :
+
+   - `DATABASE_NAME=POSTGRESQL_PRISMA`
+   - `DATABASE_URL=postgres://bugbountyapp:bugbountyapp@localhost:5432/bugbountyapp`
+
+   Important : en mode API locale, utilise `localhost` (pas `postgres`, qui est le hostname interne Docker).
+
+3. Appliquer Prisma depuis l'hôte :
+
+   ```sh
+   pnpm run prisma:generate
+   pnpm run prisma:migrate:deploy
+   ```
+
+4. Lancer l'API en local :
+
+   ```sh
+   pnpm run start
+   ```
+
+5. Ouvrir pgweb :
+
+   - `http://localhost:8087` (ou `PGWEB_HOST_PORT` si surchargé dans `.env`).
+
+Arrêt de la stack PostgreSQL seule :
+
+```sh
+pnpm run docker:postgre:stop
+```
+
+Ou teardown complet (profil pg) :
+
+```sh
+pnpm run docker:postgre:down
+```
+
 ### PostgreSQL et Prisma
 
 Persistance **`users`** avec **Prisma** : **`DATABASE_NAME=POSTGRESQL_PRISMA`**. Commandes depuis **`server/`** (après `pnpm install` à la racine du monorepo).
@@ -277,3 +329,102 @@ Les specs sous `e2e/` envoient les requêtes vers l’URL dérivée de **`HOST`*
 
 - [Documentation Nx — Node](https://nx.dev/nx-api/node)
 - [Nx et CI](https://nx.dev/ci/intro/ci-with-nx)
+
+---
+
+## Test auth Bruno/Postman (PASSPORT_JWT + IN-MEMORY)
+
+Section dédiée pour vérifier rapidement le flow auth sans dépendance DB.
+
+### 1) Configuration `.env`
+
+Dans `server/.env` :
+
+- `AUTH_TYPE=PASSPORT_JWT`
+- `DATABASE_NAME=IN-MEMORY`
+- `JWT_SECRET=mon-lapin-caillousky-dans-la-serre`
+
+### 2) Lancer l'API
+
+Depuis `server/` :
+
+```sh
+pnpm run start
+```
+
+Base URL par défaut :
+
+- `http://localhost:3000`
+
+### 3) Register (Bruno/Postman)
+
+- Méthode : `POST`
+- URL : `http://localhost:3000/api/auth/register`
+- Headers :
+  - `Content-Type: application/json`
+- Body :
+
+```json
+{
+  "username": "john-test-20260508",
+  "email": "john.test.20260508@example.com",
+  "password": "StrongPassword123!"
+}
+```
+
+Réponse attendue (exemple) :
+
+```json
+{
+  "token": "<jwt>",
+  "user": {
+    "email": "john.test.20260508@example.com",
+    "uid": "abd4481a-6064-4d17-b57d-71e3e1ecccf1",
+    "username": "john-test-20260508"
+  },
+  "require2FA": false
+}
+```
+
+### 4) Login (Bruno/Postman)
+
+- Méthode : `POST`
+- URL : `http://localhost:3000/api/auth/login`
+- Headers :
+  - `Content-Type: application/json`
+- Body :
+
+```json
+{
+  "email": "john.test.20260508@example.com",
+  "password": "StrongPassword123!"
+}
+```
+
+### 5) Vérifier le JWT dans jwt.io
+
+- Colle le token retourné par `login` dans [jwt.io](https://jwt.io/).
+- Utilise ce secret :
+
+```text
+mon-lapin-caillousky-dans-la-serre
+```
+
+- Vérifie que la signature est valide et que le payload contient notamment :
+  - `user_id`
+  - `email`
+  - `sub`
+  - `iat`, `exp`
+
+Exemple visuel de configuration jwt.io :
+
+![JWT example for local testing](docs/jwt_example.png)
+
+### 6) Test d'une route protégée (optionnel)
+
+- Méthode : `GET`
+- URL : `http://localhost:3000/api/users/me`
+- Header :
+  - `Authorization: Bearer <token>`
+
+Si tout est correct, la route répond sans `401`.

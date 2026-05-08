@@ -1,23 +1,19 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { PassportJwtLocalStrategy } from './passport-jwt-local.strategy';
-import type { AuthRepository } from '../ports/auth.repository';
+import { LoginWithPasswordCommand } from '../application/commands/login-with-password.command';
 
 const FAKE_JWT =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.xcJlZ8F0eB_2oKeNlMJzr45UriVWk5hq80uOq2AMpcI';
 
 describe('PassportJwtLocalStrategy', () => {
   let strategy: PassportJwtLocalStrategy;
-  let authRepository: jest.Mocked<AuthRepository>;
+  let loginWithPassword: jest.Mocked<Pick<LoginWithPasswordCommand, 'execute'>>;
 
   beforeEach(() => {
-    authRepository = {
-      register: jest.fn(),
-      login: jest.fn(),
-      getUserFromToken: jest.fn(),
-      getUserByUid: jest.fn(),
-      logout: jest.fn(),
+    loginWithPassword = {
+      execute: jest.fn(),
     };
-    strategy = new PassportJwtLocalStrategy(authRepository);
+    strategy = new PassportJwtLocalStrategy(loginWithPassword as any);
   });
 
   it('normalizes email and delegates login to repository', async () => {
@@ -30,11 +26,11 @@ describe('PassportJwtLocalStrategy', () => {
       },
       require2FA: false,
     };
-    authRepository.login.mockResolvedValue(expected);
+    loginWithPassword.execute.mockResolvedValue(expected);
 
     const result = await strategy.validate('  JOHN@EXAMPLE.COM  ', 'password123');
 
-    expect(authRepository.login).toHaveBeenCalledWith({
+    expect(loginWithPassword.execute).toHaveBeenCalledWith({
       email: 'john@example.com',
       password: 'password123',
     });
@@ -45,13 +41,13 @@ describe('PassportJwtLocalStrategy', () => {
     await expect(strategy.validate('', 'password123')).rejects.toBeInstanceOf(
       UnauthorizedException,
     );
-    expect(authRepository.login).not.toHaveBeenCalled();
+    expect(loginWithPassword.execute).not.toHaveBeenCalled();
   });
 
   it('throws UnauthorizedException when password is missing', async () => {
     await expect(
       strategy.validate('john@example.com', ''),
     ).rejects.toBeInstanceOf(UnauthorizedException);
-    expect(authRepository.login).not.toHaveBeenCalled();
+    expect(loginWithPassword.execute).not.toHaveBeenCalled();
   });
 });

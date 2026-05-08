@@ -13,7 +13,7 @@ import { MongoUser } from '../../users/adapters/mongo/mongo-user';
 import { variables } from '../../shared/variables.config';
 import { hashPassword, verifyPassword } from './password.util';
 import { JwtInMemoryRegistry } from './jwt-in-memory-registry';
-import { UserDetails } from '../model/user-details';
+import { Identity } from '../domain/models/identity';
 import { RegisterDto, LoginDto, AuthResponse } from '../dto/auth-common.dto';
 import type { AuthRepository } from '../ports/auth.repository';
 import { randomUUID } from 'crypto';
@@ -39,7 +39,7 @@ export class JwtAuthRepository implements AuthRepository {
   ) {}
 
 
-  async getUserFromToken(token: string): Promise<UserDetails> {
+  async getUserFromToken(token: string): Promise<Identity> {
     const secret = process.env.JWT_SECRET;
 
     if (!secret) {
@@ -59,7 +59,7 @@ export class JwtAuthRepository implements AuthRepository {
     };
   }
 
-  async getUserByUid(uid: string): Promise<UserDetails> {
+  async getUserByUid(uid: string): Promise<Identity> {
     return {
       email: '',
       uid,

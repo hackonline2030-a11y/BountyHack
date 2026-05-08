@@ -2,8 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import type { JwtPayload } from 'jsonwebtoken';
-import { AuthRepository } from '../ports/auth.repository';
-import { Inject } from '@nestjs/common';
+import { GetUserByUidQuery } from '../application/queries/get-user-by-uid.query';
 
 type SupportedJwtPayload = JwtPayload & {
   uid?: string;
@@ -15,7 +14,7 @@ type SupportedJwtPayload = JwtPayload & {
 @Injectable()
 export class PassportJwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
-    @Inject(AuthRepository) private readonly authRepository: AuthRepository,
+    private readonly getUserByUidQuery: GetUserByUidQuery,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -28,6 +27,6 @@ export class PassportJwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!uid) {
       throw new UnauthorizedException('JWT token does not contain a user id');
     }
-    return this.authRepository.getUserByUid(uid);
+    return this.getUserByUidQuery.execute(uid);
   }
 }

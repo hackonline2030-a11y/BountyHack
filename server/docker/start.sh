@@ -4,13 +4,15 @@
 # - PostgreSQL + pgweb si DATABASE_NAME=POSTGRESQL
 # (voir server/.env.example ; pas encore de pilote applicatif Postgres dans le code.)
 # Depuis la racine du repo :
-#   ./docker/start.sh          # ou ./docker/start.sh up
+#   ./docker/start.sh          # ou ./docker/start.sh up (sans build)
+#   ./docker/start.sh up-build # démarre la stack avec rebuild explicite
 #   ./docker/start.sh down     # arrête tout (y compris api-watch) + --remove-orphans
 #   ./docker/start.sh down -v  # idem + supprime les volumes (Mongo, node_modules vol., …)
 #   ./docker/start.sh api-restart   # redémarre API (+ Mongo si profil mongodb), sans rebuild
 #   ./docker/start.sh api-stop      # stoppe API (+ Mongo si profil mongodb)
 #   ./docker/start.sh logs          # suit les logs API uniquement
-#   ./docker/start.sh watch-up      # démarre API en mode watch (bind mount + hot reload)
+#   ./docker/start.sh watch-up      # démarre API en mode watch (sans build)
+#   ./docker/start.sh watch-up-build# démarre API en mode watch avec rebuild explicite
 #   ./docker/start.sh watch-stop    # stoppe API watch (et Mongo si profil mongodb)
 
 set -Eeuo pipefail
@@ -101,7 +103,7 @@ fi
 
 ACTION="${1:-up}"
 case "$ACTION" in
-  watch-up|dev-up)
+  watch-up)
     shift || true
     info "Starting API in watch mode (live reload, no rebuild loop)…"
     info "Stopping classic api container first to free host port ${API_PORT} (if running)…"
@@ -112,19 +114,19 @@ case "$ACTION" in
     fi
     if [[ "$USE_MONGO" == true ]]; then
       info "DATABASE_NAME=MONGODB → start MongoDB + api-watch."
-      if ! "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" up -d --build mongodb mongo-express api-watch "$@"; then
+      if ! "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" up -d --no-build mongodb mongo-express api-watch "$@"; then
         error "docker compose up watch mode failed"
         exit 1
       fi
     elif [[ "$USE_POSTGRES" == true ]]; then
       info "DATABASE_NAME=POSTGRESQL → start PostgreSQL + pgweb + api-watch."
-      if ! "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" up -d --build postgres pgweb api-watch "$@"; then
+      if ! "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" up -d --no-build postgres pgweb api-watch "$@"; then
         error "docker compose up watch mode (Postgres) failed"
         exit 1
       fi
     else
       info "DATABASE_NAME=$DATABASE_NAME_VALUE → start api-watch only."
-      if ! "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" up -d --build api-watch "$@"; then
+      if ! "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" up -d --no-build api-watch "$@"; then
         error "docker compose up api-watch failed"
         exit 1
       fi
@@ -133,7 +135,39 @@ case "$ACTION" in
     "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" logs -f api-watch
     exit 0
     ;;
-  watch-stop|dev-stop)
+  watch-up-build)
+    shift || true
+    info "Starting API in watch mode (with explicit build)…"
+    info "Stopping classic api container first to free host port ${API_PORT} (if running)…"
+    if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true ]]; then
+      "${compose[@]}" -f "$COMPOSE_BASE" "${PROFILE_ARGS[@]}" stop api >/dev/null 2>&1 || true
+    else
+      "${compose[@]}" -f "$COMPOSE_BASE" stop api >/dev/null 2>&1 || true
+    fi
+    if [[ "$USE_MONGO" == true ]]; then
+      info "DATABASE_NAME=MONGODB → build + start MongoDB + api-watch."
+      if ! "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" up -d --build mongodb mongo-express api-watch "$@"; then
+        error "docker compose up watch mode (build) failed"
+        exit 1
+      fi
+    elif [[ "$USE_POSTGRES" == true ]]; then
+      info "DATABASE_NAME=POSTGRESQL → build + start PostgreSQL + pgweb + api-watch."
+      if ! "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" up -d --build postgres pgweb api-watch "$@"; then
+        error "docker compose up watch mode (Postgres build) failed"
+        exit 1
+      fi
+    else
+      info "DATABASE_NAME=$DATABASE_NAME_VALUE → build + start api-watch only."
+      if ! "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" up -d --build api-watch "$@"; then
+        error "docker compose up api-watch (build) failed"
+        exit 1
+      fi
+    fi
+    ok "Watch mode (build) started. Following live api-watch logs…"
+    "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" logs -f api-watch
+    exit 0
+    ;;
+  watch-stop)
     shift || true
     info "Stopping API watch mode…"
     if [[ "$USE_MONGO" == true ]]; then
@@ -313,24 +347,29 @@ case "$ACTION" in
     exit 0
     ;;
   -h|--help|help)
-    echo "Usage: $0 [up|stop|down|api-restart|api-stop|logs|watch-up|watch-stop|dump-users|dump-users-pg] [options]"
+    echo "Usage: $0 [up|up-build|stop|down|api-restart|api-stop|logs|watch-up|watch-up-build|watch-stop|dump-users|dump-users-pg] [options]"
     echo ""
-    echo "  up (default)   Démarre la stack (build si besoin)."
+    echo "  up (default)   Démarre la stack sans rebuild image (--no-build)."
+    echo "  up-build       Démarre la stack avec rebuild explicite (--build)."
     echo "  stop             Stoppe tous les conteneurs de la stack (up + watch-up), sans supprimer réseau/volumes."
     echo "  down             Arrête tout (y compris api-watch), supprime le réseau, --remove-orphans."
     echo "  down -v          Idem + supprime les volumes compose (Mongo, web_api_node_modules, …)."
     echo "  api-restart      Redémarre API sans rebuild (MongoDB si MONGODB, Postgres si POSTGRESQL)."
     echo "  api-stop         Stoppe API (et MongoDB si MONGODB, Postgres+pgweb si POSTGRESQL)."
     echo "  logs             Suit les logs API uniquement."
-    echo "  watch-up         Démarre API en mode watch (bind mount + hot reload dans le conteneur)."
+    echo "  watch-up         Démarre API en mode watch sans rebuild image (--no-build)."
+    echo "  watch-up-build   Démarre API en mode watch avec rebuild explicite (--build)."
     echo "  watch-stop       Stoppe API watch (et MongoDB / Postgres selon DATABASE_NAME)."
     echo "  dump-users       Importe docker/dump/user.json dans MongoDB (MONGODB uniquement)."
     echo "  dump-users-pg    Importe docker/dump/users_postgres.sql (POSTGRESQL / POSTGRESQL_PRISMA) — table users requise."
     echo ""
-    echo "Depuis le dossier docker/ (ou en passant le chemin) : ./start.sh   ou   ./start"
+    echo "Depuis le dossier docker/ (ou en passant le chemin) : ./start.sh"
     exit 0
     ;;
-  up|start)
+  up)
+    [[ -n "${1:-}" ]] && shift
+    ;;
+  up-build)
     [[ -n "${1:-}" ]] && shift
     ;;
   *)
@@ -341,11 +380,23 @@ esac
 
 # ---------- up ----------
 if [[ "$USE_MONGO" == true ]]; then
-  info "Starting dev stack (API in Docker + MongoDB + mongo-express)…"
+  if [[ "${ACTION}" == "up-build" ]]; then
+    info "Starting dev stack WITH BUILD (API in Docker + MongoDB + mongo-express)…"
+  else
+    info "Starting dev stack WITHOUT BUILD (API in Docker + MongoDB + mongo-express)…"
+  fi
 elif [[ "$USE_POSTGRES" == true ]]; then
-  info "Starting dev stack (API in Docker + PostgreSQL + pgweb)…"
+  if [[ "${ACTION}" == "up-build" ]]; then
+    info "Starting dev stack WITH BUILD (API in Docker + PostgreSQL + pgweb)…"
+  else
+    info "Starting dev stack WITHOUT BUILD (API in Docker + PostgreSQL + pgweb)…"
+  fi
 else
-  info "Starting dev stack (API in Docker, pas de base Docker Compose pour ce DATABASE_NAME)…"
+  if [[ "${ACTION}" == "up-build" ]]; then
+    info "Starting dev stack WITH BUILD (API in Docker, pas de base Docker Compose pour ce DATABASE_NAME)…"
+  else
+    info "Starting dev stack WITHOUT BUILD (API in Docker, pas de base Docker Compose pour ce DATABASE_NAME)…"
+  fi
 fi
 
 if [[ ! -f "${PROJECT_DIR}/../.env" ]]; then
@@ -380,19 +431,37 @@ else
   info "Si le port ${API_PORT} est pris, arrête le service en conflit puis relance."
 fi
 
-if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true ]]; then
-  if ! "${compose[@]}" -f "$COMPOSE_BASE" "${PROFILE_ARGS[@]}" up -d --build; then
-    error "Docker Compose failed to start"
-    exit 1
+if [[ "${ACTION}" == "up-build" ]]; then
+  if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true ]]; then
+    if ! "${compose[@]}" -f "$COMPOSE_BASE" "${PROFILE_ARGS[@]}" up -d --build; then
+      error "Docker Compose failed to start (build mode)"
+      exit 1
+    fi
+  else
+    if ! "${compose[@]}" -f "$COMPOSE_BASE" up -d --build; then
+      error "Docker Compose failed to start (build mode)"
+      exit 1
+    fi
   fi
 else
-  if ! "${compose[@]}" -f "$COMPOSE_BASE" up -d --build; then
-    error "Docker Compose failed to start"
-    exit 1
+  if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true ]]; then
+    if ! "${compose[@]}" -f "$COMPOSE_BASE" "${PROFILE_ARGS[@]}" up -d --no-build; then
+      error "Docker Compose failed to start (no-build mode)"
+      exit 1
+    fi
+  else
+    if ! "${compose[@]}" -f "$COMPOSE_BASE" up -d --no-build; then
+      error "Docker Compose failed to start (no-build mode)"
+      exit 1
+    fi
   fi
 fi
 
-ok "Containers started (first run may take a while to build the API image)"
+if [[ "${ACTION}" == "up-build" ]]; then
+  ok "Containers started (build mode)"
+else
+  ok "Containers started (no-build mode)"
+fi
 
 echo ""
 info "Checking container status..."

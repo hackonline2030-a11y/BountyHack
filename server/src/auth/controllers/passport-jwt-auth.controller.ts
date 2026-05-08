@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
@@ -8,15 +8,15 @@ import {
   ApiHttpUnauthorized,
 } from '../../core/dto/api-http-responses';
 import { ApiValidationBadRequest } from '../../core/dto/http-validation-error.dto';
-import { AuthRepository } from '../ports/auth.repository';
 import { RegisterDto } from '../dto/auth-common.dto';
 import {
   JwtAuthResponseDto,
   JwtLoginRequestDto,
   JwtRegisterRequestDto,
 } from '../dto/jwt-auth.dto';
+import { RegisterWithPasswordCommand } from '../application/commands/register-with-password.command';
 
-type LoginRequestWithUser = Request & {
+type LoginRequestWithIdentity = Request & {
   user?: JwtAuthResponseDto;
 };
 
@@ -24,7 +24,7 @@ type LoginRequestWithUser = Request & {
 @Controller('auth')
 export class PassportJwtAuthController {
   constructor(
-    @Inject(AuthRepository) private readonly authRepository: AuthRepository,
+    private readonly registerWithPassword: RegisterWithPasswordCommand,
   ) {}
 
   @Post('register')
@@ -48,7 +48,7 @@ export class PassportJwtAuthController {
       password: body.password,
     };
 
-    return this.authRepository.register(registerDto);
+    return this.registerWithPassword.execute(registerDto);
   }
 
   @Post('login')
@@ -62,7 +62,7 @@ export class PassportJwtAuthController {
   @ApiValidationBadRequest('Request body does not pass validation (email, password).')
   @ApiHttpUnauthorized('Invalid credentials.')
   @ApiHttpInternalServerError('JWT auth is unavailable for current backend mode.')
-  login(@Req() req: LoginRequestWithUser) {
+  login(@Req() req: LoginRequestWithIdentity) {
     return req.user;
   }
 }

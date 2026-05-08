@@ -9,6 +9,14 @@ La selection du mode est centralisee dans `src/auth/config/auth-env.ts`.
 
 Il existe aussi un **2e axe de configuration** (independant de `AUTH_TYPE`) : `DATABASE_NAME`.
 
+## Structure (refactor clean architecture leger)
+
+- `domain/models/*` : modeles metier purs (ex: `Identity`).
+- `ports/*` : contrats applicatifs (`AuthRepository`).
+- `adapters/*` : adaptateurs techniques (Firebase, JWT repository, Passport strategies).
+- `adapters/http/*` : types lies a l'interface HTTP (ex: `RequestWithIdentity`).
+- `application/*` : use cases (commands/queries) appeles par controllers/strategies/middlewares.
+
 ## Switch base de donnees (`DATABASE_NAME`)
 
 Choix disponibles:
@@ -33,14 +41,14 @@ Mode recommande pour l'auth email/mot de passe locale.
 - `POST /api/auth/register` et `POST /api/auth/login` sont exposes via `PassportJwtAuthController`.
 - Le login passe par `@UseGuards(AuthGuard('local'))` et `PassportJwtLocalStrategy`.
 - Les routes protegees (`@Auth()`) passent par `PassportJwtAuthGuard` (`AuthGuard('jwt')`) et `PassportJwtStrategy`.
-- Le middleware custom `AuthMiddleware` n'est **pas** applique dans ce mode.
+- Le middleware `FirebaseAuthMiddleware` n'est **pas** applique dans ce mode.
 - Les infos utilisateur authentifie sont lues depuis `request.user` (payload injecte par Passport).
 
 Fichiers principaux:
 
 - `controllers/passport-jwt-auth.controller.ts`
-- `infra/passport-jwt-local.strategy.ts`
-- `infra/passport-jwt.strategy.ts`
+- `adapters/passport-jwt-local.strategy.ts`
+- `adapters/passport-jwt.strategy.ts`
 - `passport-jwt-auth.guard.ts`
 - `auth.decorator.ts`
 
@@ -73,7 +81,7 @@ Mode reserve aux tokens Firebase.
 
 Fichiers principaux:
 
-- `infra/firebase-auth.repository.ts`
+- `adapters/firebase-auth.repository.ts`
 - `firebase-auth.middleware.ts`
 - `firebase-auth.guard.ts`
 
@@ -103,8 +111,8 @@ Toute nouvelle condition de mode doit passer par `config/auth-env.ts` (pas de ch
 La couverture auth actuelle cible le mode `PASSPORT_JWT` avec mocks/stubs (sans base reelle):
 
 - `controllers/passport-jwt-auth.controller.spec.ts`
-- `infra/passport-jwt-local.strategy.spec.ts`
-- `infra/passport-jwt.strategy.spec.ts`
+- `adapters/passport-jwt-local.strategy.spec.ts`
+- `adapters/passport-jwt.strategy.spec.ts`
 
 Valeurs fake utilisees dans ces tests:
 

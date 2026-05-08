@@ -1,18 +1,22 @@
 import { FirebaseAuthGuard } from './firebase-auth.guard';
 import { AuthRepository } from './ports/auth.repository';
-import { FirebaseAuthRepository } from './infra/firebase-auth.repository';
-import { JwtAuthRepository } from './infra/jwt-auth.repository';
+import { FirebaseAuthRepository } from './adapters/firebase-auth.repository';
+import { JwtAuthRepository } from './adapters/jwt-auth.repository';
 import { forwardRef, Module } from '@nestjs/common';
 import { isFirebaseAuthEnabled } from './config/auth-env';
-import { OptionalFirebaseModule } from './infra/optional-firebase.module';
-import { JwtInMemoryRegistry } from './infra/jwt-in-memory-registry';
+import { OptionalFirebaseModule } from './adapters/optional-firebase.module';
+import { JwtInMemoryRegistry } from './adapters/jwt-in-memory-registry';
 import { UserModule } from '../users/user.module';
 import { variables } from '../shared/variables.config';
 import { PassportModule } from '@nestjs/passport';
-import { PassportJwtLocalStrategy } from './infra/passport-jwt-local.strategy';
+import { PassportJwtLocalStrategy } from './adapters/passport-jwt-local.strategy';
 import { PassportJwtAuthController } from './controllers/passport-jwt-auth.controller';
-import { PassportJwtStrategy } from './infra/passport-jwt.strategy';
+import { PassportJwtStrategy } from './adapters/passport-jwt.strategy';
 import { PassportJwtAuthGuard } from './passport-jwt-auth.guard';
+import { RegisterWithPasswordCommand } from './application/commands/register-with-password.command';
+import { LoginWithPasswordCommand } from './application/commands/login-with-password.command';
+import { GetUserByUidQuery } from './application/queries/get-user-by-uid.query';
+import { GetUserFromTokenQuery } from './application/queries/get-user-from-token.query';
 
 const jwtUserPersistenceImports =
   !isFirebaseAuthEnabled() &&
@@ -39,6 +43,10 @@ const jwtUserPersistenceImports =
     },
     FirebaseAuthRepository,
     JwtAuthRepository,
+    RegisterWithPasswordCommand,
+    LoginWithPasswordCommand,
+    GetUserByUidQuery,
+    GetUserFromTokenQuery,
     ...(isFirebaseAuthEnabled()
       ? []
       : [

@@ -5,13 +5,13 @@ import {
   InternalServerErrorException
 } from '@nestjs/common';
 import * as admin from 'firebase-admin';
-import { UserDetails } from '../model/user-details';
+import { Identity } from '../domain/models/identity';
 import { AuthRepository } from '../ports/auth.repository';
 import { RegisterDto, AuthResponse, LoginDto } from '../dto/auth-common.dto';
 
 @Injectable()
 export class FirebaseAuthRepository implements AuthRepository {
-  async getUserFromToken(token: string): Promise<UserDetails> {
+  async getUserFromToken(token: string): Promise<Identity> {
     try {
       const decodedToken = await admin.auth().verifyIdToken(token);
 
@@ -24,7 +24,7 @@ export class FirebaseAuthRepository implements AuthRepository {
     }
   }
 
-  async getUserByUid(uid: string): Promise<UserDetails> {
+  async getUserByUid(uid: string): Promise<Identity> {
     try {
       const user = await admin.auth().getUser(uid);
 

@@ -1,4 +1,4 @@
-import { UserDetails } from '../model/user-details';
+import { Identity } from '../domain/models/identity';
 import { RegisterDto, LoginDto, AuthResponse } from '../dto/auth-common.dto';
 
 export const AuthRepository = Symbol('AuthRepository');
@@ -9,13 +9,13 @@ export interface AuthRepository {
    * Validates a token and retrieves a user's information
    * @param token
    */
-  getUserFromToken(token: string): Promise<UserDetails>;
+  getUserFromToken(token: string): Promise<Identity>;
 
   /**
    * Retrieves a user by their UID
    * @param uid
    */
-  getUserByUid(uid: string): Promise<UserDetails>;
+  getUserByUid(uid: string): Promise<Identity>;
 
   /**
    * Registers a new user

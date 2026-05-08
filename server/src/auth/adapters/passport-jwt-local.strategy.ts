@@ -1,8 +1,8 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
-import { AuthRepository } from '../ports/auth.repository';
 import type { AuthResponse } from '../dto/auth-common.dto';
+import { LoginWithPasswordCommand } from '../application/commands/login-with-password.command';
 
 @Injectable()
 export class PassportJwtLocalStrategy extends PassportStrategy(
@@ -10,7 +10,7 @@ export class PassportJwtLocalStrategy extends PassportStrategy(
   'local',
 ) {
   constructor(
-    @Inject(AuthRepository) private readonly authRepository: AuthRepository,
+    private readonly loginWithPassword: LoginWithPasswordCommand,
   ) {
     super({ usernameField: 'email', passwordField: 'password' });
   }
@@ -20,7 +20,7 @@ export class PassportJwtLocalStrategy extends PassportStrategy(
       throw new UnauthorizedException('Missing credentials');
     }
 
-    return this.authRepository.login({
+    return this.loginWithPassword.execute({
       email: email.trim().toLowerCase(),
       password,
     });
