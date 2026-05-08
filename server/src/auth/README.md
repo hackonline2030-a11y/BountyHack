@@ -97,3 +97,24 @@ Ne pas melanger les pipelines:
 - En `FIREBASE`: utiliser le couple middleware + guard custom existant.
 
 Toute nouvelle condition de mode doit passer par `config/auth-env.ts` (pas de check inline `process.env.AUTH_TYPE`).
+
+## Tests (Passport uniquement)
+
+La couverture auth actuelle cible le mode `PASSPORT_JWT` avec mocks/stubs (sans base reelle):
+
+- `controllers/passport-jwt-auth.controller.spec.ts`
+- `infra/passport-jwt-local.strategy.spec.ts`
+- `infra/passport-jwt.strategy.spec.ts`
+
+Valeurs fake utilisees dans ces tests:
+
+- JWT fake:
+  - `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.xcJlZ8F0eB_2oKeNlMJzr45UriVWk5hq80uOq2AMpcI`
+- Secret fake:
+  - `mon-lapin-caillousky-dans-la-serre`
+
+Commande utile pour lancer uniquement ces tests:
+
+```sh
+pnpm exec nx run web-api:test --runInBand --testPathPattern=passport-jwt
+```
