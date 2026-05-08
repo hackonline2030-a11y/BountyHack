@@ -16,7 +16,7 @@ import { DocumentRenderingModule } from '../document-rendering/pdf.module';
 import { CommonModule } from './common.module';
 import { AppController } from './app.controller';
 import { variables } from '../shared/variables.config';
-import { PrismaModule } from '../database/prisma.module';
+import { PrismaModule } from './infrastructure/database/prisma/prisma.module';
 
 const prismaImports =
   variables.database === 'POSTGRESQL_PRISMA' ? [PrismaModule] : [];

@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Prisma } from '../../../../../generated/prisma/client';
-import { PrismaService } from '../../../../../database/prisma.service';
+import { PrismaService } from '../../../../../core/infrastructure/database/prisma/prisma.service';
 import { randomUUID } from 'crypto';
 import { Identity } from '../../../../domain/models/identity';
 import { verifyPassword, hashPassword } from '../../../password.util';
