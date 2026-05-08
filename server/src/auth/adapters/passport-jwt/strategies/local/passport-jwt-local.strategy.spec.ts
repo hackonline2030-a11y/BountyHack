@@ -1,6 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { PassportJwtLocalStrategy } from './passport-jwt-local.strategy';
-import { LoginWithPasswordCommand } from '../application/commands/login-with-password.command';
+import { LoginWithPasswordCommand } from '../../../../application/commands/login-with-password.command';
 
 const FAKE_JWT =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.xcJlZ8F0eB_2oKeNlMJzr45UriVWk5hq80uOq2AMpcI';

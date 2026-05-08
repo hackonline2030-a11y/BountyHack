@@ -5,9 +5,9 @@ import {
   InternalServerErrorException
 } from '@nestjs/common';
 import * as admin from 'firebase-admin';
-import { Identity } from '../domain/models/identity';
-import { AuthRepository } from '../ports/auth.repository';
-import { RegisterDto, AuthResponse, LoginDto } from '../dto/auth-common.dto';
+import { Identity } from '../../domain/models/identity';
+import { AuthRepository } from '../../ports/auth.repository';
+import { RegisterDto, AuthResponse, LoginDto } from '../../dto/auth-common.dto';
 
 @Injectable()
 export class FirebaseAuthRepository implements AuthRepository {
