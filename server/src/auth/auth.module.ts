@@ -1,15 +1,18 @@
-import { AuthGuard } from './auth.guard';
+import { FirebaseAuthGuard } from './firebase-auth.guard';
 import { AuthRepository } from './ports/auth.repository';
 import { FirebaseAuthRepository } from './infra/firebase-auth.repository';
 import { JwtAuthRepository } from './infra/jwt-auth.repository';
 import { forwardRef, Module } from '@nestjs/common';
 import { isFirebaseAuthEnabled } from './config/auth-env';
 import { OptionalFirebaseModule } from './infra/optional-firebase.module';
-import { JwtAuthController } from './controllers/jwt-auth.controller';
-import { JwtCredentialsService } from './application/jwt-credentials.service';
 import { JwtInMemoryRegistry } from './infra/jwt-in-memory-registry';
 import { UserModule } from '../users/user.module';
 import { variables } from '../shared/variables.config';
+import { PassportModule } from '@nestjs/passport';
+import { PassportJwtLocalStrategy } from './infra/passport-jwt-local.strategy';
+import { PassportJwtAuthController } from './controllers/passport-jwt-auth.controller';
+import { PassportJwtStrategy } from './infra/passport-jwt.strategy';
+import { PassportJwtAuthGuard } from './passport-jwt-auth.guard';
 
 const jwtUserPersistenceImports =
   !isFirebaseAuthEnabled() &&
@@ -18,10 +21,16 @@ const jwtUserPersistenceImports =
     : [];
 
 @Module({
-  imports: [OptionalFirebaseModule.register(), ...jwtUserPersistenceImports],
-  controllers: isFirebaseAuthEnabled() ? [] : [JwtAuthController],
+  imports: [
+    OptionalFirebaseModule.register(),
+    ...(!isFirebaseAuthEnabled() ? [PassportModule] : []),
+    ...jwtUserPersistenceImports,
+  ],
+  controllers: isFirebaseAuthEnabled()
+    ? []
+    : [PassportJwtAuthController],
   providers: [
-    AuthGuard,
+    FirebaseAuthGuard,
     {
       provide: AuthRepository,
       useClass: isFirebaseAuthEnabled()
@@ -32,10 +41,15 @@ const jwtUserPersistenceImports =
     JwtAuthRepository,
     ...(isFirebaseAuthEnabled()
       ? []
-      : [JwtInMemoryRegistry, JwtCredentialsService]),
+      : [
+          JwtInMemoryRegistry,
+          PassportJwtLocalStrategy,
+          PassportJwtStrategy,
+          PassportJwtAuthGuard,
+        ]),
   ],
   exports: [
-    AuthGuard,
+    FirebaseAuthGuard,
     AuthRepository,
     ...(isFirebaseAuthEnabled() ? [] : [JwtInMemoryRegistry]),
   ],

@@ -2,10 +2,9 @@ import {
   Body,
   Controller,
   Get,
-  HttpException,
-  HttpStatus,
   Post,
   Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import {
@@ -29,7 +28,7 @@ import {
   UserProfileResponseDto,
 } from '../dto/user.dto';
 import { GetUserByIdQuery } from '../queries/get-user-by-id';
-import { DecodedToken } from '../../auth/model/decoded-token.model';
+import { UserDetails } from '../../auth/model/user-details';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -55,12 +54,11 @@ export class UsersController {
     @Req() request: RequestWithUser,
     @Body() body: CreateUserProfileBodyDto
   ) {
-
-    const decodedToken: DecodedToken = await this.generateDecodedToken(request);
+    const user = this.getAuthenticatedUser(request);
 
     try {
       const data = {
-        uid: decodedToken.user_id,
+        uid: user.uid,
         username: body.username,
       };
 
@@ -87,10 +85,10 @@ export class UsersController {
   async getCurrentUser(
     @Req() request: RequestWithUser
   ): Promise<UserProfileResponseDto> {
-    const decodedToken: DecodedToken = await this.generateDecodedToken(request);
+    const user = this.getAuthenticatedUser(request);
 
     try {
-      const record = await this.getUserByIdQuery.execute(decodedToken.user_id);
+      const record = await this.getUserByIdQuery.execute(user.uid);
       return plainToInstance(UserProfileResponseDto, record, {
         excludeExtraneousValues: true,
       });
@@ -100,21 +98,11 @@ export class UsersController {
     }
   }
 
-  private async generateDecodedToken(
-    request: RequestWithUser
-  ): Promise<DecodedToken> {
-    const token = request.headers.authorization.split('Bearer ')[1];
-    const jwt = require('jsonwebtoken');
-    const decodedToken = jwt.decode(token) as DecodedToken | null;
-
-    if (!decodedToken?.user_id) {
-      throw new HttpException(
-        'Utilisateur non authentifié',
-        HttpStatus.UNAUTHORIZED
-      );
+  private getAuthenticatedUser(request: RequestWithUser): UserDetails {
+    if (!request.user?.uid) {
+      throw new UnauthorizedException('Utilisateur non authentifie');
     }
-
-    return decodedToken;
+    return request.user;
   }
 
 }
