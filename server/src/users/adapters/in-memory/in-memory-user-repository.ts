@@ -3,7 +3,7 @@ import { IUserRepository } from '../../ports/user-repository.interface';
 import { UserRecord } from '../../models';
 import { CreateUserProfilePayload } from '../../payloads';
 import { User } from '../../entities/user.entity';
-import { JwtInMemoryRegistry } from '../../../auth/infra/jwt-in-memory-registry';
+import { JwtInMemoryRegistry } from '../../../auth/adapters/passport-jwt/repositories/in-memory/jwt-in-memory-registry';
 
 @Injectable()
 export class InMemoryUserRepository implements IUserRepository {

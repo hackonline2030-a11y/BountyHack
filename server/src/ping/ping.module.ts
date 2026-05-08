@@ -4,7 +4,6 @@ import { GetVersionCommand} from './version-repository.command';
 import { I_PING_REPOSITORY, IPingRepository } from './ping-repository.interface';
 import { variables } from '../shared/variables.config';
 import { MongoPingRepository } from './adapters/mongo-ping-repository';
-import { FirebasePingRepository } from './adapters/firebase-ping-repository';
 import { InMemoryPingRepository } from './adapters/in-memory-ping-repository';
 import { PostgreRawPingRepository } from './adapters/postgre-raw-ping.repository';
 import { PostgrePrismaPingRepository } from './adapters/postgre-prisma-ping.repository';
@@ -24,8 +23,6 @@ const pingImports =
         switch (variables.database) {
           case 'MONGODB':
             return MongoPingRepository;
-          case 'FIREBASE':
-            return FirebasePingRepository;
           case 'POSTGRESQL':
             return PostgreRawPingRepository;
           case 'POSTGRESQL_PRISMA':

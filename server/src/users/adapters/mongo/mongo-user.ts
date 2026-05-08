@@ -16,7 +16,7 @@ export namespace MongoUser {
     @Prop()
     username: string;
 
-    /** Local JWT auth (optional; legacy Firebase users may omit). */
+    /** Local JWT auth (optional for imported legacy users). */
     @Prop({ type: String, lowercase: true, sparse: true, unique: true })
     email?: string;
 
