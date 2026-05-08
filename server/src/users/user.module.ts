@@ -49,6 +49,7 @@ const postgresPoolProvider =
             }
             const pool = new Pool({ connectionString: url });
             await pool.query(PostgreUser.CREATE_TABLE_SQL);
+            await pool.query(PostgreUser.ENSURE_TWO_FACTOR_ENABLED_COLUMN_SQL);
             return pool;
           },
         },

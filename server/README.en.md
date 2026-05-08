@@ -87,6 +87,7 @@ Both use the same Nx workspace source of truth.
 - The auth architecture is extensible through `AUTH_TYPE`, but the active implementation is **`PASSPORT_JWT`**.
 - Database options remain multiple via `DATABASE_NAME` (`MONGODB`, `POSTGRESQL`, `POSTGRESQL_PRISMA`, `IN-MEMORY`).
 - With **`DATABASE_NAME=MONGODB`**, users (email, password hash, profile) are stored in the Mongo database from **`DATABASE_URL`**.
+- **2FA (schema and upcoming features)** evolves only under **`DATABASE_NAME=POSTGRESQL_PRISMA`** (Prisma migrations on PostgreSQL). There is no parallel extension on plain `POSTGRESQL`, Mongo, or in-memory for now ; see **`src/auth/README.md`**.
 
 See the comments in **`.env.example`** as well.
 

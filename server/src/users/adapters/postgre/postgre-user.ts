@@ -11,6 +11,8 @@ export namespace PostgreUser {
     username: string;
     email: string | null;
     password_hash: string | null;
+    /** BIGINT — `pg` returns bigint as string unless type-parsed */
+    two_factor_enabled?: string;
   }
 
   /**
@@ -22,7 +24,13 @@ export namespace PostgreUser {
       id TEXT PRIMARY KEY,
       username TEXT NOT NULL,
       email TEXT UNIQUE,
-      password_hash TEXT
+      password_hash TEXT,
+      two_factor_enabled BIGINT NOT NULL DEFAULT 0
     );
+  ` as const;
+
+  /** Applies when an older DB was created before two_factor_enabled existed */
+  export const ENSURE_TWO_FACTOR_ENABLED_COLUMN_SQL = `
+    ALTER TABLE ${TABLE_NAME} ADD COLUMN IF NOT EXISTS two_factor_enabled BIGINT NOT NULL DEFAULT 0;
   ` as const;
 }

@@ -22,3 +22,13 @@ export * from './enums.js';
  * Aligned with `PostgreUser` table (raw `pg` adapter) — shared table for POSTGRESQL + POSTGRESQL_PRISMA.
  */
 export type User = Prisma.UserModel
+/**
+ * Model TwoFactor
+ * Which 2FA methods exist for a user (source of truth per enabled method).
+ */
+export type TwoFactor = Prisma.TwoFactorModel
+/**
+ * Model TwoFactorTotp
+ * TOTP-specific secret storage (encrypt at rest in application code, see article).
+ */
+export type TwoFactorTotp = Prisma.TwoFactorTotpModel

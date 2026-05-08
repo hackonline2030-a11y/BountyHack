@@ -94,7 +94,9 @@ export class PostgrePassportJwtRepository
       WHERE email = $1
       LIMIT 1
     `;
-    const { rows } = await this.pool.query<PostgreUser.Row>(query, [email]);
+    const { rows } = await this.pool.query<
+      Pick<PostgreUser.Row, 'id' | 'username' | 'email' | 'password_hash'>
+    >(query, [email]);
     const row = rows[0];
 
     if (!row?.password_hash) {

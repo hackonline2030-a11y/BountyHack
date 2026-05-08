@@ -87,6 +87,7 @@ Les variables **`AUTH_TYPE`** et **`DATABASE_NAME`** se combinent. Point importa
 - L'architecture auth est extensible via `AUTH_TYPE`, mais l'implémentation active est **`PASSPORT_JWT`**.
 - Les options de base de donnees restent multiples via `DATABASE_NAME` (`MONGODB`, `POSTGRESQL`, `POSTGRESQL_PRISMA`, `IN-MEMORY`).
 - Avec **`DATABASE_NAME=MONGODB`**, les utilisateurs (email, hash de mot de passe, profil) sont stockés dans la base Mongo définie par **`DATABASE_URL`**.
+- **2FA (schema et prochaines fonctionnalites)** : le projet ne fait evoluer cette couche que sous **`DATABASE_NAME=POSTGRESQL_PRISMA`** (migrations Prisma sur la base PostgreSQL). Pas d'extension parallele sur `POSTGRESQL` nu, Mongo ou in-memory pour l'instant ; voir **`src/auth/README.md`**.
 
 Voir aussi les commentaires dans **`.env.example`**.
 
