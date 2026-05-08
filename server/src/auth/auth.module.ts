@@ -20,7 +20,9 @@ import { GetUserFromTokenQuery } from './application/queries/get-user-from-token
 
 const jwtUserPersistenceImports =
   !isFirebaseAuthEnabled() &&
-  (variables.database === 'MONGODB' || variables.database === 'POSTGRESQL')
+  (variables.database === 'MONGODB' ||
+    variables.database === 'POSTGRESQL' ||
+    variables.database === 'POSTGRESQL_PRISMA')
     ? [forwardRef(() => UserModule)]
     : [];
 
