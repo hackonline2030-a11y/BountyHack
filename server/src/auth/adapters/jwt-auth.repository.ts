@@ -17,6 +17,11 @@ import { Identity } from '../domain/models/identity';
 import { RegisterDto, LoginDto, AuthResponse } from '../dto/auth-common.dto';
 import type { AuthRepository } from '../ports/auth.repository';
 import { randomUUID } from 'crypto';
+import { Pool } from 'pg';
+import { USER_PG_POOL } from '../../users/adapters/postgre/postgre-pool.token';
+import { PostgreUser } from '../../users/adapters/postgre/postgre-user';
+import { PrismaService } from '../../database/prisma.service';
+import { Prisma } from '../../generated/prisma/client';
 
 type SupportedJwtPayload = JwtPayload & {
   uid?: string;
@@ -35,7 +40,12 @@ export class JwtAuthRepository implements AuthRepository {
     private readonly jwtRegistry: JwtInMemoryRegistry,
     @Optional()
     @Inject(getModelToken(MongoUser.CollectionName))
-    private readonly userModel?: Model<MongoUser.SchemaClass>
+    private readonly userModel?: Model<MongoUser.SchemaClass>,
+    @Optional()
+    @Inject(USER_PG_POOL)
+    private readonly pool?: Pool,
+    @Optional()
+    private readonly prisma?: PrismaService,
   ) {}
 
 
@@ -60,6 +70,54 @@ export class JwtAuthRepository implements AuthRepository {
   }
 
   async getUserByUid(uid: string): Promise<Identity> {
+    if (variables.database === 'MONGODB') {
+      const doc = await this.userModel?.findById(uid).lean();
+      if (!doc) {
+        throw new UnauthorizedException('User not found');
+      }
+      return { uid: String(doc._id), email: doc.email ?? '' };
+    }
+
+    if (variables.database === 'POSTGRESQL') {
+      if (!this.pool) {
+        throw new InternalServerErrorException(
+          'PostgreSQL pool is not available',
+        );
+      }
+      const query = `SELECT id, email FROM ${PostgreUser.TABLE_NAME} WHERE id = $1 LIMIT 1`;
+      const { rows } = await this.pool.query<{ id: string; email: string | null }>(
+        query,
+        [uid],
+      );
+      const row = rows[0];
+      if (!row) {
+        throw new UnauthorizedException('User not found');
+      }
+      return { uid: row.id, email: row.email ?? '' };
+    }
+
+    if (variables.database === 'POSTGRESQL_PRISMA') {
+      if (!this.prisma) {
+        throw new InternalServerErrorException('Prisma service is not available');
+      }
+      const row = await this.prisma.user.findUnique({
+        where: { id: uid },
+        select: { id: true, email: true },
+      });
+      if (!row) {
+        throw new UnauthorizedException('User not found');
+      }
+      return { uid: row.id, email: row.email ?? '' };
+    }
+
+    if (variables.database === 'IN-MEMORY') {
+      const row = this.jwtRegistry.findByUid(uid);
+      if (!row) {
+        throw new UnauthorizedException('User not found');
+      }
+      return { uid: row.uid, email: '' };
+    }
+
     return {
       email: '',
       uid,
@@ -85,8 +143,20 @@ export class JwtAuthRepository implements AuthRepository {
       );
     }
 
+    if (variables.database === 'POSTGRESQL') {
+      return this.registerPostgre(email, input.username.trim(), input.password);
+    }
+
+    if (variables.database === 'POSTGRESQL_PRISMA') {
+      return this.registerPostgrePrisma(
+        email,
+        input.username.trim(),
+        input.password,
+      );
+    }
+
     throw new InternalServerErrorException(
-      'JWT register is only supported with DATABASE_NAME=MONGODB or IN-MEMORY',
+      'JWT register is only supported with DATABASE_NAME=MONGODB, POSTGRESQL, POSTGRESQL_PRISMA or IN-MEMORY',
     );
   }
 
@@ -105,8 +175,16 @@ export class JwtAuthRepository implements AuthRepository {
       return this.loginInMemory(email, input.password);
     }
 
+    if (variables.database === 'POSTGRESQL') {
+      return this.loginPostgre(email, input.password);
+    }
+
+    if (variables.database === 'POSTGRESQL_PRISMA') {
+      return this.loginPostgrePrisma(email, input.password);
+    }
+
     throw new InternalServerErrorException(
-      'JWT login is only supported with DATABASE_NAME=MONGODB or IN-MEMORY',
+      'JWT login is only supported with DATABASE_NAME=MONGODB, POSTGRESQL, POSTGRESQL_PRISMA or IN-MEMORY',
     );
 
   }
@@ -183,6 +261,162 @@ export class JwtAuthRepository implements AuthRepository {
         email: doc.email ?? email,
         uid: doc._id,
         username: doc.username,
+      },
+      require2FA: false,
+    };
+  }
+
+  // === Private Methods (PostgreSQL with pg) ===
+
+  private async registerPostgre(
+    email: string,
+    username: string,
+    password: string,
+  ): Promise<AuthResponse> {
+    if (!this.pool) {
+      throw new InternalServerErrorException('PostgreSQL pool is not available');
+    }
+
+    const existingQuery = `SELECT id FROM ${PostgreUser.TABLE_NAME} WHERE email = $1 LIMIT 1`;
+    const existing = await this.pool.query<{ id: string }>(existingQuery, [email]);
+    if (existing.rows.length > 0) {
+      throw new ConflictException('Email already registered');
+    }
+
+    const uid = randomUUID();
+    const passwordHash = await hashPassword(password);
+    const insertQuery = `
+      INSERT INTO ${PostgreUser.TABLE_NAME} (id, username, email, password_hash)
+      VALUES ($1, $2, $3, $4)
+    `;
+
+    try {
+      await this.pool.query(insertQuery, [uid, username, email, passwordHash]);
+    } catch (error: unknown) {
+      const code = (error as { code?: string })?.code;
+      if (code === '23505') {
+        throw new ConflictException('Email already registered');
+      }
+      throw error;
+    }
+
+    return {
+      token: this.signToken(uid, email),
+      user: { email, uid, username },
+      require2FA: false,
+    };
+  }
+
+  private async loginPostgre(
+    email: string,
+    password: string,
+  ): Promise<AuthResponse> {
+    if (!this.pool) {
+      throw new InternalServerErrorException('PostgreSQL pool is not available');
+    }
+
+    const query = `
+      SELECT id, username, email, password_hash
+      FROM ${PostgreUser.TABLE_NAME}
+      WHERE email = $1
+      LIMIT 1
+    `;
+    const { rows } = await this.pool.query<PostgreUser.Row>(query, [email]);
+    const row = rows[0];
+
+    if (!row?.password_hash) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const ok = await verifyPassword(password, row.password_hash);
+    if (!ok) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return {
+      token: this.signToken(row.id, row.email ?? email),
+      user: {
+        email: row.email ?? email,
+        uid: row.id,
+        username: row.username,
+      },
+      require2FA: false,
+    };
+  }
+
+  // === Private Methods (PostgreSQL with Prisma) ===
+
+  private async registerPostgrePrisma(
+    email: string,
+    username: string,
+    password: string,
+  ): Promise<AuthResponse> {
+    if (!this.prisma) {
+      throw new InternalServerErrorException('Prisma service is not available');
+    }
+
+    const uid = randomUUID();
+    const passwordHash = await hashPassword(password);
+
+    try {
+      await this.prisma.user.create({
+        data: {
+          id: uid,
+          username,
+          email,
+          passwordHash,
+        },
+      });
+    } catch (error: unknown) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException('Email already registered');
+      }
+      throw error;
+    }
+
+    return {
+      token: this.signToken(uid, email),
+      user: { email, uid, username },
+      require2FA: false,
+    };
+  }
+
+  private async loginPostgrePrisma(
+    email: string,
+    password: string,
+  ): Promise<AuthResponse> {
+    if (!this.prisma) {
+      throw new InternalServerErrorException('Prisma service is not available');
+    }
+
+    const row = await this.prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        passwordHash: true,
+      },
+    });
+
+    if (!row?.passwordHash) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const ok = await verifyPassword(password, row.passwordHash);
+    if (!ok) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return {
+      token: this.signToken(row.id, row.email ?? email),
+      user: {
+        email: row.email ?? email,
+        uid: row.id,
+        username: row.username,
       },
       require2FA: false,
     };
