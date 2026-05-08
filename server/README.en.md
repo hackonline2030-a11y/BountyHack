@@ -84,8 +84,8 @@ Both use the same Nx workspace source of truth.
 
 **`AUTH_TYPE`** and **`DATABASE_NAME`** work together. Important rule:
 
-- If you use **`DATABASE_NAME=MONGODB`**, you should normally set **`AUTH_TYPE=JWT`** unless you already have a **working Firebase setup** (Firebase Admin on the API, credentials, **user accounts in Firebase Authentication** managed in Firebase / the console). Without that, **`AUTH_TYPE=FIREBASE`** does **not** give you a standard email/password sign-up and sign-in flow backed by Mongo: **`POST /api/auth/register`** and **`POST /api/auth/login`** are not enabled, and users are not created in Mongo for that flow.
-- **`AUTH_TYPE=JWT`** with Mongo: users (email, password hash, profile) are stored in the Mongo database from **`DATABASE_URL`**.
+- If you use **`DATABASE_NAME=MONGODB`**, you should normally set **`AUTH_TYPE=PASSPORT_JWT`** unless you already have a **working Firebase setup** (Firebase Admin on the API, credentials, **user accounts in Firebase Authentication** managed in Firebase / the console). Without that, **`AUTH_TYPE=FIREBASE`** does **not** give you a standard email/password sign-up and sign-in flow backed by Mongo: **`POST /api/auth/register`** and **`POST /api/auth/login`** are not enabled, and users are not created in Mongo for that Passport JWT flow.
+- **`AUTH_TYPE=PASSPORT_JWT`** with Mongo: users (email, password hash, profile) are stored in the Mongo database from **`DATABASE_URL`**.
 
 See the comments in **`.env.example`** as well.
 
@@ -94,12 +94,11 @@ See the comments in **`.env.example`** as well.
 The authentication mode switch is centralized in **`src/auth/config/auth-env.ts`**.
 
 - This file reads and normalizes environment variables (`AUTH_TYPE`, `DATABASE_NAME`).
-- It exposes explicit helpers (`isFirebaseAuthEnabled`, `isLegacyJwtAuthEnabled`, `isPassportJwtAuthEnabled`, etc.) to avoid duplicating string checks across Nest modules.
+- It exposes explicit helpers (`isFirebaseAuthEnabled`, `isPassportJwtAuthEnabled`, etc.) to avoid duplicating string checks across Nest modules.
 - It keeps Firebase as one option among others (not as the global source of truth).
 
 Supported values for **`AUTH_TYPE`**:
 
-- `JWT`: legacy/custom JWT flow.
 - `PASSPORT_JWT`: Passport/Nest JWT flow (`passport-jwt`).
 - `FIREBASE`: Firebase Admin/Identity Toolkit auth flow.
 
@@ -261,7 +260,7 @@ npx nx show project web-api
 
 Specs under `e2e/` call the base URL from **`HOST`** and **`PORT`** (see `e2e/src/constants.ts` and `e2e/src/support/test-setup.ts`), default **`http://localhost:3000`**.
 
-- **API already running** (often Docker with host port **`3003`**, from `API_HOST_PORT` in `docker/`) : do **not** start a second `npx nx serve` on the **same** port. Point tests at the container, e.g. `PORT=3003` (and `AUTH_TYPE=JWT` if needed) then `pnpm exec nx run e2e:e2e` — no extra process bound to that port.
+- **API already running** (often Docker with host port **`3003`**, from `API_HOST_PORT` in `docker/`) : do **not** start a second `npx nx serve` on the **same** port. Point tests at the container, e.g. `PORT=3003` (and `AUTH_TYPE=PASSPORT_JWT` if needed) then `pnpm exec nx run e2e:e2e` — no extra process bound to that port.
 - For a **local** `nx serve` **while** Docker watch uses 3003, use a **different** free port (e.g. `3000` or `3010` in your `.env`) and the **same** `PORT` when running e2e.
 
 ---

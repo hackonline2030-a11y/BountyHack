@@ -84,8 +84,8 @@ Les deux utilisent la même source de vérité Nx du workspace.
 
 Les variables **`AUTH_TYPE`** et **`DATABASE_NAME`** se combinent. Point important :
 
-- Si tu utilises **`DATABASE_NAME=MONGODB`**, fixe en général **`AUTH_TYPE=JWT`**, sauf si tu as déjà un **projet Firebase** opérationnel (Firebase Admin sur l’API, identifiants, **comptes dans Firebase Authentication** gérés côté Firebase / console). Sans ce socle, **`AUTH_TYPE=FIREBASE`** ne te permet pas un parcours inscription / connexion email–mot de passe classique vers Mongo : les routes **`POST /api/auth/register`** et **`POST /api/auth/login`** ne sont pas exposées, et les utilisateurs ne sont pas créés dans Mongo comme pour le flux JWT.
-- **`AUTH_TYPE=JWT`** avec Mongo : les utilisateurs (email, hash de mot de passe, profil) sont stockés dans la base Mongo définie par **`DATABASE_URL`**.
+- Si tu utilises **`DATABASE_NAME=MONGODB`**, fixe en général **`AUTH_TYPE=PASSPORT_JWT`**, sauf si tu as déjà un **projet Firebase** opérationnel (Firebase Admin sur l’API, identifiants, **comptes dans Firebase Authentication** gérés côté Firebase / console). Sans ce socle, **`AUTH_TYPE=FIREBASE`** ne te permet pas un parcours inscription / connexion email–mot de passe classique vers Mongo : les routes **`POST /api/auth/register`** et **`POST /api/auth/login`** ne sont pas exposées, et les utilisateurs ne sont pas créés dans Mongo comme pour le flux Passport JWT.
+- **`AUTH_TYPE=PASSPORT_JWT`** avec Mongo : les utilisateurs (email, hash de mot de passe, profil) sont stockés dans la base Mongo définie par **`DATABASE_URL`**.
 
 Voir aussi les commentaires dans **`.env.example`**.
 
@@ -94,12 +94,11 @@ Voir aussi les commentaires dans **`.env.example`**.
 Le switch d'authentification est centralise dans **`src/auth/config/auth-env.ts`**.
 
 - Ce fichier lit et normalise les variables d'environnement (`AUTH_TYPE`, `DATABASE_NAME`).
-- Il expose des helpers explicites (`isFirebaseAuthEnabled`, `isLegacyJwtAuthEnabled`, `isPassportJwtAuthEnabled`, etc.) pour eviter de dupliquer des comparaisons de chaines dans les modules Nest.
+- Il expose des helpers explicites (`isFirebaseAuthEnabled`, `isPassportJwtAuthEnabled`, etc.) pour eviter de dupliquer des comparaisons de chaines dans les modules Nest.
 - Il garde la logique Firebase uniquement comme une option parmi d'autres (et non comme source de verite globale).
 
 Valeurs prises en charge pour **`AUTH_TYPE`** :
 
-- `JWT` : flux JWT historique (legacy/custom).
 - `PASSPORT_JWT` : flux JWT via Passport/Nest (`passport-jwt`).
 - `FIREBASE` : auth via Firebase Admin/Identity Toolkit.
 
@@ -262,7 +261,7 @@ npx nx show project web-api
 
 Les specs sous `e2e/` envoient les requêtes vers l’URL dérivée de **`HOST`** et **`PORT`** (voir `e2e/src/constants.ts` et `e2e/src/support/test-setup.ts`), par défaut **`http://localhost:3000`**.
 
-- L’**API en cours d’exécution** (souvent Docker : mappage hôte **`3003`**, via `API_HOST_PORT` dans le script `docker/`) : ne lance **pas** un second `npx nx serve` sur le **même** port. Pour cibler le conteneur, exporte le port hôte : par exemple `PORT=3003` (et `AUTH_TYPE=JWT` si besoin) puis `pnpm exec nx run e2e:e2e` — sans autre processus sur ce port.
+- L’**API en cours d’exécution** (souvent Docker : mappage hôte **`3003`**, via `API_HOST_PORT` dans le script `docker/`) : ne lance **pas** un second `npx nx serve` sur le **même** port. Pour cibler le conteneur, exporte le port hôte : par exemple `PORT=3003` (et `AUTH_TYPE=PASSPORT_JWT` si besoin) puis `pnpm exec nx run e2e:e2e` — sans autre processus sur ce port.
 - Pour un **`nx serve` local** en parallèle de Docker sur 3003, utilise un **autre** port libre (p.ex. `3000` ou `3010` dans ton `.env`) et la **même** valeur de `PORT` quand tu lances l’e2e.
 
 ---

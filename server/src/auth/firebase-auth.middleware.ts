@@ -1,4 +1,10 @@
-import { Inject, Injectable, Logger, NestMiddleware, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  NestMiddleware,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthRepository } from './ports/auth.repository';
 
 export interface TokenDetails {
@@ -12,14 +18,18 @@ export interface RequestModel extends Request {
 }
 
 @Injectable()
-export class AuthMiddleware implements NestMiddleware {
-  private readonly logger = new Logger(AuthMiddleware.name);
+export class FirebaseAuthMiddleware implements NestMiddleware {
+  private readonly logger = new Logger(FirebaseAuthMiddleware.name);
 
   constructor(
     @Inject(AuthRepository) private readonly repository: AuthRepository
   ) {}
 
-  public async use(req: RequestModel, _: Response, next: (error?: Error | unknown) => void) {
+  public async use(
+    req: RequestModel,
+    _: Response,
+    next: (error?: Error | unknown) => void
+  ) {
     try {
       const authorization = req.headers['Authorization'] || req.headers['authorization'];
       if (!authorization) {

@@ -102,9 +102,8 @@ async function bootstrap() {
   Logger.log(
     `🔧 e2e tests are in \x1b[38;5;226m${join(__dirname, '..', 'e2e/src/server')}\x1b[0m`,
   );
-  const authType = (process.env.AUTH_TYPE ?? 'JWT').toUpperCase();
+  const authType = (process.env.AUTH_TYPE ?? 'PASSPORT_JWT').toUpperCase();
   const authTypeMessages: Record<string, string> = {
-    JWT: 'Auth provider configured: JWT legacy/custom (AUTH_TYPE=JWT).',
     PASSPORT_JWT: 'Auth provider configured: JWT via Passport (AUTH_TYPE=PASSPORT_JWT).',
     FIREBASE: 'Auth provider configured: FIREBASE (AUTH_TYPE=FIREBASE).',
   };
