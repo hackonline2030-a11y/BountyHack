@@ -18,7 +18,7 @@ export const createStore = (config: {
     preloadedState: config?.initialState,
     reducer: reducers,
     devTools: true,
-    middleware: (getDefaultMiddleware: any) => {
+    middleware: (getDefaultMiddleware) => {
       const listener = createListenerMiddleware();
 
       return getDefaultMiddleware({

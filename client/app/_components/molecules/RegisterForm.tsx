@@ -6,6 +6,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useT } from "next-i18next/client";
 import { localePrefixFromPathname } from "@/lib/locale-path";
+import {
+  messageFromNestBody,
+  postAuthRegister,
+} from "@/lib/auth-api";
 
 const inputBase =
   "w-full bg-white placeholder:text-gray-500 text-gray-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow";
@@ -15,7 +19,7 @@ export function RegisterForm() {
   const router = useRouter();
   const pathname = usePathname();
   const prefix = localePrefixFromPathname(pathname);
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -27,22 +31,22 @@ export function RegisterForm() {
     setMessage("");
 
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      const data = await res.json();
+      const res = await postAuthRegister({ username, email, password });
+      let data: unknown;
+      try {
+        data = await res.json();
+      } catch {
+        data = null;
+      }
 
       if (!res.ok) {
         setStatus("error");
-        setMessage(data.error ?? t("registerForm.errorRegister"));
+        setMessage(messageFromNestBody(data, t("registerForm.errorRegister")));
         return;
       }
 
       setStatus("success");
-      setMessage(data.message ?? t("registerForm.successRegister"));
+      setMessage(t("registerForm.successRegister"));
       // After a successful registration, take the user to the login page.
       router.replace(`${prefix}/login`);
     } catch {
@@ -58,18 +62,18 @@ export function RegisterForm() {
       noValidate
     >
       <div>
-        <label htmlFor="register-name" className="block text-sm font-medium text-white mb-1">
-          {t("registerForm.nameLabel")}
+        <label htmlFor="register-username" className="block text-sm font-medium text-white mb-1">
+          {t("registerForm.usernameLabel")}
         </label>
         <input
-          id="register-name"
+          id="register-username"
           type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           className={inputBase}
-          placeholder={t("registerForm.namePlaceholder")}
+          placeholder={t("registerForm.usernamePlaceholder")}
           required
-          autoComplete="name"
+          autoComplete="username"
           disabled={status === "loading"}
         />
       </div>

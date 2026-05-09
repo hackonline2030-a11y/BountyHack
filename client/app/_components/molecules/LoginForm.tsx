@@ -5,6 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useT } from "next-i18next/client";
 import { localePrefixFromPathname } from "@/lib/locale-path";
+import {
+  messageFromNestBody,
+  postAuthLogin,
+} from "@/lib/auth-api";
 
 const inputBase =
   "w-full bg-white placeholder:text-gray-500 text-gray-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow";
@@ -25,22 +29,22 @@ export function LoginForm() {
     setMessage("");
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
+      const res = await postAuthLogin({ email, password });
+      let data: unknown;
+      try {
+        data = await res.json();
+      } catch {
+        data = null;
+      }
 
       if (!res.ok) {
         setStatus("error");
-        setMessage(data.error ?? t("loginForm.errorLogin"));
+        setMessage(messageFromNestBody(data, t("loginForm.errorLogin")));
         return;
       }
 
       setStatus("success");
-      setMessage(data.message ?? t("loginForm.successLogin"));
+      setMessage(t("loginForm.successLogin"));
       router.replace(prefix);
     } catch {
       setStatus("error");

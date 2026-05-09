@@ -11,8 +11,8 @@ jobs:
     name: development-ci
     runs-on: ubuntu-latest
     env:
-      DATABASE_PROVIDER: sqlite
-      DATABASE_URL: file:./prisma/dev.db
+      NEXT_PUBLIC_SITE_URL: http://localhost:3001
+      NEXT_PUBLIC_AUTH_API: http://localhost:3000
 
     steps:
       - name: Checkout code

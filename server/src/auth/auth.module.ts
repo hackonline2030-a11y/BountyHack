@@ -21,7 +21,11 @@ import { GetUserByUidQuery } from './application/queries/get-user-by-uid.query';
 import { GetUserFromTokenQuery } from './application/queries/get-user-from-token.query';
 
 import { PassportJwtAuthController } from './controllers/passport-jwt-auth.controller';
+import { TotpSignInDemoController } from './controllers/totp-sign-in-demo.controller';
+import { TotpEnrollmentController } from './controllers/totp-enrollment.controller';
 import { PassportJwtAuthGuard } from './passport-jwt-auth.guard';
+import { TotpSignInDemoService } from './application/demo/totp-sign-in-demo.service';
+import { TotpEnrollmentService } from './application/totp-enrollment.service';
 
 const usesPersistedJwtStore =
   variables.database === 'MONGODB' ||
@@ -35,9 +39,20 @@ const authImports = [
     : []),
 ];
 
-const authControllers = [PassportJwtAuthController];
+const authControllers = [
+  PassportJwtAuthController,
+  ...(variables.database === 'POSTGRESQL_PRISMA'
+    ? [TotpSignInDemoController, TotpEnrollmentController]
+    : []),
+];
+
+const prismaTotpProviders =
+  variables.database === 'POSTGRESQL_PRISMA'
+    ? [TotpSignInDemoService, TotpEnrollmentService]
+    : [];
 
 const coreProviders = [
+  ...prismaTotpProviders,
   {
     provide: AuthRepository,
     useClass: PassportJwtAuthRepository,
