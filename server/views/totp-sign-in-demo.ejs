@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add authenticator app — Démo</title>
+  <style>
+    :root {
+      --bg: #f4f4f6;
+      --card: #fff;
+      --text: #1a1a1e;
+      --muted: #5c5c66;
+      --line: #e4e4e9;
+      --accent: #6d28d9;
+      --accent-ring: rgba(109, 40, 217, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      min-height: 100vh;
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    .page-head {
+      max-width: 28rem;
+      margin: 0 auto 1.25rem;
+    }
+
+    .page-head h1 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 0 0 0.35rem;
+    }
+
+    .page-head p {
+      margin: 0;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .page-head a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .page-head a:hover { text-decoration: underline; }
+
+    .credentials-panel {
+      max-width: 28rem;
+      margin: 0 auto 1.5rem;
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1.25rem 1.35rem;
+      border: 1px solid var(--line);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .credentials-panel label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 0.85rem;
+    }
+
+    .credentials-panel label:first-of-type { margin-top: 0; }
+
+    .credentials-panel input {
+      width: 100%;
+      margin-top: 0.35rem;
+      padding: 0.55rem 0.65rem;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .credentials-panel input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-ring);
+    }
+
+    .credentials-panel button[type="submit"] {
+      margin-top: 1.1rem;
+      width: 100%;
+      padding: 0.65rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .credentials-panel button[type="submit"]:hover {
+      filter: brightness(1.06);
+    }
+
+    .global-msg {
+      max-width: 28rem;
+      margin: 0 auto 1rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .global-msg.err { color: #b45309; }
+
+    /* Modal card — aligné sur votre capture (Add authenticator app) */
+    .modal-card {
+      max-width: 28rem;
+      margin: 0 auto;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 1.35rem 1.45rem 1.6rem;
+      border: 1px solid var(--line);
+      box-shadow:
+        0 0 0 1px var(--accent-ring),
+        0 12px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    .modal-card.hidden { display: none; }
+
+    .modal-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.875rem;
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      background: none;
+      padding: 0;
+      margin-bottom: 0.85rem;
+      font-family: inherit;
+    }
+
+    .modal-back:hover { text-decoration: underline; }
+
+    .modal-title {
+      margin: 0 0 1.35rem;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .step-title {
+      margin: 0 0 0.4rem;
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+
+    .step-desc {
+      margin: 0 0 1rem;
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+
+    .qr-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .qr-wrap img {
+      width: min(220px, 80vw);
+      height: auto;
+      border-radius: 8px;
+    }
+
+    .link-fake {
+      display: block;
+      text-align: center;
+      margin: 0.25rem 0 1.25rem;
+      font-size: 0.875rem;
+      color: var(--accent);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.25rem;
+      font-family: inherit;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .manual-panel {
+      display: none;
+      margin-bottom: 1.25rem;
+      padding: 0.75rem;
+      background: var(--bg);
+      border-radius: 8px;
+      font-size: 0.75rem;
+      word-break: break-all;
+    }
+
+    .manual-panel.visible { display: block; }
+
+    .manual-panel code {
+      display: block;
+      margin-top: 0.35rem;
+      font-size: 0.68rem;
+      line-height: 1.35;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--line);
+      margin: 1.35rem 0;
+    }
+
+    .otp-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: space-between;
+      margin-bottom: 1.1rem;
+    }
+
+    .otp-row input.otp-digit {
+      width: 100%;
+      max-width: 2.65rem;
+      aspect-ratio: 1;
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 600;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .otp-row input.otp-digit:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-ring);
+    }
+
+    .btn-verify {
+      width: 100%;
+      padding: 0.65rem;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .btn-verify:hover:not(:disabled) { filter: brightness(1.06); }
+
+    .btn-verify:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .modal-status {
+      margin-top: 1rem;
+      font-size: 0.8125rem;
+      color: var(--muted);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .modal-status.ok { color: #15803d; }
+
+    /* Second card — utilisateur déjà enrôlé */
+    .secondary-card {
+      max-width: 28rem;
+      margin: 1.75rem auto 0;
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1.25rem 1.35rem;
+      border: 1px solid var(--line);
+    }
+
+    .secondary-card h2 {
+      margin: 0 0 0.35rem;
+      font-size: 1rem;
+    }
+
+    .secondary-card > p {
+      margin: 0 0 1rem;
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+
+    .api-hint {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 0.75rem;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>Démo TOTP (NestJS + EJS)</h1>
+  <p>Inspiré du flux <a href="https://blog.logto.io/support-authenticator-app-verification-for-your-nodejs-app">Logto</a> — liaison puis connexion JWT.</p>
+</div>
+
+<div class="credentials-panel">
+  <form id="credentialsForm">
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="username" required />
+
+    <label for="password">Mot de passe</label>
+    <input id="password" type="password" autocomplete="current-password" required />
+
+    <button type="submit">Continuer</button>
+  </form>
+  <p class="api-hint" id="stepUrlHint"></p>
+</div>
+
+<div id="globalMsg" class="global-msg"></div>
+
+<div id="totpModal" class="modal-card hidden" aria-hidden="true">
+  <button type="button" class="modal-back" id="modalBack">&#8249; Back</button>
+
+  <h2 class="modal-title">Add authenticator app</h2>
+
+  <section class="step1">
+    <h3 class="step-title">Step 1: Scan this QR code</h3>
+    <p class="step-desc">
+      Scan using your authenticator app, like Google Authenticator, Duo Mobile, Authy, etc.
+    </p>
+    <div class="qr-wrap">
+      <img id="qrImg" alt="TOTP QR code" />
+    </div>
+    <button type="button" class="link-fake" id="toggleManual">Can't scan the QR code?</button>
+    <div class="manual-panel" id="manualPanel">
+      <strong>Manual entry</strong> — add an account manually and paste this <code>otpauth://</code> URI:
+      <code id="otpauthUriOut"></code>
+    </div>
+  </section>
+
+  <div class="divider" role="separator"></div>
+
+  <section class="step2">
+    <h3 class="step-title">Step 2: Enter the one-time code</h3>
+    <p class="step-desc">
+      Enter the 6-digit verification code generated by the authenticator app.
+    </p>
+    <div class="otp-row" id="otpBindRow" aria-label="6-digit verification code"></div>
+    <button type="button" class="btn-verify" id="btnVerifyBind">Verify and link</button>
+    <div class="modal-status" id="bindStatus"></div>
+    <p class="api-hint" id="verifyUrlHint"></p>
+  </section>
+</div>
+
+<div class="secondary-card">
+  <h2>Returning user</h2>
+  <p>When TOTP is already linked: same email/password + fresh 6-digit code → JWT (<code>/totp-sign-in/complete</code>).</p>
+  <div class="otp-row" id="otpCompleteRow" aria-label="6-digit sign-in code"></div>
+  <button type="button" class="btn-verify" id="btnComplete">Sign in with TOTP</button>
+  <div class="modal-status" id="completeStatus"></div>
+  <p class="api-hint" id="completeUrlHint"></p>
+</div>
+
+<script>
+  (function () {
+    var apiPrefix = <%- JSON.stringify(apiPrefix) %>;
+    var stepUrl = apiPrefix + '/demo/totp-sign-in/step';
+    var verifyUrl = apiPrefix + '/demo/totp-sign-in/verify';
+    var completeUrl = apiPrefix + '/demo/totp-sign-in/complete';
+
+    document.getElementById('stepUrlHint').textContent = 'POST ' + stepUrl;
+    document.getElementById('verifyUrlHint').textContent = 'POST ' + verifyUrl;
+    document.getElementById('completeUrlHint').textContent = 'POST ' + completeUrl;
+
+    function sharedCreds() {
+      return {
+        email: document.getElementById('email').value.trim(),
+        password: document.getElementById('password').value,
+      };
+    }
+
+    function buildOtpInputs(containerId) {
+      var row = document.getElementById(containerId);
+      row.innerHTML = '';
+      for (var i = 0; i < 6; i++) {
+        var inp = document.createElement('input');
+        inp.type = 'text';
+        inp.inputMode = 'numeric';
+        inp.autocomplete = i === 0 ? 'one-time-code' : 'off';
+        inp.maxLength = 1;
+        inp.className = 'otp-digit';
+        inp.dataset.index = String(i);
+        inp.setAttribute('aria-label', 'Digit ' + (i + 1));
+        row.appendChild(inp);
+      }
+    }
+
+    function wireOtpRow(containerId, onFilled) {
+      var row = document.getElementById(containerId);
+      var inputs = row.querySelectorAll('.otp-digit');
+
+      function digits() {
+        return Array.from(inputs).map(function (el) { return el.value.replace(/\D/g, ''); });
+      }
+
+      function joinCode() {
+        return digits().join('');
+      }
+
+      inputs.forEach(function (input, idx) {
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Backspace' && !input.value && idx > 0) {
+            inputs[idx - 1].focus();
+            inputs[idx - 1].select();
+          }
+        });
+
+        input.addEventListener('input', function () {
+          var v = input.value.replace(/\D/g, '');
+          input.value = v.slice(-1);
+          if (input.value && idx < inputs.length - 1) {
+            inputs[idx + 1].focus();
+          }
+          var full = joinCode();
+          if (full.length === 6 && typeof onFilled === 'function') {
+            onFilled(full);
+          }
+        });
+
+        input.addEventListener('paste', function (e) {
+          e.preventDefault();
+          var t = (e.clipboardData || window.clipboardData).getData('text') || '';
+          var only = t.replace(/\D/g, '').slice(0, 6);
+          for (var j = 0; j < 6; j++) {
+            inputs[j].value = only[j] || '';
+          }
+          var nextIdx = Math.min(only.length, 5);
+          inputs[nextIdx].focus();
+          if (only.length === 6 && typeof onFilled === 'function') {
+            onFilled(only);
+          }
+        });
+      });
+    }
+
+    function getOtpRowCode(containerId) {
+      var row = document.getElementById(containerId);
+      return Array.from(row.querySelectorAll('.otp-digit')).map(function (el) {
+        return el.value.replace(/\D/g, '');
+      }).join('');
+    }
+
+    buildOtpInputs('otpBindRow');
+    buildOtpInputs('otpCompleteRow');
+
+    wireOtpRow('otpBindRow'); // optional auto-submit: user clicks Verify explicitly like many modals
+    wireOtpRow('otpCompleteRow');
+
+    var totpModal = document.getElementById('totpModal');
+    var qrImg = document.getElementById('qrImg');
+    var bindStatus = document.getElementById('bindStatus');
+    var manualPanel = document.getElementById('manualPanel');
+
+    document.getElementById('toggleManual').addEventListener('click', function () {
+      manualPanel.classList.toggle('visible');
+    });
+
+    document.getElementById('modalBack').addEventListener('click', function () {
+      totpModal.classList.add('hidden');
+      totpModal.setAttribute('aria-hidden', 'true');
+      manualPanel.classList.remove('visible');
+      qrImg.src = '';
+      bindStatus.textContent = '';
+      bindStatus.classList.remove('ok');
+      document.getElementById('otpBindRow').querySelectorAll('.otp-digit').forEach(function (el) { el.value = ''; });
+      document.getElementById('globalMsg').textContent = '';
+      document.getElementById('globalMsg').classList.remove('err');
+    });
+
+    document.getElementById('credentialsForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var globalMsg = document.getElementById('globalMsg');
+      globalMsg.textContent = '';
+      globalMsg.classList.remove('err');
+      bindStatus.textContent = '';
+
+      totpModal.classList.add('hidden');
+      qrImg.src = '';
+
+      try {
+        var res = await fetch(stepUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(sharedCreds()),
+        });
+        var data = await res.json().catch(function () { return {}; });
+
+        if (res.status === 403 && data.error === 'missing_totp' && data.secretQrCode) {
+          totpModal.classList.remove('hidden');
+          totpModal.setAttribute('aria-hidden', 'false');
+          qrImg.src = data.secretQrCode;
+          document.getElementById('otpauthUriOut').textContent = data.otpauthUri || '(no uri)';
+          document.getElementById('otpBindRow').querySelector('.otp-digit').focus();
+          return;
+        }
+
+        if (res.status === 403 && data.error === 'totp_verification_required') {
+          globalMsg.textContent =
+            'This account already has TOTP linked. Use « Returning user » below with email, password and a fresh 6-digit code.\n\n' +
+            JSON.stringify(data);
+          globalMsg.classList.add('err');
+          document.getElementById('otpCompleteRow').querySelector('.otp-digit').focus();
+          return;
+        }
+
+        globalMsg.textContent = res.status + '\n' + JSON.stringify(data, null, 2);
+        globalMsg.classList.add('err');
+      } catch (err) {
+        globalMsg.textContent = String(err && err.message ? err.message : err);
+        globalMsg.classList.add('err');
+      }
+    });
+
+    document.getElementById('btnVerifyBind').addEventListener('click', async function () {
+      var bindSt = document.getElementById('bindStatus');
+      bindSt.textContent = '';
+      bindSt.classList.remove('ok');
+
+      var code = getOtpRowCode('otpBindRow');
+      if (code.length !== 6) {
+        bindSt.textContent = 'Enter all 6 digits.';
+        return;
+      }
+
+      try {
+        var res = await fetch(verifyUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: sharedCreds().email,
+            password: sharedCreds().password,
+            code: code,
+          }),
+        });
+        var data = await res.json().catch(function () { return {}; });
+        bindSt.textContent = res.status + '\n' + JSON.stringify(data, null, 2);
+        if (res.ok && data.ok) {
+          bindSt.classList.add('ok');
+          bindSt.textContent = data.message || 'Linked. You can sign in via « Returning user » with a new code.';
+        }
+      } catch (err) {
+        bindSt.textContent = String(err && err.message ? err.message : err);
+      }
+    });
+
+    document.getElementById('btnComplete').addEventListener('click', async function () {
+      var cs = document.getElementById('completeStatus');
+      cs.textContent = '';
+      cs.classList.remove('ok');
+
+      var code = getOtpRowCode('otpCompleteRow');
+      if (code.length !== 6) {
+        cs.textContent = 'Enter all 6 digits.';
+        return;
+      }
+
+      try {
+        var res = await fetch(completeUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: sharedCreds().email,
+            password: sharedCreds().password,
+            code: code,
+          }),
+        });
+        var data = await res.json().catch(function () { return {}; });
+        cs.textContent = res.status + '\n' + JSON.stringify(data, null, 2);
+        if (res.ok && data.token) {
+          cs.classList.add('ok');
+        }
+      } catch (err) {
+        cs.textContent = String(err && err.message ? err.message : err);
+      }
+    });
+  })();
+</script>
+</body>
+</html>

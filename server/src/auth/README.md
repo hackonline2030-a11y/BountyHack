@@ -79,8 +79,28 @@ Le modele de donnees suit l'article [Designing Two-Factor Authentication That Sc
 - **Enum `TwoFactorMethod`**: valeur `APP` (authentificateur TOTP comme dans l'article). Pour du passkey / WebAuthn plus tard : ajouter une valeur a l'enum **et** une table dediee credentiels ; pas de table passkey tant que la fonctionnalite n'existe pas.
 - **DDL canonique**: `prisma/schema.prisma` + migration `prisma/migrations/20260508191300_two_factor_totp/migration.sql`. Appliquer avec `pnpm exec prisma migrate deploy` (et `prisma generate` si besoin). Le `PrismaService` continue de garantir au demarrage la table `users` + la colonne `two_factor_enabled` pour un dev rapide ; les tables `two_factor` / `two_factor_totp` viennent des migrations.
 - **Mongo**: le champ optionnel `twoFactorEnabled` sur `MongoUser` reste un alignement documentaire seulement ; pas d'evolution 2FA prevue de ce cote pour l'instant.
+- **Secrets en base (`two_factor_totp.secret`)** : en production le module d’enrollment persiste un **chiffrement** (AES-256-GCM, cle derivee via **scrypt** a partir de **`TOTP_ENCRYPTION_KEY`**, prefixe stocke **`v1:`**). Les anciennes lignes **sans** ce prefixe sont encore lues en clair (compat demopage sign-in).
 
-Les endpoints flux 2FA (enable / verify login) restent a implementer ; le squelette DDL + Prisma prepare la persistance.
+### Activation TOTP avec JWT (parcours « Enable OTP »)
+
+Uniquement **`DATABASE_NAME=POSTGRESQL_PRISMA`** + variable **`TOTP_ENCRYPTION_KEY`** (≥ 16 caracteres) dans **`server/.env`**, puis **redémarrer l’API**. Cette cle n’est **pas** un champ Bruno : le serveur seul l’utilise pour chiffrer les secrets en base. Flux calque sur l’article Medium (upsert `two_factor`, secret `otplib`, QR, verification, `verified`) :
+
+1. `POST /api/auth/totp/enable/start` avec **`Authorization: Bearer <JWT>`**. Met a jour / cree `two_factor` (methode `APP`, `verified=false`), regenere le secret, enregistre le **texte chiffre** dans `two_factor_totp`. Reponse : **`secret`** (Base32, saisie manuelle), **`otpauthUri`**, **`secretQrCode`** (data URL pour le QR).
+2. `POST /api/auth/totp/enable/confirm` avec le meme Bearer, corps `{ "code": "123456" }`. Verifie le TOTP (`otplib.verify`, tolerance `TOTP_EPOCH_TOLERANCE`), puis **`verified=true`** sur `two_factor` et **`two_factor_enabled`** = `1` sur `users`.
+
+Fichiers principaux : `application/totp-enrollment.service.ts`, `infrastructure/totp/totp-secret-seal.ts`, `controllers/totp-enrollment.controller.ts`.
+
+**Page demo dashboard (EJS)** pour enchainer login + start + confirm : `GET /api/dashboard/totp` (bouton aussi sur la page d’accueil `/api`).
+
+### Page de démo (EJS) — liaison TOTP après mot de passe
+
+Sous **`DATABASE_NAME=POSTGRESQL_PRISMA`** uniquement (flux proche [Logto — authenticator + Node](https://blog.logto.io/support-authenticator-app-verification-for-your-nodejs-app)) :
+
+- **Page** : `GET /api/demo/totp-sign-in` (selon `GLOBAL_PREFIX`, par defaut prefix `api`).
+- **1 — QR** : `POST /api/demo/totp-sign-in/step` corps comme `POST /api/auth/login` (`email`, `password`). Reponses **403** JSON : `missing_totp` + `secretQrCode` (data URL), ou `totp_verification_required` si le TOTP est **deja lie** (`verified=true`).
+- **2 — Binder** : `POST /api/demo/totp-sign-in/verify` corps `email`, `password`, `code` (TOTP). Passe `two_factor.verified` a true et `users.two_factor_enabled` a `1`.
+- **3 — Connexion** : `POST /api/demo/totp-sign-in/complete` meme corps ; renvoie le meme JSON que `POST /api/auth/login` (JWT) si mot de passe + TOTP sont valides.
+- Issuer QR : **`TOTP_ISSUER`** (defaut `BugBountyApp`). **`TOTP_EPOCH_TOLERANCE`** pour `verify()` (defaut `30` secondes).
 
 ## Regle d'architecture
 

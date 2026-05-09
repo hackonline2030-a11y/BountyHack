@@ -9,7 +9,8 @@ export const ThemeSwitcher: React.FC = () => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const id = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(id);
   }, []);
 
   const src = theme === 'light' ? '/dark.svg' : '/light.svg';

@@ -1,4 +1,4 @@
-# Next.js + Prisma (client workspace)
+# Next.js (client workspace)
 # See https://help.github.com/articles/ignoring-files/
 
 # Dependencies
@@ -45,13 +45,6 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
-
-# Prisma — generated client (your output path)
-/generated/prisma/
-
-# Prisma — local dev DB files (adjust if you commit a seed DB)
-/prisma/**/*.db*
-/prisma/**/*.db-journal
 
 # Tooling caches
 .turbo

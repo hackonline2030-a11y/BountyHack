@@ -23,10 +23,10 @@
     "successLogin": "Connexion réussie"
   },
   "registerForm": {
-    "nameLabel": "Nom",
+    "usernameLabel": "Nom d’utilisateur",
     "emailLabel": "E-mail",
     "passwordLabel": "Mot de passe",
-    "namePlaceholder": "Votre nom",
+    "usernamePlaceholder": "votre_pseudo",
     "emailPlaceholder": "vous@exemple.com",
     "passwordPlaceholder": "••••••••",
     "submit": "Créer un compte",
