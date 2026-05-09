@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { generateSecret, generateURI, verify } from 'otplib';
 import * as QRCode from 'qrcode';
-import type { AuthResponse } from '../../dto/auth-common.dto';
+import type { AuthenticatedSession } from '../models/authenticated-session';
 import { TwoFactorMethod } from '../../../generated/prisma/enums';
 import { PrismaService } from '../../../core/infrastructure/database/prisma/prisma.service';
 import { PassportJwtTokenService } from '../../adapters/passport-jwt/services/passport-jwt-token.service';
@@ -19,7 +19,7 @@ import { variables } from '../../../shared/variables.config';
 import {
   openTotpSecretFromStorage,
   sealTotpSecretForStorage,
-} from '../../infrastructure/totp/totp-secret-seal';
+} from '../../adapters/totp/totp-secret-seal';
 import { TOTP_DEMO } from './totp-crypto';
 
 /** JSON body when TOTP enrolment UI should be shown (aligné articles Logto / express). */
@@ -203,7 +203,7 @@ export class TotpSignInDemoService {
     emailRaw: string,
     password: string,
     codeRaw: string,
-  ): Promise<AuthResponse> {
+  ): Promise<AuthenticatedSession> {
     this.assertPrismaDemo();
     const email = emailRaw.trim().toLowerCase();
     const token = codeRaw.replace(/\s/g, '');
@@ -273,7 +273,7 @@ export class TotpSignInDemoService {
   private async authenticatePassword(
     email: string,
     password: string,
-  ): Promise<AuthResponse> {
+  ): Promise<AuthenticatedSession> {
     try {
       return await this.loginWithPassword.execute({ email, password });
     } catch (e) {

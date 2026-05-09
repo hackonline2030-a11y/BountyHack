@@ -10,11 +10,11 @@ import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { randomUUID } from 'crypto';
 import { MongoUser } from '../../../../../users/adapters/mongo/mongo-user';
+import type { AuthenticatedSession } from '../../../../application/models/authenticated-session';
 import { Identity } from '../../../../domain/models/identity';
-import { verifyPassword, hashPassword } from '../../../password.util';
+import { verifyPassword, hashPassword } from '../../../utils/password.util';
 import { PassportJwtTokenService } from '../../services/passport-jwt-token.service';
 import {
-  PassportJwtAuthResult,
   PassportJwtLoginInput,
   PassportJwtPersistence,
   PassportJwtRegisterInput,
@@ -42,7 +42,7 @@ export class MongoPassportJwtRepository
     return { uid: String(doc._id), email: doc.email ?? '' };
   }
 
-  async register(input: PassportJwtRegisterInput): Promise<PassportJwtAuthResult> {
+  async register(input: PassportJwtRegisterInput): Promise<AuthenticatedSession> {
     if (!this.userModel) {
       throw new InternalServerErrorException('Mongo user model is not available');
     }
@@ -78,7 +78,7 @@ export class MongoPassportJwtRepository
     };
   }
 
-  async login(input: PassportJwtLoginInput): Promise<PassportJwtAuthResult> {
+  async login(input: PassportJwtLoginInput): Promise<AuthenticatedSession> {
     if (!this.userModel) {
       throw new InternalServerErrorException('Mongo user model is not available');
     }

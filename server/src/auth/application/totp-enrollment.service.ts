@@ -13,7 +13,7 @@ import { variables } from '../../shared/variables.config';
 import {
   sealTotpSecretForStorage,
   openTotpSecretFromStorage,
-} from '../infrastructure/totp/totp-secret-seal';
+} from '../adapters/totp/totp-secret-seal';
 import { TOTP_DEMO } from './demo/totp-crypto';
 
 export type TotpEnrollmentStartResult = {

@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Render } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
-import type { AuthResponse } from '../dto/auth-common.dto';
+import type { AuthenticatedSession } from '../application/models/authenticated-session';
 import { TotpSignInDemoService } from '../application/demo/totp-sign-in-demo.service';
 import { JwtLoginRequestDto } from '../dto/jwt-auth.dto';
 import { TotpDemoVerifyRequestDto } from '../dto/totp-demo.dto';
@@ -45,7 +45,7 @@ export class TotpSignInDemoController {
   @Post('totp-sign-in/complete')
   completeSignInWithTotp(
     @Body() body: TotpDemoVerifyRequestDto,
-  ): Promise<AuthResponse> {
+  ): Promise<AuthenticatedSession> {
     return this.totpSignInDemo.completeLoginWithTotp(
       body.email,
       body.password,

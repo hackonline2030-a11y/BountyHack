@@ -8,11 +8,11 @@ import {
 import { Prisma } from '../../../../../generated/prisma/client';
 import { PrismaService } from '../../../../../core/infrastructure/database/prisma/prisma.service';
 import { randomUUID } from 'crypto';
+import type { AuthenticatedSession } from '../../../../application/models/authenticated-session';
 import { Identity } from '../../../../domain/models/identity';
-import { verifyPassword, hashPassword } from '../../../password.util';
+import { verifyPassword, hashPassword } from '../../../utils/password.util';
 import { PassportJwtTokenService } from '../../services/passport-jwt-token.service';
 import {
-  PassportJwtAuthResult,
   PassportJwtLoginInput,
   PassportJwtPersistence,
   PassportJwtRegisterInput,
@@ -42,7 +42,7 @@ export class PostgrePrismaPassportJwtRepository
     return { uid: row.id, email: row.email ?? '' };
   }
 
-  async register(input: PassportJwtRegisterInput): Promise<PassportJwtAuthResult> {
+  async register(input: PassportJwtRegisterInput): Promise<AuthenticatedSession> {
     if (!this.prisma) {
       throw new InternalServerErrorException('Prisma service is not available');
     }
@@ -77,7 +77,7 @@ export class PostgrePrismaPassportJwtRepository
     };
   }
 
-  async login(input: PassportJwtLoginInput): Promise<PassportJwtAuthResult> {
+  async login(input: PassportJwtLoginInput): Promise<AuthenticatedSession> {
     if (!this.prisma) {
       throw new InternalServerErrorException('Prisma service is not available');
     }

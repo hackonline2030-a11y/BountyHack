@@ -14,7 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace.js"
 
 /**
  * Model User
- * Aligned with `PostgreUser` table (raw `pg` adapter) — shared table for POSTGRESQL + POSTGRESQL_PRISMA.
+ * Postgres `users` table (Prisma + optional raw DDL bootstrap in `PrismaService`).
  */
 export type UserModel = runtime.Types.Result.DefaultSelection<Prisma.$UserPayload>
 

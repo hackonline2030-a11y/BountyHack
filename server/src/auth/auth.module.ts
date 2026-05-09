@@ -12,24 +12,23 @@ import { PassportJwtTokenService } from './adapters/passport-jwt/services/passpo
 import { InMemoryPassportJwtRepository } from './adapters/passport-jwt/repositories/in-memory/in-memory-passport-jwt.repository';
 import { JwtInMemoryRegistry } from './adapters/passport-jwt/repositories/in-memory/jwt-in-memory-registry';
 import { MongoPassportJwtRepository } from './adapters/passport-jwt/repositories/mongo/mongo-passport-jwt.repository';
-import { PostgrePassportJwtRepository } from './adapters/passport-jwt/repositories/postgre/postgre-passport-jwt.repository';
 import { PostgrePrismaPassportJwtRepository } from './adapters/passport-jwt/repositories/postgre/postgre-prisma-passport-jwt.repository';
 
 import { RegisterWithPasswordCommand } from './application/commands/register-with-password.command';
 import { LoginWithPasswordCommand } from './application/commands/login-with-password.command';
 import { GetUserByUidQuery } from './application/queries/get-user-by-uid.query';
 import { GetUserFromTokenQuery } from './application/queries/get-user-from-token.query';
+import { RefreshAccessTokenQuery } from './application/queries/get-refresh-access-token.query';
 
 import { PassportJwtAuthController } from './controllers/passport-jwt-auth.controller';
 import { TotpSignInDemoController } from './controllers/totp-sign-in-demo.controller';
 import { TotpEnrollmentController } from './controllers/totp-enrollment.controller';
-import { PassportJwtAuthGuard } from './passport-jwt-auth.guard';
+import { PassportJwtAuthGuard } from './adapters/passport-jwt/guards/passport-jwt-auth.guard';
 import { TotpSignInDemoService } from './application/demo/totp-sign-in-demo.service';
 import { TotpEnrollmentService } from './application/totp-enrollment.service';
 
 const usesPersistedJwtStore =
   variables.database === 'MONGODB' ||
-  variables.database === 'POSTGRESQL' ||
   variables.database === 'POSTGRESQL_PRISMA';
 
 const authImports = [
@@ -61,12 +60,12 @@ const coreProviders = [
   PassportJwtTokenService,
   InMemoryPassportJwtRepository,
   MongoPassportJwtRepository,
-  PostgrePassportJwtRepository,
   PostgrePrismaPassportJwtRepository,
   RegisterWithPasswordCommand,
   LoginWithPasswordCommand,
   GetUserByUidQuery,
   GetUserFromTokenQuery,
+  RefreshAccessTokenQuery,
   JwtInMemoryRegistry,
   PassportJwtLocalStrategy,
   PassportJwtStrategy,
