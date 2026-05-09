@@ -23,6 +23,11 @@ export * from './enums.js';
  */
 export type User = Prisma.UserModel
 /**
+ * Model RefreshToken
+ * Opaque refresh tokens (peer of Mongo `refresh_tokens` collection). Raw token is hashed at rest (`token_hash`).
+ */
+export type RefreshToken = Prisma.RefreshTokenModel
+/**
  * Model TwoFactor
  * Which 2FA methods exist for a user (source of truth per enabled method).
  */

@@ -11,4 +11,9 @@ export interface AuthenticatedSession {
   user: AuthenticatedUserProfile;
   /** When true, caller must supply a second factor before the session is complete. */
   require2FA?: boolean;
+  /**
+   * Opaque refresh secret (only the raw value is sent to the client; DB stores SHA-256).
+   * Prefer httpOnly cookie at HTTP boundary rather than exposing in JSON when possible.
+   */
+  refreshToken?: string;
 }

@@ -78,4 +78,11 @@ export class JwtAuthResponseDto {
       'When true, the account expects a second factor; client should complete 2FA before relying on the session.',
   })
   require2FA?: boolean;
+
+  @ApiProperty({
+    required: false,
+    description:
+      'Opaque refresh secret; stored hashed server-side. Prefer httpOnly cookie in production.',
+  })
+  refreshToken?: string;
 }

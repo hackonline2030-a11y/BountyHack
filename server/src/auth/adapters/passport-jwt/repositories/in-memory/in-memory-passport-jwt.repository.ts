@@ -5,7 +5,10 @@ import {
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { JwtInMemoryRegistry } from './jwt-in-memory-registry';
-import type { AuthenticatedSession } from '../../../../application/models/authenticated-session';
+import type {
+  AuthenticatedSession,
+  AuthenticatedUserProfile,
+} from '../../../../application/models/authenticated-session';
 import { Identity } from '../../../../domain/models/identity';
 import { verifyPassword, hashPassword } from '../../../utils/password.util';
 import { PassportJwtTokenService } from '../../services/passport-jwt-token.service';
@@ -30,6 +33,14 @@ export class InMemoryPassportJwtRepository
       throw new UnauthorizedException('User not found');
     }
     return { uid: row.uid, email: '' };
+  }
+
+  async getAuthUserPublicProfile(uid: string): Promise<AuthenticatedUserProfile> {
+    const row = this.jwtRegistry.findAuthProfileByUid(uid);
+    if (!row) {
+      throw new UnauthorizedException('User not found');
+    }
+    return row;
   }
 
   async register(input: PassportJwtRegisterInput): Promise<AuthenticatedSession> {

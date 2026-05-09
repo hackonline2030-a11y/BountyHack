@@ -10,7 +10,10 @@ import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { randomUUID } from 'crypto';
 import { MongoUser } from '../../../../../users/adapters/mongo/mongo-user';
-import type { AuthenticatedSession } from '../../../../application/models/authenticated-session';
+import type {
+  AuthenticatedSession,
+  AuthenticatedUserProfile,
+} from '../../../../application/models/authenticated-session';
 import { Identity } from '../../../../domain/models/identity';
 import { verifyPassword, hashPassword } from '../../../utils/password.util';
 import { PassportJwtTokenService } from '../../services/passport-jwt-token.service';
@@ -40,6 +43,21 @@ export class MongoPassportJwtRepository
       throw new UnauthorizedException('User not found');
     }
     return { uid: String(doc._id), email: doc.email ?? '' };
+  }
+
+  async getAuthUserPublicProfile(uid: string): Promise<AuthenticatedUserProfile> {
+    if (!this.userModel) {
+      throw new InternalServerErrorException('Mongo user model is not available');
+    }
+    const doc = await this.userModel.findById(uid).lean();
+    if (!doc?._id) {
+      throw new UnauthorizedException('User not found');
+    }
+    return {
+      uid: String(doc._id),
+      email: doc.email ?? '',
+      username: doc.username,
+    };
   }
 
   async register(input: PassportJwtRegisterInput): Promise<AuthenticatedSession> {
@@ -97,11 +115,13 @@ export class MongoPassportJwtRepository
       throw new InternalServerErrorException('Invalid user identifier');
     }
 
+    const resolvedEmail = doc.email ?? email;
+    const uid = String(doc._id);
     return {
-      token: this.jwtTokenService.signToken(String(doc._id), doc.email ?? email),
+      token: this.jwtTokenService.signToken(uid, resolvedEmail),
       user: {
-        email: doc.email ?? email,
-        uid: String(doc._id),
+        email: resolvedEmail,
+        uid,
         username: doc.username,
       },
       require2FA: false,

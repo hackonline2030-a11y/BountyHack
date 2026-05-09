@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   NotImplementedException,
   UnauthorizedException,
@@ -13,7 +14,12 @@ import * as QRCode from 'qrcode';
 import type { AuthenticatedSession } from '../models/authenticated-session';
 import { TwoFactorMethod } from '../../../generated/prisma/enums';
 import { PrismaService } from '../../../core/infrastructure/database/prisma/prisma.service';
+import { attachOpaqueRefreshToSession } from '../../adapters/utils/opaque-refresh-token.util';
 import { PassportJwtTokenService } from '../../adapters/passport-jwt/services/passport-jwt-token.service';
+import {
+  REFRESH_TOKEN_REPOSITORY,
+  type IRefreshTokenRepository,
+} from '../../ports/refresh-token.repository';
 import { LoginWithPasswordCommand } from '../commands/login-with-password.command';
 import { variables } from '../../../shared/variables.config';
 import {
@@ -43,6 +49,8 @@ export class TotpSignInDemoService {
     private readonly prisma: PrismaService,
     private readonly loginWithPassword: LoginWithPasswordCommand,
     private readonly jwtTokenService: PassportJwtTokenService,
+    @Inject(REFRESH_TOKEN_REPOSITORY)
+    private readonly refreshTokenRepository: IRefreshTokenRepository,
   ) {}
 
   /**
@@ -239,16 +247,21 @@ export class TotpSignInDemoService {
       throw new UnauthorizedException('Invalid TOTP code');
     }
 
-    const accessToken = this.jwtTokenService.signToken(row.id, row.email);
-    return {
+    const emailResolved = row.email ?? '';
+    const accessToken = this.jwtTokenService.signToken(row.id, emailResolved);
+    const session: AuthenticatedSession = {
       token: accessToken,
       user: {
         uid: row.id,
-        email: row.email,
+        email: row.email ?? emailResolved,
         username: row.username,
       },
       require2FA: false,
     };
+    return attachOpaqueRefreshToSession(
+      this.refreshTokenRepository,
+      session,
+    );
   }
 
   /**

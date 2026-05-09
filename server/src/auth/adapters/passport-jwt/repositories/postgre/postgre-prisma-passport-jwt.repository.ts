@@ -8,7 +8,10 @@ import {
 import { Prisma } from '../../../../../generated/prisma/client';
 import { PrismaService } from '../../../../../core/infrastructure/database/prisma/prisma.service';
 import { randomUUID } from 'crypto';
-import type { AuthenticatedSession } from '../../../../application/models/authenticated-session';
+import type {
+  AuthenticatedSession,
+  AuthenticatedUserProfile,
+} from '../../../../application/models/authenticated-session';
 import { Identity } from '../../../../domain/models/identity';
 import { verifyPassword, hashPassword } from '../../../utils/password.util';
 import { PassportJwtTokenService } from '../../services/passport-jwt-token.service';
@@ -40,6 +43,24 @@ export class PostgrePrismaPassportJwtRepository
       throw new UnauthorizedException('User not found');
     }
     return { uid: row.id, email: row.email ?? '' };
+  }
+
+  async getAuthUserPublicProfile(uid: string): Promise<AuthenticatedUserProfile> {
+    if (!this.prisma) {
+      throw new InternalServerErrorException('Prisma service is not available');
+    }
+    const row = await this.prisma.user.findUnique({
+      where: { id: uid },
+      select: { id: true, email: true, username: true },
+    });
+    if (!row) {
+      throw new UnauthorizedException('User not found');
+    }
+    return {
+      uid: row.id,
+      email: row.email ?? '',
+      username: row.username,
+    };
   }
 
   async register(input: PassportJwtRegisterInput): Promise<AuthenticatedSession> {
@@ -95,10 +116,11 @@ export class PostgrePrismaPassportJwtRepository
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    const resolvedEmail = row.email ?? email;
     return {
-      token: this.jwtTokenService.signToken(row.id, row.email ?? email),
+      token: this.jwtTokenService.signToken(row.id, resolvedEmail),
       user: {
-        email: row.email ?? email,
+        email: resolvedEmail,
         uid: row.id,
         username: row.username,
       },
