@@ -1,7 +1,10 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../../../../generated/prisma/client';
-import { PostgreUser } from '../../../../users/adapters/postgre/postgre-user';
+import {
+  CREATE_PG_USERS_TABLE_SQL,
+  ENSURE_PG_USERS_TWO_FACTOR_COLUMN_SQL,
+} from '../postgres-users-ddl';
 
 /**
  * Nest wrapper around Prisma Client (generated code stays in `src/generated/prisma`).
@@ -25,9 +28,9 @@ export class PrismaService
 
   async onModuleInit(): Promise<void> {
     await this.$connect();
-    await this.$executeRawUnsafe(String(PostgreUser.CREATE_TABLE_SQL).trim());
+    await this.$executeRawUnsafe(String(CREATE_PG_USERS_TABLE_SQL).trim());
     await this.$executeRawUnsafe(
-      String(PostgreUser.ENSURE_TWO_FACTOR_ENABLED_COLUMN_SQL).trim(),
+      String(ENSURE_PG_USERS_TWO_FACTOR_COLUMN_SQL).trim(),
     );
   }
 

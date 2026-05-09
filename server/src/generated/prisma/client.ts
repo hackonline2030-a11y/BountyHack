@@ -43,7 +43,7 @@ export { Prisma }
 
 /**
  * Model User
- * Aligned with `PostgreUser` table (raw `pg` adapter) — shared table for POSTGRESQL + POSTGRESQL_PRISMA.
+ * Postgres `users` table (Prisma + optional raw DDL bootstrap in `PrismaService`).
  */
 export type User = Prisma.UserModel
 /**

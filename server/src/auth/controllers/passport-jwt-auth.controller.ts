@@ -8,16 +8,17 @@ import {
   ApiHttpUnauthorized,
 } from '../../core/dto/api-http-responses';
 import { ApiValidationBadRequest } from '../../core/dto/http-validation-error.dto';
-import { RegisterDto } from '../dto/auth-common.dto';
+import { toRegisterWithPasswordInput } from '../adapters/http/map-jwt-register-body';
+import { RegisterWithPasswordCommand } from '../application/commands/register-with-password.command';
+import type { AuthenticatedSession } from '../application/models/authenticated-session';
 import {
   JwtAuthResponseDto,
   JwtLoginRequestDto,
   JwtRegisterRequestDto,
 } from '../dto/jwt-auth.dto';
-import { RegisterWithPasswordCommand } from '../application/commands/register-with-password.command';
 
 type LoginRequestWithIdentity = Request & {
-  user?: JwtAuthResponseDto;
+  user?: AuthenticatedSession;
 };
 
 @ApiTags('auth')
@@ -42,13 +43,7 @@ export class PassportJwtAuthController {
     @Body()
     body: JwtRegisterRequestDto,
   ) {
-    const registerDto: RegisterDto = {
-      email: body.email,
-      username: body.username,
-      password: body.password,
-    };
-
-    return this.registerWithPassword.execute(registerDto);
+    return this.registerWithPassword.execute(toRegisterWithPasswordInput(body));
   }
 
   @Post('login')

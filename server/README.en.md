@@ -85,9 +85,9 @@ Both use the same Nx workspace source of truth.
 **`AUTH_TYPE`** and **`DATABASE_NAME`** work together. Important rule:
 
 - The auth architecture is extensible through `AUTH_TYPE`, but the active implementation is **`PASSPORT_JWT`**.
-- Database options remain multiple via `DATABASE_NAME` (`MONGODB`, `POSTGRESQL`, `POSTGRESQL_PRISMA`, `IN-MEMORY`).
+- Database options remain multiple via `DATABASE_NAME` (`MONGODB`, `POSTGRESQL_PRISMA`, `IN-MEMORY`).
 - With **`DATABASE_NAME=MONGODB`**, users (email, password hash, profile) are stored in the Mongo database from **`DATABASE_URL`**.
-- **2FA (schema and upcoming features)** evolves only under **`DATABASE_NAME=POSTGRESQL_PRISMA`** (Prisma migrations on PostgreSQL). There is no parallel extension on plain `POSTGRESQL`, Mongo, or in-memory for now ; see **`src/auth/README.md`**.
+- **2FA (schema and upcoming features)** evolves only under **`DATABASE_NAME=POSTGRESQL_PRISMA`** (Prisma migrations on PostgreSQL). There is no parallel extension on Mongo or in-memory for 2FA for now ; see **`src/auth/README.md`**.
 
 See the comments in **`.env.example`** as well.
 
@@ -125,9 +125,9 @@ Details: [`docker/README.md`](docker/README.md#prisma-migrations-et-démo) and *
 
 Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.dev.yaml`. Full guide: [`docker/README.md`](docker/README.md).
 
-**PostgreSQL + pgweb** start when **`DATABASE_NAME`** is **`POSTGRESQL`** or **`POSTGRESQL_PRISMA`**. **MongoDB + mongo-express** start when **`DATABASE_NAME=MONGODB`**. With `IN-MEMORY`, those database containers are not started. Compose **profiles** (`mongodb`, `pg`) keep these sets separate.
+**PostgreSQL + pgweb** start when **`DATABASE_NAME=POSTGRESQL_PRISMA`**. **MongoDB + mongo-express** start when **`DATABASE_NAME=MONGODB`**. With `IN-MEMORY`, those database containers are not started. Compose **profiles** (`mongodb`, `pg`) keep these sets separate.
 
-1. Environment file: follow **[Installation](#installation)** above (`server/.env` from `server/.env.example`). Set `DATABASE_NAME` (`MONGODB`, `POSTGRESQL`, `POSTGRESQL_PRISMA`, `IN-MEMORY`, …), plus `JWT_SECRET`, CORS, etc.
+1. Environment file: follow **[Installation](#installation)** above (`server/.env` from `server/.env.example`). Set `DATABASE_NAME` (`MONGODB`, `POSTGRESQL_PRISMA`, `IN-MEMORY`, …), plus `JWT_SECRET`, CORS, etc.
 
    **`DATABASE_URL`:** `.env.example` defaults to **PostgreSQL** (e.g. `postgres://…@postgres:5432/…` when the API runs in Docker). **API in Docker** + **`pg`** profile: host **`postgres`** on the compose network (not `localhost` from the api container). **API on the host** (`nx serve`) + Postgres in Docker: URL to **`localhost`** / **`127.0.0.1`** and **`POSTGRES_HOST_PORT`**. For **Mongo**, see `.env.example`; in Docker, host **`mongodb`** (e.g. `mongodb://mongodb:27017/bugbountyapp`).
 
@@ -143,9 +143,9 @@ Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.
 
    **Fast API cycle (no image rebuild):**
    - `./docker/start.sh api-restart` (or `./docker/start.sh restart-api`): restarts API without rebuilding the image.
-   - `./docker/start.sh api-stop` (or `./docker/start.sh stop-api`): stops the API and, depending on **`DATABASE_NAME`**, the matching Docker DB stack (**MongoDB** when `MONGODB`, **Postgres + pgweb** when **`POSTGRESQL`** or **`POSTGRESQL_PRISMA`**).
+   - `./docker/start.sh api-stop` (or `./docker/start.sh stop-api`): stops the API and, depending on **`DATABASE_NAME`**, the matching Docker DB stack (**MongoDB** when `MONGODB`, **Postgres + pgweb** when **`POSTGRESQL_PRISMA`**).
    - If `DATABASE_NAME=MONGODB`, the script applies profile **`mongodb`** and targets `mongodb` + `api`.
-   - If `DATABASE_NAME=POSTGRESQL` or `POSTGRESQL_PRISMA`, the script applies profile **`pg`** and orchestrates **`postgres`**, **`pgweb`**, and **`api`** depending on the command (`api-restart` only brings up **`postgres`** + **`api`** — see `start.sh`).
+   - If `DATABASE_NAME=POSTGRESQL_PRISMA`, the script applies profile **`pg`** and orchestrates **`postgres`**, **`pgweb`**, and **`api`** depending on the command (`api-restart` only brings up **`postgres`** + **`api`** — see `start.sh`).
    - Otherwise (`IN-MEMORY`, …), only **`api`** is affected (no compose DB containers).
    - After `./docker/start.sh` (`up`), the script tails API logs in the terminal (`logs -f api`).
      - Exit live tail: `Ctrl+C` (containers keep running).
@@ -171,7 +171,7 @@ Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.
    ```
    - Copy the output into `passwordHash` in `docker/dump/user.json` (hash changes every run because salt is random).
 
-   The script reads **`server/.env`** and adds **`--profile mongodb`** or **`--profile pg`** only when `DATABASE_NAME` is **`MONGODB`**, **`POSTGRESQL`**, or **`POSTGRESQL_PRISMA`** (including for `down`, so the right services stop).
+   The script reads **`server/.env`** and adds **`--profile mongodb`** or **`--profile pg`** only when `DATABASE_NAME` is **`MONGODB`** or **`POSTGRESQL_PRISMA`** (including for `down`, so the right services stop).
 
    **Without** the script — **Mongo**:
 
@@ -198,7 +198,7 @@ Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.
    | API (REST prefix) | `http://localhost:3003/api` (default host port **3003**; override with **`API_HOST_PORT`** in `server/.env`, read by `compose.dev.yaml`) |
    | OpenAPI (Swagger UI) | `http://localhost:3003/api/docs` (same host port) |
    | mongo-express | if **`DATABASE_NAME=MONGODB`** — `http://localhost:8086` |
-   | pgweb | if **`pg`** profile (`POSTGRESQL` or `POSTGRESQL_PRISMA`) — `http://localhost:8087` (override **`PGWEB_HOST_PORT`**) |
+   | pgweb | if **`pg`** profile (`POSTGRESQL_PRISMA`) — `http://localhost:8087` (override **`PGWEB_HOST_PORT`**) |
    | MongoDB (from host) | if **`DATABASE_NAME=MONGODB`** — `mongodb://localhost:27017` / database `bugbountyapp` |
    | PostgreSQL (from host) | if **`pg`** profile — `localhost:5432` (override **`POSTGRES_HOST_PORT`**) |
 

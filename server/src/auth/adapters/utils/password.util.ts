@@ -24,5 +24,8 @@ export async function verifyPassword(
   if (keyBuf.length !== derived.length) {
     return false;
   }
-  return timingSafeEqual(keyBuf, derived);
+  return timingSafeEqual(
+    new Uint8Array(keyBuf.buffer, keyBuf.byteOffset, keyBuf.byteLength),
+    new Uint8Array(derived.buffer, derived.byteOffset, derived.byteLength),
+  );
 }

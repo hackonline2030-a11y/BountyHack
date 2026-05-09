@@ -21,7 +21,6 @@ Il existe aussi un **2e axe de configuration** (independant de `AUTH_TYPE`) : `D
 Choix disponibles:
 
 - `MONGODB`
-- `POSTGRESQL` (SQL direct, sans Prisma)
 - `POSTGRESQL_PRISMA` (PostgreSQL via Prisma ORM)
 - `IN-MEMORY`
 
@@ -46,7 +45,7 @@ Fichiers principaux:
 - `controllers/passport-jwt-auth.controller.ts`
 - `adapters/passport-jwt/strategies/local/passport-jwt-local.strategy.ts`
 - `adapters/passport-jwt/strategies/passport-jwt.strategy.ts`
-- `passport-jwt-auth.guard.ts`
+- `adapters/passport-jwt/guards/passport-jwt-auth.guard.ts`
 - `auth.decorator.ts`
 
 Schema (`PASSPORT_JWT`) :
@@ -70,7 +69,7 @@ Route protegee (@Auth)
 ## Schema 2FA (Prisma / Postgres uniquement pour la suite)
 
 **Les prochaines etapes (flux 2FA, services, endpoints) ne ciblent que `DATABASE_NAME=POSTGRESQL_PRISMA`.**  
-Les autres modes (`POSTGRESQL` nu, Mongo, in-memory) restent possibles pour l'auth existante, mais ne seront pas etendus en parallele pour la 2FA.
+Les autres modes (Mongo, in-memory) restent possibles pour l'auth JWT de base, mais ne seront pas etendus en parallele pour la 2FA.
 
 Le modele de donnees suit l'article [Designing Two-Factor Authentication That Scales](https://medium.com/@a_zeraibi/designing-two-factor-authentication-that-scales-a2f78fab65e4)
 : table pivot `two_factor` (methode active + `verified`), table specifique `two_factor_totp` pour le secret TOTP.
@@ -88,7 +87,7 @@ Uniquement **`DATABASE_NAME=POSTGRESQL_PRISMA`** + variable **`TOTP_ENCRYPTION_K
 1. `POST /api/auth/totp/enable/start` avec **`Authorization: Bearer <JWT>`**. Met a jour / cree `two_factor` (methode `APP`, `verified=false`), regenere le secret, enregistre le **texte chiffre** dans `two_factor_totp`. Reponse : **`secret`** (Base32, saisie manuelle), **`otpauthUri`**, **`secretQrCode`** (data URL pour le QR).
 2. `POST /api/auth/totp/enable/confirm` avec le meme Bearer, corps `{ "code": "123456" }`. Verifie le TOTP (`otplib.verify`, tolerance `TOTP_EPOCH_TOLERANCE`), puis **`verified=true`** sur `two_factor` et **`two_factor_enabled`** = `1` sur `users`.
 
-Fichiers principaux : `application/totp-enrollment.service.ts`, `infrastructure/totp/totp-secret-seal.ts`, `controllers/totp-enrollment.controller.ts`.
+Fichiers principaux : `application/totp-enrollment.service.ts`, `adapters/totp/totp-secret-seal.ts`, `controllers/totp-enrollment.controller.ts`.
 
 **Page demo dashboard (EJS)** pour enchainer login + start + confirm : `GET /api/dashboard/totp` (bouton aussi sur la page d’accueil `/api`).
 

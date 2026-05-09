@@ -70,4 +70,12 @@ export class JwtAuthResponseDto {
     description: 'Authenticated user profile payload.',
   })
   user: JwtAuthUserDto;
+
+  @ApiProperty({
+    required: false,
+    example: false,
+    description:
+      'When true, the account expects a second factor; client should complete 2FA before relying on the session.',
+  })
+  require2FA?: boolean;
 }
