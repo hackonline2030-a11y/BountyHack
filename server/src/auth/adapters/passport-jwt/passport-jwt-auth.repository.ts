@@ -1,7 +1,7 @@
 import {
+  Inject,
   Injectable,
   InternalServerErrorException,
-  NotImplementedException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { variables } from '../../../shared/variables.config';
@@ -10,6 +10,11 @@ import type { LoginWithPasswordInput } from '../../application/models/login-with
 import type { RegisterWithPasswordInput } from '../../application/models/register-with-password.input';
 import { Identity } from '../../domain/models/identity';
 import type { AuthRepository } from '../../ports/auth.repository';
+import {
+  REFRESH_TOKEN_REPOSITORY,
+  type IRefreshTokenRepository,
+} from '../../ports/refresh-token.repository';
+import { attachOpaqueRefreshToSession } from '../utils/opaque-refresh-token.util';
 import { PassportJwtTokenService } from './services/passport-jwt-token.service';
 import { InMemoryPassportJwtRepository } from './repositories/in-memory/in-memory-passport-jwt.repository';
 import { MongoPassportJwtRepository } from './repositories/mongo/mongo-passport-jwt.repository';
@@ -29,6 +34,8 @@ import {
 export class PassportJwtAuthRepository implements AuthRepository {
   constructor(
     private readonly jwtTokenService: PassportJwtTokenService,
+    @Inject(REFRESH_TOKEN_REPOSITORY)
+    private readonly refreshTokenRepository: IRefreshTokenRepository,
     private readonly inMemoryRepo: InMemoryPassportJwtRepository,
     private readonly mongoRepo: MongoPassportJwtRepository,
     private readonly postgrePrismaRepo: PostgrePrismaPassportJwtRepository,
@@ -54,7 +61,9 @@ export class PassportJwtAuthRepository implements AuthRepository {
       username: input.username.trim(),
       password: input.password,
     };
-    return this.resolvePersistenceRepository().register(command);
+    const session =
+      await this.resolvePersistenceRepository().register(command);
+    return attachOpaqueRefreshToSession(this.refreshTokenRepository, session);
   }
 
   async login(input: LoginWithPasswordInput): Promise<AuthenticatedSession> {
@@ -68,13 +77,35 @@ export class PassportJwtAuthRepository implements AuthRepository {
       email,
       password: input.password,
     };
-    return this.resolvePersistenceRepository().login(command);
+    const session = await this.resolvePersistenceRepository().login(command);
+    return attachOpaqueRefreshToSession(this.refreshTokenRepository, session);
   }
 
-  async refreshAccessToken(_refreshToken: string): Promise<AuthenticatedSession> {
-    throw new NotImplementedException(
-      'JWT refresh not implemented yet (PassportJwtAuthRepository).',
+  async refreshAccessToken(
+    refreshToken: string,
+  ): Promise<AuthenticatedSession> {
+    const trimmed = refreshToken.trim();
+    if (!trimmed) {
+      throw new UnauthorizedException('Missing refresh token');
+    }
+
+    const hit = await this.refreshTokenRepository.findValidForRotation(trimmed);
+    if (!hit) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
+    await this.refreshTokenRepository.revokeByRawToken(trimmed);
+
+    const user = await this.resolvePersistenceRepository().getAuthUserPublicProfile(
+      hit.userId,
     );
+    const accessToken = this.jwtTokenService.signToken(user.uid, user.email);
+    const session: AuthenticatedSession = {
+      token: accessToken,
+      user,
+      require2FA: false,
+    };
+    return attachOpaqueRefreshToSession(this.refreshTokenRepository, session);
   }
 
   async logout(userId: string): Promise<void> {

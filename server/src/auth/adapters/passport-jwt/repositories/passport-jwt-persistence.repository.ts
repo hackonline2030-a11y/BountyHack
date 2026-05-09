@@ -1,4 +1,7 @@
-import type { AuthenticatedSession } from '../../../application/models/authenticated-session';
+import type {
+  AuthenticatedSession,
+  AuthenticatedUserProfile,
+} from '../../../application/models/authenticated-session';
 import { Identity } from '../../../domain/models/identity';
 
 export type PassportJwtRegisterInput = {
@@ -14,6 +17,7 @@ export type PassportJwtLoginInput = {
 
 export type PassportJwtPersistence = {
   getUserByUid(uid: string): Promise<Identity>;
+  getAuthUserPublicProfile(uid: string): Promise<AuthenticatedUserProfile>;
   register(input: PassportJwtRegisterInput): Promise<AuthenticatedSession>;
   login(input: PassportJwtLoginInput): Promise<AuthenticatedSession>;
 };

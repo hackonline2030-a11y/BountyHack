@@ -28,8 +28,23 @@ model User {
   twoFactorEnabled BigInt @default(0) @map("two_factor_enabled")
 
   twoFactors TwoFactor[]
+  refreshTokens RefreshToken[]
 
   @@map("users")
+}
+
+/// Opaque refresh tokens (peer of Mongo `refresh_tokens` collection). Raw token is hashed at rest (`token_hash`).
+model RefreshToken {
+  id         String   @id @default(uuid())
+  tokenHash  String   @unique @map("token_hash")
+  userId     String   @map("user_id")
+  expiresAt  DateTime @map("expires_at")
+  lastUsedAt DateTime @default(now()) @map("last_used_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
 }
 
 /// Which 2FA methods exist for a user (source of truth per enabled method).

@@ -3,10 +3,10 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtPayload, sign, verify } from 'jsonwebtoken';
+import { JwtPayload, JsonWebTokenError, sign, verify, TokenExpiredError } from 'jsonwebtoken';
 import { Identity } from '../../../domain/models/identity';
 
-type SupportedJwtPayload = JwtPayload & {
+type SupportedAccessPayload = JwtPayload & {
   uid?: string;
   user_id?: string;
   sub?: string;
@@ -21,14 +21,20 @@ export class PassportJwtTokenService {
       throw new UnauthorizedException('JWT_SECRET is not configured');
     }
 
-    const payload = verify(token, secret) as SupportedJwtPayload;
+    let payload: SupportedAccessPayload;
+    try {
+      payload = verify(token, secret) as SupportedAccessPayload;
+    } catch (e) {
+      this.rethrowJwtError(e);
+    }
+
     const uid = payload.uid || payload.user_id || payload.sub;
     if (!uid) {
       throw new UnauthorizedException('JWT token does not contain a user id');
     }
 
     return {
-      email: payload.email ?? '',
+      email: typeof payload.email === 'string' ? payload.email : '',
       uid,
     };
   }
@@ -42,5 +48,15 @@ export class PassportJwtTokenService {
     return sign({ user_id: uid, email, sub: uid }, secret, {
       expiresIn: process.env.JWT_EXPIRES_IN || '7d',
     });
+  }
+
+  private rethrowJwtError(e: unknown): never {
+    if (e instanceof TokenExpiredError) {
+      throw new UnauthorizedException('Token expired');
+    }
+    if (e instanceof JsonWebTokenError) {
+      throw new UnauthorizedException('Invalid token');
+    }
+    throw e;
   }
 }
