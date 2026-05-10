@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { getT } from "next-i18next/server";
+import { notFound } from "next/navigation";
 import { Section } from "@components/sections/Section";
+import { isSupportedLanguage } from "@/lib/auth/supported-language";
+import { verifySession } from "@/lib/dal/session";
 
 type PageProps = { params: Promise<{ lng: string }> };
 
@@ -12,6 +15,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function WelcomeDashboardPage({ params }: PageProps) {
   const { lng } = await params;
+  if (!isSupportedLanguage(lng)) {
+    notFound();
+  }
+  await verifySession(lng);
   const { t } = await getT("welcomeDashboard", { lng });
 
   return (

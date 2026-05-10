@@ -37,7 +37,7 @@ Open [http://localhost:3001](http://localhost:3001). Next dev runs on **3001** (
 
 ## Included
 
-- Auth pages: `/{lng}/register`, `/{lng}/login` (e.g. `/en/login`, `/fr/register`) — forms use `POST /{prefix}/auth/login` and `POST /{prefix}/auth/register` on the Nest host.
+- Auth pages: `/{lng}/register`, `/{lng}/login` (e.g. `/en/login`, `/fr/register`) — forms call Nest (`POST …/auth/login`, `…/auth/register`). After login, the client posts the access JWT to **`POST /api/session`** so Next can store an **`httpOnly` cookie** and run DAL checks (e.g. `/{lng}/welcome-dashboard`).
 - Shared UI foundation (sections, buttons, theming)
 - Email demo route: `POST /api/send` (disabled when `RESEND_API_KEY` is missing)
 
@@ -48,6 +48,7 @@ Prerequisite: **`client/.env`** — see **[Installation](#installation)**.
 - **`NEXT_PUBLIC_SITE_URL`**: public URL of this Next app (SEO, absolute links).
 - **`NEXT_PUBLIC_AUTH_API`**: Nest origin (no trailing slash), e.g. `http://localhost:3000`.
 - **`NEXT_PUBLIC_AUTH_API_PREFIX`** (optional): global API segment before `/auth` (default `api` → `http://…/api/auth/login`).
+- **`JWT_SECRET`**: must match the Nest `JWT_SECRET`; used to verify the access JWT when setting the httpOnly session cookie (`POST /api/session`) and in the DAL for protected Server Components.
 - **`RESEND_API_KEY`**: for `POST /api/send`. If missing or empty, the route logs a warning and returns `503`.
 
 ## Scripts
