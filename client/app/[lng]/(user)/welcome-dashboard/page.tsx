@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getT } from "next-i18next/server";
 import { notFound } from "next/navigation";
 import { Section } from "@components/sections/Section";
-import { isSupportedLanguage } from "@/lib/auth/supported-language";
+import { isSupportedLanguage } from "@modules/auth/core/model/locale.policy";
 import { verifySession } from "@/lib/dal/session";
 
 type PageProps = { params: Promise<{ lng: string }> };

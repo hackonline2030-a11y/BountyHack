@@ -2,7 +2,7 @@ import i18nConfig from "@/i18n.config";
 
 const supported = new Set(i18nConfig.supportedLngs);
 
-/** Locale segment validated for `/api/session` and session redirects (`en`, `fr`, …). */
+/** Validates `[lng]` route segments against `i18n.config.ts`. */
 export function isSupportedLanguage(lng: string): boolean {
   return supported.has(lng);
 }
