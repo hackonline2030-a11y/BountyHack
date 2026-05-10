@@ -47,7 +47,6 @@ export function RegisterForm() {
 
       setStatus("success");
       setMessage(t("registerForm.successRegister"));
-      // After a successful registration, take the user to the login page.
       router.replace(`${prefix}/login`);
     } catch {
       setStatus("error");

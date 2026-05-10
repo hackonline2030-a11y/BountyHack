@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { getT } from "next-i18next/server";
 import { notFound } from "next/navigation";
 import { Section } from "@components/sections/Section";
+import { getWelcomeDashboardUser } from "@/lib/dal/welcome-user";
 import { isSupportedLanguage } from "@modules/auth/core/model/locale.policy";
-import { verifySession } from "@/lib/dal/session";
 
 type PageProps = { params: Promise<{ lng: string }> };
 
@@ -18,8 +18,12 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
   if (!isSupportedLanguage(lng)) {
     notFound();
   }
-  await verifySession(lng);
+  const { displayName } = await getWelcomeDashboardUser(lng);
   const { t } = await getT("welcomeDashboard", { lng });
+  const heading =
+    displayName !== null
+      ? t("welcomeDashboard.headingWithUsername", { username: displayName })
+      : t("welcomeDashboard.heading");
 
   return (
     <main className="flex w-full min-h-[calc(100vh-(var(--header-height)+var(--footer-height)))] flex-col">
@@ -29,7 +33,7 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
       >
         <article className="flex w-full max-w-md flex-col items-center gap-6 px-5 py-8 sm:px-6">
           <h1 className="text-center text-3xl font-bold text-white">
-            {t("welcomeDashboard.heading")}
+            {heading}
           </h1>
         </article>
       </Section>

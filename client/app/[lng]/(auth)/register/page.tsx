@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getT } from "next-i18next/server";
 import { Section } from "@components/sections/Section";
-import { RegisterForm } from "@components/molecules/RegisterForm";
+import { RegisterForm } from "@components/forms/RegisterForm";
 
 type PageProps = { params: Promise<{ lng: string }> };
 
