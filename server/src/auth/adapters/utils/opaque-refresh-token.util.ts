@@ -34,6 +34,11 @@ export function opaqueRefreshExpiryDate(nowMs = Date.now()): Date {
   return new Date(nowMs + 30 * 86400000);
 }
 
+/** Max-Age semantics for Set-Cookie (milliseconds), aligned with opaque DB expiry. */
+export function refreshCookieMaxAgeMs(nowMs = Date.now()): number {
+  return Math.max(0, opaqueRefreshExpiryDate(nowMs).getTime() - nowMs);
+}
+
 export async function attachOpaqueRefreshToSession(
   repo: IRefreshTokenRepository,
   session: AuthenticatedSession,

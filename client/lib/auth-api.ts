@@ -67,3 +67,11 @@ export async function postAuthRegister(body: NestAuthRegisterBody) {
     body: JSON.stringify(body),
   });
 }
+
+/** Rotates opaque refresh cookie and returns JSON `{ token, user, require2FA? }`. */
+export async function postAuthRefresh() {
+  return fetch(authUrl("/refresh"), {
+    method: "POST",
+    credentials: "include",
+  });
+}
