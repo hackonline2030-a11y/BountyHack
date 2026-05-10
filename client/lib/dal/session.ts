@@ -1,9 +1,8 @@
 import "server-only";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
-import { ACCESS_TOKEN_COOKIE_NAME } from "@/lib/auth/access-session.constants";
-import { verifyAccessToken } from "@/lib/auth/verify-access-token.server";
+import { createRequireAppSessionDependencies } from "@modules/auth/core/auth.factory";
+import { requireAppSessionUseCase } from "@modules/auth/core/usecase/require-app-session.usecase";
 
 function loginHref(lng: string): string {
   return `/${lng}/login`;
@@ -14,18 +13,13 @@ function loginHref(lng: string): string {
  * @see https://nextjs.org/docs/app/guides/authentication#create-a-data-access-layer-dal-with-only-the-data-you-need
  */
 export const verifySession = cache(async (lng: string) => {
-  const cookieStore = await cookies();
-  const raw = cookieStore.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
+  const result = await requireAppSessionUseCase(
+    createRequireAppSessionDependencies(),
+  );
 
-  if (!raw?.trim()) {
+  if (!result.ok) {
     redirect(loginHref(lng));
   }
 
-  const verified = await verifyAccessToken(raw.trim());
-  if (!verified) {
-    cookieStore.delete(ACCESS_TOKEN_COOKIE_NAME);
-    redirect(loginHref(lng));
-  }
-
-  return verified;
+  return result.payload;
 });

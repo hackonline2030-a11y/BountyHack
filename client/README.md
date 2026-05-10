@@ -37,6 +37,7 @@ Open [http://localhost:3001](http://localhost:3001). Next dev runs on **3001** (
 
 ## Included
 
+- Auth module (`modules/auth/core/`): ports (`gateway/`), Next + **jose** adapters (`gateway-infra/`, see `JoseJwtHs256AccessTokenVerifier`), use cases, and **`auth.factory.ts`** wiring; `app/api` and `lib/dal` stay thin adapters.
 - Auth pages: `/{lng}/register`, `/{lng}/login` (e.g. `/en/login`, `/fr/register`) — forms call Nest (`POST …/auth/login`, `…/auth/register`). After login, the client posts the access JWT to **`POST /api/session`** so Next can store an **`httpOnly` cookie** and run DAL checks (e.g. `/{lng}/welcome-dashboard`).
 - Shared UI foundation (sections, buttons, theming)
 - Email demo route: `POST /api/send` (disabled when `RESEND_API_KEY` is missing)
