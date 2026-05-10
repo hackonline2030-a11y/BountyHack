@@ -43,6 +43,28 @@ export function LoginForm() {
         return;
       }
 
+      const nest = data as { token?: string };
+      const token = nest.token?.trim();
+      if (!token) {
+        setStatus("error");
+        setMessage(t("loginForm.errorLogin"));
+        return;
+      }
+
+      const lng = prefix.replace(/^\//, "") || "en";
+      const sessionRes = await fetch("/api/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ token, lng }),
+      });
+
+      if (!sessionRes.ok) {
+        setStatus("error");
+        setMessage(t("loginForm.errorLogin"));
+        return;
+      }
+
       setStatus("success");
       router.replace(`${prefix}/welcome-dashboard`);
     } catch {
