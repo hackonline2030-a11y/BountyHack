@@ -7,8 +7,10 @@ import { getT, initServerI18next } from "next-i18next/server";
 import i18nConfig from "@/i18n.config";
 import enCommon from "@/app/i18n/locales/en/common.json";
 import enConnexion from "@/app/i18n/locales/en/connexion.json";
+import enParameters from "@/app/i18n/locales/en/parameters.json";
 import frCommon from "@/app/i18n/locales/fr/common.json";
 import frConnexion from "@/app/i18n/locales/fr/connexion.json";
+import frParameters from "@/app/i18n/locales/fr/parameters.json";
 import "@/app/globals.css";
 import { ThemeProvider } from "@modules/app/react/ThemeProvider";
 import { Header } from "@modules/app/react/layout/Header";
@@ -18,8 +20,8 @@ initServerI18next(i18nConfig);
 
 /** Bundled for client `I18nProvider` so every namespace (e.g. `connexion`) hydrates reliably. */
 const clientI18nResources = {
-  en: { common: enCommon, connexion: enConnexion },
-  fr: { common: frCommon, connexion: frConnexion },
+  en: { common: enCommon, connexion: enConnexion, parameters: enParameters },
+  fr: { common: frCommon, connexion: frConnexion, parameters: frParameters },
 } satisfies Resource;
 
 const LANG_HEADER = "x-i18next-current-language";

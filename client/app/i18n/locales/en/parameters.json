@@ -1,0 +1,22 @@
+{
+  "metaTitle": "Settings",
+  "pageTitle": "Settings",
+  "securityHeading": "Security",
+  "totpHeading": "Authenticator app (TOTP)",
+  "totpLead": "Add your account to Google Authenticator or another TOTP app, then confirm with a 6-digit code. Your session stays on this site; the token is not shown in the browser.",
+  "btnStart": "Start setup",
+  "hintScan": "Scan this QR code with your authenticator app.",
+  "manualToggle": "Manual entry (secret / URI)",
+  "secretLabel": "Base32 secret",
+  "uriLabel": "otpauth URI",
+  "enterCode": "Enter the 6-digit code from your app.",
+  "btnConfirm": "Confirm and enable",
+  "statusStarting": "Starting…",
+  "statusConfirming": "Verifying code…",
+  "statusSuccess": "Two-factor authentication is enabled.",
+  "statusUnauthorized": "Session expired. Please sign in again.",
+  "statusGenericError": "Something went wrong. Try again.",
+  "statusInvalidCode": "Invalid code. Check your authenticator and try again.",
+  "statusNestUnavailable": "TOTP setup is not available (check server database and TOTP_ENCRYPTION_KEY).",
+  "nestError": "Request failed (HTTP {{status}})."
+}
