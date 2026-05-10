@@ -12,6 +12,7 @@ All user-facing pages live under the dynamic segment **`[lng]`** (supported loca
 | `/{lng}/login` | Login |
 | `/{lng}/register` | Register |
 | `/{lng}/welcome-dashboard` | Authenticated welcome (session required) |
+| `/{lng}/parameters` | Settings (session required); **Security** includes TOTP enrollment UI |
 
 Example: `http://localhost:3001/fr/welcome-dashboard`.
 
@@ -21,8 +22,12 @@ Example: `http://localhost:3001/fr/welcome-dashboard`.
 |---------------|--------|
 | `POST /api/session` | Store the Nest access JWT as an **httpOnly** cookie on the Next origin (used after login/register from the client). |
 | `POST /api/send` | Resend-backed email (needs `RESEND_API_KEY`). |
+| `POST /api/account/totp/enable/start` | **BFF:** forwards to Nest `POST …/auth/totp/enable/start` using the **verified** session cookie JWT (never exposed to client JS). |
+| `POST /api/account/totp/enable/confirm` | **BFF:** same for `POST …/auth/totp/enable/confirm` with JSON `{ "code": "123456" }` (6–8 digits). |
 
 These are **requested by the browser** (or by client code) and therefore appear in Chrome DevTools → **Network** when triggered.
+
+**TOTP security model:** the browser calls only the **Next origin** (`/api/account/...`). The Nest access JWT stays **httpOnly**; Next route handlers read it server-side and attach `Authorization: Bearer` to Nest—same trust boundary as [`lib/dal/welcome-user.ts`](lib/dal/welcome-user.ts), without pasting tokens in the page (contrast with the Nest EJS demo).
 
 ## Nest calls from the server (“GET system” / `users/me`)
 
