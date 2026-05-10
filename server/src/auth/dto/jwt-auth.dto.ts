@@ -57,11 +57,14 @@ export class JwtAuthUserDto {
   username: string;
 }
 
-/** HTTP response for `POST /api/auth/register` and `POST /api/auth/login`. */
+/**
+ * JSON returned after register / login / refresh.
+ * Refresh opaque is issued only via `Set-Cookie` (httpOnly), not in this body.
+ */
 export class JwtAuthResponseDto {
   @ApiProperty({
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-    description: 'Signed JWT access token.',
+    description: 'Signed JWT access token (short-lived).',
   })
   token: string;
 
@@ -78,11 +81,4 @@ export class JwtAuthResponseDto {
       'When true, the account expects a second factor; client should complete 2FA before relying on the session.',
   })
   require2FA?: boolean;
-
-  @ApiProperty({
-    required: false,
-    description:
-      'Opaque refresh secret; stored hashed server-side. Prefer httpOnly cookie in production.',
-  })
-  refreshToken?: string;
 }

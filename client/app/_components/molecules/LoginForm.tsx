@@ -44,8 +44,7 @@ export function LoginForm() {
       }
 
       setStatus("success");
-      setMessage(t("loginForm.successLogin"));
-      router.replace(prefix);
+      router.replace(`${prefix}/welcome-dashboard`);
     } catch {
       setStatus("error");
       setMessage(t("errors.network"));

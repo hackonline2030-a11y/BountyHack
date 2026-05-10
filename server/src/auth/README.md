@@ -11,9 +11,9 @@ Il existe aussi un **2e axe de configuration** (independant de `AUTH_TYPE`) : `D
 ## Structure (refactor clean architecture leger)
 
 - `domain/models/*` : modeles metier purs (ex: `Identity`).
-- `ports/*` : contrats applicatifs (`AuthRepository`).
+- `ports/*` : contrats applicatifs (`AuthRepository`, symbole `REFRESH_TOKEN_REPOSITORY` + `IRefreshTokenRepository`).
 - `adapters/*` : adaptateurs techniques (Passport strategies, repositories par base, etc.).
-- `adapters/http/*` : types lies a l'interface HTTP (ex: `RequestWithIdentity`).
+- `adapters/http/*` : aide HTTP (`RequestWithIdentity`, cookie refresh `jwt-refresh-cookie.ts`, corps JSON sans refresh `jwt-auth-access-response.ts`, map inscription `map-jwt-register-body.ts`).
 - `application/*` : use cases (commands/queries) appeles par controllers/strategies/middlewares.
 
 ## Switch base de donnees (`DATABASE_NAME`)
@@ -35,7 +35,7 @@ Notes:
 
 Mode recommande pour l'auth email/mot de passe locale.
 
-- `POST /api/auth/register` et `POST /api/auth/login` sont exposes via `PassportJwtAuthController`.
+- `POST /api/auth/register`, `POST /api/auth/login` et `POST /api/auth/refresh` sont exposes via `PassportJwtAuthController`.
 - Le login passe par `@UseGuards(AuthGuard('local'))` et `PassportJwtLocalStrategy`.
 - Les routes protegees (`@Auth()`) passent par `PassportJwtAuthGuard` (`AuthGuard('jwt')`) et `PassportJwtStrategy`.
 - Les infos utilisateur authentifie sont lues depuis `request.user` (payload injecte par Passport).
@@ -48,23 +48,73 @@ Fichiers principaux:
 - `adapters/passport-jwt/guards/passport-jwt-auth.guard.ts`
 - `auth.decorator.ts`
 
-Schema (`PASSPORT_JWT`) :
+Schema (`PASSPORT_JWT`) — resume :
 
 ```text
-POST /api/auth/login
-  -> AuthGuard('local')
-  -> PassportJwtLocalStrategy.validate(email, password)
-  -> AuthRepository.login(...)
-  -> req.user = { token, user }
-  -> PassportJwtAuthController.login() retourne req.user
+POST /api/auth/register | login
+  -> RegisterWithPasswordCommand | AuthGuard('local') + PassportJwtLocalStrategy
+  -> AuthRepository (signe JWT access court + persiste refresh opaque + ... )
+  -> Set-Cookie: refresh httpOnly (path /api/auth/refresh)
+  -> JSON au client : { token, user, require2FA? } (pas de champ refresh dans le corps)
+
+POST /api/auth/refresh
+  -> cookie refresh opaque
+  -> RefreshAccessTokenQuery -> AuthRepository.refreshAccessToken (DB : rotation)
+  -> nouveau cookie + meme forme JSON { token, user, ... }
 
 Route protegee (@Auth)
-  -> PassportJwtAuthGuard (AuthGuard('jwt'))
-  -> PassportJwtStrategy.validate(payload JWT)
-  -> AuthRepository.getUserByUid(...)
-  -> req.user = { uid, email, ... }
-  -> controller metier
+  -> PassportJwtAuthGuard (Bearer : JWT access)
+  -> PassportJwtStrategy -> AuthRepository.getUserByUid(...)
+  -> req.user = Identity (adapter metier), pas la session login complete
 ```
+
+---
+
+## JWT — access VS refresh opaque (fil minimal en prod progressive)
+
+Section dediee : ce que le module fait aujourd’hui pour le couple **JWT access** / **refresh** et **pourquoi**.
+
+### Access JWT (court)
+
+- Signe avec **`JWT_SECRET`**, duree **`JWT_EXPIRES_IN`** (`jsonwebtoken` / `expiresIn`, ex. `15m`).
+- Transport client : convention **`Authorization: Bearer <token>`** sur les routes protegees (`PassportJwtStrategy`).
+
+### Refresh opaque (long) — pas un second JWT
+
+**Choix d’archi** :
+
+- Valeur aleatoire cote serveur (**opaque**), stockee en base **unique par hash SHA-256** (`token_hash` / Mongo `tokenHash`).
+- TTL alignee avec **`JWT_REFRESH_EXPIRES_IN`** lors de la persistance et du `Set-Cookie` (`max-age` derive de la meme regle dans `opaque-refresh-token.util.ts`).
+- **Rotation stricte** a chaque POST `/auth/refresh` : validation + `last_used_at`, puis **suppression de la ligne** du jeton utilise avant d’emettre une nouvelle paire opaque + nouveau cookie (meme comportement fonctionnel que l’article “delete old refresh”).
+
+Pourquoi ne pas garder uniquement un long JWT comme refresh ?
+- Une base **avec revocation / rotation par jeton** est un pattern courant associe a une **fenetre courte** pour l’access JWT ; permet **logout reel** (`DELETE`/revocation), limite replay apres substitution, audit (`last_used_at`).
+
+Pourquoi ne pas garder les secrets refresh en JSON ?
+- Réponse HTTP **`JwtAuthResponseDto`** : uniquement **`token` + `user` + require2FA** facultatif ; le navigateur doit utiliser **`credentials: 'include'`** pour recevoir le cookie (**`cookie-parser`** est enregistre dans `main.ts`).
+- Attrait securise : **`httpOnly`**, **`Secure` si `NODE_ENV=production`**, **`SameSite=lax`** (ajustement possible si sous-domaines / SPA distante HTTPS).
+- **`Path`** du cookie : **`/{GLOBAL_PREFIX}/auth/refresh`** (defaut **`/api/auth/refresh`**) pour limiter l’envoi du cookie aux rotations.
+
+### Ports / use cases (inversion de dependance)
+
+| Frontiere | Role |
+|-----------|------|
+| `AuthRepository` | register/login/refresh JWT access + orchestration opaque attache apres inscription cote facade `PassportJwtAuthRepository`. |
+| `REFRESH_TOKEN_REPOSITORY` / `IRefreshTokenRepository` | persistance Postgres **Prisma**, **Mongo**, ou **in-memory** selon `DATABASE_NAME`. |
+| `RefreshAccessTokenQuery` | use case utilise par le controller HTTP `/auth/refresh`. |
+| `PassportJwtTokenService` | **uniquement** verification / emission du JWT **access**. |
+
+Adaptateurs infra : sous `adapters/passport-jwt/repositories/*` (dont `*-refresh-token.repository.ts`, `*-passport-jwt.repository.ts`). Table Prisma **`refresh_tokens`** (migration dediee) + DDL bootstrap facultatif dans `PrismaService` pour DB legacy.
+
+### Configuration (auth + env serveur)
+
+- **`JWT_REFRESH_EXPIRES_IN`** : TTL commun persistance cookie + lignes refresh.
+- **`JWT_REFRESH_COOKIE_NAME`** (voir `config/auth-env.ts`) : nom du cookie (defaut `refresh_token`).
+- CORS Nest : **`credentials: true`** des que l’origine n’est pas `*` — le client Next utilise deja **`credentials: 'include'`** dans `client/lib/auth-api.ts` ; helper **`postAuthRefresh()`** pour `POST …/auth/refresh`.
+
+Les endpoints **demo TOTP** (`totp-sign-in/complete`) reutilisent la meme persistence refresh **sans** recopier encore la mise en cookie httpOnly dedie dans ce README (JSON interne utilise `AuthenticatedSession` avec refresh attache jusqu’a alignement UX si besoin).
+
+---
 
 ## Schema 2FA (Prisma / Postgres uniquement pour la suite)
 
@@ -107,13 +157,14 @@ Pipeline actuel :
 
 - Utiliser les guard/strategies Passport pour l'auth des requetes.
 
-Toute nouvelle condition de configuration auth doit passer par `config/auth-env.ts` (pas de check inline `process.env.AUTH_TYPE`).
+Toute nouvelle valeur de configuration lisible dans le module (`AUTH_TYPE`, nom du cookie refresh, etc.) doit passer par **`config/auth-env.ts`** lorsqu’elle est partagee (eviter les `process.env` epars dans tout le dossier pour la meme chose).
 
 ## Tests (Passport uniquement)
 
 La couverture auth actuelle cible `PASSPORT_JWT` avec mocks/stubs (sans base reelle):
 
-- `controllers/passport-jwt-auth.controller.spec.ts`
+- `controllers/passport-jwt-auth.controller.spec.ts` (cookies + `refresh`, corps JSON sans refresh)
+- `application/queries/*.spec.ts` (delegation vers `AuthRepository` / `REFRESH_TOKEN_REPOSITORY` reste teste via mocks)
 - `adapters/passport-jwt/strategies/local/passport-jwt-local.strategy.spec.ts`
 - `adapters/passport-jwt/strategies/passport-jwt.strategy.spec.ts`
 
@@ -160,6 +211,7 @@ Quand une strategie n'est plus utile, proceder par etapes pour eviter les regres
   - `POST /api/auth/login`
   - une route protegee `@Auth()`
 - Verifier qu'il ne reste plus de references textuelles de la strategie retiree.
+- Tester aussi `POST /api/auth/refresh` avec **`Cookie`** + `credentials` (Navigateur ou `curl -c/-b`).
 
 6) **Finaliser**
 - Corriger naming/structure restants (fichiers devenus trompeurs).

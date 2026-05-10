@@ -8,6 +8,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import type { Application } from 'express';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
+import cookieParser from 'cookie-parser';
 import * as express from 'express';
 import { HttpExceptionBodyDto } from './core/dto/http-exception-body.dto';
 import { HttpValidationErrorDto } from './core/dto/http-validation-error.dto';
@@ -17,6 +18,8 @@ import { getHttpCorsOrigin, isCorsOpenToAll } from './shared/cors.util';
 async function bootstrap() {
 
   const app = await NestFactory.create<NestExpressApplication>(MainModule);
+
+  app.use(cookieParser());
 
   app.useGlobalPipes(
     new ValidationPipe({
