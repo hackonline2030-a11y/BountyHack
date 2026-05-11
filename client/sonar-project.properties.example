@@ -1,0 +1,11 @@
+# 1) Créer un projet sur https://sonarcloud.io (GitHub → importer ce dépôt).
+# 2) Renseigner organization + projectKey ci-dessous, puis renommer ce fichier en sonar-project.properties
+#    (à la racine du dossier client, à côté de package.json).
+# 3) Ajouter le secret SONAR_TOKEN au dépôt GitHub ; activer la variable CLIENT_SONARCLOUD_ENABLED=true.
+
+sonar.organization=REPLACE_WITH_SONARCLOUD_ORG_KEY
+sonar.projectKey=REPLACE_WITH_SONARCLOUD_PROJECT_KEY
+
+sonar.sources=.
+sonar.sourceEncoding=UTF-8
+sonar.exclusions=**/node_modules/**,.next/**,coverage/**,**/e2e/**,**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx
