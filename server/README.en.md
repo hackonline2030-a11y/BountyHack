@@ -84,10 +84,25 @@ Both use the same Nx workspace source of truth.
 
 **`AUTH_TYPE`** and **`DATABASE_NAME`** work together. Important rule:
 
-- If you use **`DATABASE_NAME=MONGODB`**, you should normally set **`AUTH_TYPE=JWT`** unless you already have a **working Firebase setup** (Firebase Admin on the API, credentials, **user accounts in Firebase Authentication** managed in Firebase / the console). Without that, **`AUTH_TYPE=FIREBASE`** does **not** give you a standard email/password sign-up and sign-in flow backed by Mongo: **`POST /api/auth/register`** and **`POST /api/auth/login`** are not enabled, and users are not created in Mongo for that flow.
-- **`AUTH_TYPE=JWT`** with Mongo: users (email, password hash, profile) are stored in the Mongo database from **`DATABASE_URL`**.
+- The auth architecture is extensible through `AUTH_TYPE`, but the active implementation is **`PASSPORT_JWT`**.
+- Database options remain multiple via `DATABASE_NAME` (`MONGODB`, `POSTGRESQL_PRISMA`, `IN-MEMORY`).
+- With **`DATABASE_NAME=MONGODB`**, users (email, password hash, profile) are stored in the Mongo database from **`DATABASE_URL`**.
+- **2FA (schema and upcoming features)** evolves only under **`DATABASE_NAME=POSTGRESQL_PRISMA`** (Prisma migrations on PostgreSQL). There is no parallel extension on Mongo or in-memory for 2FA for now ; see **`src/auth/README.md`**.
 
 See the comments in **`.env.example`** as well.
+
+#### `AUTH_TYPE` configuration and `auth-env.ts`
+
+Authentication configuration is centralized in **`src/auth/config/auth-env.ts`**.
+
+- This file reads and normalizes environment variables (`AUTH_TYPE`, `DATABASE_NAME`).
+- It centralizes auth/database configuration choices to avoid scattered checks across Nest modules.
+
+Supported value for **`AUTH_TYPE`**:
+
+- `PASSPORT_JWT`: Passport/Nest JWT flow (`passport-jwt`).
+
+Recommendation: any new authentication-configuration condition should go through **`auth-env.ts`** instead of direct `process.env.AUTH_TYPE` checks.
 
 ---
 
@@ -101,8 +116,8 @@ Pick **one** path: **Docker** (API and optional Postgres + watch), or **Node on 
 
 | Context | Commands |
 |--------|----------|
-| **Docker — API in watch** (`web-api-watch` + Postgres) | `pnpm docker:watch`, then `pnpm docker:prisma:generate`, `pnpm docker:prisma:deploy`, optional `pnpm docker:prisma:seed-demo`. Same as `./docker/start.sh watch-up` from **`server/docker/`**. |
-| **Host — Postgres on `localhost`** | `pnpm prisma generate`, `pnpm prisma migrate deploy`, optional `pnpm prisma:seed-demo`. If `DATABASE_URL` still uses `@postgres`, use `pnpm prisma:migrate:deploy:docker` and `pnpm prisma:seed-demo:docker`. |
+| **Docker — API in watch** (`web-api-watch` + Postgres) | `pnpm docker:watch`, then `pnpm docker:prisma:generate`, `pnpm docker:prisma:deploy`, then data: `pnpm docker:prisma:seed`. Same as `./docker/start.sh watch-up` from **`server/docker/`**. |
+| **Host — Postgres on `localhost`** | `pnpm prisma generate`, `pnpm prisma migrate deploy`, then `pnpm prisma:seed`. If `DATABASE_URL` still uses `@postgres`, use `pnpm prisma:migrate:deploy:docker` and `pnpm prisma:seed:docker`. See **`prisma/README.md`**. |
 
 Details: [`docker/README.md`](docker/README.md#prisma-migrations-et-démo) and **`.env.example`**. Demo login: `demo-user@example.local` / `password123`.
 
@@ -110,9 +125,9 @@ Details: [`docker/README.md`](docker/README.md#prisma-migrations-et-démo) and *
 
 Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.dev.yaml`. Full guide: [`docker/README.md`](docker/README.md).
 
-**PostgreSQL + pgweb** start when **`DATABASE_NAME`** is **`POSTGRESQL`** or **`POSTGRESQL_PRISMA`**. **MongoDB + mongo-express** start when **`DATABASE_NAME=MONGODB`**. With `FIREBASE`, `IN-MEMORY`, etc., those database containers are not started. Compose **profiles** (`mongodb`, `pg`) keep these sets separate.
+**PostgreSQL + pgweb** start when **`DATABASE_NAME=POSTGRESQL_PRISMA`**. **MongoDB + mongo-express** start when **`DATABASE_NAME=MONGODB`**. With `IN-MEMORY`, those database containers are not started. Compose **profiles** (`mongodb`, `pg`) keep these sets separate.
 
-1. Environment file: follow **[Installation](#installation)** above (`server/.env` from `server/.env.example`). Set `DATABASE_NAME` (`MONGODB`, `POSTGRESQL`, `POSTGRESQL_PRISMA`, `FIREBASE`, `IN-MEMORY`, …), plus `JWT_SECRET`, CORS, etc.
+1. Environment file: follow **[Installation](#installation)** above (`server/.env` from `server/.env.example`). Set `DATABASE_NAME` (`MONGODB`, `POSTGRESQL_PRISMA`, `IN-MEMORY`, …), plus `JWT_SECRET`, CORS, etc.
 
    **`DATABASE_URL`:** `.env.example` defaults to **PostgreSQL** (e.g. `postgres://…@postgres:5432/…` when the API runs in Docker). **API in Docker** + **`pg`** profile: host **`postgres`** on the compose network (not `localhost` from the api container). **API on the host** (`nx serve`) + Postgres in Docker: URL to **`localhost`** / **`127.0.0.1`** and **`POSTGRES_HOST_PORT`**. For **Mongo**, see `.env.example`; in Docker, host **`mongodb`** (e.g. `mongodb://mongodb:27017/bugbountyapp`).
 
@@ -128,10 +143,10 @@ Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.
 
    **Fast API cycle (no image rebuild):**
    - `./docker/start.sh api-restart` (or `./docker/start.sh restart-api`): restarts API without rebuilding the image.
-   - `./docker/start.sh api-stop` (or `./docker/start.sh stop-api`): stops the API and, depending on **`DATABASE_NAME`**, the matching Docker DB stack (**MongoDB** when `MONGODB`, **Postgres + pgweb** when **`POSTGRESQL`** or **`POSTGRESQL_PRISMA`**).
+   - `./docker/start.sh api-stop` (or `./docker/start.sh stop-api`): stops the API and, depending on **`DATABASE_NAME`**, the matching Docker DB stack (**MongoDB** when `MONGODB`, **Postgres + pgweb** when **`POSTGRESQL_PRISMA`**).
    - If `DATABASE_NAME=MONGODB`, the script applies profile **`mongodb`** and targets `mongodb` + `api`.
-   - If `DATABASE_NAME=POSTGRESQL` or `POSTGRESQL_PRISMA`, the script applies profile **`pg`** and orchestrates **`postgres`**, **`pgweb`**, and **`api`** depending on the command (`api-restart` only brings up **`postgres`** + **`api`** — see `start.sh`).
-   - Otherwise (`IN-MEMORY`, `FIREBASE`, …), only **`api`** is affected (no compose DB containers).
+   - If `DATABASE_NAME=POSTGRESQL_PRISMA`, the script applies profile **`pg`** and orchestrates **`postgres`**, **`pgweb`**, and **`api`** depending on the command (`api-restart` only brings up **`postgres`** + **`api`** — see `start.sh`).
+   - Otherwise (`IN-MEMORY`, …), only **`api`** is affected (no compose DB containers).
    - After `./docker/start.sh` (`up`), the script tails API logs in the terminal (`logs -f api`).
      - Exit live tail: `Ctrl+C` (containers keep running).
      - Disable this behavior: `API_FOLLOW_LOGS=0 ./docker/start.sh`.
@@ -156,7 +171,7 @@ Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.
    ```
    - Copy the output into `passwordHash` in `docker/dump/user.json` (hash changes every run because salt is random).
 
-   The script reads **`server/.env`** and adds **`--profile mongodb`** or **`--profile pg`** only when `DATABASE_NAME` is **`MONGODB`**, **`POSTGRESQL`**, or **`POSTGRESQL_PRISMA`** (including for `down`, so the right services stop).
+   The script reads **`server/.env`** and adds **`--profile mongodb`** or **`--profile pg`** only when `DATABASE_NAME` is **`MONGODB`** or **`POSTGRESQL_PRISMA`** (including for `down`, so the right services stop).
 
    **Without** the script — **Mongo**:
 
@@ -170,7 +185,7 @@ Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.
    docker compose -f docker/compose.dev.yaml --profile pg up --build -d
    ```
 
-   **Without** a Compose DB (e.g. Firebase / in-memory):
+   **Without** a Compose DB (e.g. in-memory):
 
    ```sh
    docker compose -f docker/compose.dev.yaml up --build -d
@@ -183,7 +198,7 @@ Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.
    | API (REST prefix) | `http://localhost:3003/api` (default host port **3003**; override with **`API_HOST_PORT`** in `server/.env`, read by `compose.dev.yaml`) |
    | OpenAPI (Swagger UI) | `http://localhost:3003/api/docs` (same host port) |
    | mongo-express | if **`DATABASE_NAME=MONGODB`** — `http://localhost:8086` |
-   | pgweb | if **`pg`** profile (`POSTGRESQL` or `POSTGRESQL_PRISMA`) — `http://localhost:8087` (override **`PGWEB_HOST_PORT`**) |
+   | pgweb | if **`pg`** profile (`POSTGRESQL_PRISMA`) — `http://localhost:8087` (override **`PGWEB_HOST_PORT`**) |
    | MongoDB (from host) | if **`DATABASE_NAME=MONGODB`** — `mongodb://localhost:27017` / database `bugbountyapp` |
    | PostgreSQL (from host) | if **`pg`** profile — `localhost:5432` (override **`POSTGRES_HOST_PORT`**) |
 
@@ -196,10 +211,6 @@ With the **Mongo** profile, ensure ports **27017**, **3003** (or **`API_HOST_POR
 **Logs (Postgres mode):** `cd docker && docker compose -f compose.dev.yaml --profile pg logs -f`
 
 **Logs (API only):** `cd docker && docker compose -f compose.dev.yaml logs -f`
-
-**Firebase:** Compose does not provision Firebase. If `DATABASE_NAME=FIREBASE` (or you rely on Firebase for auth/data), create a project in the [Firebase console](https://console.firebase.google.com/), add credentials, and configure `.env` (mount or supply `FIREBASE_KEY_PATH` in the container if needed). This is separate from the optional Mongo services above.
-
----
 
 ### 2. Manual setup (Node on the host)
 
@@ -245,7 +256,7 @@ npx nx show project web-api
 
 Specs under `e2e/` call the base URL from **`HOST`** and **`PORT`** (see `e2e/src/constants.ts` and `e2e/src/support/test-setup.ts`), default **`http://localhost:3000`**.
 
-- **API already running** (often Docker with host port **`3003`**, from `API_HOST_PORT` in `docker/`) : do **not** start a second `npx nx serve` on the **same** port. Point tests at the container, e.g. `PORT=3003` (and `AUTH_TYPE=JWT` if needed) then `pnpm exec nx run e2e:e2e` — no extra process bound to that port.
+- **API already running** (often Docker with host port **`3003`**, from `API_HOST_PORT` in `docker/`) : do **not** start a second `npx nx serve` on the **same** port. Point tests at the container, e.g. `PORT=3003` (and `AUTH_TYPE=PASSPORT_JWT` if needed) then `pnpm exec nx run e2e:e2e` — no extra process bound to that port.
 - For a **local** `nx serve` **while** Docker watch uses 3003, use a **different** free port (e.g. `3000` or `3010` in your `.env`) and the **same** `PORT` when running e2e.
 
 ---

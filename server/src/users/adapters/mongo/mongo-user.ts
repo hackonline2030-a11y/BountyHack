@@ -16,12 +16,16 @@ export namespace MongoUser {
     @Prop()
     username: string;
 
-    /** Local JWT auth (optional; legacy Firebase users may omit). */
+    /** Local JWT auth (optional for imported legacy users). */
     @Prop({ type: String, lowercase: true, sparse: true, unique: true })
     email?: string;
 
     @Prop({ type: String })
     passwordHash?: string;
+
+    /** Mirrors Postgres `two_factor_enabled` BIGINT (e.g. 0 = off); keep consistent in app logic. */
+    @Prop({ type: Number, default: 0 })
+    twoFactorEnabled?: number;
   }
 
   export const Schema = SchemaFactory.createForClass(SchemaClass);

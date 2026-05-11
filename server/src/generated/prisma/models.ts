@@ -9,4 +9,12 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/User.js'
+export type * from './models/Role.js'
+export type * from './models/AuthzObject.js'
+export type * from './models/Permission.js'
+export type * from './models/RolePermission.js'
+export type * from './models/RefreshToken.js'
+export type * from './models/PasswordResetToken.js'
+export type * from './models/TwoFactor.js'
+export type * from './models/TwoFactorTotp.js'
 export type * from './commonInputTypes.js'

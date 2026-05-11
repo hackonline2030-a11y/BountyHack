@@ -5,4 +5,6 @@
 export type UserRecord = {
   uid: string;
   username: string;
+  /** Present when the persistence layer exposes it (ex. Prisma Postgres). */
+  twoFactorEnabled?: boolean;
 };

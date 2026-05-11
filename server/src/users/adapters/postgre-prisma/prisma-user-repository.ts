@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IUserRepository } from '../../ports/user-repository.interface';
 import { UserRecord } from '../../models';
 import { CreateUserProfilePayload } from '../../payloads';
-import { PrismaService } from '../../../database/prisma.service';
+import { PrismaService } from '../../../core/infrastructure/database/prisma/prisma.service';
 
 @Injectable()
 export class PrismaUserRepository implements IUserRepository {
@@ -19,11 +19,15 @@ export class PrismaUserRepository implements IUserRepository {
   async findById(id: string): Promise<UserRecord | null> {
     const row = await this.prisma.user.findUnique({
       where: { id },
-      select: { id: true, username: true },
+      select: { id: true, username: true, twoFactorEnabled: true },
     });
     if (!row) {
       return null;
     }
-    return { uid: row.id, username: row.username };
+    return {
+      uid: row.id,
+      username: row.username,
+      twoFactorEnabled: row.twoFactorEnabled !== BigInt(0),
+    };
   }
 }

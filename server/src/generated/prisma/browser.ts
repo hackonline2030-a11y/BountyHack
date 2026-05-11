@@ -19,6 +19,46 @@ export * as $Enums from './enums.js'
 export * from './enums.js';
 /**
  * Model User
- * Aligned with `PostgreUser` table (raw `pg` adapter) — shared table for POSTGRESQL + POSTGRESQL_PRISMA.
+ * Postgres `users` table (Prisma + optional raw DDL bootstrap in `PrismaService`).
  */
 export type User = Prisma.UserModel
+/**
+ * Model Role
+ * Application role (e.g. SUPER_ADMIN, HUNTER).
+ */
+export type Role = Prisma.RoleModel
+/**
+ * Model AuthzObject
+ * RBAC target type (e.g. user, report, project). Table `objects` in ERD; Prisma model name avoids `Object` clash.
+ */
+export type AuthzObject = Prisma.AuthzObjectModel
+/**
+ * Model Permission
+ * Atomic capability: `action` on an `AuthzObject` (e.g. read + user).
+ */
+export type Permission = Prisma.PermissionModel
+/**
+ * Model RolePermission
+ * Many-to-many: which permissions each role receives.
+ */
+export type RolePermission = Prisma.RolePermissionModel
+/**
+ * Model RefreshToken
+ * Opaque refresh tokens (peer of Mongo `refresh_tokens` collection). Raw token is hashed at rest (`token_hash`).
+ */
+export type RefreshToken = Prisma.RefreshTokenModel
+/**
+ * Model PasswordResetToken
+ * One-time opaque password reset (raw token only in email; `token_hash` = SHA-256 hex at rest).
+ */
+export type PasswordResetToken = Prisma.PasswordResetTokenModel
+/**
+ * Model TwoFactor
+ * Which 2FA methods exist for a user (source of truth per enabled method).
+ */
+export type TwoFactor = Prisma.TwoFactorModel
+/**
+ * Model TwoFactorTotp
+ * TOTP-specific secret storage (encrypt at rest in application code, see article).
+ */
+export type TwoFactorTotp = Prisma.TwoFactorTotpModel

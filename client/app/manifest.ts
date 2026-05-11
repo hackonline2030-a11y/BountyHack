@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Clean App — Next.js template",
-    short_name: "Clean App",
+    name: "BugBountyApp — Next.js template",
+    short_name: "BugBountyApp",
     description:
       "Auth-first Next.js starter with TypeScript, Prisma, and modular architecture.",
     start_url: "/",

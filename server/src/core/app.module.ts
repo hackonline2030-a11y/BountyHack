@@ -1,8 +1,5 @@
 import {
-  MiddlewareConsumer,
   Module,
-  NestModule,
-  RequestMethod,
 } from '@nestjs/common';
 
 import { AppService } from './app.service';
@@ -10,7 +7,6 @@ import { AppService } from './app.service';
 import { PingModule } from '../ping/ping.module';
 
 import { AuthModule } from '../auth/auth.module';
-import { AuthMiddleware } from '../auth/auth.middleware';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -20,7 +16,7 @@ import { DocumentRenderingModule } from '../document-rendering/pdf.module';
 import { CommonModule } from './common.module';
 import { AppController } from './app.controller';
 import { variables } from '../shared/variables.config';
-import { PrismaModule } from '../database/prisma.module';
+import { PrismaModule } from './infrastructure/database/prisma/prisma.module';
 
 const prismaImports =
   variables.database === 'POSTGRESQL_PRISMA' ? [PrismaModule] : [];
@@ -51,10 +47,4 @@ const mongooseRoot =
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements NestModule {
-  public configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(AuthMiddleware)
-      .forRoutes({ path: '*path', method: RequestMethod.ALL });
-  }
-}
+export class AppModule {}

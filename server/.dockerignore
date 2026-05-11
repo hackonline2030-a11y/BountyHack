@@ -1,0 +1,8 @@
+# Build context root is server/
+node_modules
+npm-debug.log
+dist
+.git
+.env
+*.md
+.gitignore

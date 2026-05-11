@@ -1,0 +1,34 @@
+{
+  "metaTitle": "Credits",
+  "title": "Credits",
+  "lead": "This page lists all visual assets used in BugBountyApp.",
+  "groupsTitle": "Credits by asset type",
+  "groupsLead": "References are organized by media family.",
+  "entry": {
+    "author": "Author",
+    "source": "Source",
+    "license": "License"
+  },
+  "groups": {
+    "images": {
+      "title": "Images",
+      "description": "Illustrations, screenshots, icons, and visual assets."
+    },
+    "videos": {
+      "title": "Videos",
+      "description": "Video clips, motion backgrounds, and embedded media."
+    },
+    "fonts": {
+      "title": "Fonts",
+      "description": "Typography families, font files, and style licenses."
+    },
+    "audio": {
+      "title": "Audio",
+      "description": "Sound effects, ambient tracks, and music assets."
+    },
+    "other": {
+      "title": "Other assets",
+      "description": "Any additional third-party resources used in the app."
+    }
+  }
+}

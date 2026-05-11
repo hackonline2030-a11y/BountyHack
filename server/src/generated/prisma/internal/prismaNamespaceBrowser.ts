@@ -51,7 +51,15 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  User: 'User'
+  User: 'User',
+  Role: 'Role',
+  AuthzObject: 'AuthzObject',
+  Permission: 'Permission',
+  RolePermission: 'RolePermission',
+  RefreshToken: 'RefreshToken',
+  PasswordResetToken: 'PasswordResetToken',
+  TwoFactor: 'TwoFactor',
+  TwoFactorTotp: 'TwoFactorTotp'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -74,10 +82,91 @@ export const UserScalarFieldEnum = {
   id: 'id',
   username: 'username',
   email: 'email',
-  passwordHash: 'passwordHash'
+  passwordHash: 'passwordHash',
+  twoFactorEnabled: 'twoFactorEnabled',
+  roleId: 'roleId'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const RoleScalarFieldEnum = {
+  id: 'id',
+  name: 'name'
+} as const
+
+export type RoleScalarFieldEnum = (typeof RoleScalarFieldEnum)[keyof typeof RoleScalarFieldEnum]
+
+
+export const AuthzObjectScalarFieldEnum = {
+  id: 'id',
+  name: 'name'
+} as const
+
+export type AuthzObjectScalarFieldEnum = (typeof AuthzObjectScalarFieldEnum)[keyof typeof AuthzObjectScalarFieldEnum]
+
+
+export const PermissionScalarFieldEnum = {
+  id: 'id',
+  action: 'action',
+  objectId: 'objectId'
+} as const
+
+export type PermissionScalarFieldEnum = (typeof PermissionScalarFieldEnum)[keyof typeof PermissionScalarFieldEnum]
+
+
+export const RolePermissionScalarFieldEnum = {
+  id: 'id',
+  roleId: 'roleId',
+  permissionId: 'permissionId'
+} as const
+
+export type RolePermissionScalarFieldEnum = (typeof RolePermissionScalarFieldEnum)[keyof typeof RolePermissionScalarFieldEnum]
+
+
+export const RefreshTokenScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  lastUsedAt: 'lastUsedAt'
+} as const
+
+export type RefreshTokenScalarFieldEnum = (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum]
+
+
+export const PasswordResetTokenScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
+
+
+export const TwoFactorScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  method: 'method',
+  verified: 'verified',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TwoFactorScalarFieldEnum = (typeof TwoFactorScalarFieldEnum)[keyof typeof TwoFactorScalarFieldEnum]
+
+
+export const TwoFactorTotpScalarFieldEnum = {
+  id: 'id',
+  twoFactorId: 'twoFactorId',
+  secret: 'secret',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TwoFactorTotpScalarFieldEnum = (typeof TwoFactorTotpScalarFieldEnum)[keyof typeof TwoFactorTotpScalarFieldEnum]
 
 
 export const SortOrder = {
