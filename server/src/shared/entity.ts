@@ -17,7 +17,8 @@ export abstract class Entity<TType> {
     this.initialState = this.props;
   }
 
-  clone() {
-    return new (this.constructor as any)(this.props);
+  clone(): this {
+    const Constructor = this.constructor as new (data: TType) => this;
+    return new Constructor(this.props);
   }
 }

@@ -20,8 +20,8 @@ export class InMemoryUserRepository implements IUserRepository {
     }
   }
 
-  async addUsername(user: CreateUserProfilePayload): Promise<void> {
-    return;
+  async addUsername(_user: CreateUserProfilePayload): Promise<void> {
+    void _user;
   }
 
   async findById(id: string): Promise<UserRecord | null> {
