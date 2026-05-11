@@ -69,7 +69,11 @@ describe('UsersController', () => {
     expect(getUserByIdQuery.execute).toHaveBeenCalledWith('uid-1');
     expect(result).toBeInstanceOf(UserProfileResponseDto);
     expect(result).toEqual(
-      expect.objectContaining({ uid: 'uid-1', username: 'test-user' })
+      expect.objectContaining({
+        uid: 'uid-1',
+        username: 'test-user',
+        roleCode: null,
+      }),
     );
   });
 });

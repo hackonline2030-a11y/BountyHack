@@ -19,11 +19,15 @@ export class PrismaUserRepository implements IUserRepository {
   async findById(id: string): Promise<UserRecord | null> {
     const row = await this.prisma.user.findUnique({
       where: { id },
-      select: { id: true, username: true },
+      select: { id: true, username: true, twoFactorEnabled: true },
     });
     if (!row) {
       return null;
     }
-    return { uid: row.id, username: row.username };
+    return {
+      uid: row.id,
+      username: row.username,
+      twoFactorEnabled: row.twoFactorEnabled !== BigInt(0),
+    };
   }
 }

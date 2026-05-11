@@ -19,7 +19,7 @@ const createDependencies = (
  */
 export const createTestStore = (config?: {
   initialState?: Partial<AppState>;
-  dependencies?: any;
+  dependencies?: Partial<Dependencies>;
 }) => {
   const initialStore = createStore({
     dependencies: createDependencies(config?.dependencies),

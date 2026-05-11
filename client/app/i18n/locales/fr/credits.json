@@ -1,0 +1,34 @@
+{
+  "metaTitle": "Credits",
+  "title": "Credits",
+  "lead": "Cette page liste toutes les ressources visuelles utilisees dans BugBountyApp.",
+  "groupsTitle": "Credits par type de ressource",
+  "groupsLead": "Les references sont organisees par famille de media.",
+  "entry": {
+    "author": "Auteur",
+    "source": "Source",
+    "license": "Licence"
+  },
+  "groups": {
+    "images": {
+      "title": "Images",
+      "description": "Illustrations, captures d'ecran, icones et ressources visuelles."
+    },
+    "videos": {
+      "title": "Videos",
+      "description": "Clips video, fonds animes et medias embarques."
+    },
+    "fonts": {
+      "title": "Polices",
+      "description": "Familles typographiques, fichiers de police et licences associees."
+    },
+    "audio": {
+      "title": "Audio",
+      "description": "Effets sonores, ambiances et pistes musicales."
+    },
+    "other": {
+      "title": "Autres ressources",
+      "description": "Toutes les autres ressources tierces utilisees dans l'application."
+    }
+  }
+}

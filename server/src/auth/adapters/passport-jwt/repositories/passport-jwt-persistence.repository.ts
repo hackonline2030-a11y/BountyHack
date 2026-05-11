@@ -1,28 +1,27 @@
+import type {
+  AuthenticatedSession,
+  AuthenticatedUserProfile,
+} from '../../../application/models/authenticated-session';
+import type { AppRoleCode } from '../../../../shared/rbac/app-role.code';
 import { Identity } from '../../../domain/models/identity';
 
 export type PassportJwtRegisterInput = {
   email: string;
   username: string;
   password: string;
+  /** Ignored by non-Postgres backends. */
+  roleCode?: AppRoleCode;
 };
 
 export type PassportJwtLoginInput = {
   email: string;
   password: string;
-};
-
-export type PassportJwtAuthResult = {
-  token: string;
-  user: {
-    uid: string;
-    email: string;
-    username: string;
-  };
-  require2FA?: boolean;
+  code?: string;
 };
 
 export type PassportJwtPersistence = {
   getUserByUid(uid: string): Promise<Identity>;
-  register(input: PassportJwtRegisterInput): Promise<PassportJwtAuthResult>;
-  login(input: PassportJwtLoginInput): Promise<PassportJwtAuthResult>;
+  getAuthUserPublicProfile(uid: string): Promise<AuthenticatedUserProfile>;
+  register(input: PassportJwtRegisterInput): Promise<AuthenticatedSession>;
+  login(input: PassportJwtLoginInput): Promise<AuthenticatedSession>;
 };

@@ -1,21 +1,27 @@
 {
-  "title": "Clean App — Next.js template",
+  "title": "BugBountyApp — Next.js template",
   "description": "Auth-first Next.js starter with TypeScript, Prisma, and a modular layout — ready to extend.",
   "tagline": "Ship features faster with a clear structure.",
   "home": {
     "metaTitle": "Home",
-    "heroTitle": "Next.js Clean Architectured Template",
-    "heroLead": "Reusable starter with registration and login flows already wired.",
-    "heroHint": "Use the header navigation to access authentication pages and start adapting the template to your project."
+    "heroTitle": "BugBountyApp",
+    "heroLead": "Bug bounty platform for web applications.",
+    "heroHint": "Prepare to integrate real bug bounty programs (YesWeHack, HackerOne, etc.) with our educational support."
   },
   "header": {
-    "brand": "CleanApp",
+    "brand": "BugBountyApp",
     "home": "Home",
+    "parameters": "Settings",
+    "admin": "Admin",
     "login": "Log in",
+    "logout": "Log out",
+    "logoutPending": "Signing out…",
     "register": "Register"
   },
   "footer": {
-    "copyright": "© {{year}} CleanApp",
-    "credit": "Built with Next.js"
+    "copyright": "© 2026 BugBountyApp",
+    "privacy": "Privacy policy",
+    "notice": "Legal notice",
+    "credits": "Credits"
   }
 }

@@ -39,4 +39,17 @@ export class JwtInMemoryRegistry {
     }
     return { uid, username: u.username };
   }
+
+  /** Full profile slice for JWT session / refresh (includes email from registry). */
+  findAuthProfileByUid(uid: string): {
+    uid: string;
+    username: string;
+    email: string;
+  } | null {
+    const u = this.users.get(uid);
+    if (!u) {
+      return null;
+    }
+    return { uid, username: u.username, email: u.email };
+  }
 }

@@ -66,6 +66,31 @@ export class AppController {
       dashboardBtnText: this.appService.getHomeActions().dashboard,
       docsUrl: `${apiPrefix}/docs`,
       dashboardUrl: `${apiPrefix}/dashboard`,
+      totpSetupUrl: `${apiPrefix}/dashboard/totp`,
+      totpSetupBtnText: 'Demo : activer le TOTP',
+    };
+  }
+
+  @Get('/dashboard/totp')
+  @Render('totp-dashboard')
+  @ApiOperation({
+    summary: 'Demo dashboard — enable TOTP (JWT)',
+    description:
+      'Page HTML : login, puis `POST .../auth/totp/enable/start` et `confirm` avec Bearer token.',
+  })
+  @ApiOkResponse({
+    description: 'HTML dashboard for TOTP enrollment.',
+    content: {
+      'text/html': {
+        schema: { type: 'string' },
+      },
+    },
+  })
+  getTotpDashboardPage() {
+    const apiPrefix = `/${variables.globalPrefix.replace(/^\/+|\/+$/g, '')}`;
+    return {
+      apiPrefix,
+      issuer: process.env.TOTP_ISSUER?.trim() || 'BugBountyApp',
     };
   }
 
