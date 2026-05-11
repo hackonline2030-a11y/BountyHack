@@ -66,7 +66,7 @@ Prérequis : **`client/.env`** — voir **[Installation](#installation)**.
 
 ## CI (GitHub Actions)
 
-Le workflow du client vit à la racine du monorepo : **[`../.github/workflows/client-ci.yml`](../.github/workflows/client-ci.yml)** — exécution automatique sur **push / PR** de la branche **`feature/test-ci`** uniquement (chemins `client/**`), plus **`workflow_dispatch`** (E2E Playwright via l’option `run_e2e`). Il installe **toutes** les dépendances (y compris dev) : normal pour lint / tests / build, ce n’est pas l’artefact de prod (déploiement prévu **sans Docker** : build + Node sur le serveur). Contenu : lint, tests unitaires, build ; Trivy FS/config ; Gitleaks ; SonarCloud **optionnel** (uniquement si variable `CLIENT_SONARCLOUD_ENABLED=true` **et** fichier versionné `client/sonar-project.properties` présent + secret `SONAR_TOKEN`).
+Le workflow du client vit à la racine du monorepo : **[`../.github/workflows/client-ci.yml`](../.github/workflows/client-ci.yml)** — exécution automatique sur **push / PR** de la branche **`feature/test-ci`** uniquement (chemins `client/**`), plus **`workflow_dispatch`** (E2E Playwright via l’option `run_e2e`). Il installe **toutes** les dépendances (y compris dev) : normal pour lint / tests / build, ce n’est pas l’artefact de prod (déploiement prévu **sans Docker** : build + Node sur le serveur). Contenu : lint, tests unitaires, build ; Gitleaks.
 
 
 
