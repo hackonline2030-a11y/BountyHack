@@ -28,7 +28,8 @@ describe('PassportJwtLocalStrategy', () => {
     };
     loginWithPassword.execute.mockResolvedValue(expected);
 
-    const result = await strategy.validate('  JOHN@EXAMPLE.COM  ', 'password123');
+    const req = { body: {} } as any;
+    const result = await strategy.validate(req, '  JOHN@EXAMPLE.COM  ', 'password123');
 
     expect(loginWithPassword.execute).toHaveBeenCalledWith({
       email: 'john@example.com',
@@ -38,7 +39,7 @@ describe('PassportJwtLocalStrategy', () => {
   });
 
   it('throws UnauthorizedException when email is missing', async () => {
-    await expect(strategy.validate('', 'password123')).rejects.toBeInstanceOf(
+    await expect(strategy.validate({ body: {} } as any, '', 'password123')).rejects.toBeInstanceOf(
       UnauthorizedException,
     );
     expect(loginWithPassword.execute).not.toHaveBeenCalled();
@@ -46,8 +47,29 @@ describe('PassportJwtLocalStrategy', () => {
 
   it('throws UnauthorizedException when password is missing', async () => {
     await expect(
-      strategy.validate('john@example.com', ''),
+      strategy.validate({ body: {} } as any, 'john@example.com', ''),
     ).rejects.toBeInstanceOf(UnauthorizedException);
     expect(loginWithPassword.execute).not.toHaveBeenCalled();
+  });
+
+  it('passes optional TOTP code from request body', async () => {
+    const expected = {
+      token: FAKE_JWT,
+      user: { uid: 'uid-1', email: 'john@example.com', username: 'john' },
+      require2FA: false,
+    };
+    loginWithPassword.execute.mockResolvedValue(expected);
+
+    await strategy.validate(
+      { body: { code: ' 123 456 ' } } as any,
+      'john@example.com',
+      'password123',
+    );
+
+    expect(loginWithPassword.execute).toHaveBeenCalledWith({
+      email: 'john@example.com',
+      password: 'password123',
+      code: '123456',
+    });
   });
 });

@@ -35,10 +35,12 @@ Notes:
 
 Mode recommande pour l'auth email/mot de passe locale.
 
-- `POST /api/auth/register`, `POST /api/auth/login` et `POST /api/auth/refresh` sont exposes via `PassportJwtAuthController`.
+- `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/refresh` et `POST /api/auth/logout` sont exposes via `PassportJwtAuthController`.
 - Le login passe par `@UseGuards(AuthGuard('local'))` et `PassportJwtLocalStrategy`.
+- `POST /api/auth/login` accepte aussi un champ optionnel `code` (TOTP 6-8 chiffres) pour les comptes avec 2FA activée.
 - Les routes protegees (`@Auth()`) passent par `PassportJwtAuthGuard` (`AuthGuard('jwt')`) et `PassportJwtStrategy`.
-- Les infos utilisateur authentifie sont lues depuis `request.user` (payload injecte par Passport).
+- RBAC minimal : `rbac/roles.decorator.ts` (`@Roles`, `AuthRoles(...)`), `rbac/roles.guard.ts`. Ex. `POST /api/auth/register` exige `AuthRoles(AppRoleCode.SUPER_ADMIN)` + Bearer. `Identity.roleCode` est hydrate depuis Prisma (`user.role.name`) dans `PostgrePrismaPassportJwtRepository.getUserByUid`. Les lignes `roles` en base viennent du **seed** (`pnpm prisma:seed`, `prisma/seed/roles.sql`), pas des migrations applicatives.
+- Les infos utilisateur authentifie sont lues depuis `request.user` (payload injecte par Passport : `Identity`).
 
 Fichiers principaux:
 
@@ -54,13 +56,18 @@ Schema (`PASSPORT_JWT`) — resume :
 POST /api/auth/register | login
   -> RegisterWithPasswordCommand | AuthGuard('local') + PassportJwtLocalStrategy
   -> AuthRepository (signe JWT access court + persiste refresh opaque + ... )
-  -> Set-Cookie: refresh httpOnly (path /api/auth/refresh)
+  -> Set-Cookie: refresh httpOnly (path /api/auth, voir aussi clear legacy `/api/auth/refresh` au logout)
   -> JSON au client : { token, user, require2FA? } (pas de champ refresh dans le corps)
 
 POST /api/auth/refresh
   -> cookie refresh opaque
   -> RefreshAccessTokenQuery -> AuthRepository.refreshAccessToken (DB : rotation)
   -> nouveau cookie + meme forme JSON { token, user, ... }
+
+POST /api/auth/logout
+  -> cookie refresh opaque (idem path /api/auth)
+  -> LogoutSessionCommand (revoke en base si present)
+  -> Clear-Cookie refresh (path courant `/api/auth` + path legacy `/api/auth/refresh`)
 
 Route protegee (@Auth)
   -> PassportJwtAuthGuard (Bearer : JWT access)
@@ -93,7 +100,9 @@ Pourquoi ne pas garder uniquement un long JWT comme refresh ?
 Pourquoi ne pas garder les secrets refresh en JSON ?
 - Réponse HTTP **`JwtAuthResponseDto`** : uniquement **`token` + `user` + require2FA** facultatif ; le navigateur doit utiliser **`credentials: 'include'`** pour recevoir le cookie (**`cookie-parser`** est enregistre dans `main.ts`).
 - Attrait securise : **`httpOnly`**, **`Secure` si `NODE_ENV=production`**, **`SameSite=lax`** (ajustement possible si sous-domaines / SPA distante HTTPS).
-- **`Path`** du cookie : **`/{GLOBAL_PREFIX}/auth/refresh`** (defaut **`/api/auth/refresh`**) pour limiter l’envoi du cookie aux rotations.
+- **`Path`** du cookie : **`/{GLOBAL_PREFIX}/auth`** (defaut **`/api/auth`**) — le navigateur l’envoie sur **`POST …/auth/login`**, **`POST …/auth/refresh`** et **`POST …/auth/logout`** (revocation du refresh). Les clients qui avaient encore l’ancien path **`/auth/refresh`** recoivent aussi un **`Clear-Cookie`** sur ce path legacy a la deconnexion.
+
+- **Deconnexion** : **`POST /auth/logout`** avec **`credentials: 'include'`** : suppression en base du hash du jeton opaque courant (si cookie present), **`clearCookie`** sur le path courant **et** le path legacy, puis le client Next doit appeler **`DELETE /api/session`** pour effacer le cookie access court.
 
 ### Ports / use cases (inversion de dependance)
 
@@ -102,6 +111,7 @@ Pourquoi ne pas garder les secrets refresh en JSON ?
 | `AuthRepository` | register/login/refresh JWT access + orchestration opaque attache apres inscription cote facade `PassportJwtAuthRepository`. |
 | `REFRESH_TOKEN_REPOSITORY` / `IRefreshTokenRepository` | persistance Postgres **Prisma**, **Mongo**, ou **in-memory** selon `DATABASE_NAME`. |
 | `RefreshAccessTokenQuery` | use case utilise par le controller HTTP `/auth/refresh`. |
+| `LogoutSessionCommand` | revocation du refresh opaque pour le cookie courant (`POST /auth/logout`). |
 | `PassportJwtTokenService` | **uniquement** verification / emission du JWT **access**. |
 
 Adaptateurs infra : sous `adapters/passport-jwt/repositories/*` (dont `*-refresh-token.repository.ts`, `*-passport-jwt.repository.ts`). Table Prisma **`refresh_tokens`** (migration dediee) + DDL bootstrap facultatif dans `PrismaService` pour DB legacy.
@@ -136,6 +146,17 @@ Uniquement **`DATABASE_NAME=POSTGRESQL_PRISMA`** + variable **`TOTP_ENCRYPTION_K
 
 1. `POST /api/auth/totp/enable/start` avec **`Authorization: Bearer <JWT>`**. Met a jour / cree `two_factor` (methode `APP`, `verified=false`), regenere le secret, enregistre le **texte chiffre** dans `two_factor_totp`. Reponse : **`secret`** (Base32, saisie manuelle), **`otpauthUri`**, **`secretQrCode`** (data URL pour le QR).
 2. `POST /api/auth/totp/enable/confirm` avec le meme Bearer, corps `{ "code": "123456" }`. Verifie le TOTP (`otplib.verify`, tolerance `TOTP_EPOCH_TOLERANCE`), puis **`verified=true`** sur `two_factor` et **`two_factor_enabled`** = `1` sur `users`.
+3. `POST /api/auth/totp/disable` avec le meme Bearer, corps `{ "code": "123456" }`. **Step-up obligatoire**: verifie un code TOTP courant, puis supprime les secrets/rows TOTP (`two_factor_totp`, `two_factor`) et repasse **`two_factor_enabled`** = `0` sur `users`.
+
+### Login + TOTP (2-step)
+
+Quand `users.two_factor_enabled = 1` (Postgres Prisma), le login mot de passe seul ne suffit plus:
+
+1. `POST /api/auth/login` avec `{ email, password }` -> `401` si code absent (`TOTP code required`).
+2. `POST /api/auth/login` avec `{ email, password, code }` -> verification `otplib` sur le secret TOTP actif.
+3. Si code valide: JWT access + refresh opaque emis comme le flux standard.
+
+Pour les comptes sans TOTP (`two_factor_enabled = 0`), le login reste inchangé (email + password uniquement).
 
 Fichiers principaux : `application/totp-enrollment.service.ts`, `adapters/totp/totp-secret-seal.ts`, `controllers/totp-enrollment.controller.ts`.
 

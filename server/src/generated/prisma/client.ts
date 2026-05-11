@@ -47,6 +47,26 @@ export { Prisma }
  */
 export type User = Prisma.UserModel
 /**
+ * Model Role
+ * Application role (e.g. SUPER_ADMIN, HUNTER).
+ */
+export type Role = Prisma.RoleModel
+/**
+ * Model AuthzObject
+ * RBAC target type (e.g. user, report, project). Table `objects` in ERD; Prisma model name avoids `Object` clash.
+ */
+export type AuthzObject = Prisma.AuthzObjectModel
+/**
+ * Model Permission
+ * Atomic capability: `action` on an `AuthzObject` (e.g. read + user).
+ */
+export type Permission = Prisma.PermissionModel
+/**
+ * Model RolePermission
+ * Many-to-many: which permissions each role receives.
+ */
+export type RolePermission = Prisma.RolePermissionModel
+/**
  * Model RefreshToken
  * Opaque refresh tokens (peer of Mongo `refresh_tokens` collection). Raw token is hashed at rest (`token_hash`).
  */

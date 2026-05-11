@@ -21,6 +21,7 @@ import { PostgrePrismaPassportJwtRepository } from './adapters/passport-jwt/repo
 import { PrismaRefreshTokenRepository } from './adapters/passport-jwt/repositories/postgre/prisma-refresh-token.repository';
 
 import { RegisterWithPasswordCommand } from './application/commands/register-with-password.command';
+import { LogoutSessionCommand } from './application/commands/logout-session.command';
 import { LoginWithPasswordCommand } from './application/commands/login-with-password.command';
 import { GetUserByUidQuery } from './application/queries/get-user-by-uid.query';
 import { GetUserFromTokenQuery } from './application/queries/get-user-from-token.query';
@@ -30,6 +31,7 @@ import { PassportJwtAuthController } from './controllers/passport-jwt-auth.contr
 import { TotpSignInDemoController } from './controllers/totp-sign-in-demo.controller';
 import { TotpEnrollmentController } from './controllers/totp-enrollment.controller';
 import { PassportJwtAuthGuard } from './adapters/passport-jwt/guards/passport-jwt-auth.guard';
+import { RolesGuard } from './rbac/roles.guard';
 import { TotpSignInDemoService } from './application/demo/totp-sign-in-demo.service';
 import { TotpEnrollmentService } from './application/totp-enrollment.service';
 
@@ -102,10 +104,12 @@ const coreProviders = [
   GetUserByUidQuery,
   GetUserFromTokenQuery,
   RefreshAccessTokenQuery,
+  LogoutSessionCommand,
   JwtInMemoryRegistry,
   PassportJwtLocalStrategy,
   PassportJwtStrategy,
   PassportJwtAuthGuard,
+  RolesGuard,
 ];
 
 const authExports = [

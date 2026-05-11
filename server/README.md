@@ -168,8 +168,8 @@ Persistance **`users`** avec **Prisma** : **`DATABASE_NAME=POSTGRESQL_PRISMA`**.
 
 | Contexte | Commandes |
 |----------|-----------|
-| **Docker — API en watch** (`web-api-watch` + Postgres) | `pnpm docker:watch`, puis `pnpm docker:prisma:generate`, `pnpm docker:prisma:deploy`. Optionnel : `pnpm docker:prisma:seed-demo` (ligne démo dans **`users`**). Équivalent : `./docker/start.sh watch-up` depuis **`server/docker/`**. |
-| **Node sur l’hôte — Postgres sur `localhost`** | `pnpm prisma generate`, `pnpm prisma migrate deploy`, optionnel `pnpm prisma:seed-demo`. Si `DATABASE_URL` contient encore `@postgres` : `pnpm prisma:migrate:deploy:docker` puis `pnpm prisma:seed-demo:docker`. |
+| **Docker — API en watch** (`web-api-watch` + Postgres) | `pnpm docker:watch`, puis `pnpm docker:prisma:generate`, `pnpm docker:prisma:deploy`, puis données : `pnpm docker:prisma:seed` (rôles + démo optionnelle). Équivalent : `./docker/start.sh watch-up` depuis **`server/docker/`**. |
+| **Node sur l’hôte — Postgres sur `localhost`** | `pnpm prisma generate`, `pnpm prisma migrate deploy`, puis `pnpm prisma:seed`. Si `DATABASE_URL` contient encore `@postgres` : `pnpm prisma:migrate:deploy:docker` puis `pnpm prisma:seed:docker`. Voir **`prisma/README.md`** (migrations = schéma ; seed = données). |
 
 Plus de détail : [`docker/README.md`](docker/README.md#prisma-migrations-et-démo), **`.env.example`**.
 

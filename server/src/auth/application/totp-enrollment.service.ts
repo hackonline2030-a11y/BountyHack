@@ -156,6 +156,73 @@ export class TotpEnrollmentService {
     return { ok: true };
   }
 
+  /**
+   * Disables TOTP after verifying a current code (step-up).
+   * Clears stored secret and disables the global 2FA flag on the user.
+   */
+  async disableEnrollment(userId: string, codeRaw: string): Promise<{ ok: true }> {
+    this.assertPrisma();
+    const token = codeRaw.replace(/\s/g, '');
+
+    const flags = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { twoFactorEnabled: true },
+    });
+    if (!flags || flags.twoFactorEnabled === BigInt(0)) {
+      throw new BadRequestException({
+        error: 'totp_not_enabled',
+        message: 'TOTP is not enabled for this account.',
+      });
+    }
+
+    const twoFactor = await this.prisma.twoFactor.findUnique({
+      where: {
+        userId_method: {
+          userId,
+          method: TwoFactorMethod.APP,
+        },
+      },
+      include: { totp: true },
+    });
+
+    if (!twoFactor?.verified || !twoFactor.totp?.secret) {
+      throw new BadRequestException({
+        error: 'totp_not_enabled',
+        message: 'TOTP is not enabled for this account.',
+      });
+    }
+
+    const secretPlain = openTotpSecretFromStorage(twoFactor.totp.secret);
+    const result = await verify({
+      secret: secretPlain,
+      token,
+      strategy: 'totp',
+      algorithm: TOTP_DEMO.algorithm,
+      digits: TOTP_DEMO.digits,
+      period: TOTP_DEMO.period,
+      epochTolerance: TOTP_DEMO.epochToleranceSeconds,
+    });
+
+    if (!result.valid) {
+      throw new UnauthorizedException('Invalid TOTP code');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.twoFactorTotp.deleteMany({
+        where: { twoFactorId: twoFactor.id },
+      }),
+      this.prisma.twoFactor.delete({
+        where: { id: twoFactor.id },
+      }),
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { twoFactorEnabled: BigInt(0) },
+      }),
+    ]);
+
+    return { ok: true };
+  }
+
   private assertPrisma(): void {
     if (variables.database !== 'POSTGRESQL_PRISMA') {
       throw new NotImplementedException(

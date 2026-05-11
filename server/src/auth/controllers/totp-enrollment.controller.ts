@@ -68,4 +68,21 @@ export class TotpEnrollmentController {
   ): Promise<{ ok: true }> {
     return this.enrollment.confirmEnrollment(req.user.uid, body.code);
   }
+
+  @Post('disable')
+  @Auth()
+  @HttpCode(HttpStatus.OK)
+  @ApiBody({ type: TotpEnrollmentConfirmDto })
+  @ApiOperation({
+    summary: 'Disable TOTP (requires a current code)',
+    description:
+      'Verifies a current TOTP code, then removes APP credentials and clears `two_factor_enabled` on the user.',
+  })
+  @ApiOkResponse({ schema: { example: { ok: true } } })
+  disable(
+    @Req() req: RequestWithIdentity,
+    @Body() body: TotpEnrollmentConfirmDto,
+  ): Promise<{ ok: true }> {
+    return this.enrollment.disableEnrollment(req.user.uid, body.code);
+  }
 }

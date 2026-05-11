@@ -4,8 +4,10 @@ import type { JwtLoginRequestDto, JwtRegisterRequestDto } from '../dto/jwt-auth.
 import type { AuthenticatedSession } from '../application/models/authenticated-session';
 import type { Request, Response } from 'express';
 import { RegisterWithPasswordCommand } from '../application/commands/register-with-password.command';
+import { LogoutSessionCommand } from '../application/commands/logout-session.command';
 import { RefreshAccessTokenQuery } from '../application/queries/get-refresh-access-token.query';
 import { getJwtRefreshCookieName } from '../config/auth-env';
+import { AppRoleCode } from '../../shared/rbac/app-role.code';
 
 const FAKE_JWT =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.xcJlZ8F0eB_2oKeNlMJzr45UriVWk5hq80uOq2AMpcI';
@@ -14,9 +16,11 @@ describe('PassportJwtAuthController', () => {
   let controller: PassportJwtAuthController;
   let registerWithPassword: jest.Mocked<RegisterWithPasswordCommand>;
   let refreshAccessToken: jest.Mocked<Pick<RefreshAccessTokenQuery, 'execute'>>;
+  let logoutSession: jest.Mocked<Pick<LogoutSessionCommand, 'execute'>>;
 
   beforeEach(async () => {
     refreshAccessToken = { execute: jest.fn() };
+    logoutSession = { execute: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PassportJwtAuthController],
@@ -30,6 +34,10 @@ describe('PassportJwtAuthController', () => {
         {
           provide: RefreshAccessTokenQuery,
           useValue: refreshAccessToken,
+        },
+        {
+          provide: LogoutSessionCommand,
+          useValue: logoutSession,
         },
       ],
     }).compile();
@@ -63,13 +71,14 @@ describe('PassportJwtAuthController', () => {
       email: payload.email,
       username: payload.username,
       password: payload.password,
+      roleCode: AppRoleCode.USER,
     });
     expect(res.cookie).toHaveBeenCalledWith(
       getJwtRefreshCookieName(),
       'opaque-refresh',
       expect.objectContaining({
         httpOnly: true,
-        path: expect.stringContaining('/auth/refresh'),
+        path: expect.stringMatching(/\/auth$/),
       }),
     );
     expect(result).toEqual({
@@ -148,5 +157,30 @@ describe('PassportJwtAuthController', () => {
       require2FA: false,
     });
     expect(result).not.toHaveProperty('refreshToken');
+  });
+
+  it('logout revokes refresh hash, clears cookies (all path variants), returns ok', async () => {
+    logoutSession.execute.mockResolvedValue(undefined);
+    const req = {
+      cookies: { [getJwtRefreshCookieName()]: ' old-refresh-token ' },
+    } as unknown as Request;
+    const res = { clearCookie: jest.fn() } as unknown as Response;
+
+    const result = await controller.logout(req, res);
+
+    expect(logoutSession.execute).toHaveBeenCalledWith('old-refresh-token');
+    expect(res.clearCookie).toHaveBeenCalled();
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('logout without refresh cookie still clears cookies', async () => {
+    logoutSession.execute.mockResolvedValue(undefined);
+    const req = { cookies: {} } as unknown as Request;
+    const res = { clearCookie: jest.fn() } as unknown as Response;
+
+    await controller.logout(req, res);
+
+    expect(logoutSession.execute).toHaveBeenCalledWith(undefined);
+    expect(res.clearCookie).toHaveBeenCalled();
   });
 });

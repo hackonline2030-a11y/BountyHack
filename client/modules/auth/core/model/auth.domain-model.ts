@@ -15,3 +15,14 @@ export type EstablishAppSessionResult =
 export type RequireAppSessionResult =
   | { ok: true; payload: VerifiedAccessPayload }
   | { ok: false; kind: "missing_cookie" | "invalid_token" };
+
+/**
+ * Raw JWT for server-side `Authorization: Bearer` to Nest (BFF, DAL `fetch`).
+ * No TOTP domain logic — only session + cookie orchestration.
+ */
+export type SessionBearerForUpstreamResult =
+  | { ok: true; token: string }
+  | {
+      ok: false;
+      kind: "missing_cookie" | "invalid_token" | "missing_raw";
+    };

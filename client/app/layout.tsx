@@ -7,26 +7,42 @@ import { getT, initServerI18next } from "next-i18next/server";
 import i18nConfig from "@/i18n.config";
 import enCommon from "@/app/i18n/locales/en/common.json";
 import enConnexion from "@/app/i18n/locales/en/connexion.json";
+import enCredits from "@/app/i18n/locales/en/credits.json";
+import enLegal from "@/app/i18n/locales/en/legal.json";
 import enParameters from "@/app/i18n/locales/en/parameters.json";
 import frCommon from "@/app/i18n/locales/fr/common.json";
 import frConnexion from "@/app/i18n/locales/fr/connexion.json";
+import frCredits from "@/app/i18n/locales/fr/credits.json";
+import frLegal from "@/app/i18n/locales/fr/legal.json";
 import frParameters from "@/app/i18n/locales/fr/parameters.json";
 import "@/app/globals.css";
-import { ThemeProvider } from "@modules/app/react/ThemeProvider";
-import { Header } from "@modules/app/react/layout/Header";
-import { Footer } from "@modules/app/react/layout/Footer";
+import { ThemeProvider } from "@/modules/app/nextjs/ThemeProvider";
+import { Header } from "@/modules/app/nextjs/layout/Header";
+import { Footer } from "@/modules/app/nextjs/layout/Footer";
 
 initServerI18next(i18nConfig);
 
 /** Bundled for client `I18nProvider` so every namespace (e.g. `connexion`) hydrates reliably. */
 const clientI18nResources = {
-  en: { common: enCommon, connexion: enConnexion, parameters: enParameters },
-  fr: { common: frCommon, connexion: frConnexion, parameters: frParameters },
+  en: {
+    common: enCommon,
+    connexion: enConnexion,
+    parameters: enParameters,
+    legal: enLegal,
+    credits: enCredits,
+  },
+  fr: {
+    common: frCommon,
+    connexion: frConnexion,
+    parameters: frParameters,
+    legal: frLegal,
+    credits: frCredits,
+  },
 } satisfies Resource;
 
 const LANG_HEADER = "x-i18next-current-language";
 
-const siteName = "Clean App — Next.js template";
+const siteName = "BugBountyApp — Next.js template";
 const siteDescription =
   "Auth-first Next.js starter: TypeScript, Prisma, modular architecture, and tests — ready to extend.";
 
@@ -59,7 +75,7 @@ export const metadata: Metadata = {
     template: `%s | ${siteName}`,
   },
   description: siteDescription,
-  applicationName: "Clean App",
+  applicationName: "BugBountyApp",
   manifest: "/manifest.webmanifest",
   robots: { index: true, follow: true },
   openGraph: {
@@ -78,7 +94,7 @@ export default async function RootLayout({
 }) {
   const lang =
     (await headers()).get(LANG_HEADER) ?? i18nConfig.fallbackLng ?? "en";
-  await getT(["common", "connexion"], { lng: lang });
+  await getT(["common", "connexion", "legal", "credits"], { lng: lang });
 
   return (
     <html
