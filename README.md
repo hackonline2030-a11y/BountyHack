@@ -60,7 +60,9 @@ Une fois séparés, le front appelle l’API via une **URL HTTPS** dédiée au b
 
 ## Production : **sans Docker** (cible du projet)
 
-Le déploiement visé est **classique** : build (`pnpm build` / `nx build`), transfert des artefacts sur le serveur (rsync, CI SSH, etc.), processus **Node** sous **systemd** (ou équivalent), **reverse-proxy** (nginx, Caddy) pour HTTPS et le routage. **Pas de GitHub Container Registry (GHCR)** ni d’image Docker obligatoire pour la prod.
+Le déploiement visé est **classique** : build (`pnpm build` / `nx build`), transfert des artefacts sur le serveur (rsync, CI SSH, etc.), processus **Node** sous **systemd** (ou équivalent), **reverse-proxy** (nginx, Caddy) pour HTTPS et le routage.
+
+**Pas d’image Docker « officielle » du serveur** et **pas de GitHub Container Registry (GHCR)** dans le périmètre du projet : l’API **n’est pas** livrée par *pull* d’image depuis un registre, et il n’y a **pas** de workflow ou de convention de build/push vers `ghcr.io/…` pour le backend. Le [`server/docker/Dockerfile`](server/docker/Dockerfile) sert uniquement à **reproduire un runtime** en **local ou lab** (éventuel `docker build` sur ta machine, éventuellement avec `compose.lab.yml`) ; ce n’est **ni** l’artefact de déploiement production **ni** une chaîne de publication vers un registre.
 
 **Docker / `server/docker/`** restent utiles **en local** (API + Postgres + watch, WSL, etc.) — voir [`server/docker/README.md`](server/docker/README.md).
 

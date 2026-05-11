@@ -1,6 +1,6 @@
 # Docker — API Bug Bounty (backend)
 
-**Usage prévu : développement local (optionnel).** La production cible du monorepo est **sans conteneur** ni registre d’images (voir [`../../README.md`](../../README.md)). Ce dossier regroupe **`Dockerfile`**, **`compose.dev.yaml`** (dev) et **`compose.lab.yml`** (exemple de stack conteneurisée / lab — pas une exigence GHCR pour la prod).
+**Usage prévu : développement local (optionnel).** La production cible du monorepo est **sans conteneur** ni registre d’images (voir [`../../README.md`](../../README.md)). Il n’existe **pas** de flux projet vers **GitHub Container Registry (GHCR)** ni vers un autre registre pour publier l’API : pas de `docker build -t ghcr.io/…` attendu ni de déploiement par image serveur. Ce dossier regroupe **`Dockerfile`**, **`compose.dev.yaml`** (dev) et **`compose.lab.yml`** (exemple de stack lab / local).
 
 Les commandes sont à lancer depuis la machine hôte ; tous les exemples **`docker compose`** supposent que vous êtes dans **`server/docker/`** (racine du projet compose dev : même répertoire que `start.sh`).
 

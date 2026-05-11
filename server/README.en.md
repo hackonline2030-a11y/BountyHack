@@ -108,7 +108,7 @@ Recommendation: any new authentication-configuration condition should go through
 
 ## Getting started
 
-Pick **one** path: **Docker locally** (API and optional Postgres + watch), or **Node on the host** with a reachable database (**PostgreSQL + Prisma**, MongoDB, … per **`DATABASE_NAME`**). **Production** is intended as **Node on a server without Docker** (see [`../README.md`](../README.md)).
+Pick **one** path: **Docker locally** (API and optional Postgres + watch), or **Node on the host** with a reachable database (**PostgreSQL + Prisma**, MongoDB, … per **`DATABASE_NAME`**). **Production** is intended as **Node on a server without Docker** (see [`../README.md`](../README.md)). The monorepo does **not** define a server image build/push to **GitHub Container Registry (GHCR)** or any other registry; `server/docker/` is **local / lab** only.
 
 ### PostgreSQL and Prisma
 
