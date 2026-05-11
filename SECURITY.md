@@ -2,6 +2,14 @@
 
 Ce dépôt est un monorepo (**`client/`** — Next.js, **`server/`** — NestJS/Nx). Ce document explique comment signaler une vulnérabilité de façon responsable.
 
+## Posture côté projet (déploiement et CI)
+
+- **Production sans Docker** : le déploiement visé pour l’API n’est **pas** basé sur des images conteneurisées ni sur un registre d’images (type GHCR) comme chemin par défaut. L’objectif est une exécution **Node sur le serveur** (processus supervisé, reverse-proxy pour HTTPS, etc.), ce qui réduit la surface liée aux chaînes d’approvisionnement « image + registre + orchestrateur ». Le dossier **`server/docker/`** et les fichiers Compose associés servent au **développement local ou de lab**, de façon **optionnelle** ; ce n’est pas la cible de production du monorepo (voir le README racine).
+
+- **Pas de Trivy dans la CI** : les workflows GitHub Actions **n’utilisent pas** Trivy ni l’action **`aquasecurity/trivy-action`**. Le choix est volontaire au regard des **risques supply chain** sur l’écosystème Trivy et les actions tierces (compromissions, tags réécrits, etc.). La sécurité du code et des dépendances repose sur d’autres leviers : revue de code, mises à jour de dépendances, tests et lint, **Gitleaks** pour la détection de secrets versionnés, et les bonnes pratiques GitHub sur les workflows (actions épinglées, moindre privilège des secrets).
+
+Si vous évaluez une faille, précisez si elle concerne un **déploiement sans conteneur**, une **stack Docker locale**, ou la **CI** : le périmètre et la criticité peuvent différer.
+
 ## Où placer ce fichier ?
 
 À la **racine du dépôt**, `SECURITY.md` est l’emplacement attendu par les plateformes (par ex. GitHub : onglet **Security** → politique visible). Une variante acceptée est `.github/SECURITY.md` ; la racine reste la plus courante et la plus visible.
