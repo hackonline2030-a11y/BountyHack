@@ -23,6 +23,8 @@
     "submitting": "Connexion…",
     "backToPassword": "Retour e-mail/mot de passe",
     "noAccount": "Pas encore de compte ? Demander un compte à l'administrateur.",
+    "forgotPasswordLink": "Mot de passe oublié ?",
+    "afterPasswordReset": "Votre mot de passe a été mis à jour. Vous pouvez vous connecter avec le nouveau mot de passe.",
     "errorLogin": "Échec de la connexion",
     "successLogin": "Connexion réussie"
   },

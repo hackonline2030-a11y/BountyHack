@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import React, { startTransition, useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useT } from "next-i18next/client";
 import { localePrefixFromPathname } from "@/lib/locale-path";
 import {
@@ -16,6 +17,7 @@ export function LoginForm() {
   const { t } = useT("connexion");
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const prefix = localePrefixFromPathname(pathname);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,6 +25,17 @@ export function LoginForm() {
   const [step, setStep] = useState<"credentials" | "totp">("credentials");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (searchParams.get("passwordReset") !== "success") {
+      return;
+    }
+    startTransition(() => {
+      setStatus("success");
+      setMessage(t("loginForm.afterPasswordReset"));
+    });
+    router.replace(`${prefix}/login`, { scroll: false });
+  }, [searchParams, router, prefix, t]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -123,6 +136,16 @@ export function LoginForm() {
           disabled={status === "loading" || step === "totp"}
         />
       </div>
+      {step === "credentials" ? (
+        <p className="text-right text-sm">
+          <Link
+            href={`${prefix}/forgot-password`}
+            className="text-white/90 underline-offset-2 hover:text-white hover:underline"
+          >
+            {t("loginForm.forgotPasswordLink")}
+          </Link>
+        </p>
+      ) : null}
       {step === "totp" ? (
         <div>
           <label htmlFor="login-code" className="block text-sm font-medium text-white mb-1">

@@ -8,7 +8,7 @@ import { LangLinks } from "@/modules/app/nextjs/layout/LangLinks";
 import { logoutFromBrowser } from "@modules/auth/core/browser-logout.factory";
 import {
   isAdministrationRegisterPath,
-  isAuthLoginPath,
+  isAuthHeaderLoginHighlightPath,
   isParametersPath,
   localePrefixFromPathname,
 } from "@/lib/locale-path";
@@ -33,7 +33,7 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
   const parametersHref = `${prefix}/parameters`;
   const adminHref = `${prefix}/administration/register`;
   const loginHref = `${prefix}/login`;
-  const isLoginActive = isAuthLoginPath(pathname);
+  const isLoginActive = isAuthHeaderLoginHighlightPath(pathname);
   const isParametersActive = isParametersPath(pathname);
   const isAdminActive = isAdministrationRegisterPath(pathname);
   const isSuperAdmin = currentRoleCode === "SUPER_ADMIN";
