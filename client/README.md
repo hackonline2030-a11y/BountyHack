@@ -6,6 +6,8 @@ Application Next.js App Router orientée UI : les formulaires d’authentificati
 
 ### Installation
 
+**Node.js** : **≥ 24** (même contrainte que l’API Nest, voir `engines` dans `client/package.json` et `server/package.json`).
+
 Créez **`client/.env`** à partir du template (depuis la **racine du monorepo**) :
 
 ```bash
@@ -61,6 +63,10 @@ Prérequis : **`client/.env`** — voir **[Installation](#installation)**.
 - `pnpm build`
 - `pnpm lint`
 - `pnpm test`
+
+## CI (GitHub Actions)
+
+Le workflow du client vit à la racine du monorepo : **[`../.github/workflows/client-ci.yml`](../.github/workflows/client-ci.yml)** — exécution automatique sur **push / PR** de la branche **`feature/test-ci`** uniquement (chemins `client/**`), plus **`workflow_dispatch`** (E2E Playwright via l’option `run_e2e`). Il installe **toutes** les dépendances (y compris dev) : normal pour lint / tests / build, ce n’est pas l’artefact de prod (déploiement prévu **sans Docker** : build + Node sur le serveur). Contenu : lint, tests unitaires, build ; Gitleaks.
 
 
 

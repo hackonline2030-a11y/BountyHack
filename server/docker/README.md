@@ -1,6 +1,8 @@
 # Docker — API Bug Bounty (backend)
 
-Ce dossier regroupe **`Dockerfile`**, **`compose.dev.yaml`** (développement) et **`compose.prod.yml`** (déploiement type VPS). Les commandes sont à lancer depuis la machine hôte ; tous les exemples **`docker compose`** supposent que vous êtes dans **`server/docker/`** (racine du projet compose dev : même répertoire que `start.sh`).
+**Usage prévu : développement local (optionnel).** La production cible du monorepo est **sans conteneur** ni registre d’images (voir [`../../README.md`](../../README.md)). Il n’existe **pas** de flux projet vers **GitHub Container Registry (GHCR)** ni vers un autre registre pour publier l’API : pas de `docker build -t ghcr.io/…` attendu ni de déploiement par image serveur. Ce dossier regroupe **`Dockerfile`**, **`compose.dev.yaml`** (dev) et **`compose.lab.yml`** (exemple de stack lab / local).
+
+Les commandes sont à lancer depuis la machine hôte ; tous les exemples **`docker compose`** supposent que vous êtes dans **`server/docker/`** (racine du projet compose dev : même répertoire que `start.sh`).
 
 **`start.sh`** lit **`DATABASE_NAME`** dans **`server/.env`** et active :
 - le profil **`pg`** si **`POSTGRESQL_PRISMA`** (Postgres + pgweb) ;
@@ -131,7 +133,7 @@ Possible si vous utilisez uniquement **`docker compose -f compose.dev.yaml ...`*
 | Fichier | Rôle |
 |--------|------|
 | **`server/.env`** | Variables de l’API (lu par `compose.dev.yaml` via `env_file: ../.env`). À créer depuis [`../.env.example`](../.env.example). |
-| **`server/docker/.env`** (prod) | Pour **`compose.prod.yml`** : fichier attendu à côté du compose sur le VPS (voir en-tête de `compose.prod.yml`). |
+| **`server/docker/.env`** (stack `compose.lab.yml`) | Pour **`compose.lab.yml`** (local / lab uniquement) : fichier attendu à côté du compose sur la machine qui exécute Docker (voir en-tête de `compose.lab.yml`). |
 
 **Point critique avec Mongo en Docker (dev)** : depuis le conteneur `api`, l’hôte Mongo s’appelle le **nom du service Compose** (`mongodb`), pas `localhost`. Si `DATABASE_URL` pointe encore vers `mongodb://localhost:27017`, l’API **dans** Docker ne joindra pas Mongo — utiliser une URL du type `mongodb://mongodb:27017/…` comme indiqué dans `.env.example`.
 
@@ -216,15 +218,15 @@ docker compose -f compose.dev.yaml --profile watch --profile mongodb --profile p
 
 (ajustez **`mongodb`** / **`watch`** selon ce que vous aviez lancé.)
 
-### Production — Postgres optionnel (`compose.prod.yml`)
+### Stack exemple (`compose.lab.yml`) — Postgres optionnel
 
-Par défaut, la prod démarre **`app`** + **`mongo`** uniquement. Pour ajouter **PostgreSQL** sur le même réseau Docker (sans l’exposer sur l’hôte) :
+Par défaut, ce compose démarre **`app`** + **`mongo`** uniquement. Pour ajouter **PostgreSQL** sur le même réseau Docker (sans l’exposer sur l’hôte) :
 
 ```bash
-docker compose -f compose.prod.yml --env-file .env --profile pg up -d
+docker compose -f compose.lab.yml --env-file .env --profile pg up -d --build
 ```
 
-Définir au minimum **`POSTGRES_PASSWORD`** dans le `.env` à côté du compose (et les autres **`POSTGRES_*`** si besoin). Aujourd’hui, le service **`app`** pointe encore vers Mongo via **`DATABASE_URL`** dans le fichier d’exemple prod : brancher l’API sur Postgres suppose une évolution applicative et une **`DATABASE_URL`** adaptée.
+Définir au minimum **`POSTGRES_PASSWORD`** dans le `.env` à côté du compose (et les autres **`POSTGRES_*`** si besoin). Aujourd’hui, le service **`app`** pointe encore vers Mongo via **`DATABASE_URL`** dans le fichier d’exemple : brancher l’API sur Postgres suppose une évolution applicative et une **`DATABASE_URL`** adaptée.
 
 ### Faut-il extraire Mongo dans un `compose.mongo.yaml` séparé ?
 
@@ -324,7 +326,7 @@ docker exec -it web-api-mongodb sh
 - Si **`sh`** n’existait pas dans une image très minimaliste : **`docker exec -it <conteneur> /bin/sh`** même principe. Les images utilisées ici (**Node Alpine**, **`node:24`**) fournissent **`sh`**.
 - Quitter le shell : **`exit`** ou Ctrl+D.
 
-Shell dans la stack **prod** : utilise le **`container_name`** défini dans `compose.prod.yml` (ex. **`web-api-prod`**) une fois **`docker compose … up`** lancé.
+Shell dans la stack **`compose.lab.yml`** (lab) : utilise le **`container_name`** défini dans ce fichier (ex. **`web-api-lab`**) une fois **`docker compose … up`** lancé.
 
 ---
 
@@ -415,15 +417,15 @@ docker exec -i web-api-mongodb mongoimport --db bugbountyapp --collection users 
 
 (le chemin **`dump/user.json`** est relatif à **`server/docker/`**.)
 
-### Production (**`compose.prod.yml`**)
+### Stack exemple **`compose.lab.yml`** (local / lab)
 
 Depuis **`server/docker/`**, avec un fichier **`.env`** à côté du compose contenant **`JWT_SECRET`**, **`MONGO_ROOT_PASSWORD`**, etc. :
 
 ```bash
-docker compose -f compose.prod.yml --env-file .env up -d
+docker compose -f compose.lab.yml --env-file .env up -d --build
 ```
 
-Voir les commentaires en tête de **`compose.prod.yml`** (image **`ghcr.io/…`**, variables, absence d’exposition de Mongo sur l’hôte).
+Voir les commentaires en tête de **`compose.lab.yml`** (build de l’image **`app`** depuis **`docker/Dockerfile`**, variables d’environnement, absence d’exposition de Mongo sur l’hôte). Ce n’est **pas** le chemin de déploiement prod du monorepo (voir README racine).
 
 ---
 
@@ -436,6 +438,6 @@ Voir les commentaires en tête de **`compose.prod.yml`** (image **`ghcr.io/…`*
 ## Références
 
 - Compose dev : `compose.dev.yaml`
-- Compose prod : `compose.prod.yml`
-- Postgres (profil **`pg`**, y compris sans API : `docker compose … --profile pg up -d postgres pgweb`) : `compose.dev.yaml` et `compose.prod.yml`
+- Compose lab (exemple stack conteneurisée, pas déploiement prod du projet) : `compose.lab.yml`
+- Postgres (profil **`pg`**, y compris sans API : `docker compose … --profile pg up -d postgres pgweb`) : `compose.dev.yaml` et `compose.lab.yml`
 - Script : `start.sh` • raccourci : `start`

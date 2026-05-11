@@ -61,3 +61,7 @@ Prerequisite: **`client/.env`** — see **[Installation](#installation)**.
 - `pnpm lint`
 - `pnpm test`
 
+## CI (GitHub Actions)
+
+Workflow at monorepo root: **[`../.github/workflows/client-ci.yml`](../.github/workflows/client-ci.yml)** — auto on **push / PR** to **`feature/test-ci`** only (`client/**` paths), plus **`workflow_dispatch`** (Playwright E2E via `run_e2e`). Installs **all** deps including dev (normal for lint/tests/build); **not** the production artifact (**no Docker** in prod: build + Node on the server). Includes lint, unit tests, build; Gitleaks.
+

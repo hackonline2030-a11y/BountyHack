@@ -2,7 +2,7 @@
 
 ## Image utilisée
 
-Dans **`server/docker/compose.dev.yaml`** et **`server/docker/compose.prod.yml`**, le service **`postgres`** utilise l’image officielle :
+Dans **`server/docker/compose.dev.yaml`** et **`server/docker/compose.lab.yml`**, le service **`postgres`** utilise l’image officielle :
 
 **`postgres:18-alpine`**
 

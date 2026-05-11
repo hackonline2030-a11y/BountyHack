@@ -1,0 +1,125 @@
+# Next.js client — CI GitHub Actions (équivalent esprit GitLab : deps → test → build → qualité / sécurité).
+# Pas de conteneur : build et tests tournent sur le runner Ubuntu avec pnpm.
+# Ce workflow n’est pas un « déploiement prod » : `pnpm install` garde les devDependencies (ESLint, Jest, types…)
+# nécessaires au lint / tests / build. La prod livrable = autre chaîne (ex. artefact `next build` + Node sur le VPS, systemd, reverse-proxy — **sans Docker**).
+#
+# Étape par étape (outils externes) :
+# - Gitleaks : job activé par défaut (`continue-on-error: true` sur l'action).
+# - Trivy / `trivy-action` : volontairement absents (supply chain, incidents signalés sur l’écosystème en 2026).
+#
+# Déclenchement : push / PR sur la branche feature/test-ci uniquement (+ chemins client) ; manuel : workflow_dispatch.
+
+name: Client CI (Next.js)
+
+on:
+  push:
+    branches:
+      - feature/test-ci
+    paths:
+      - "client/**"
+      - ".github/workflows/client-ci.yml"
+  pull_request:
+    branches:
+      - feature/test-ci
+    paths:
+      - "client/**"
+      - ".github/workflows/client-ci.yml"
+  workflow_dispatch:
+    inputs:
+      run_e2e:
+        description: "Lancer Playwright e2e (plus lent, installe Chromium)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: client-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: client
+
+env:
+  # https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  NODE_ENV: production
+  NEXT_PUBLIC_SITE_URL: http://localhost:3001
+  NEXT_PUBLIC_AUTH_API: http://localhost:3000
+
+jobs:
+  # --- Équivalent dependencies + test + build (lint inclus) ---
+  install-lint-test-build:
+    name: Install · lint · unit tests · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: client/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Unit tests
+        run: pnpm run test:unit
+
+      - name: Build
+        run: pnpm run build
+
+  # --- Playwright (optionnel, manuel ou workflow_dispatch avec run_e2e) ---
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name == 'workflow_dispatch' && inputs.run_e2e == true
+    needs: [install-lint-test-build]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: client/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Run e2e
+        run: pnpm run test:e2e
+
+  # --- Sécrets dans le dépôt ---
+  gitleaks:
+    name: Gitleaks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
