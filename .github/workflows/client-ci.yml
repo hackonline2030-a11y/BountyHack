@@ -5,9 +5,10 @@
 # « invalides » — ce sont des noms valides côté GitHub (variable dépôt + secret SonarCloud). Voir `.github/actionlint.yaml`.
 #
 # Étape par étape (outils externes) :
-# - SonarCloud : créer un projet sur https://sonarcloud.io , copier client/sonar-project.properties.example
-#   vers client/sonar-project.properties (remplir organization + projectKey), ajouter le secret SONAR_TOKEN
-#   au dépôt, puis activer la variable dépôt CLIENT_SONARCLOUD_ENABLED=true (Settings → Variables).
+# - SonarCloud (désactivé par défaut) : le job Sonar ne s’exécute que si **les deux** conditions sont vraies :
+#   1) variable dépôt `CLIENT_SONARCLOUD_ENABLED=true` ; 2) fichier versionné **`client/sonar-project.properties`**
+#   (copie depuis `sonar-project.properties.example`, remplir organization + projectKey sur https://sonarcloud.io).
+#   Secret dépôt `SONAR_TOKEN` requis quand le job tourne.
 # - Trivy / Gitleaks : jobs activés par défaut ; ajuste exit-code Trivy (0 → 1) quand tu veux bloquer la CI.
 #
 # Déclenchement : push / PR sur la branche feature/test-ci uniquement (+ chemins client) ; manuel : workflow_dispatch.
@@ -53,11 +54,22 @@ jobs:
     name: CI config
     runs-on: ubuntu-latest
     timeout-minutes: 2
+    defaults:
+      run:
+        working-directory: .
     outputs:
       sonarcloud: ${{ steps.flags.outputs.sonarcloud }}
     steps:
+      - uses: actions/checkout@v4
+
       - id: flags
-        run: echo "sonarcloud=${{ vars.CLIENT_SONARCLOUD_ENABLED }}" >> "$GITHUB_OUTPUT"
+        run: |
+          enabled="${{ vars.CLIENT_SONARCLOUD_ENABLED }}"
+          if [ "$enabled" = "true" ] && [ -f client/sonar-project.properties ]; then
+            echo "sonarcloud=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "sonarcloud=false" >> "$GITHUB_OUTPUT"
+          fi
 
   # --- Équivalent dependencies + test + build (lint inclus) ---
   install-lint-test-build:
@@ -156,7 +168,6 @@ jobs:
           scan-type: fs
           scan-ref: ./client
           severity: HIGH,CRITICAL
-          # Passe à exit-code: '1' quand tu veux faire échouer la CI comme ton GitLab
           exit-code: "0"
 
   # --- Sécurité : Trivy IaC / config (Dockerfile, compose, k8s yaml si présents) ---
