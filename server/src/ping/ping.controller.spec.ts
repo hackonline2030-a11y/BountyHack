@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PingController } from './ping.controller';
 import { GetVersionCommand } from './version-repository.command';
+import type { PingResult } from './ping.entity';
 
 describe('PingController', () => {
   let controller: PingController;
@@ -22,10 +23,11 @@ describe('PingController', () => {
   });
 
   it('should return ping payload from version command', async () => {
-    getVersionCommand.execute.mockResolvedValue({
+    const pingResult: PingResult = {
       status: 'OK',
       database: { version: 'v2', status: 'OK' },
-    } as any);
+    };
+    getVersionCommand.execute.mockResolvedValue(pingResult);
 
     const result = await controller.ping();
 
