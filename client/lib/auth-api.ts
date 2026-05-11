@@ -3,23 +3,9 @@
  * Uses credentials so httpOnly cookies work when Nest sends Set-Cookie.
  */
 
-const AUTH_API_BASE =
-  (process.env.NEXT_PUBLIC_AUTH_API ?? "").replace(/\/+$/, "") || undefined;
+import { nestAuthAbsoluteUrl } from "@/lib/nest-auth-url";
 
-const API_PREFIX =
-  (process.env.NEXT_PUBLIC_AUTH_API_PREFIX ?? "api").replace(/^\/+|\/+$/g, "");
-
-function authApiBase(): string {
-  if (!AUTH_API_BASE) {
-    throw new Error(
-      "NEXT_PUBLIC_AUTH_API is not set (e.g. http://localhost:3000)"
-    );
-  }
-  return AUTH_API_BASE;
-}
-
-const authUrl = (path: string) =>
-  `${authApiBase()}/${API_PREFIX}/auth${path}`;
+const authUrl = (path: string) => nestAuthAbsoluteUrl(path);
 
 export type NestAuthLoginBody = { email: string; password: string; code?: string };
 export type NestAuthRegisterBody = {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getT } from "next-i18next/server";
 import { Section } from "@modules/app/nextjs/components/sections/Section";
 import { LoginForm } from "@/modules/auth/nextjs/components/forms/LoginForm";
@@ -25,7 +26,9 @@ export default async function LoginPage({ params }: PageProps) {
           <h1 className="text-center text-3xl font-bold text-white">
             {t("loginPage.heading")}
           </h1>
-          <LoginForm />
+          <Suspense fallback={null}>
+            <LoginForm />
+          </Suspense>
         </article>
       </Section>
     </main>
