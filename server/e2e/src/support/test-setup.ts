@@ -3,7 +3,7 @@ import { config as loadEnv } from 'dotenv';
 import { resolve } from 'node:path';
 import axios from 'axios';
 
-// Load repo .env then e2e/.env (e2e overrides) so E2E_FIREBASE_WEB_API_KEY and friends are available.
+// Load repo .env then e2e/.env (e2e overrides).
 const repoRoot = resolve(__dirname, '../../..');
 const e2eRoot = resolve(__dirname, '../..');
 loadEnv({ path: resolve(repoRoot, '.env'), quiet: true });

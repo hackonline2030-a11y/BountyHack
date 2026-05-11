@@ -8,12 +8,11 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Prisma client must match runtime DB (postgresql in compose). URL is only
-# used for generate shape; no DB connection is required at install time.
-ARG DATABASE_PROVIDER=postgresql
-ARG DATABASE_URL=postgresql://admin:example@127.0.0.1:5432/cleanapp
-ENV DATABASE_PROVIDER=${DATABASE_PROVIDER}
-ENV DATABASE_URL=${DATABASE_URL}
+# NEXT_PUBLIC_* is inlined at `next build` time.
+ARG NEXT_PUBLIC_SITE_URL=http://localhost:3001
+ARG NEXT_PUBLIC_AUTH_API=http://localhost:3000
+ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+ENV NEXT_PUBLIC_AUTH_API=${NEXT_PUBLIC_AUTH_API}
 
 COPY package.json pnpm-lock.yaml ./
 RUN corepack enable pnpm && pnpm install --frozen-lockfile

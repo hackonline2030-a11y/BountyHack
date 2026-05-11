@@ -8,7 +8,7 @@
 # montés depuis l’hôte. Le fichier .npmrc à la racine définit confirm-modules-purge=false (sinon pnpm demande une
 # confirmation sans TTY et l’installation peut échouer ou laisser node_modules incomplet).
 #
-# Avec le script : ./start.sh (MONGODB → profil mongodb, POSTGRESQL → profil pg)
+# Avec le script : ./start.sh (MONGODB → profil mongodb, POSTGRESQL_PRISMA → profil pg)
 # À la main (Mongo) : docker compose -f compose.dev.yaml --profile mongodb up --build -d
 # DATABASE_URL dans .env : voir .env.example (localhost vs hôte « mongodb » du réseau compose).
 name: web-api-dev
@@ -99,7 +99,7 @@ services:
     volumes:
       - ../src/document-rendering/data:/usr/src/app/src/document-rendering/data:ro
       - ../templates:/usr/src/app/templates:ro
-    # Pas de depends_on mongodb : le profil mongodb peut être désactivé (FIREBASE / IN-MEMORY).
+    # Pas de depends_on mongodb : le profil mongodb peut être désactivé (IN-MEMORY).
 
   api-watch:
     profiles:

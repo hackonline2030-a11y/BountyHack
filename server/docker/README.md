@@ -3,7 +3,7 @@
 Ce dossier regroupe **`Dockerfile`**, **`compose.dev.yaml`** (développement) et **`compose.prod.yml`** (déploiement type VPS). Les commandes sont à lancer depuis la machine hôte ; tous les exemples **`docker compose`** supposent que vous êtes dans **`server/docker/`** (racine du projet compose dev : même répertoire que `start.sh`).
 
 **`start.sh`** lit **`DATABASE_NAME`** dans **`server/.env`** et active :
-- le profil **`pg`** si **`POSTGRESQL`** ou **`POSTGRESQL_PRISMA`** (Postgres + pgweb) ;
+- le profil **`pg`** si **`POSTGRESQL_PRISMA`** (Postgres + pgweb) ;
 - le profil **`mongodb`** si **`MONGODB`** (Mongo + mongo-express) ;
 - sinon pas de conteneur de base Docker pour ce mode.
 
@@ -143,7 +143,7 @@ Possible si vous utilisez uniquement **`docker compose -f compose.dev.yaml ...`*
 |--------|-----------------|
 | *(aucun)* | Service **`api`** uniquement (image build `target: production`). |
 | **`mongodb`** | **`mongodb`** + **`mongo-express`** + permet d’aligner **`api`** sur une stack avec base locale. Activé automatiquement par **`start.sh`** si **`DATABASE_NAME=MONGODB`** dans `server/.env`. |
-| **`pg`** | **`postgres`** (PostgreSQL 18, image officielle **Alpine**) + **`pgweb`**. Activé par **`start.sh`** si **`DATABASE_NAME=POSTGRESQL`** ou **`POSTGRESQL_PRISMA`**, ou à la main : **`--profile pg`**. Par défaut : Postgres sur l’hôte **`5432`**, pgweb sur **`8087`** (mongo-express : **`8086`**). |
+| **`pg`** | **`postgres`** (PostgreSQL 18, image officielle **Alpine**) + **`pgweb`**. Activé par **`start.sh`** si **`DATABASE_NAME=POSTGRESQL_PRISMA`**, ou à la main : **`--profile pg`**. Par défaut : Postgres sur l’hôte **`5432`**, pgweb sur **`8087`** (mongo-express : **`8086`**). |
 | **`watch`** | **`api-watch`** (code monté depuis l’hôte, `pnpm install` + `nx serve` dans le conteneur, reload). Jamais utilisé seul comme « prod » ; destiné au dev Docker. |
 
 Projet Compose : nom **`web-api-dev`**.
@@ -152,7 +152,7 @@ Projet Compose : nom **`web-api-dev`**.
 
 ## PostgreSQL (Postgres + pgweb)
 
-Le profil **`pg`** s’active lorsque **`DATABASE_NAME`** vaut **`POSTGRESQL`** ou **`POSTGRESQL_PRISMA`** dans **`server/.env`** (Postgres + pgweb + API selon la commande). **MongoDB** est une alternative (profil **`mongodb`**). Les services **Postgres** ci‑dessous servent notamment à :
+Le profil **`pg`** s’active lorsque **`DATABASE_NAME=POSTGRESQL_PRISMA`** dans **`server/.env`** (Postgres + pgweb + API selon la commande). **MongoDB** est une alternative (profil **`mongodb`**). Les services **Postgres** ci‑dessous servent notamment à :
 
 - lancer une base **PostgreSQL** avec **`start.sh`** ou le compose ;
 - monter **uniquement Postgres + pgweb** sans API (**voir ci‑dessous**).
@@ -166,13 +166,13 @@ Schéma et migrations : dossier **`server/prisma/`** (monté dans **`web-api-wat
 | Script | Effet |
 |--------|--------|
 | **`pnpm docker:prisma:generate`** | `prisma generate` dans le conteneur **`web-api-watch`** (profils **`watch`** + **`pg`** actifs). |
-| **`pnpm docker:prisma:deploy`** | `prisma migrate deploy` (applique l’historique des migrations, y compris seed SQL démo si présent dans une migration). |
+| **`pnpm docker:prisma:deploy`** | `prisma migrate deploy` (schéma uniquement ; les données sont dans **`pnpm docker:prisma:seed`**). |
 | **`pnpm docker:prisma:migrate:dev`** | `prisma migrate dev` (interactif). |
-| **`pnpm docker:prisma:seed-demo`** | `prisma db execute` sur le fichier SQL de la migration seed (ligne démo **`users`**). |
+| **`pnpm docker:prisma:seed`** | `prisma db seed` (rôles + démo optionnelle via `prisma/seed-runner.mjs`). |
 
 Prérequis : **`web-api-watch`** et **`postgres`** déjà démarrés (ex. **`pnpm docker:watch`** à la racine **`server/`**).
 
-**Prisma sur la machine hôte** (base joignable en `localhost`) : `pnpm prisma generate`, `pnpm prisma migrate deploy`, `pnpm prisma:seed-demo`. Si **`DATABASE_URL`** dans **`server/.env`** cible encore le service Docker **`postgres`**, préférer **`pnpm prisma:migrate:deploy:docker`** et **`pnpm prisma:seed-demo:docker`** (scripts **`server/docker/*.cjs`** qui réécrivent l’URL vers **`127.0.0.1`** / **`POSTGRES_HOST_PORT`**).
+**Prisma sur la machine hôte** (base joignable en `localhost`) : `pnpm prisma generate`, `pnpm prisma migrate deploy`, `pnpm prisma:seed`. Si **`DATABASE_URL`** dans **`server/.env`** cible encore le service Docker **`postgres`**, préférer **`pnpm prisma:migrate:deploy:docker`** et **`pnpm prisma:seed:docker`** (scripts **`server/docker/*.cjs`** qui réécrivent l’URL vers **`127.0.0.1`** / **`POSTGRES_HOST_PORT`**).
 
 Vue d’ensemble : [`../README.md`](../README.md#postgresql-et-prisma).
 
@@ -240,8 +240,8 @@ Définir au minimum **`POSTGRES_PASSWORD`** dans le `.env` à côté du compose 
 
 ### Ce que fait le script automatiquement
 
-- Lit **`DATABASE_NAME`** dans **`server/../.env`** (donc **`server/.env`**). Si aucun fichier : valeur par défaut **POSTGRESQL** (pour le script uniquement ; mieux vaut toujours avoir un `.env` explicite, comme **`.env.example`**).
-- Ajoute **`--profile mongodb`** si **`DATABASE_NAME=MONGODB`**, ou **`--profile pg`** si **`DATABASE_NAME=POSTGRESQL`** ou **`POSTGRESQL_PRISMA`**.
+- Lit **`DATABASE_NAME`** dans **`server/../.env`** (donc **`server/.env`**). Si aucun fichier : valeur par défaut **POSTGRESQL_PRISMA** (pour le script uniquement ; mieux vaut toujours avoir un `.env` explicite, comme **`.env.example`**).
+- Ajoute **`--profile mongodb`** si **`DATABASE_NAME=MONGODB`**, ou **`--profile pg`** si **`DATABASE_NAME=POSTGRESQL_PRISMA`**.
 - **`down`** active les profils **`watch`**, **`mongodb`** et **`pg`** pour que tout service (dont **`api-watch`**) soit bien arrêté et que le réseau compose ne reste pas bloqué.
 
 ### Variables optionnelles reconnues par le script
@@ -255,7 +255,7 @@ Définir au minimum **`POSTGRES_PASSWORD`** dans le `.env` à côté du compose 
 
 | Commande | Rôle |
 |----------|------|
-| **`./start.sh`** ou **`./start.sh up`** | Build (si nécessaire) et démarre la stack : **`api`** seul, ou **`mongodb`** + **`mongo-express`** + **`api`** si `DATABASE_NAME=MONGODB`, ou **`postgres`** + **`pgweb`** + **`api`** si `DATABASE_NAME=POSTGRESQL` ou `POSTGRESQL_PRISMA`. Vérifie la base (ping) si un profil DB est actif, affiche un récap d’URLs, puis peut enchaîner un **`logs -f api`** selon **`API_FOLLOW_LOGS`**. |
+| **`./start.sh`** ou **`./start.sh up`** | Build (si nécessaire) et démarre la stack : **`api`** seul, ou **`mongodb`** + **`mongo-express`** + **`api`** si `DATABASE_NAME=MONGODB`, ou **`postgres`** + **`pgweb`** + **`api`** si `DATABASE_NAME=POSTGRESQL_PRISMA`. Vérifie la base (ping) si un profil DB est actif, affiche un récap d’URLs, puis peut enchaîner un **`logs -f api`** selon **`API_FOLLOW_LOGS`**. |
 | **`./start.sh stop`** | Stoppe tous les services de la stack **dev** (**`api`**, **`api-watch`**, **`mongodb`**, **`mongo-express`** si présents). Ne supprime **pas** réseaux ni volumes : redémarrage rapide ensuite. |
 | **`./start.sh down`** | **`docker compose … down --remove-orphans`** avec profils **`watch`** (+ **`mongodb`** si applicable). Coupe tout proprement, supprime le réseau projet. |
 | **`./start.sh down -v`** | Comme **`down`**, mais supprime aussi les **volumes nommés** (données Mongo **`mongo_data`**, volume **`web_api_node_modules`** du watch, etc.). |
@@ -340,7 +340,7 @@ Toujours **`cd server/docker`** d’abord.
 docker compose -f compose.dev.yaml --profile mongodb up -d --build
 ```
 
-**Sans Mongo** (ex. **`IN-MEMORY`**, **`FIREBASE`** côté config, sans conteneurs Mongo) :
+**Sans Mongo** (ex. **`IN-MEMORY`** côté config, sans conteneurs Mongo) :
 
 ```bash
 docker compose -f compose.dev.yaml up -d --build
