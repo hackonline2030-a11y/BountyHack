@@ -1,29 +1,29 @@
-## Next.js frontend (Bug Bounty)
+## Frontend Next.js (Bug Bounty)
 
-UI-focused Next.js App Router app: auth forms call the **Nest** API (`NEXT_PUBLIC_AUTH_API`).
+Application Next.js App Router orientée UI : les formulaires d’authentification appellent l’API **Nest** (`NEXT_PUBLIC_AUTH_API`).
 
-## Getting started
+## Démarrage
 
 ### Installation
 
-Create **`client/.env`** from the template (from the **monorepo root**):
+Créez **`client/.env`** à partir du template (depuis la **racine du monorepo**) :
 
 ```bash
-# at the repo root (if not done yet)
+# à la racine du dépôt (si ce n'est pas déjà fait)
 cp bugbountyapp/client/.env.example bugbountyapp/client/.env
 ```
 
-Equivalent if you are already in **`client/`**:
+Équivalent si vous êtes déjà dans **`client/`** :
 
 ```bash
 cp .env.example .env
 ```
 
-Adjust **`client/.env`** as needed (see **Environment variables** below and `client/.env.example`).
+Adaptez **`client/.env`** selon vos besoins (voir **Variables d’environnement** ci-dessous et `client/.env.example`).
 
-### Run
+### Lancer le projet
 
-This workspace uses **[pnpm](https://pnpm.io)** (`packageManager` is pinned in `package.json`). Enable Corepack once, then install and run:
+Ce workspace utilise **[pnpm](https://pnpm.io)** (`packageManager` est verrouillé dans `package.json`). Activez Corepack une fois, puis installez et lancez :
 
 ```bash
 corepack enable
@@ -31,27 +31,29 @@ pnpm install
 pnpm dev
 ```
 
-Open [http://localhost:3001](http://localhost:3001). Next dev runs on **3001** (`next dev -p 3001`) so the Nest API can use **3000** by default. For another port: `pnpm dev -- --port 3010` (and align **`CORS_ORIGIN`** in **`server/.env`**).
+Ouvrez [http://localhost:3001](http://localhost:3001). Next dev tourne sur **3001** (`next dev -p 3001`) afin de laisser l’API Nest sur **3000** par défaut. Pour un autre port : `pnpm dev -- --port 3010` (et alignez **`CORS_ORIGIN`** dans **`server/.env`**).
 
-**API (CORS)** : the browser origin (`http://localhost:3001` in dev) must be allowed by Nest — see **`server/.env.example`** and **`server/src/shared/cors.util.ts`**.
+**API (CORS)** : l’origine navigateur (`http://localhost:3001` en dev) doit être autorisée côté Nest — voir **`server/.env.example`** et **`server/src/shared/cors.util.ts`**.
 
-## Included
+## Contenu inclus
 
-- Auth module (`modules/auth/core/`): ports (`gateway/`), Next + **jose** adapters (`gateway-infra/`, see `JoseJwtHs256AccessTokenVerifier`), use cases, and **`auth.factory.ts`** wiring; `app/api` and `lib/dal` stay thin adapters.
-- Auth pages: `/{lng}/register`, `/{lng}/login` (e.g. `/en/login`, `/fr/register`) — forms call Nest (`POST …/auth/login`, `…/auth/register`). After login, the client posts the access JWT to **`POST /api/session`** so Next can store an **`httpOnly` cookie** and run DAL checks. **Welcome dashboard** (`lib/dal/welcome-user.ts`): **`GET …/users/me`** with **`Authorization: Bearer`**; the heading shows **`Bienvenue` / `Welcome` only** until the API returns a non-empty **username** (no JWT/email fallback).
-- **Settings** `/{lng}/parameters`: TOTP enrollment calls **`POST /api/account/totp/enable/start`** and **`…/confirm`**, which proxy to Nest **`auth/totp/enable/*`** using the same httpOnly session (see `routes.md`).
-- Shared UI foundation (sections, buttons, theming)
-- Email demo route: `POST /api/send` (disabled when `RESEND_API_KEY` is missing)
+- Module d’auth (`modules/auth/core/`) : ports (`gateway/`), adaptateurs Next + **jose** (`gateway-infra/`, voir `JoseJwtHs256AccessTokenVerifier`), use cases, et wiring dans **`auth.factory.ts`** ; `app/api` et `lib/dal` restent des adaptateurs fins.
+- Auth : **`/{lng}/login`** (public) ; **`/{lng}/administration/register`** (**`verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN])`** dans [`lib/dal/session.ts`](lib/dal/session.ts) ; autres rôles → **`welcome-dashboard`**). L’inscription utilise **`POST /api/account/register-user`** pour que Next attache le Bearer admin (Nest rejette `POST …/auth/register` sans JWT **`SUPER_ADMIN`**). **`POST …/auth/login`** continue d’appeler Nest directement. Après login, **`POST /api/session`** enregistre le cookie **`httpOnly`** pour les vérifications DAL/BFF.
+- UX login en 2 étapes si nécessaire : étape 1 (email+mot de passe), puis étape 2 (code TOTP) seulement si le backend répond `TOTP code required`. Si le TOTP n’est pas activé pour le compte, l’étape 1 crée directement la session.
+- **Paramètres** `/{lng}/parameters` : TOTP géré par switch (on/off). L’UI appelle les routes BFF Next **`POST /api/account/totp/enable/start`**, **`…/enable/confirm`**, et **`…/disable`**. Ces routes proxifient vers Nest **`auth/totp/enable/*`** et **`auth/totp/disable`** avec la même session httpOnly (voir `routes.md`).
+- Architecture front TOTP : `TotpEnrollmentPanel` dépend de use cases auth core (`start/confirm/disable TotpEnrollmentUseCase`) et d’un contrat gateway (`ITotpManagementGateway`) câblé dans `totp-management.factory.ts` (compatible client ; pas de `next/headers`). Le wiring session/JWT reste dans `auth.factory.ts` (server-only).
+- Le header utilise **`GET /api/session/status`** pour afficher les métadonnées de session en temps réel côté client : username et rôle après le nom de l’app, `Mes paramètres` quand authentifié, et lien `Admin` seulement pour `SUPER_ADMIN`. Déconnexion : use case navigateur **`performBrowserLogoutUseCase`** (`browser-logout.factory` → `logoutFromBrowser`) puis côté Next route **`destroyAppSessionUseCase`** sur **`DELETE /api/session`** (`auth.factory` → `createDestroyAppSessionDependencies`).
+- Fondation UI partagée (sections, boutons, theming)
 
-## Environment variables
+## Variables d’environnement
 
-Prerequisite: **`client/.env`** — see **[Installation](#installation)**.
+Prérequis : **`client/.env`** — voir **[Installation](#installation)**.
 
-- **`NEXT_PUBLIC_SITE_URL`**: public URL of this Next app (SEO, absolute links).
-- **`NEXT_PUBLIC_AUTH_API`**: Nest origin (no trailing slash), e.g. `http://localhost:3000`.
-- **`NEXT_PUBLIC_AUTH_API_PREFIX`** (optional): global API segment before `/auth` (default `api` → `http://…/api/auth/login`).
-- **`JWT_SECRET`**: must match the Nest `JWT_SECRET`; used to verify the access JWT when setting the httpOnly session cookie (`POST /api/session`) and in the DAL for protected Server Components.
-- **`RESEND_API_KEY`**: for `POST /api/send`. If missing or empty, the route logs a warning and returns `503`.
+- **`NEXT_PUBLIC_SITE_URL`** : URL publique de cette app Next (SEO, liens absolus).
+- **`NEXT_PUBLIC_AUTH_API`** : origine Nest (sans slash final), ex. `http://localhost:3000`.
+- **`NEXT_PUBLIC_AUTH_API_PREFIX`** (optionnel) : segment API global avant `/auth` (par défaut `api` → `http://…/api/auth/login`).
+- **`JWT_SECRET`** : doit correspondre au `JWT_SECRET` Nest ; utilisé pour vérifier le JWT d’accès lors de la pose du cookie session httpOnly (`POST /api/session`) et dans le DAL pour les Server Components protégés.
+
 
 ## Scripts
 
@@ -60,19 +62,6 @@ Prerequisite: **`client/.env`** — see **[Installation](#installation)**.
 - `pnpm lint`
 - `pnpm test`
 
-## Resend (email demo)
 
-- Route: `POST /api/send`
-- Note: `app/api/send/route.ts` uses placeholder values for `from`, `to`, `subject`, and `EmailTemplate({ firstName: 'John' })`.
 
-### Resend configuration
 
-1. Add `RESEND_API_KEY` to `.env` (see `.env.example`).
-2. Replace placeholders in `app/api/send/route.ts` with verified sender and real recipients.
-3. Adjust `EmailTemplate` props as needed.
-
-### Test
-
-```bash
-curl -X POST http://localhost:3001/api/send
-```

@@ -116,8 +116,8 @@ Pick **one** path: **Docker** (API and optional Postgres + watch), or **Node on 
 
 | Context | Commands |
 |--------|----------|
-| **Docker — API in watch** (`web-api-watch` + Postgres) | `pnpm docker:watch`, then `pnpm docker:prisma:generate`, `pnpm docker:prisma:deploy`, optional `pnpm docker:prisma:seed-demo`. Same as `./docker/start.sh watch-up` from **`server/docker/`**. |
-| **Host — Postgres on `localhost`** | `pnpm prisma generate`, `pnpm prisma migrate deploy`, optional `pnpm prisma:seed-demo`. If `DATABASE_URL` still uses `@postgres`, use `pnpm prisma:migrate:deploy:docker` and `pnpm prisma:seed-demo:docker`. |
+| **Docker — API in watch** (`web-api-watch` + Postgres) | `pnpm docker:watch`, then `pnpm docker:prisma:generate`, `pnpm docker:prisma:deploy`, then data: `pnpm docker:prisma:seed`. Same as `./docker/start.sh watch-up` from **`server/docker/`**. |
+| **Host — Postgres on `localhost`** | `pnpm prisma generate`, `pnpm prisma migrate deploy`, then `pnpm prisma:seed`. If `DATABASE_URL` still uses `@postgres`, use `pnpm prisma:migrate:deploy:docker` and `pnpm prisma:seed:docker`. See **`prisma/README.md`**. |
 
 Details: [`docker/README.md`](docker/README.md#prisma-migrations-et-démo) and **`.env.example`**. Demo login: `demo-user@example.local` / `password123`.
 

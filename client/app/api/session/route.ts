@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { EstablishAppSessionResult } from "@modules/auth/core/model/auth.domain-model";
-import { createEstablishAppSessionDependencies } from "@modules/auth/core/auth.factory";
+import {
+  createDestroyAppSessionDependencies,
+  createEstablishAppSessionDependencies,
+} from "@modules/auth/core/auth.factory";
+import { destroyAppSessionUseCase } from "@modules/auth/core/usecase/destroy-app-session.usecase";
 import { establishAppSessionUseCase } from "@modules/auth/core/usecase/establish-app-session.usecase";
 
 function mapEstablishOutcomeToResponse(
@@ -38,4 +42,11 @@ export async function POST(request: NextRequest) {
   const result = await establishAppSessionUseCase({ token, lng }, deps);
 
   return mapEstablishOutcomeToResponse(result);
+}
+
+/** Drops the short-lived access JWT cookie on the Next origin (after Nest `POST …/auth/logout` from the browser). */
+export async function DELETE() {
+  const deps = createDestroyAppSessionDependencies();
+  await destroyAppSessionUseCase(deps);
+  return NextResponse.json({ ok: true }, { status: 200 });
 }

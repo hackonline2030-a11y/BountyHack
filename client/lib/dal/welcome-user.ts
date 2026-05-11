@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { ACCESS_TOKEN_COOKIE_NAME } from "@modules/auth/core/model/session.constants";
 import { nestInternalApiUrl } from "@/lib/server/nest-internal-url";
-import { verifySession } from "@/lib/dal/session";
 
 /** Canonical display name from `GET /users/me` only; `null` if none. */
 export type WelcomeUserDto = {
@@ -34,13 +33,12 @@ function noPseudoLogAndReturn(): WelcomeUserDto {
 }
 
 /**
- * Verifies session, loads profile from Nest `GET /users/me`.
+ * Loads profile from Nest `GET /users/me` using the httpOnly access cookie.
+ * Call **`verifySession(lng)`** in the page first (same pattern as other authenticated routes).
  * Username for the UI comes only from the API response (no JWT/email fallback).
  */
 export const getWelcomeDashboardUser = cache(
   async (lng: string): Promise<WelcomeUserDto> => {
-    await verifySession(lng);
-
     const token = (await cookies()).get(ACCESS_TOKEN_COOKIE_NAME)?.value?.trim();
     if (!token) {
       redirect(loginHref(lng));

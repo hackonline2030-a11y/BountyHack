@@ -2,6 +2,7 @@ import { JoseJwtHs256AccessTokenVerifier } from "./gateway-infra/jose.hs256-acce
 import { NextCookiesAppHostSessionGateway } from "./gateway-infra/next-cookies-app-host-session.gateway-infra";
 import { ACCESS_TOKEN_COOKIE_NAME } from "./model/session.constants";
 import type { EstablishAppSessionDependencies } from "./usecase/establish-app-session.usecase.types";
+import type { DestroyAppSessionDependencies } from "./usecase/destroy-app-session.usecase";
 import type { RequireAppSessionDependencies } from "./usecase/require-app-session.usecase";
 
 function jwtSecretFromEnv(): string {
@@ -20,6 +21,13 @@ export function createEstablishAppSessionDependencies(): EstablishAppSessionDepe
 export function createRequireAppSessionDependencies(): RequireAppSessionDependencies {
   return {
     verifier: new JoseJwtHs256AccessTokenVerifier(jwtSecretFromEnv()),
+    session: new NextCookiesAppHostSessionGateway(ACCESS_TOKEN_COOKIE_NAME),
+  };
+}
+
+/** Server-only wiring to clear app-host access cookie (pair with Nest `POST …/auth/logout` from the browser). */
+export function createDestroyAppSessionDependencies(): DestroyAppSessionDependencies {
+  return {
     session: new NextCookiesAppHostSessionGateway(ACCESS_TOKEN_COOKIE_NAME),
   };
 }

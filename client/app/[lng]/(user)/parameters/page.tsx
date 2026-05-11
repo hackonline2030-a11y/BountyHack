@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { getT } from "next-i18next/server";
 import { notFound } from "next/navigation";
-import { Section } from "@components/sections/Section";
-import { TotpEnrollmentPanel } from "@components/parameters/TotpEnrollmentPanel";
+import { Section } from "@modules/app/nextjs/components/sections/Section";
+import { TotpEnrollmentPanel } from "@/modules/auth/nextjs/components/parameters/TotpEnrollmentPanel";
+import { getParametersProfile } from "@/lib/dal/parameters-profile";
 import { verifySession } from "@/lib/dal/session";
 import { isSupportedLanguage } from "@modules/auth/core/model/locale.policy";
 
@@ -20,6 +21,7 @@ export default async function ParametersPage({ params }: PageProps) {
     notFound();
   }
   await verifySession(lng);
+  const profile = await getParametersProfile(lng);
   const { t } = await getT("parameters", { lng });
 
   return (
@@ -33,7 +35,7 @@ export default async function ParametersPage({ params }: PageProps) {
             {t("securityHeading")}
           </h2>
           <div className="mt-4">
-            <TotpEnrollmentPanel />
+            <TotpEnrollmentPanel initialTotpEnabled={profile.twoFactorEnabled} />
           </div>
         </div>
       </Section>

@@ -1,6 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString, Matches, MinLength } from 'class-validator';
+import { AppRoleCode } from '../../shared/rbac/app-role.code';
 
 /** HTTP body for `POST /api/auth/register`. */
 export class JwtRegisterRequestDto {
@@ -20,6 +21,22 @@ export class JwtRegisterRequestDto {
   @IsString()
   @MinLength(1)
   password: string;
+
+  @ApiPropertyOptional({
+    enum: AppRoleCode,
+    example: AppRoleCode.HUNTER,
+    description:
+      'Role persisted on the new account (`roles.name`). Omit = USER (startup default).',
+  })
+  @Transform(({ value }) => {
+    if (value === '' || value === null || value === undefined) {
+      return undefined;
+    }
+    return typeof value === 'string' ? value.trim() : value;
+  })
+  @IsOptional()
+  @IsEnum(AppRoleCode)
+  roleCode?: AppRoleCode;
 }
 
 /** HTTP body for `POST /api/auth/login`. */
@@ -34,6 +51,19 @@ export class JwtLoginRequestDto {
   @IsString()
   @MinLength(1)
   password: string;
+
+  @ApiPropertyOptional({
+    example: '123456',
+    description:
+      'Current TOTP code when account 2FA is enabled (6–8 digits).',
+  })
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.replace(/\s/g, '') : value,
+  )
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{6,8}$/)
+  code?: string;
 }
 
 /** User profile embedded in {@link JwtAuthResponseDto}. */

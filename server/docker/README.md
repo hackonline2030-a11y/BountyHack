@@ -166,13 +166,13 @@ Schéma et migrations : dossier **`server/prisma/`** (monté dans **`web-api-wat
 | Script | Effet |
 |--------|--------|
 | **`pnpm docker:prisma:generate`** | `prisma generate` dans le conteneur **`web-api-watch`** (profils **`watch`** + **`pg`** actifs). |
-| **`pnpm docker:prisma:deploy`** | `prisma migrate deploy` (applique l’historique des migrations, y compris seed SQL démo si présent dans une migration). |
+| **`pnpm docker:prisma:deploy`** | `prisma migrate deploy` (schéma uniquement ; les données sont dans **`pnpm docker:prisma:seed`**). |
 | **`pnpm docker:prisma:migrate:dev`** | `prisma migrate dev` (interactif). |
-| **`pnpm docker:prisma:seed-demo`** | `prisma db execute` sur le fichier SQL de la migration seed (ligne démo **`users`**). |
+| **`pnpm docker:prisma:seed`** | `prisma db seed` (rôles + démo optionnelle via `prisma/seed-runner.mjs`). |
 
 Prérequis : **`web-api-watch`** et **`postgres`** déjà démarrés (ex. **`pnpm docker:watch`** à la racine **`server/`**).
 
-**Prisma sur la machine hôte** (base joignable en `localhost`) : `pnpm prisma generate`, `pnpm prisma migrate deploy`, `pnpm prisma:seed-demo`. Si **`DATABASE_URL`** dans **`server/.env`** cible encore le service Docker **`postgres`**, préférer **`pnpm prisma:migrate:deploy:docker`** et **`pnpm prisma:seed-demo:docker`** (scripts **`server/docker/*.cjs`** qui réécrivent l’URL vers **`127.0.0.1`** / **`POSTGRES_HOST_PORT`**).
+**Prisma sur la machine hôte** (base joignable en `localhost`) : `pnpm prisma generate`, `pnpm prisma migrate deploy`, `pnpm prisma:seed`. Si **`DATABASE_URL`** dans **`server/.env`** cible encore le service Docker **`postgres`**, préférer **`pnpm prisma:migrate:deploy:docker`** et **`pnpm prisma:seed:docker`** (scripts **`server/docker/*.cjs`** qui réécrivent l’URL vers **`127.0.0.1`** / **`POSTGRES_HOST_PORT`**).
 
 Vue d’ensemble : [`../README.md`](../README.md#postgresql-et-prisma).
 

@@ -46,7 +46,8 @@ export class PassportJwtTokenService {
     }
 
     return sign({ user_id: uid, email, sub: uid }, secret, {
-      expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+      // Short-lived access; pair with opaque refresh (`JWT_REFRESH_EXPIRES_IN`).
+      expiresIn: process.env.JWT_EXPIRES_IN?.trim() || '10m',
     });
   }
 

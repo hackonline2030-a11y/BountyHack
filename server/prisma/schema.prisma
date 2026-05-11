@@ -26,11 +26,61 @@ model User {
   passwordHash String? @map("password_hash")
   /// Global 2FA flag (e.g. 0 = off, non-zero = required / enabled); keep in sync with `two_factor` rows in app code.
   twoFactorEnabled BigInt @default(0) @map("two_factor_enabled")
+  /// Optional RBAC role (`roles.id`). Nullable for existing rows until backfill.
+  roleId       Int?    @map("role_id")
 
   twoFactors TwoFactor[]
   refreshTokens RefreshToken[]
+  role       Role?   @relation(fields: [roleId], references: [id], onDelete: SetNull)
 
+  @@index([roleId])
   @@map("users")
+}
+
+/// Application role (e.g. SUPER_ADMIN, HUNTER).
+model Role {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  users           User[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+/// RBAC target type (e.g. user, report, project). Table `objects` in ERD; Prisma model name avoids `Object` clash.
+model AuthzObject {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  permissions Permission[]
+
+  @@map("objects")
+}
+
+/// Atomic capability: `action` on an `AuthzObject` (e.g. read + user).
+model Permission {
+  id        Int         @id @default(autoincrement())
+  action    String
+  objectId  Int         @map("object_id")
+  object    AuthzObject @relation(fields: [objectId], references: [id], onDelete: Cascade)
+  rolePermissions RolePermission[]
+
+  @@index([objectId])
+  @@map("permissions")
+}
+
+/// Many-to-many: which permissions each role receives.
+model RolePermission {
+  id           Int        @id @default(autoincrement())
+  roleId       Int        @map("role_id")
+  permissionId Int        @map("permission_id")
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permissions")
 }
 
 /// Opaque refresh tokens (peer of Mongo `refresh_tokens` collection). Raw token is hashed at rest (`token_hash`).

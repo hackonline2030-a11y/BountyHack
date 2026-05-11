@@ -1,3 +1,4 @@
+import { AppRoleCode } from '../../../shared/rbac/app-role.code';
 import type { RegisterWithPasswordInput } from '../../application/models/register-with-password.input';
 import type { JwtRegisterRequestDto } from '../../dto/jwt-auth.dto';
 
@@ -9,5 +10,6 @@ export function toRegisterWithPasswordInput(
     email: body.email,
     username: body.username,
     password: body.password,
+    roleCode: body.roleCode ?? AppRoleCode.USER,
   };
 }

@@ -60,6 +60,7 @@ export class PassportJwtAuthRepository implements AuthRepository {
       email,
       username: input.username.trim(),
       password: input.password,
+      roleCode: input.roleCode,
     };
     const session =
       await this.resolvePersistenceRepository().register(command);
@@ -76,6 +77,7 @@ export class PassportJwtAuthRepository implements AuthRepository {
     const command: PassportJwtLoginInput = {
       email,
       password: input.password,
+      code: input.code?.trim() || undefined,
     };
     const session = await this.resolvePersistenceRepository().login(command);
     return attachOpaqueRefreshToSession(this.refreshTokenRepository, session);
