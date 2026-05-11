@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { RegisterDto, AuthResponse } from '../../dto/auth-common.dto';
+import type { AuthenticatedSession } from '../models/authenticated-session';
+import type { RegisterWithPasswordInput } from '../models/register-with-password.input';
 import { AuthRepository } from '../../ports/auth.repository';
 
 @Injectable()
@@ -8,7 +9,7 @@ export class RegisterWithPasswordCommand {
     @Inject(AuthRepository) private readonly authRepository: AuthRepository,
   ) {}
 
-  execute(input: RegisterDto): Promise<AuthResponse> {
+  execute(input: RegisterWithPasswordInput): Promise<AuthenticatedSession> {
     return this.authRepository.register(input);
   }
 }

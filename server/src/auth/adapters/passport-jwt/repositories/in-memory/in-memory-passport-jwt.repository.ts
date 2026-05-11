@@ -5,11 +5,14 @@ import {
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { JwtInMemoryRegistry } from './jwt-in-memory-registry';
+import type {
+  AuthenticatedSession,
+  AuthenticatedUserProfile,
+} from '../../../../application/models/authenticated-session';
 import { Identity } from '../../../../domain/models/identity';
-import { verifyPassword, hashPassword } from '../../../password.util';
+import { verifyPassword, hashPassword } from '../../../utils/password.util';
 import { PassportJwtTokenService } from '../../services/passport-jwt-token.service';
 import {
-  PassportJwtAuthResult,
   PassportJwtLoginInput,
   PassportJwtPersistence,
   PassportJwtRegisterInput,
@@ -32,7 +35,15 @@ export class InMemoryPassportJwtRepository
     return { uid: row.uid, email: '' };
   }
 
-  async register(input: PassportJwtRegisterInput): Promise<PassportJwtAuthResult> {
+  async getAuthUserPublicProfile(uid: string): Promise<AuthenticatedUserProfile> {
+    const row = this.jwtRegistry.findAuthProfileByUid(uid);
+    if (!row) {
+      throw new UnauthorizedException('User not found');
+    }
+    return row;
+  }
+
+  async register(input: PassportJwtRegisterInput): Promise<AuthenticatedSession> {
     const email = input.email.trim().toLowerCase();
     const username = input.username.trim();
     if (this.jwtRegistry.findByEmail(email)) {
@@ -50,7 +61,7 @@ export class InMemoryPassportJwtRepository
     };
   }
 
-  async login(input: PassportJwtLoginInput): Promise<PassportJwtAuthResult> {
+  async login(input: PassportJwtLoginInput): Promise<AuthenticatedSession> {
     const email = input.email.trim().toLowerCase();
     const row = this.jwtRegistry.findByEmail(email);
     if (!row) {

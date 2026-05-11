@@ -22,6 +22,10 @@ export namespace MongoUser {
 
     @Prop({ type: String })
     passwordHash?: string;
+
+    /** Mirrors Postgres `two_factor_enabled` BIGINT (e.g. 0 = off); keep consistent in app logic. */
+    @Prop({ type: Number, default: 0 })
+    twoFactorEnabled?: number;
   }
 
   export const Schema = SchemaFactory.createForClass(SchemaClass);

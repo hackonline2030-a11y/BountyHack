@@ -9,7 +9,8 @@
 * 🟢 You can import this file directly.
 */
 
+export const TwoFactorMethod = {
+  APP: 'APP'
+} as const
 
-
-// This file is empty because there are no enums in the schema.
-export {}
+export type TwoFactorMethod = (typeof TwoFactorMethod)[keyof typeof TwoFactorMethod]

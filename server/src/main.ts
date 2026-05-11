@@ -8,6 +8,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import type { Application } from 'express';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
+import cookieParser from 'cookie-parser';
 import * as express from 'express';
 import { HttpExceptionBodyDto } from './core/dto/http-exception-body.dto';
 import { HttpValidationErrorDto } from './core/dto/http-validation-error.dto';
@@ -17,6 +18,8 @@ import { getHttpCorsOrigin, isCorsOpenToAll } from './shared/cors.util';
 async function bootstrap() {
 
   const app = await NestFactory.create<NestExpressApplication>(MainModule);
+
+  app.use(cookieParser());
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -113,10 +116,7 @@ async function bootstrap() {
   Logger.log(
     `📄 Internal api views are in \x1b[35m${join(__dirname, '..', 'views')}\x1b[0m`
   );
-  if (
-    variables.database === 'POSTGRESQL' ||
-    variables.database === 'POSTGRESQL_PRISMA'
-  ) {
+  if (variables.database === 'POSTGRESQL_PRISMA') {
     const pgwebHostPort = process.env.PGWEB_HOST_PORT?.trim() || '8087';
     Logger.log(
       `🧭 pgweb (UI SQL depuis la machine hôte) : http://localhost:${pgwebHostPort}/ — slug d’accès : / — surcharger le port : PGWEB_HOST_PORT dans .env (défaut 8087)`,

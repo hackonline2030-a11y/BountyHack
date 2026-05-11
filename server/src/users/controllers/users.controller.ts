@@ -89,9 +89,16 @@ export class UsersController {
 
     try {
       const record = await this.getUserByIdQuery.execute(identity.uid);
-      return plainToInstance(UserProfileResponseDto, record, {
-        excludeExtraneousValues: true,
-      });
+      return plainToInstance(
+        UserProfileResponseDto,
+        {
+          ...record,
+          roleCode: identity.roleCode ?? null,
+        },
+        {
+          excludeExtraneousValues: true,
+        },
+      );
     } catch (error) {
       console.error('Error getting user data:', error);
       throw error;

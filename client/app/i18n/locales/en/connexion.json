@@ -5,7 +5,7 @@
   },
   "registerPage": {
     "metaTitle": "Register",
-    "heading": "Create your account"
+    "heading": "Create a new user account"
   },
   "errors": {
     "network": "Network error. Please try again."
@@ -15,18 +15,32 @@
     "passwordLabel": "Password",
     "emailPlaceholder": "you@example.com",
     "passwordPlaceholder": "••••••••",
+    "totpCodeLabel": "TOTP code (if enabled)",
+    "totpCodePlaceholder": "123456",
+    "totpStepPrompt": "Step 2: enter the 6-digit code from your authenticator app.",
     "submit": "Sign in",
+    "submitTotp": "Verify TOTP and sign in",
     "submitting": "Signing in…",
-    "noAccount": "Don't have an account?",
-    "registerLink": "Register",
+    "backToPassword": "Back to email/password",
+    "noAccount": "Don't have an account? Ask your administrator for an account.",
     "errorLogin": "Login failed",
     "successLogin": "Logged in successfully"
   },
   "registerForm": {
-    "nameLabel": "Name",
+    "roleLabel": "Assigned role",
+    "roles": {
+      "USER": "User (default)",
+      "SUPER_ADMIN": "Super admin",
+      "HUNTER": "Hunter (junior researcher)",
+      "MENTOR": "Mentor",
+      "QUALITY_CHECKER": "Quality checker (reports & vuln process)",
+      "COORDINATOR": "Coordinator",
+      "QUALITY_CONTENT": "Pedagogical content quality"
+    },
+    "usernameLabel": "Username",
     "emailLabel": "Email",
     "passwordLabel": "Password",
-    "namePlaceholder": "Your name",
+    "usernamePlaceholder": "your_username",
     "emailPlaceholder": "you@example.com",
     "passwordPlaceholder": "••••••••",
     "submit": "Create account",

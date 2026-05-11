@@ -5,15 +5,10 @@ import { I_PING_REPOSITORY, IPingRepository } from './ping-repository.interface'
 import { variables } from '../shared/variables.config';
 import { MongoPingRepository } from './adapters/mongo-ping-repository';
 import { InMemoryPingRepository } from './adapters/in-memory-ping-repository';
-import { PostgreRawPingRepository } from './adapters/postgre-raw-ping.repository';
 import { PostgrePrismaPingRepository } from './adapters/postgre-prisma-ping.repository';
-import { UserModule } from '../users/user.module';
-
-const pingImports =
-  variables.database === 'POSTGRESQL' ? [UserModule] : [];
 
 @Module({
-  imports: pingImports,
+  imports: [],
   controllers: [PingController],
 
   providers: [
@@ -23,8 +18,6 @@ const pingImports =
         switch (variables.database) {
           case 'MONGODB':
             return MongoPingRepository;
-          case 'POSTGRESQL':
-            return PostgreRawPingRepository;
           case 'POSTGRESQL_PRISMA':
             return PostgrePrismaPingRepository;
           case 'IN-MEMORY':

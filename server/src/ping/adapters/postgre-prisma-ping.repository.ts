@@ -3,7 +3,7 @@ import { PrismaService } from '../../core/infrastructure/database/prisma/prisma.
 import { IPingRepository } from '../ping-repository.interface';
 import { DatabaseStatus, DatabaseVersion } from '../ping.entity';
 
-/** Ping via Prisma when `DATABASE_NAME=POSTGRESQL_PRISMA` (same DB as raw Postgres). */
+/** Ping via Prisma when `DATABASE_NAME=POSTGRESQL_PRISMA`. */
 @Injectable()
 export class PostgrePrismaPingRepository implements IPingRepository {
   constructor(private readonly prisma: PrismaService) {}
