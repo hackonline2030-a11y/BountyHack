@@ -1,4 +1,5 @@
 import { UnauthorizedException } from '@nestjs/common';
+import type { Request } from 'express';
 import { PassportJwtLocalStrategy } from './passport-jwt-local.strategy';
 import { LoginWithPasswordCommand } from '../../../../application/commands/login-with-password.command';
 
@@ -13,7 +14,9 @@ describe('PassportJwtLocalStrategy', () => {
     loginWithPassword = {
       execute: jest.fn(),
     };
-    strategy = new PassportJwtLocalStrategy(loginWithPassword as any);
+    strategy = new PassportJwtLocalStrategy(
+      loginWithPassword as unknown as LoginWithPasswordCommand,
+    );
   });
 
   it('normalizes email and delegates login to repository', async () => {
@@ -28,7 +31,7 @@ describe('PassportJwtLocalStrategy', () => {
     };
     loginWithPassword.execute.mockResolvedValue(expected);
 
-    const req = { body: {} } as any;
+    const req = { body: {} } as Request;
     const result = await strategy.validate(req, '  JOHN@EXAMPLE.COM  ', 'password123');
 
     expect(loginWithPassword.execute).toHaveBeenCalledWith({
@@ -39,7 +42,7 @@ describe('PassportJwtLocalStrategy', () => {
   });
 
   it('throws UnauthorizedException when email is missing', async () => {
-    await expect(strategy.validate({ body: {} } as any, '', 'password123')).rejects.toBeInstanceOf(
+    await expect(strategy.validate({ body: {} } as Request, '', 'password123')).rejects.toBeInstanceOf(
       UnauthorizedException,
     );
     expect(loginWithPassword.execute).not.toHaveBeenCalled();
@@ -47,7 +50,7 @@ describe('PassportJwtLocalStrategy', () => {
 
   it('throws UnauthorizedException when password is missing', async () => {
     await expect(
-      strategy.validate({ body: {} } as any, 'john@example.com', ''),
+      strategy.validate({ body: {} } as Request, 'john@example.com', ''),
     ).rejects.toBeInstanceOf(UnauthorizedException);
     expect(loginWithPassword.execute).not.toHaveBeenCalled();
   });
@@ -61,7 +64,7 @@ describe('PassportJwtLocalStrategy', () => {
     loginWithPassword.execute.mockResolvedValue(expected);
 
     await strategy.validate(
-      { body: { code: ' 123 456 ' } } as any,
+      { body: { code: ' 123 456 ' } } as Request,
       'john@example.com',
       'password123',
     );

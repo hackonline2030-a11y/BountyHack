@@ -1,5 +1,7 @@
 import { PreviewCvHtmlQuery } from './preview-cv-html.query';
 import { CvTemplateReadModel } from '../read-models/cv-template.read-model';
+import type { ICvRepository } from '../ports/cv-repository.port';
+import type { ITemplateRenderer } from '../ports/template-renderer.port';
 
 describe('PreviewCvHtmlQuery', () => {
   it('loads cv data and renders html', async () => {
@@ -48,8 +50,8 @@ describe('PreviewCvHtmlQuery', () => {
       renderCv: jest.fn().mockResolvedValue('<html>ok</html>'),
     };
     const query = new PreviewCvHtmlQuery(
-      cvRepository as any,
-      templateRenderer as any,
+      cvRepository as unknown as ICvRepository,
+      templateRenderer as unknown as ITemplateRenderer,
     );
 
     const result = await query.execute();

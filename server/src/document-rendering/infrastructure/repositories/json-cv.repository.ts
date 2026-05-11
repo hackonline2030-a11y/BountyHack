@@ -455,7 +455,11 @@ export class JsonCvRepositoryAdapter implements ICvRepository {
         `Invalid CV style '${requestedStyle}'. Use a slug like 'red-curb' or 'hetic-squared'.`,
       );
     }
-    let resolvedStyle = normalizedStyle ?? styles[0]!;
+    const defaultStyle = styles[0];
+    if (defaultStyle === undefined) {
+      throw new CvDataMissingError(this.dataRootDir);
+    }
+    let resolvedStyle = normalizedStyle ?? defaultStyle;
     if (!styles.includes(resolvedStyle)) {
       throw new CvDataInvalidError(
         `CV style '${resolvedStyle}' not found under '${this.dataRootDir}'.`,
@@ -484,7 +488,11 @@ export class JsonCvRepositoryAdapter implements ICvRepository {
       const versions = await this.listCvVersions(candidateStyle);
       if (!versions.length) continue;
 
-      const candidateVersion = normalizedVersion ?? versions[0]!;
+      const firstVersion = versions[0];
+      if (firstVersion === undefined) {
+        continue;
+      }
+      const candidateVersion = normalizedVersion ?? firstVersion;
       if (!versions.includes(candidateVersion)) continue;
 
       const candidateDir = path.join(
@@ -517,7 +525,13 @@ export class JsonCvRepositoryAdapter implements ICvRepository {
     let resolvedLocale: string;
 
     if (rawLocale === '') {
-      resolvedLocale = availableLocales[0]!;
+      const firstAvail = availableLocales[0];
+      if (firstAvail === undefined) {
+        throw new CvDataInvalidError(
+          `No locale entry files under resolved CV version directory.`,
+        );
+      }
+      resolvedLocale = firstAvail;
     } else {
       if (!LOCALE_CODE_PATTERN.test(rawLocale)) {
         throw new CvLocaleInvalidError(locale ?? '');

@@ -1,6 +1,8 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { PassportJwtStrategy } from './passport-jwt.strategy';
-import { GetUserByUidQuery } from '../../../application/queries/get-user-by-uid.query';
+import {
+  GetUserByUidQuery,
+} from '../../../application/queries/get-user-by-uid.query';
 
 describe('PassportJwtStrategy', () => {
   let strategy: PassportJwtStrategy;
@@ -14,7 +16,9 @@ describe('PassportJwtStrategy', () => {
     getUserByUidQuery = {
       execute: jest.fn(),
     };
-    strategy = new PassportJwtStrategy(getUserByUidQuery as any);
+    strategy = new PassportJwtStrategy(
+      getUserByUidQuery as unknown as GetUserByUidQuery,
+    );
   });
 
   afterEach(() => {
