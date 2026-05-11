@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ServiceUnavailableException } from '@nestjs/common';
+import { Logger, ServiceUnavailableException } from '@nestjs/common';
 import { RequestPasswordResetCommand } from './request-password-reset.command';
 import { PASSWORD_RESET_REPOSITORY } from '../../ports/password-reset.repository';
 import { TRANSACTIONAL_MAIL_PORT } from '../../ports/transactional-mail.port';
@@ -57,15 +57,24 @@ describe('RequestPasswordResetCommand', () => {
   });
 
   it('throws 503 when mail delivery fails', async () => {
-    repo.findPasswordAccountByEmail.mockResolvedValue({
-      userId: 'u1',
-      username: 'bob',
-      email: 'bob@example.com',
-    });
-    mail.send.mockRejectedValue(new Error('network'));
+    // La commande logue en ERROR avant de lever — sans mock, la sortie Jest ressemble à une panique prod.
+    const loggerError = jest
+      .spyOn(Logger.prototype, 'error')
+      .mockImplementation(() => undefined);
+    try {
+      repo.findPasswordAccountByEmail.mockResolvedValue({
+        userId: 'u1',
+        username: 'bob',
+        email: 'bob@example.com',
+      });
+      mail.send.mockRejectedValue(new Error('network'));
 
-    await expect(
-      command.execute({ email: 'bob@example.com' }),
-    ).rejects.toBeInstanceOf(ServiceUnavailableException);
+      await expect(
+        command.execute({ email: 'bob@example.com' }),
+      ).rejects.toBeInstanceOf(ServiceUnavailableException);
+      expect(loggerError).toHaveBeenCalled();
+    } finally {
+      loggerError.mockRestore();
+    }
   });
 });

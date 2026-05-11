@@ -103,7 +103,10 @@ export class PassportJwtAuthController {
     @Req() req: LoginRequestWithIdentity,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const session = req.user!;
+    const session = req.user;
+    if (!session) {
+      throw new UnauthorizedException('Not authenticated');
+    }
     attachHttpOnlyRefreshCookie(res, session.refreshToken);
     return toJwtAuthAccessBody(session);
   }

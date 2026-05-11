@@ -278,7 +278,18 @@ export class AppController {
       throw e;
     }
 
-    const effectiveLang = trimmed === '' ? locales[0]! : trimmed;
+    let effectiveLang: string;
+    if (trimmed !== '') {
+      effectiveLang = trimmed;
+    } else {
+      const primary = locales[0];
+      if (primary === undefined) {
+        throw new NotFoundException(
+          `No CV locale files found for '${style}/${version}'.`,
+        );
+      }
+      effectiveLang = primary;
+    }
     const params = new URLSearchParams();
     params.set('style', style);
     params.set('version', version);

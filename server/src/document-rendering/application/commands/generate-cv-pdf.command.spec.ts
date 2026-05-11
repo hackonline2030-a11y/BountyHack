@@ -1,5 +1,9 @@
 import { GenerateCvPdfCommand } from './generate-cv-pdf.command';
 import { CvTemplateReadModel } from '../read-models/cv-template.read-model';
+import type { ICvRepository } from '../ports/cv-repository.port';
+import type { ITemplateRenderer } from '../ports/template-renderer.port';
+import type { IPdfGenerator } from '../ports/pdf-generator.port';
+import type { IPdfStorage } from '../ports/pdf-storage.port';
 
 describe('GenerateCvPdfCommand', () => {
   it('generates and stores pdf from rendered cv html', async () => {
@@ -59,10 +63,10 @@ describe('GenerateCvPdfCommand', () => {
     };
 
     const command = new GenerateCvPdfCommand(
-      cvRepository as any,
-      templateRenderer as any,
-      pdfGenerator as any,
-      pdfStorage as any,
+      cvRepository as unknown as ICvRepository,
+      templateRenderer as unknown as ITemplateRenderer,
+      pdfGenerator as unknown as IPdfGenerator,
+      pdfStorage as unknown as IPdfStorage,
     );
 
     const result = await command.execute();
