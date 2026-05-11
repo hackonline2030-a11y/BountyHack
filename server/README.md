@@ -26,7 +26,7 @@ Puis édite **`server/.env`** en suivant les commentaires de **`.env.example`** 
 ## Prérequis
 
 - **Node.js** 24+ et **pnpm** (voir `server/package.json` → `engines`)
-- **Docker** et Docker Compose (uniquement si tu suis la procédure Docker ci-dessous)
+- **Docker** et Docker Compose (**optionnel**, uniquement pour le **dev local** décrit ci-dessous — pas la cible prod)
 
 ### Workspace Nx : logique IDE et logique console
 
@@ -108,7 +108,7 @@ Recommandation : toute nouvelle condition liee a la configuration d'authentifica
 
 ## Démarrage
 
-Choisis **un** parcours : **Docker** (API et optionnellement Postgres + watch), ou **Node sur l’hôte** avec une base joignable (**PostgreSQL + Prisma**, MongoDB, etc. selon **`DATABASE_NAME`**).
+Choisis **un** parcours : **Docker en local** (API et optionnellement Postgres + watch), ou **Node sur l’hôte** avec une base joignable (**PostgreSQL + Prisma**, MongoDB, etc. selon **`DATABASE_NAME`**). La **production** visée est **Node sur serveur sans Docker** (voir [`../README.md`](../README.md)).
 
 ### API locale + DB Docker (recommandé en dev)
 

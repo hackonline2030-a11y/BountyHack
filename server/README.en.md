@@ -26,7 +26,7 @@ Then edit **`server/.env`** following **`.env.example`** (secrets, `DATABASE_NAM
 ## Prerequisites
 
 - **Node.js** 24+ and **pnpm** (see `server/package.json` → `engines`)
-- **Docker** and Docker Compose (only if you follow the Docker workflow below)
+- **Docker** and Docker Compose (**optional**, for **local dev** only — not the production target)
 
 ### Nx Workspace: IDE and Console Logic
 
@@ -108,7 +108,7 @@ Recommendation: any new authentication-configuration condition should go through
 
 ## Getting started
 
-Pick **one** path: **Docker** (API and optional Postgres + watch), or **Node on the host** with a reachable database (**PostgreSQL + Prisma**, MongoDB, … per **`DATABASE_NAME`**).
+Pick **one** path: **Docker locally** (API and optional Postgres + watch), or **Node on the host** with a reachable database (**PostgreSQL + Prisma**, MongoDB, … per **`DATABASE_NAME`**). **Production** is intended as **Node on a server without Docker** (see [`../README.md`](../README.md)).
 
 ### PostgreSQL and Prisma
 

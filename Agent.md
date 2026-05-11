@@ -13,7 +13,7 @@
 Fichiers **à consulter avant un changement non trivial** (ne pas tout recopier ici — les lire) :
 
 - **[`CONVENTIONS.md`](CONVENTIONS.md)** — branches, PR, rebase, **Conventional Commits**, scopes **`client-<zone>`** / **`server-<zone>`** / **`app`** (transversal uniquement).
-- **[`README.md`](README.md)** — monorepo, prod client/serveur séparés, Docker **contexte `server/`**, GHCR = API seule.
+- **[`README.md`](README.md)** — monorepo, prod client/serveur séparés **sans Docker** ; Docker sous `server/docker/` = **dev local optionnel**.
 - **[`SECURITY.md`](SECURITY.md)** — divulgation, branches sensibles.
 
 ## Carte du dépôt
@@ -22,7 +22,7 @@ Fichiers **à consulter avant un changement non trivial** (ne pas tout recopier 
 |------|--------|----------------|
 | Front | `client/` | Next.js — voir `client/README.md`, `client/.env.example` |
 | API | `server/` | NestJS, Nx — voir `server/README.md`, `server/.env.example` |
-| Conteneur API | `server/docker/` | Build depuis la racine **`server/`** — voir `server/docker/README.md` |
+| Docker (dev local) | `server/docker/` | Compose / `Dockerfile` — **optionnel** ; voir `server/docker/README.md` |
 
 ## Comportement attendu
 
