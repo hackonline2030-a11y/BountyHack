@@ -28,6 +28,9 @@ analyze/
 
 # Testing
 /coverage
+/playwright-report/
+/test-results/
+/blob-report/
 
 # Vercel
 .vercel

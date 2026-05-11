@@ -57,6 +57,7 @@ export const ModelName = {
   Permission: 'Permission',
   RolePermission: 'RolePermission',
   RefreshToken: 'RefreshToken',
+  PasswordResetToken: 'PasswordResetToken',
   TwoFactor: 'TwoFactor',
   TwoFactorTotp: 'TwoFactorTotp'
 } as const
@@ -132,6 +133,17 @@ export const RefreshTokenScalarFieldEnum = {
 } as const
 
 export type RefreshTokenScalarFieldEnum = (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum]
+
+
+export const PasswordResetTokenScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
 
 
 export const TwoFactorScalarFieldEnum = {

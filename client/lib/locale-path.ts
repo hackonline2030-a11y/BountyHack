@@ -9,6 +9,19 @@ export function isAuthLoginPath(pathname: string): boolean {
   return /^\/(en|fr)\/login$/.test(pathname);
 }
 
+/** Highlight header « Login » on login and password-reset flows (same nav group). */
+export function isAuthHeaderLoginHighlightPath(pathname: string): boolean {
+  return /^\/(en|fr)\/(login|forgot-password|password-reset)$/.test(pathname);
+}
+
+export function isForgotPasswordPath(pathname: string): boolean {
+  return /^\/(en|fr)\/forgot-password$/.test(pathname);
+}
+
+export function isPasswordResetPath(pathname: string): boolean {
+  return /^\/(en|fr)\/password-reset$/.test(pathname);
+}
+
 /** User settings at `/{lng}/parameters` (session gated on the page). */
 export function isParametersPath(pathname: string): boolean {
   return /^\/(en|fr)\/parameters$/.test(pathname);

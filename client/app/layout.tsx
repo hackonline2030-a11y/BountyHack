@@ -7,11 +7,13 @@ import { getT, initServerI18next } from "next-i18next/server";
 import i18nConfig from "@/i18n.config";
 import enCommon from "@/app/i18n/locales/en/common.json";
 import enConnexion from "@/app/i18n/locales/en/connexion.json";
+import enPasswordReset from "@/app/i18n/locales/en/passwordReset.json";
 import enCredits from "@/app/i18n/locales/en/credits.json";
 import enLegal from "@/app/i18n/locales/en/legal.json";
 import enParameters from "@/app/i18n/locales/en/parameters.json";
 import frCommon from "@/app/i18n/locales/fr/common.json";
 import frConnexion from "@/app/i18n/locales/fr/connexion.json";
+import frPasswordReset from "@/app/i18n/locales/fr/passwordReset.json";
 import frCredits from "@/app/i18n/locales/fr/credits.json";
 import frLegal from "@/app/i18n/locales/fr/legal.json";
 import frParameters from "@/app/i18n/locales/fr/parameters.json";
@@ -27,6 +29,7 @@ const clientI18nResources = {
   en: {
     common: enCommon,
     connexion: enConnexion,
+    passwordReset: enPasswordReset,
     parameters: enParameters,
     legal: enLegal,
     credits: enCredits,
@@ -34,6 +37,7 @@ const clientI18nResources = {
   fr: {
     common: frCommon,
     connexion: frConnexion,
+    passwordReset: frPasswordReset,
     parameters: frParameters,
     legal: frLegal,
     credits: frCredits,
@@ -94,7 +98,7 @@ export default async function RootLayout({
 }) {
   const lang =
     (await headers()).get(LANG_HEADER) ?? i18nConfig.fallbackLng ?? "en";
-  await getT(["common", "connexion", "legal", "credits"], { lng: lang });
+  await getT(["common", "connexion", "passwordReset", "legal", "credits"], { lng: lang });
 
   return (
     <html

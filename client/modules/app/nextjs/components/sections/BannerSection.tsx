@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Section } from "@components/sections/Section"
+import { Section } from "@modules/app/nextjs/components/sections/Section"
 import { useElementHeightCssVar } from "@/modules/app/nextjs/hooks/useElementHeightCssVar"
 
 type BannerSectionProps = {

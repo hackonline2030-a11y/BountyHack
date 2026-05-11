@@ -9,7 +9,8 @@
     "start": "next start -p 3001",
     "lint": "eslint",
     "test": "jest",
-    "test:unit": "jest --testPathIgnorePatterns=int --testPathIgnorePatterns=e2e"
+    "test:unit": "jest --testPathIgnorePatterns=int --testPathIgnorePatterns=e2e",
+    "test:e2e": "playwright test -c e2e/playwright.config.ts"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
@@ -27,6 +28,7 @@
     "resend": "^6.9.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@jest/globals": "^30.3.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",

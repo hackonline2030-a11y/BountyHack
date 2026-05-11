@@ -10,12 +10,16 @@ All user-facing pages live under the dynamic segment **`[lng]`** (supported loca
 |------|--------|
 | `/{lng}` | Home |
 | `/{lng}/login` | Login (public) |
+| `/{lng}/forgot-password` | Forgot password — `POST …/auth/password-reset/request` (Nest direct from browser; neutral success copy) |
+| `/{lng}/password-reset` | Set new password from e-mail link (`?token=…`) — `POST …/auth/password-reset/confirm` |
 | `/{lng}/administration/register` | **Admin:** register a new user via Nest; **`verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN])`**; others → redirect **`welcome-dashboard`** (see [`lib/dal/session.ts`](lib/dal/session.ts)) |
 | `/{lng}/welcome-dashboard` | User welcome (session required) |
 | `/{lng}/welcome` | Welcome-style page under `(admin)` (session required) |
 | `/{lng}/parameters` | Settings (session required); **Security** includes TOTP enrollment UI |
 
 Example: `http://localhost:3001/fr/welcome-dashboard`.
+
+**E2E (Playwright):** from `bugbountyapp/client`, run `pnpm exec playwright install chromium` once, then `pnpm run test:e2e` (starts `pnpm run dev` on port 3001 unless already running). Specs live in [`e2e/`](e2e/).
 
 ## Session protection (how it works)
 
@@ -81,6 +85,11 @@ These are **requested by the browser** (or by client code) and therefore appear 
 - If account has no TOTP enabled (`two_factor_enabled = 0`): Nest returns access JWT directly (normal login).
 - If account has TOTP enabled (`two_factor_enabled = 1`): Nest responds `401` (`TOTP code required`), UI switches to step 2 and resubmits login with `code`.
 - On success, client calls `POST /api/session` to persist `bb_access` httpOnly cookie and navigates to `/{lng}/welcome-dashboard`.
+
+## Password reset (Nest direct)
+
+- **Request link:** `POST …/auth/password-reset/request` with JSON `{ "email", "locale" }` — implemented in [`modules/auth`](modules/auth) (gateway → use case); UI: [`ForgotPasswordForm`](modules/auth/nextjs/components/forms/ForgotPasswordForm.tsx) on `/{lng}/forgot-password`. Success is always the same neutral message (anti-enumeration); errors use Nest body parsing via [`messageFromNestBody`](lib/auth-api.ts).
+- **Confirm:** `POST …/auth/password-reset/confirm` with `{ "token", "password" }` — [`ResetPasswordForm`](modules/auth/nextjs/components/forms/ResetPasswordForm.tsx) on `/{lng}/password-reset?token=…`. On success, redirect to `/{lng}/login?passwordReset=success` (banner then URL is cleaned client-side).
 
 ## Nest calls from the server (“GET system” / `users/me`)
 

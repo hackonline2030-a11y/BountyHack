@@ -23,6 +23,8 @@
     "submitting": "Signing in…",
     "backToPassword": "Back to email/password",
     "noAccount": "Don't have an account? Ask your administrator for an account.",
+    "forgotPasswordLink": "Forgot password?",
+    "afterPasswordReset": "Your password was updated. You can sign in with your new password.",
     "errorLogin": "Login failed",
     "successLogin": "Logged in successfully"
   },
