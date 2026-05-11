@@ -108,7 +108,7 @@ Recommandation : toute nouvelle condition liee a la configuration d'authentifica
 
 ## Démarrage
 
-Choisis **un** parcours : **Docker en local** (API et optionnellement Postgres + watch), ou **Node sur l’hôte** avec une base joignable (**PostgreSQL + Prisma**, MongoDB, etc. selon **`DATABASE_NAME`**). La **production** visée est **Node sur serveur sans Docker** (voir [`../README.md`](../README.md)).
+Choisis **un** parcours : **Docker en local** (API et optionnellement Postgres + watch), ou **Node sur l’hôte** avec une base joignable (**PostgreSQL + Prisma**, MongoDB, etc. selon **`DATABASE_NAME`**). La **production** visée est **Node sur serveur sans Docker** (voir [`../README.md`](../README.md)). Le monorepo **ne prévoit pas** de build/push d’image serveur vers **GitHub Container Registry (GHCR)** ni vers un autre registre : `server/docker/` reste **local / lab** uniquement.
 
 ### API locale + DB Docker (recommandé en dev)
 
