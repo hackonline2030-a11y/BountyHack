@@ -230,6 +230,7 @@ export type UserWhereInput = {
   roleId?: Prisma.IntNullableFilter<"User"> | number | null
   twoFactors?: Prisma.TwoFactorListRelationFilter
   refreshTokens?: Prisma.RefreshTokenListRelationFilter
+  passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
   role?: Prisma.XOR<Prisma.RoleNullableScalarRelationFilter, Prisma.RoleWhereInput> | null
 }
 
@@ -242,6 +243,7 @@ export type UserOrderByWithRelationInput = {
   roleId?: Prisma.SortOrderInput | Prisma.SortOrder
   twoFactors?: Prisma.TwoFactorOrderByRelationAggregateInput
   refreshTokens?: Prisma.RefreshTokenOrderByRelationAggregateInput
+  passwordResetTokens?: Prisma.PasswordResetTokenOrderByRelationAggregateInput
   role?: Prisma.RoleOrderByWithRelationInput
 }
 
@@ -257,6 +259,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   roleId?: Prisma.IntNullableFilter<"User"> | number | null
   twoFactors?: Prisma.TwoFactorListRelationFilter
   refreshTokens?: Prisma.RefreshTokenListRelationFilter
+  passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
   role?: Prisma.XOR<Prisma.RoleNullableScalarRelationFilter, Prisma.RoleWhereInput> | null
 }, "id" | "email">
 
@@ -294,6 +297,7 @@ export type UserCreateInput = {
   twoFactorEnabled?: bigint | number
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
 }
 
@@ -306,6 +310,7 @@ export type UserUncheckedCreateInput = {
   roleId?: number | null
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -316,6 +321,7 @@ export type UserUpdateInput = {
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
 }
 
@@ -328,6 +334,7 @@ export type UserUncheckedUpdateInput = {
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -488,6 +495,20 @@ export type UserUpdateOneRequiredWithoutRefreshTokensNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRefreshTokensInput, Prisma.UserUpdateWithoutRefreshTokensInput>, Prisma.UserUncheckedUpdateWithoutRefreshTokensInput>
 }
 
+export type UserCreateNestedOneWithoutPasswordResetTokensInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPasswordResetTokensNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetTokensInput
+  upsert?: Prisma.UserUpsertWithoutPasswordResetTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPasswordResetTokensInput, Prisma.UserUpdateWithoutPasswordResetTokensInput>, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
+}
+
 export type UserCreateNestedOneWithoutTwoFactorsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutTwoFactorsInput, Prisma.UserUncheckedCreateWithoutTwoFactorsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutTwoFactorsInput
@@ -510,6 +531,7 @@ export type UserCreateWithoutRoleInput = {
   twoFactorEnabled?: bigint | number
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRoleInput = {
@@ -520,6 +542,7 @@ export type UserUncheckedCreateWithoutRoleInput = {
   twoFactorEnabled?: bigint | number
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRoleInput = {
@@ -567,6 +590,7 @@ export type UserCreateWithoutRefreshTokensInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
 }
 
@@ -578,6 +602,7 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   twoFactorEnabled?: bigint | number
   roleId?: number | null
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRefreshTokensInput = {
@@ -603,6 +628,7 @@ export type UserUpdateWithoutRefreshTokensInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
 }
 
@@ -614,6 +640,67 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPasswordResetTokensInput = {
+  id: string
+  username: string
+  email?: string | null
+  passwordHash?: string | null
+  twoFactorEnabled?: bigint | number
+  twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  role?: Prisma.RoleCreateNestedOneWithoutUsersInput
+}
+
+export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
+  id: string
+  username: string
+  email?: string | null
+  passwordHash?: string | null
+  twoFactorEnabled?: bigint | number
+  roleId?: number | null
+  twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+}
+
+export type UserUpsertWithoutPasswordResetTokensInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetTokensInput, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetTokensInput, Prisma.UserUncheckedCreateWithoutPasswordResetTokensInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPasswordResetTokensInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetTokensInput, Prisma.UserUncheckedUpdateWithoutPasswordResetTokensInput>
+}
+
+export type UserUpdateWithoutPasswordResetTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTwoFactorsInput = {
@@ -623,6 +710,7 @@ export type UserCreateWithoutTwoFactorsInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
 }
 
@@ -634,6 +722,7 @@ export type UserUncheckedCreateWithoutTwoFactorsInput = {
   twoFactorEnabled?: bigint | number
   roleId?: number | null
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTwoFactorsInput = {
@@ -659,6 +748,7 @@ export type UserUpdateWithoutTwoFactorsInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
 }
 
@@ -670,6 +760,7 @@ export type UserUncheckedUpdateWithoutTwoFactorsInput = {
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyRoleInput = {
@@ -688,6 +779,7 @@ export type UserUpdateWithoutRoleInput = {
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRoleInput = {
@@ -698,6 +790,7 @@ export type UserUncheckedUpdateWithoutRoleInput = {
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutRoleInput = {
@@ -716,11 +809,13 @@ export type UserUncheckedUpdateManyWithoutRoleInput = {
 export type UserCountOutputType = {
   twoFactors: number
   refreshTokens: number
+  passwordResetTokens: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   twoFactors?: boolean | UserCountOutputTypeCountTwoFactorsArgs
   refreshTokens?: boolean | UserCountOutputTypeCountRefreshTokensArgs
+  passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
 }
 
 /**
@@ -747,6 +842,13 @@ export type UserCountOutputTypeCountRefreshTokensArgs<ExtArgs extends runtime.Ty
   where?: Prisma.RefreshTokenWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPasswordResetTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PasswordResetTokenWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -757,6 +859,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   roleId?: boolean
   twoFactors?: boolean | Prisma.User$twoFactorsArgs<ExtArgs>
   refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
+  passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   role?: boolean | Prisma.User$roleArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -794,6 +897,7 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   twoFactors?: boolean | Prisma.User$twoFactorsArgs<ExtArgs>
   refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
+  passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   role?: boolean | Prisma.User$roleArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -809,6 +913,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     twoFactors: Prisma.$TwoFactorPayload<ExtArgs>[]
     refreshTokens: Prisma.$RefreshTokenPayload<ExtArgs>[]
+    passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
     role: Prisma.$RolePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1220,6 +1325,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   twoFactors<T extends Prisma.User$twoFactorsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$twoFactorsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TwoFactorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   refreshTokens<T extends Prisma.User$refreshTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$refreshTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  passwordResetTokens<T extends Prisma.User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   role<T extends Prisma.User$roleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$roleArgs<ExtArgs>>): Prisma.Prisma__RoleClient<runtime.Types.Result.GetResult<Prisma.$RolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1702,6 +1808,30 @@ export type User$refreshTokensArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.RefreshTokenScalarFieldEnum | Prisma.RefreshTokenScalarFieldEnum[]
+}
+
+/**
+ * User.passwordResetTokens
+ */
+export type User$passwordResetTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PasswordResetToken
+   */
+  select?: Prisma.PasswordResetTokenSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PasswordResetToken
+   */
+  omit?: Prisma.PasswordResetTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PasswordResetTokenInclude<ExtArgs> | null
+  where?: Prisma.PasswordResetTokenWhereInput
+  orderBy?: Prisma.PasswordResetTokenOrderByWithRelationInput | Prisma.PasswordResetTokenOrderByWithRelationInput[]
+  cursor?: Prisma.PasswordResetTokenWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PasswordResetTokenScalarFieldEnum | Prisma.PasswordResetTokenScalarFieldEnum[]
 }
 
 /**

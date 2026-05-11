@@ -316,8 +316,9 @@ Les specs sous `e2e/` envoient les requêtes vers l’URL dérivée de **`HOST`*
 
 ## Documentation API
 
-- **Swagger (OpenAPI)** : interface interactive sur `/api/docs` (voir le tableau *URLs* ci-dessus selon ton port).
+- **Swagger (OpenAPI)** : interface interactive sur `/api/docs` (voir le tableau *URLs* ci-dessus selon ton port). Les routes **`auth/password-reset/*`** y figurent avec corps de requête, schémas de réponse et codes d’erreur lorsque **`DATABASE_NAME=POSTGRESQL_PRISMA`**.
 - **Notes HTTP** : [docs/api.md](./docs/api.md).
+- **Décisions d’architecture (ADR)** : [../docs/adr/architecture_server_adr.md](../docs/adr/architecture_server_adr.md) — inclut une section **Réinitialisation de mot de passe** (couches, périmètre Prisma, sécurité, Swagger).
 
 ---
 

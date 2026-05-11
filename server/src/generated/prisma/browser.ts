@@ -48,6 +48,11 @@ export type RolePermission = Prisma.RolePermissionModel
  */
 export type RefreshToken = Prisma.RefreshTokenModel
 /**
+ * Model PasswordResetToken
+ * One-time opaque password reset (raw token only in email; `token_hash` = SHA-256 hex at rest).
+ */
+export type PasswordResetToken = Prisma.PasswordResetTokenModel
+/**
  * Model TwoFactor
  * Which 2FA methods exist for a user (source of truth per enabled method).
  */
