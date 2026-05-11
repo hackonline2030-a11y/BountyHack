@@ -13,8 +13,8 @@ Merci de suivre les règles décidé sur le fichier des conventions :
 Documentation détaillée :
 
 - [`CONVENTIONS.md`](CONVENTIONS.md) — branches, messages de commit, scopes monorepo
-- [`client/README.md`](client/README.md)
-- [`server/README.md`](server/README.md)
+- [`client/README.md`](client/README.md) — CI : [`.github/workflows/client-ci.yml`](.github/workflows/client-ci.yml)
+- [`server/README.md`](server/README.md) — CI : [`.github/workflows/server-ci.yml`](.github/workflows/server-ci.yml)
 - Docker **optionnel** (dev local uniquement : **`start.sh`**, `docker compose`, Windows / WSL2) : [`server/docker/README.md`](server/docker/README.md) — **pas** la cible de déploiement production du projet (voir section ci-dessous).
 
 ## Installation

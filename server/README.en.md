@@ -21,6 +21,10 @@ cp .env.example .env
 
 Then edit **`server/.env`** following **`.env.example`** (secrets, `DATABASE_NAME`, `DATABASE_URL`, CORS, etc.).
 
+## CI (GitHub Actions)
+
+Workflow at monorepo root: **[`../.github/workflows/server-ci.yml`](../.github/workflows/server-ci.yml)** — on **push / PR** to **`feature/test-ci`** only (`server/**` paths), plus **`workflow_dispatch`**. Steps: `pnpm install --frozen-lockfile`, **`nx run web-api:lint`**, **`pnpm run test`**, **`pnpm run build`**, **Gitleaks** (action uses `continue-on-error: true`). No Docker or image registry, no Trivy or SonarCloud.
+
 ---
 
 ## Prerequisites
