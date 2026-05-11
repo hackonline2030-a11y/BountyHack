@@ -63,5 +63,5 @@ Prerequisite: **`client/.env`** — see **[Installation](#installation)**.
 
 ## CI (GitHub Actions)
 
-Workflow at monorepo root: **[`../.github/workflows/client-ci.yml`](../.github/workflows/client-ci.yml)** — auto on **push / PR** to **`feature/test-ci`** only (`client/**` paths), plus **`workflow_dispatch`** (Playwright E2E via `run_e2e`). Installs **all** deps including dev (normal for lint/tests/build); **not** the production artifact (**no Docker** in prod: build + Node on the server). Includes lint, unit tests, build; Trivy FS/config; Gitleaks; optional SonarCloud (repo variable `CLIENT_SONARCLOUD_ENABLED=true` **and** tracked `client/sonar-project.properties` + `SONAR_TOKEN` secret).
+Workflow at monorepo root: **[`../.github/workflows/client-ci.yml`](../.github/workflows/client-ci.yml)** — auto on **push / PR** to **`feature/test-ci`** only (`client/**` paths), plus **`workflow_dispatch`** (Playwright E2E via `run_e2e`). Installs **all** deps including dev (normal for lint/tests/build); **not** the production artifact (**no Docker** in prod: build + Node on the server). Includes lint, unit tests, build; Gitleaks.
 

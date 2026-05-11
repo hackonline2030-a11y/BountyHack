@@ -1,4 +1,4 @@
 # Déclare les variables dépôt / org utilisées dans les workflows (évite les faux positifs actionlint sur `vars.*`).
 # https://github.com/rhysd/actionlint/blob/main/docs/config.md
-config-variables:
-  - CLIENT_SONARCLOUD_ENABLED
+# Aucune variable `vars.*` pour l’instant.
+config-variables: []

@@ -3,15 +3,9 @@
 # Ce workflow n’est pas un « déploiement prod » : `pnpm install` garde les devDependencies (ESLint, Jest, types…)
 # nécessaires au lint / tests / build. La prod livrable = autre chaîne (ex. artefact `next build` + Node sur le VPS, systemd, reverse-proxy — **sans Docker**).
 #
-# Validateurs IDE : `vars.CLIENT_SONARCLOUD_ENABLED` et `secrets.SONAR_TOKEN` peuvent être signalés comme
-# « invalides » — ce sont des noms valides côté GitHub (variable dépôt + secret SonarCloud). Voir `.github/actionlint.yaml`.
-#
 # Étape par étape (outils externes) :
-# - SonarCloud (désactivé par défaut) : le job Sonar ne s’exécute que si **les deux** conditions sont vraies :
-#   1) variable dépôt `CLIENT_SONARCLOUD_ENABLED=true` ; 2) fichier versionné **`client/sonar-project.properties`**
-#   (copie depuis `sonar-project.properties.example`, remplir organization + projectKey sur https://sonarcloud.io).
-#   Secret dépôt `SONAR_TOKEN` requis quand le job tourne.
-# - Trivy / Gitleaks : jobs activés par défaut ; ajuste exit-code Trivy (0 → 1) quand tu veux bloquer la CI.
+# - Gitleaks : job activé par défaut (`continue-on-error: true` sur l'action).
+# - Trivy / `trivy-action` : volontairement absents (supply chain, incidents signalés sur l’écosystème en 2026).
 #
 # Déclenchement : push / PR sur la branche feature/test-ci uniquement (+ chemins client) ; manuel : workflow_dispatch.
 
@@ -53,28 +47,6 @@ env:
   NEXT_PUBLIC_AUTH_API: http://localhost:3000
 
 jobs:
-  # Lit les variables dépôt une fois ; les jobs suivants évitent `vars.*` dans `if:` (meilleure compat. validateurs IDE).
-  ci-config:
-    name: CI config
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    defaults:
-      run:
-        working-directory: .
-    outputs:
-      sonarcloud: ${{ steps.flags.outputs.sonarcloud }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - id: flags
-        run: |
-          enabled="${{ vars.CLIENT_SONARCLOUD_ENABLED }}"
-          if [ "$enabled" = "true" ] && [ -f client/sonar-project.properties ]; then
-            echo "sonarcloud=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "sonarcloud=false" >> "$GITHUB_OUTPUT"
-          fi
-
   # --- Équivalent dependencies + test + build (lint inclus) ---
   install-lint-test-build:
     name: Install · lint · unit tests · build
@@ -135,61 +107,6 @@ jobs:
 
       - name: Run e2e
         run: pnpm run test:e2e
-
-  # --- Qualité : SonarCloud (désactivé tant que CLIENT_SONARCLOUD_ENABLED != true) ---
-  sonarcloud:
-    name: SonarCloud
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    if: needs.ci-config.outputs.sonarcloud == 'true'
-    needs: [ci-config, install-lint-test-build]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # SonarQube Cloud : même action que celle recommandée par Sonar (SONAR_TOKEN + client/sonar-project.properties).
-      - name: SonarQube Cloud scan
-        uses: SonarSource/sonarqube-scan-action@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          projectBaseDir: client
-
-  # --- Sécurité : Trivy filesystem (sans registry) ---
-  trivy-fs:
-    name: Trivy FS
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: [install-lint-test-build]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Run Trivy vulnerability scanner (fs)
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          scan-type: fs
-          scan-ref: ./client
-          severity: HIGH,CRITICAL
-          exit-code: "0"
-
-  # --- Sécurité : Trivy config (scan IaC si fichiers du type compose / k8s / Dockerfile présents dans client/) ---
-  trivy-config:
-    name: Trivy config
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [install-lint-test-build]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Run Trivy config scanner
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          scan-type: config
-          scan-ref: ./client
-          severity: HIGH,CRITICAL
-          exit-code: "0"
 
   # --- Sécrets dans le dépôt ---
   gitleaks:
