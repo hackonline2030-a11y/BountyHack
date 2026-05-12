@@ -19,6 +19,7 @@ import frLegal from "@/app/i18n/locales/fr/legal.json";
 import frParameters from "@/app/i18n/locales/fr/parameters.json";
 import "@/app/globals.css";
 import { ThemeProvider } from "@/modules/app/nextjs/ThemeProvider";
+import { AppWrapper } from "@/modules/app/nextjs/appWrapper";
 import { Header } from "@/modules/app/nextjs/layout/Header";
 import { Footer } from "@/modules/app/nextjs/layout/Footer";
 
@@ -118,9 +119,11 @@ export default async function RootLayout({
             supportedLngs={i18nConfig.supportedLngs}
             fallbackLng={i18nConfig.fallbackLng}
           >
-            <Header />
-            {children}
-            <Footer />
+            <AppWrapper>
+              <Header />
+              {children}
+              <Footer />
+            </AppWrapper>
           </I18nProvider>
         </ThemeProvider>
       </body>

@@ -2,8 +2,13 @@ import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
 import { combineReducers, configureStore, createListenerMiddleware } from "@reduxjs/toolkit";
 import { Dependencies } from "@store/dependencies";
+import { reportDraftReducer } from "@modules/report-draft/core/store/report-draft.slice";
+import { registerReportDraftStepListener } from "@modules/report-draft/core/store/report-draft-step.listener";
+import { registerReportDraftFetcherListeners } from "@modules/report-draft/core/store/report-draft-fetcher.listener";
 
-const reducers = combineReducers({});
+const reducers = combineReducers({
+  reportDraft: reportDraftReducer,
+});
 
 export type AppStore = ReturnType<typeof createStore>;
 export type AppState = ReturnType<typeof reducers>;
@@ -20,6 +25,8 @@ export const createStore = (config: {
     devTools: true,
     middleware: (getDefaultMiddleware) => {
       const listener = createListenerMiddleware();
+      registerReportDraftStepListener(listener);
+      registerReportDraftFetcherListeners(listener);
 
       return getDefaultMiddleware({
         thunk: {
