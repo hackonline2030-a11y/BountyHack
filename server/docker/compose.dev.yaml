@@ -145,7 +145,30 @@ services:
       exec runuser -u node -g node -- sh -c 'cd /usr/src/app && export NX_DAEMON=false NX_ISOLATE_PLUGINS=false NX_SOCKET_DIR=/tmp/nx && exec node ./node_modules/nx/bin/nx.js serve web-api'"
     # Service de dev : code monté depuis l'hôte + watcher Nest/Nx dans le conteneur.
 
+  redis:
+    profiles:
+      - redis
+    image: redis:7-alpine
+    container_name: web-api-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+
+  redisinsight:
+    profiles:
+      - redis
+    image: redis/redisinsight:latest
+    container_name: web-api-redisinsight
+    restart: unless-stopped
+    ports:
+      - "${REDIS_INSIGHT_HOST_PORT:-5540}:5540"
+    volumes:
+      - redisinsight_data:/data
+    depends_on:
+      - redis
+
 volumes:
   mongo_data:
   postgres_data:
   web_api_node_modules:
+  redisinsight_data:
