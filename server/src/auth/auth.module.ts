@@ -140,6 +140,8 @@ const coreProviders = [
 const authExports = [
   AuthRepository,
   JwtInMemoryRegistry,
+  /** For `@Auth()` / `PassportJwtAuthGuard` on feature modules (e.g. async PDF enqueue). */
+  PassportJwtAuthGuard,
 ];
 
 @Module({

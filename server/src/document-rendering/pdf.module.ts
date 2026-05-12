@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bullmq';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuthModule } from '../auth/auth.module';
 import { PdfController } from './controllers/pdf.controller';
+import { PdfJobsController } from './controllers/pdf-jobs.controller';
 import { I_TEMPLATE_RENDERER } from './application/ports/template-renderer.port';
 import { I_PDF_GENERATOR } from './application/ports/pdf-generator.port';
 import { I_PDF_STORAGE } from './application/ports/pdf-storage.port';
@@ -16,11 +20,43 @@ import {
 } from './application/ports/report-repository.port';
 import { PreviewReportHtmlQuery } from './application/queries/preview-report-html.query';
 import { GenerateReportPdfCommand } from './application/commands/generate-report-pdf.command';
+import { ReportPdfProcessor } from './infrastructure/queue/report-pdf.processor';
+import { PDF_GENERATION_QUEUE } from './infrastructure/queue/pdf-generation.constants';
 
 @Module({
-  controllers: [PdfController],
+  imports: [
+    AuthModule,
+    ConfigModule,
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const portRaw = config.get<string>('REDIS_PORT', '6379');
+        const port = Number.parseInt(portRaw, 10);
+        const password = config.get<string>('REDIS_PASSWORD');
+        return {
+          connection: {
+            host: config.get<string>('REDIS_HOST', '127.0.0.1'),
+            port: Number.isFinite(port) ? port : 6379,
+            ...(password && password.trim() !== ''
+              ? { password: password.trim() }
+              : {}),
+          },
+          defaultJobOptions: {
+            removeOnComplete: 500,
+            removeOnFail: 2000,
+            attempts: 3,
+            backoff: { type: 'exponential' as const, delay: 2000 },
+          },
+        };
+      },
+    }),
+    BullModule.registerQueue({ name: PDF_GENERATION_QUEUE }),
+  ],
+  controllers: [PdfController, PdfJobsController],
   exports: [I_REPORT_REPOSITORY],
   providers: [
+    ReportPdfProcessor,
     {
       provide: I_REPORT_REPOSITORY,
       useClass: JsonReportRepositoryAdapter,
