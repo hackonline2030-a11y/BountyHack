@@ -94,7 +94,7 @@ services:
       NODE_ENV: production
       # Même valeur que le port hôte dans la section « ports » ci-dessus (pour les logs de l’app).
       API_HOST_PORT: ${API_HOST_PORT:-3003}
-    # Dev : même contenu que le dépôt hôte (dashboard CV + assets templates) — évite un rebuild à chaque changement.
+    # Dev : même contenu que le dépôt hôte (dashboard rapport + assets templates) — évite un rebuild à chaque changement.
     # L’image inclut aussi ces dossiers (Dockerfile) pour les environnements sans montage.
     volumes:
       - ../src/document-rendering/data:/usr/src/app/src/document-rendering/data:ro

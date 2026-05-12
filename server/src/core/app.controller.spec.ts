@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { I_CV_REPOSITORY } from '../document-rendering/application/ports/cv-repository.port';
 import { I_REPORT_REPOSITORY } from '../document-rendering/application/ports/report-repository.port';
 
 describe('AppController', () => {
@@ -20,20 +19,12 @@ describe('AppController', () => {
           },
         },
         {
-          provide: I_CV_REPOSITORY,
-          useValue: {
-            listCvVersions: jest.fn().mockResolvedValue(['v1']),
-            listCvLocales: jest.fn().mockResolvedValue(['fr']),
-            listLocalesForDashboard: jest
-              .fn()
-              .mockResolvedValue({ documentKind: 'cv', locales: ['fr'] }),
-            getCvTemplateData: jest.fn().mockResolvedValue({}),
-          },
-        },
-        {
           provide: I_REPORT_REPOSITORY,
           useValue: {
-            getReportTemplateData: jest.fn(),
+            listReportStyles: jest.fn().mockResolvedValue(['report-final']),
+            listReportVersions: jest.fn().mockResolvedValue(['v1']),
+            listReportLocales: jest.fn().mockResolvedValue(['fr']),
+            getReportTemplateData: jest.fn().mockResolvedValue({}),
           },
         },
       ],

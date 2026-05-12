@@ -1,14 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PdfController } from './pdf.controller';
-import { PreviewCvHtmlQuery } from '../application/queries/preview-cv-html.query';
-import { GenerateCvPdfCommand } from '../application/commands/generate-cv-pdf.command';
 import { PreviewReportHtmlQuery } from '../application/queries/preview-report-html.query';
 import { GenerateReportPdfCommand } from '../application/commands/generate-report-pdf.command';
 
 describe('PdfController', () => {
   let controller: PdfController;
-  const previewQueryMock = { execute: jest.fn() };
-  const generateCommandMock = { execute: jest.fn() };
   const previewReportQueryMock = { execute: jest.fn() };
   const generateReportCommandMock = { execute: jest.fn() };
 
@@ -16,14 +12,6 @@ describe('PdfController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PdfController],
       providers: [
-        {
-          provide: PreviewCvHtmlQuery,
-          useValue: previewQueryMock,
-        },
-        {
-          provide: GenerateCvPdfCommand,
-          useValue: generateCommandMock,
-        },
         {
           provide: PreviewReportHtmlQuery,
           useValue: previewReportQueryMock,
@@ -41,28 +29,6 @@ describe('PdfController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
-  });
-
-  it('returns preview html from use case', async () => {
-    previewQueryMock.execute.mockResolvedValue('<html>preview</html>');
-
-    const result = await controller.previewHtml();
-
-    expect(previewQueryMock.execute).toHaveBeenCalledWith({});
-    expect(result).toBe('<html>preview</html>');
-  });
-
-  it('returns generated pdf url from use case', async () => {
-    generateCommandMock.execute.mockResolvedValue({
-      url: '/pdfs/cv-red-squared-1.pdf',
-    });
-
-    const result = await controller.exportPDF();
-
-    expect(generateCommandMock.execute).toHaveBeenCalledWith({});
-    expect(result).toEqual({
-      url: '/pdfs/cv-red-squared-1.pdf',
-    });
   });
 
   it('returns report preview html from use case', async () => {
