@@ -38,7 +38,7 @@ function injectBaseHref(htmlContent: string, origin: string): string {
 }
 
 const PDF_LAYOUT_OVERRIDE_CSS = `
-  .cv {
+  .report-page {
     box-shadow: none !important;
     margin: 0 !important;
     width: auto !important;
@@ -46,11 +46,6 @@ const PDF_LAYOUT_OVERRIDE_CSS = `
     min-height: ${A4_HEIGHT_MM} !important;
     max-height: none !important;
     overflow: visible !important;
-  }
-  .cv .layout,
-  .cv .left,
-  .cv .right {
-    min-height: inherit !important;
   }
 `;
 

@@ -5,17 +5,12 @@ import * as path from 'path';
 import {
   ITemplateRenderer,
 } from '../../application/ports/template-renderer.port';
-import { CvTemplate } from '../../domain/entities/cv-template.entity';
 import { ReportTemplate } from '../../domain/entities/report-template.entity';
 import { TemplateNotFoundError } from '../../application/errors/pdf-application.errors';
 
 @Injectable()
 export class EjsTemplateRendererAdapter implements ITemplateRenderer {
   private readonly templatesRootPath = path.resolve(process.cwd(), 'templates');
-
-  async renderCv(data: CvTemplate): Promise<string> {
-    return this.renderTemplate(data.toReadModel(), data.templateName);
-  }
 
   async renderReport(data: ReportTemplate): Promise<string> {
     return this.renderTemplate(data.toReadModel(), data.templateName);

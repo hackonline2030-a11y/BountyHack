@@ -12,20 +12,10 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { variables } from '../shared/variables.config';
 import {
-  I_CV_REPOSITORY,
-  ICvRepository,
-} from '../document-rendering/application/ports/cv-repository.port';
-import {
   I_REPORT_REPOSITORY,
   IReportRepository,
 } from '../document-rendering/application/ports/report-repository.port';
 import {
-  CvDataInvalidError,
-  CvDataMissingError,
-  CvLocaleInvalidError,
-  CvLocaleNotFoundError,
-  CvVersionInvalidError,
-  CvVersionNotFoundError,
   ReportDataInvalidError,
   ReportDataMissingError,
   ReportLocaleInvalidError,
@@ -34,8 +24,8 @@ import {
   ReportVersionNotFoundError,
 } from '../document-rendering/application/errors/pdf-application.errors';
 
-const CV_VERSION_ROUTE = /^v\d+$/i;
-const CV_STYLE_ROUTE = /^[a-z0-9_-]+$/i;
+const REPORT_VERSION_ROUTE = /^v\d+$/i;
+const REPORT_STYLE_ROUTE = /^[a-z0-9_-]+$/i;
 const LOCALE_ROUTE_CODE = /^[a-z]{2}$/;
 const LANG_LABELS: Record<string, string> = {
   fr: 'Français',
@@ -47,8 +37,6 @@ const LANG_LABELS: Record<string, string> = {
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    @Inject(I_CV_REPOSITORY)
-    private readonly cvRepository: ICvRepository,
     @Inject(I_REPORT_REPOSITORY)
     private readonly reportRepository: IReportRepository,
   ) {}
@@ -110,9 +98,9 @@ export class AppController {
   @Get('/dashboard')
   @Render('dashboard')
   @ApiOperation({
-    summary: 'Choose CV dashboard style',
+    summary: 'Choose report dashboard style',
     description:
-      'Lists available CV styles (`red-curb`, `red-squared`, `hetic-squared`, …); each opens `/dashboard/:style`.',
+      'Lists available report styles (folders under `src/document-rendering/data` with `report.json`); each opens `/dashboard/:style`.',
   })
   @ApiOkResponse({
     description: 'HTML dashboard page returned.',
@@ -121,7 +109,7 @@ export class AppController {
         schema: {
           type: 'string',
           example:
-            '<!doctype html><html><head><title>Dashboard CV</title></head><body>...</body></html>',
+            '<!doctype html><html><head><title>Dashboard</title></head><body>...</body></html>',
         },
       },
     },
@@ -129,10 +117,10 @@ export class AppController {
   async getDashboardVersionPickerPage() {
     const apiPrefix = `/${variables.globalPrefix.replace(/^\/+|\/+$/g, '')}`;
     const texts = this.appService.getDashboardTexts();
-    const styles = await this.cvRepository.listCvStyles();
+    const styles = await this.reportRepository.listReportStyles();
     if (!styles.length) {
       throw new NotFoundException(
-        'No document style folders found. Add data under `src/document-rendering/data/<style>/v1/` with `cv.json` or `report.json` (and optional `*.en.json`).',
+        'No report style folders found. Add data under `src/document-rendering/data/<style>/v1/` with `report.json` (and optional `report.<lang>.json`).',
       );
     }
 
@@ -151,9 +139,8 @@ export class AppController {
   @Get('/dashboard/:style')
   @Render('dashboard')
   @ApiOperation({
-    summary: 'Choose CV dashboard version for one style',
-    description:
-      'Lists available versions for one style (`/dashboard/:style/:version`).',
+    summary: 'Choose report dashboard version for one style',
+    description: 'Lists available versions for one style (`/dashboard/:style/:version`).',
   })
   @ApiOkResponse({
     description: 'HTML dashboard page returned.',
@@ -162,28 +149,26 @@ export class AppController {
         schema: {
           type: 'string',
           example:
-            '<!doctype html><html><head><title>Dashboard CV</title></head><body>...</body></html>',
+            '<!doctype html><html><head><title>Dashboard</title></head><body>...</body></html>',
         },
       },
     },
   })
-  async getDashboardStylePage(
-    @Param('style') styleParam: string,
-  ) {
+  async getDashboardStylePage(@Param('style') styleParam: string) {
     const apiPrefix = `/${variables.globalPrefix.replace(/^\/+|\/+$/g, '')}`;
     const texts = this.appService.getDashboardTexts();
     const style = typeof styleParam === 'string' ? styleParam.trim().toLowerCase() : '';
 
-    if (!CV_STYLE_ROUTE.test(style)) {
+    if (!REPORT_STYLE_ROUTE.test(style)) {
       throw new BadRequestException(
-        `Invalid CV style '${styleParam}'. Expected a slug like red-curb or hetic-squared.`,
+        `Invalid report style '${styleParam}'. Expected a slug like report-final.`,
       );
     }
 
-    const versions = await this.cvRepository.listCvVersions(style);
+    const versions = await this.reportRepository.listReportVersions(style);
     if (!versions.length) {
       throw new NotFoundException(
-        `No populated version folders found for style '${style}'. Add cv.json or report.json under src/document-rendering/data/${style}/v1/ (or another v* folder).`,
+        `No populated version folders found for style '${style}'. Add report.json under src/document-rendering/data/${style}/v1/ (or another v* folder).`,
       );
     }
 
@@ -203,7 +188,7 @@ export class AppController {
   @Get('/dashboard/:style/:version')
   @Render('dashboard')
   @ApiOperation({
-    summary: 'Render CV dashboard for one style/version',
+    summary: 'Render report dashboard for one style/version',
     description:
       'Preview and PDF actions use matching `style`, `version`, and `lang` query parameters.',
   })
@@ -214,7 +199,7 @@ export class AppController {
         schema: {
           type: 'string',
           example:
-            '<!doctype html><html><head><title>Dashboard CV</title></head><body>...</body></html>',
+            '<!doctype html><html><head><title>Dashboard</title></head><body>...</body></html>',
         },
       },
     },
@@ -229,26 +214,25 @@ export class AppController {
     const style = typeof styleParam === 'string' ? styleParam.trim().toLowerCase() : '';
     const slug = typeof versionParam === 'string' ? versionParam.trim() : '';
 
-    if (!CV_STYLE_ROUTE.test(style)) {
+    if (!REPORT_STYLE_ROUTE.test(style)) {
       throw new BadRequestException(
-        `Invalid CV style '${styleParam}'. Expected a slug like red-curb or hetic-squared.`,
+        `Invalid report style '${styleParam}'. Expected a slug like report-final.`,
       );
     }
 
-    if (!CV_VERSION_ROUTE.test(slug)) {
+    if (!REPORT_VERSION_ROUTE.test(slug)) {
       throw new BadRequestException(
-        `Invalid CV version '${slug}'. Expected a slug like v1 or v2.`,
+        `Invalid report version '${slug}'. Expected a slug like v1 or v2.`,
       );
     }
 
     const version = slug.toLowerCase();
 
-    const { documentKind, locales } =
-      await this.cvRepository.listLocalesForDashboard(style, version);
+    const locales = await this.reportRepository.listReportLocales(style, version);
 
     if (!locales.length) {
       throw new NotFoundException(
-        `No document locale files found for '${style}/${version}'. Add cv.json / cv.<lang>.json or report.json / report.<lang>.json under that folder.`,
+        `No report locale files found for '${style}/${version}'. Add report.json / report.<lang>.json under that folder.`,
       );
     }
 
@@ -270,34 +254,20 @@ export class AppController {
     }
 
     try {
-      if (documentKind === 'report') {
-        await this.reportRepository.getReportTemplateData(
-          style,
-          version,
-          trimmed === '' ? undefined : trimmed,
-        );
-      } else {
-        await this.cvRepository.getCvTemplateData(
-          style,
-          version,
-          trimmed === '' ? undefined : trimmed,
-        );
-      }
+      await this.reportRepository.getReportTemplateData(
+        style,
+        version,
+        trimmed === '' ? undefined : trimmed,
+      );
     } catch (e) {
       if (
-        e instanceof CvLocaleInvalidError ||
-        e instanceof CvDataInvalidError ||
         e instanceof ReportLocaleInvalidError ||
         e instanceof ReportDataInvalidError ||
-        e instanceof ReportVersionInvalidError ||
-        e instanceof CvVersionInvalidError
+        e instanceof ReportVersionInvalidError
       ) {
         throw new BadRequestException(e.message);
       }
       if (
-        e instanceof CvLocaleNotFoundError ||
-        e instanceof CvVersionNotFoundError ||
-        e instanceof CvDataMissingError ||
         e instanceof ReportLocaleNotFoundError ||
         e instanceof ReportVersionNotFoundError ||
         e instanceof ReportDataMissingError
@@ -314,7 +284,7 @@ export class AppController {
       const primary = locales[0];
       if (primary === undefined) {
         throw new NotFoundException(
-          `No CV locale files found for '${style}/${version}'.`,
+          `No report locale files found for '${style}/${version}'.`,
         );
       }
       effectiveLang = primary;
@@ -325,8 +295,7 @@ export class AppController {
     params.set('lang', effectiveLang);
 
     const query = `?${params.toString()}`;
-    const pdfBase =
-      documentKind === 'report' ? `${apiPrefix}/pdf/report` : `${apiPrefix}/pdf`;
+    const pdfBase = `${apiPrefix}/pdf`;
 
     return {
       ...texts,
@@ -341,7 +310,6 @@ export class AppController {
         code,
         label: LANG_LABELS[code] ?? code.toUpperCase(),
       })),
-      documentKind,
       previewUrl: `${pdfBase}/previewHtml${query}`,
       generateUrl: `${pdfBase}/htmlToPDF${query}`,
       homeUrl: `${apiPrefix}`,
