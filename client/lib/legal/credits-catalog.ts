@@ -29,7 +29,18 @@ export const CREDIT_CATEGORIES: CreditCategory[] = [
  * ]
  */
 export const CREDITS_CATALOG: Record<CreditCategory, CreditItem[]> = {
-  images: [],
+  images: [
+    {
+      name: "Person icon (placeholder male avatar)",
+      author: "Xinh Studio",
+      sourceUrl: "https://www.magnific.com/icon/people_11045303",
+    },
+    {
+      name: "Person icon (placeholder female avatar)",
+      author: "Xinh Studio",
+      sourceUrl: "https://www.magnific.com/icon/profile_11045305",
+    },
+  ],
   videos: [],
   fonts: [],
   audio: [],

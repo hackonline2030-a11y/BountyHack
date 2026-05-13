@@ -10,6 +10,9 @@ import {
   startTotpEnrollmentUseCase,
 } from "@/modules/auth/core/usecase/totp-management.usecase";
 
+/** Length of the TOTP one-time code we collect from the user. */
+const OTP_LENGTH = 6;
+
 type TotpStartOk = {
   secret: string;
   otpauthUri: string;
@@ -45,10 +48,10 @@ function OtpRow({
   }, [onDigitsChange]);
 
   return (
-    <div className="flex justify-between gap-2">
-      {[0, 1, 2, 3, 4, 5].map((idx) => (
+    <div className="flex gap-2">
+      {Array.from({ length: OTP_LENGTH }, (_, idx) => (
         <input
-          key={idx}
+          key={`otp-digit-${idx}`}
           ref={(el) => {
             inputsRef.current[idx] = el;
           }}
@@ -67,21 +70,21 @@ function OtpRow({
             const v = e.currentTarget.value.replace(/\D/g, "").slice(-1);
             e.currentTarget.value = v;
             syncParent();
-            if (v && idx < 5) {
+            if (v && idx < OTP_LENGTH - 1) {
               inputsRef.current[idx + 1]?.focus();
             }
           }}
           onPaste={(e) => {
             e.preventDefault();
             const t =
-              e.clipboardData?.getData("text")?.replace(/\D/g, "").slice(0, 6) ?? "";
-            for (let j = 0; j < 6; j++) {
+              e.clipboardData?.getData("text")?.replace(/\D/g, "").slice(0, OTP_LENGTH) ?? "";
+            for (let j = 0; j < OTP_LENGTH; j++) {
               if (inputsRef.current[j]) {
                 inputsRef.current[j]!.value = t[j] ?? "";
               }
             }
             syncParent();
-            inputsRef.current[Math.min(t.length, 5)]?.focus();
+            inputsRef.current[Math.min(t.length, OTP_LENGTH - 1)]?.focus();
           }}
         />
       ))}
@@ -320,7 +323,7 @@ export function TotpEnrollmentPanel({
               type="button"
               onClick={disable}
               disabled={busy || disableOtpDigits.replace(/\D/g, "").length !== 6}
-              className="rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="action-btn action-btn--danger"
             >
               {disablePhase === "loading" ? t("statusDisabling") : t("btnDisable")}
             </button>
@@ -332,7 +335,7 @@ export function TotpEnrollmentPanel({
                 setMessage(null);
               }}
               disabled={busy}
-              className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed"
+              className="action-btn action-btn--neutral"
             >
               {t("btnCancelDisable")}
             </button>
@@ -349,7 +352,7 @@ export function TotpEnrollmentPanel({
                 void start();
               }}
               disabled={busy}
-              className="rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="action-btn action-btn--primary"
             >
               {startPhase === "loading" ? t("statusStarting") : t("btnStart")}
             </button>
@@ -391,7 +394,7 @@ export function TotpEnrollmentPanel({
                   type="button"
                   onClick={confirm}
                   disabled={busy || otpDigits.replace(/\D/g, "").length !== 6}
-                  className="mt-5 rounded-lg border border-violet-600 bg-white px-4 py-2.5 text-sm font-semibold text-violet-700 shadow-sm transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="action-btn action-btn--secondary mt-5"
                 >
                   {confirmPhase === "loading" ? t("statusConfirming") : t("btnConfirm")}
                 </button>
