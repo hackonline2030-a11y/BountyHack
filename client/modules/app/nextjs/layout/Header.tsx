@@ -126,34 +126,30 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
       <nav
         className={`header-container flex items-center justify-between gap-4 ${className}`.trim()}
       >
-        <Link
-          href={localeHome}
-          className="text-lg font-bold tracking-tight text-black hover:text-black/70"
-        >
-          {t("header.brand")}
-          {currentUsername ? (
-            <span className="ml-2 text-sm font-medium tracking-normal text-black/70">
-              {currentUsername}
-              {currentRoleLabel ? ` (${currentRoleLabel})` : ""}
-            </span>
-          ) : null}
-        </Link>
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex flex-col items-start gap-0.5">
           <Link
             href={localeHome}
-            className="rounded-md px-3 py-2 text-sm font-medium text-black/70 transition hover:bg-black/5 hover:text-black focus:outline-none focus:ring-2 focus:ring-black/20"
+            className="text-lg font-bold tracking-tight text-black hover:text-black/70"
           >
+            {t("header.brand")}
+          </Link>
+          {currentUsername ? (
+            <span className="text-sm font-medium text-black/70">
+              {currentUsername}
+              {currentRoleLabel ? ` - ${currentRoleLabel}` : ""}
+            </span>
+          ) : null}
+        </div>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link href={localeHome} className="header-nav-link">
             {t("header.home")}
           </Link>
           <LangLinks />
           {showParametersLink ? (
             <Link
               href={parametersHref}
-              className={`rounded-md px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-black/20 ${
-                isParametersActive
-                  ? "bg-black text-white"
-                  : "text-black/70 hover:bg-black/5 hover:text-black"
-              }`}
+              aria-current={isParametersActive ? "page" : undefined}
+              className={`header-nav-link${isParametersActive ? " header-nav-link--active" : ""}`}
             >
               {t("header.parameters")}
             </Link>
@@ -161,11 +157,8 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
           {isSuperAdmin ? (
             <Link
               href={adminHref}
-              className={`rounded-md px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-black/20 ${
-                isAdminActive
-                  ? "bg-black text-white"
-                  : "text-black/70 hover:bg-black/5 hover:text-black"
-              }`}
+              aria-current={isAdminActive ? "page" : undefined}
+              className={`header-nav-link${isAdminActive ? " header-nav-link--active" : ""}`}
             >
               {t("header.admin")}
             </Link>
@@ -175,18 +168,15 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
               type="button"
               onClick={() => void handleLogout()}
               disabled={logoutBusy}
-              className="rounded-md px-3 py-2 text-sm font-medium text-black/70 transition hover:bg-black/5 hover:text-black focus:outline-none focus:ring-2 focus:ring-black/20 disabled:cursor-not-allowed disabled:opacity-50"
+              className="header-nav-link"
             >
               {logoutBusy ? t("header.logoutPending") : t("header.logout")}
             </button>
           ) : (
             <Link
               href={loginHref}
-              className={`rounded-md px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-black/20 ${
-                isLoginActive
-                  ? "bg-black text-white"
-                  : "text-black/70 hover:bg-black/5 hover:text-black"
-              }`}
+              aria-current={isLoginActive ? "page" : undefined}
+              className={`header-nav-link${isLoginActive ? " header-nav-link--active" : ""}`}
             >
               {t("header.login")}
             </Link>

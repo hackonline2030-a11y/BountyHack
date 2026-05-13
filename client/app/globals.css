@@ -16,6 +16,8 @@
 
   /* Base background (you can adjust later if needed) */
   --background: #f6f6f6;
+  
+
 
   /* Typography – Rubik family and weights from style guide */
   --font-rubik: "Rubik", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -47,6 +49,7 @@
 --color-gray-950: var(--gray-950);
 --color-gray-400: var(--gray-400);
 --button-hover-color: var(--gray-400);
+--cta-btn-color: var(--violet-600);
 /* Body font size → text-body */
 --text-body: var(--font-size-body);
 
@@ -108,6 +111,142 @@
 }
 .btn-secondary:focus-visible {
   @apply ring-2 ring-offset-2 ring-blue-500 outline-none;
+}
+
+/* -----------------------------------------------------------------------------
+   CTA buttons – styles migrated from CtaButton.tsx as @apply rules.
+   Lives alongside the .btn-* set above for now; the two will be reconciled later.
+   ----------------------------------------------------------------------------- */
+
+/* Common styles for every CTA button (mirror of .btn-common-styles).
+   NOTE: source TSX used `text-md` which is not a Tailwind utility — replaced
+   with `text-base` (same as .btn-common-styles). */
+.cta-btn-common {
+  @apply text-base font-bold transition-all duration-300 motion-reduce:duration-0 ease-in-out;
+}
+
+/* Primary CTA – pink background, white text, rounded */
+.cta-btn-primary {
+  @apply px-15 py-6 bg-pink-500 opacity-100 text-white shadow-md rounded-full cursor-pointer;
+}
+.cta-btn-primary:hover {
+  @apply opacity-60;
+}
+
+/* Secondary CTA – white bg, dark text, rounded.
+   NOTE: source TSX had `hover:text-grayish-blue`; no such color is defined in
+   @theme, so the hover was already a no-op at runtime. Dropped here to keep
+   behavior identical; revisit when reconciling with .btn-secondary (whose hover
+   is `text-blue-500`). */
+.cta-btn-secondary {
+  @apply px-15 py-6 bg-white text-black shadow-sm rounded-full cursor-pointer;
+}
+
+/* Tertiary CTA – red bg, white text */
+.cta-btn-tertiary {
+  @apply px-8 py-6 bg-red-500 text-white cursor-pointer;
+}
+.cta-btn-tertiary:hover {
+  @apply bg-red-600;
+}
+
+/* -----------------------------------------------------------------------------
+   Action buttons – compact form/panel buttons (e.g. TotpEnrollmentPanel).
+   Distinct from the marketing `btn-*` / `cta-btn-*` families: `rounded-lg`
+   instead of `rounded-full`, dense `px-4 py-2.5` padding.
+   ----------------------------------------------------------------------------- */
+
+/* Shared base for every variant. Variant rules carry color, hover, font weight
+   and the `disabled:opacity-60` modifier (omitted on --neutral to faithfully
+   mirror the original TSX, which intentionally or not left it off the cancel
+   button). */
+.action-btn {
+  @apply rounded-lg px-4 py-2.5 text-sm shadow-sm transition disabled:cursor-not-allowed;
+}
+
+/* Primary action – violet solid */
+.action-btn--primary {
+  @apply bg-violet-600 text-white font-semibold disabled:opacity-60;
+}
+.action-btn--primary:hover {
+  @apply bg-violet-700;
+}
+
+/* Secondary action – violet outline on white */
+.action-btn--secondary {
+  @apply border border-violet-600 bg-white text-violet-700 font-semibold disabled:opacity-60;
+}
+.action-btn--secondary:hover {
+  @apply bg-violet-50;
+}
+
+/* Destructive action – rose solid */
+.action-btn--danger {
+  @apply bg-rose-600 text-white font-semibold disabled:opacity-60;
+}
+.action-btn--danger:hover {
+  @apply bg-rose-700;
+}
+
+/* Neutral / dismiss action – slate outline on white */
+.action-btn--neutral {
+  @apply border border-slate-200 bg-white text-slate-700 font-medium;
+}
+.action-btn--neutral:hover {
+  @apply bg-slate-50;
+}
+
+/* -----------------------------------------------------------------------------
+   Header navigation links – text-only links with an animated underline that
+   grows from the left on hover/focus, and stays pinned for active routes.
+   The line is rendered by ::after so it doesn't take part in the text flow.
+   ----------------------------------------------------------------------------- */
+.header-nav-link {
+  @apply relative inline-block cursor-pointer px-1 py-2 text-sm font-medium text-black/70 no-underline transition-colors;
+}
+.header-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+  height: 2px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 250ms ease-in-out;
+  pointer-events: none;
+}
+.header-nav-link:hover,
+.header-nav-link:focus-visible {
+  @apply text-black;
+}
+.header-nav-link:hover::after,
+.header-nav-link:focus-visible::after {
+  transform: scaleX(1);
+}
+.header-nav-link:focus-visible {
+  @apply rounded-sm outline outline-2 outline-offset-4 outline-black/40;
+}
+
+/* Active route – same look as hovered, but pinned. */
+.header-nav-link--active {
+  @apply text-black;
+}
+.header-nav-link--active::after {
+  transform: scaleX(1);
+}
+
+/* Logout (and other action buttons styled as nav links) honour `disabled`. */
+.header-nav-link:disabled {
+  @apply cursor-not-allowed opacity-50;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header-nav-link::after {
+    transition: none;
+  }
 }
 
 /* Background pattern – plain CSS so background-size: cover is not overridden by Tailwind shorthand */

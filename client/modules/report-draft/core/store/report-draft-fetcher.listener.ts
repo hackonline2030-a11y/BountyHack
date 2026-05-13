@@ -3,8 +3,9 @@ import { ReportDraftDomainModel } from "../model/report-draft.domain-model";
 import { reportDraftSlice } from "./report-draft.slice";
 
 /**
- * Same shape as `order/core/store/fetcher.listener.ts`: react to `setStep` and trigger side effects per step.
- * Branches are intentionally empty until you wire API / prefetch (see order module for examples).
+ * React to `setStep` and trigger side effects per step (data prefetch,
+ * background syncs, etc.). Branches are intentionally empty until the
+ * per-step fetchers are wired.
  */
 export const registerReportDraftFetcherListeners = (
   listener: ListenerMiddlewareInstance,
@@ -13,6 +14,8 @@ export const registerReportDraftFetcherListeners = (
     actionCreator: reportDraftSlice.actions.setStep,
     effect: (action) => {
       switch (action.payload) {
+        case ReportDraftDomainModel.ReportDraftStep.META:
+          break;
         case ReportDraftDomainModel.ReportDraftStep.DESCRIPTION:
           break;
         case ReportDraftDomainModel.ReportDraftStep.COLLECTION:
