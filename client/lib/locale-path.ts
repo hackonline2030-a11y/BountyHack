@@ -22,11 +22,6 @@ export function isPasswordResetPath(pathname: string): boolean {
   return /^\/(en|fr)\/password-reset$/.test(pathname);
 }
 
-/** User settings at `/{lng}/parameters` (session gated on the page). */
-export function isParametersPath(pathname: string): boolean {
-  return /^\/(en|fr)\/parameters$/.test(pathname);
-}
-
 /** Super-admin registers new users at `/{lng}/administration/register` (session + `SUPER_ADMIN` only). */
 export function isAdministrationRegisterPath(pathname: string): boolean {
   return /^\/(en|fr)\/administration\/register$/.test(pathname);

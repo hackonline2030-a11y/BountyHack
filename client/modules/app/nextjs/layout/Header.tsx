@@ -9,7 +9,6 @@ import { logoutFromBrowser } from "@modules/auth/core/browser-logout.factory";
 import {
   isAdministrationRegisterPath,
   isAuthHeaderLoginHighlightPath,
-  isParametersPath,
   localePrefixFromPathname,
 } from "@/lib/locale-path";
 
@@ -17,7 +16,10 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
   const { t } = useT("common");
   const router = useRouter();
   const pathname = usePathname();
-  const [showParametersLink, setShowParametersLink] = useState(false);
+  // Reflects /api/session/status. Drives both the username/role display
+  // and the Logout-vs-Login switch (Parameters now lives in the in-app
+  // dashboard sidebar — not the header).
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [logoutBusy, setLogoutBusy] = useState(false);
   const [currentUsername, setCurrentUsername] = useState<string | null>(null);
   const [currentRoleLabel, setCurrentRoleLabel] = useState<string | null>(null);
@@ -30,11 +32,9 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
 
   const prefix = localePrefixFromPathname(pathname);
   const localeHome = prefix;
-  const parametersHref = `${prefix}/parameters`;
   const adminHref = `${prefix}/administration/register`;
   const loginHref = `${prefix}/login`;
   const isLoginActive = isAuthHeaderLoginHighlightPath(pathname);
-  const isParametersActive = isParametersPath(pathname);
   const isAdminActive = isAdministrationRegisterPath(pathname);
   const isSuperAdmin = currentRoleCode === "SUPER_ADMIN";
 
@@ -83,14 +83,14 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
             ? roleRaw.trim()
             : null;
         if (!cancelled) {
-          setShowParametersLink(authenticated);
+          setIsAuthenticated(authenticated);
           setCurrentUsername(authenticated ? username : null);
           setCurrentRoleLabel(authenticated ? roleLabelFromRoleCode(roleCode) : null);
           setCurrentRoleCode(authenticated ? roleCode : null);
         }
       } catch {
         if (!cancelled) {
-          setShowParametersLink(false);
+          setIsAuthenticated(false);
           setCurrentUsername(null);
           setCurrentRoleLabel(null);
           setCurrentRoleCode(null);
@@ -107,7 +107,7 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
     setLogoutBusy(true);
     try {
       await logoutFromBrowser();
-      setShowParametersLink(false);
+      setIsAuthenticated(false);
       setCurrentUsername(null);
       setCurrentRoleLabel(null);
       setCurrentRoleCode(null);
@@ -145,15 +145,6 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
             {t("header.home")}
           </Link>
           <LangLinks />
-          {showParametersLink ? (
-            <Link
-              href={parametersHref}
-              aria-current={isParametersActive ? "page" : undefined}
-              className={`header-nav-link${isParametersActive ? " header-nav-link--active" : ""}`}
-            >
-              {t("header.parameters")}
-            </Link>
-          ) : null}
           {isSuperAdmin ? (
             <Link
               href={adminHref}
@@ -163,7 +154,7 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
               {t("header.admin")}
             </Link>
           ) : null}
-          {showParametersLink ? (
+          {isAuthenticated ? (
             <button
               type="button"
               onClick={() => void handleLogout()}
