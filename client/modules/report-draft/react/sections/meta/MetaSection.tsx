@@ -232,7 +232,7 @@ export const MetaSection: FC = () => {
       <div className="flex flex-wrap gap-3 pt-2">
         <button
           type="button"
-          className="rounded-md bg-white/10 px-4 py-2 text-white opacity-40"
+          className="rounded-md bg-form-overlay px-4 py-2 text-form-text opacity-40"
           disabled
           aria-label="Retour (indisponible — première étape)"
         >
@@ -240,14 +240,14 @@ export const MetaSection: FC = () => {
         </button>
         <button
           type="submit"
-          className="rounded-md bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-emerald-600/40"
+          className="rounded-md bg-form-accent px-4 py-2 font-medium text-form-text hover:bg-form-accent-hover disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
           disabled={!isSubmitable}
         >
           Continuer
         </button>
         <button
           type="button"
-          className="ml-auto rounded-md border border-white/30 px-3 py-2 text-sm text-white/80 hover:bg-white/10"
+          className="ml-auto rounded-md border border-form-border-strong px-3 py-2 text-sm text-form-text-muted hover:bg-form-overlay"
           onClick={onReset}
         >
           Réinitialiser
@@ -258,13 +258,13 @@ export const MetaSection: FC = () => {
 };
 
 const textInputClass =
-  "w-full rounded-md border border-white/20 bg-black/30 px-3 py-2 text-white placeholder:text-white/40 focus:border-emerald-500 focus:outline-none";
+  "w-full rounded-md border border-form-border bg-form-surface px-3 py-2 text-form-text placeholder:text-form-placeholder focus:border-form-accent-hover focus:outline-none";
 
 const textareaClass =
-  "w-full rounded-md border border-white/20 bg-black/30 p-3 text-white placeholder:text-white/40 focus:border-emerald-500 focus:outline-none";
+  "w-full rounded-md border border-form-border bg-form-surface p-3 text-form-text placeholder:text-form-placeholder focus:border-form-accent-hover focus:outline-none";
 
 const selectClass =
-  "w-full rounded-md border border-white/20 bg-black/30 px-3 py-2 text-white focus:border-emerald-500 focus:outline-none";
+  "w-full rounded-md border border-form-border bg-form-surface px-3 py-2 text-form-text focus:border-form-accent-hover focus:outline-none";
 
 type FieldProps = {
   id: string;
@@ -276,11 +276,11 @@ type FieldProps = {
 
 const Field: FC<FieldProps> = ({ id, label, hint, required, children }) => (
   <div className="flex flex-col gap-1">
-    <label htmlFor={id} className="text-sm font-medium text-white/80">
+    <label htmlFor={id} className="text-sm font-medium text-form-text-muted">
       {label}
-      {required && <span className="ml-1 text-emerald-400">*</span>}
+      {required && <span className="ml-1 text-form-accent-strong">*</span>}
     </label>
     {children}
-    {hint && <p className="text-xs text-white/50">{hint}</p>}
+    {hint && <p className="text-xs text-form-text-hint">{hint}</p>}
   </div>
 );

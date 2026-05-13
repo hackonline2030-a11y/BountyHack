@@ -16,7 +16,47 @@
 
   /* Base background (you can adjust later if needed) */
   --background: #f6f6f6;
-  
+
+  /* -----------------------------------------------------------------------
+     Form palette – semantic tokens consumed by the report-draft sections
+     (MetaSection, DescriptionSection, …). Use the role, not the hue.
+     Surface / border / text / placeholder are tuned for a dark form on a
+     dark background. Accent drives the primary action + focus ring.
+     ----------------------------------------------------------------------- */
+  --form-surface: rgb(0 0 0 / 0.3);
+  --form-border: rgb(255 255 255 / 0.2);
+  --form-border-strong: rgb(255 255 255 / 0.3);
+  --form-text: #ffffff;
+  --form-text-muted: rgb(255 255 255 / 0.8);
+  --form-text-hint: rgb(255 255 255 / 0.5);
+  --form-placeholder: rgb(255 255 255 / 0.4);
+  --form-overlay: rgb(255 255 255 / 0.1);
+  --form-accent: oklch(0.596 0.145 163.225);        /* emerald-600 */
+  --form-accent-hover: oklch(0.696 0.17 162.48);    /* emerald-500 */
+  --form-accent-strong: oklch(0.765 0.177 163.223); /* emerald-400 */
+  --form-accent-disabled: color-mix(in oklch, oklch(0.596 0.145 163.225) 40%, transparent);
+
+  /* -----------------------------------------------------------------------
+     Dashboard palette – semantic tokens for the welcome dashboard
+     (light theme floating on the violet `.bg-pattern`).
+     Change a single variable here to retheme every tile / nav / pill.
+     ----------------------------------------------------------------------- */
+  --dashboard-card-bg: #ffffff;
+  --dashboard-card-border: rgb(0 0 0 / 0.06);
+  --dashboard-card-shadow: 0 1px 3px rgb(0 0 0 / 0.08),
+                           0 1px 2px rgb(0 0 0 / 0.04);
+  --dashboard-text: var(--gray-950);
+  --dashboard-text-muted: hsl(0, 0%, 38%);
+  --dashboard-text-subtle: var(--gray-400);
+  --dashboard-divider: rgb(0 0 0 / 0.06);
+  --dashboard-accent: oklch(0.541 0.281 293.009);       /* violet-600 */
+  --dashboard-accent-hover: oklch(0.491 0.27 292.581);  /* violet-700 */
+  --dashboard-accent-soft: oklch(0.962 0.018 272.314);  /* violet-50  */
+  --dashboard-accent-on: #ffffff;                       /* readable text on accent bg */
+  --dashboard-heading-on-pattern: #ffffff;
+  --dashboard-subheading-on-pattern: rgb(255 255 255 / 0.85);
+  --dashboard-focus-ring: var(--dashboard-accent);
+
 
 
   /* Typography – Rubik family and weights from style guide */
@@ -50,6 +90,34 @@
 --color-gray-400: var(--gray-400);
 --button-hover-color: var(--gray-400);
 --cta-btn-color: var(--violet-600);
+
+/* Form palette → border-form-border, bg-form-surface, text-form-text, … */
+--color-form-surface: var(--form-surface);
+--color-form-border: var(--form-border);
+--color-form-border-strong: var(--form-border-strong);
+--color-form-text: var(--form-text);
+--color-form-text-muted: var(--form-text-muted);
+--color-form-text-hint: var(--form-text-hint);
+--color-form-placeholder: var(--form-placeholder);
+--color-form-overlay: var(--form-overlay);
+--color-form-accent: var(--form-accent);
+--color-form-accent-hover: var(--form-accent-hover);
+--color-form-accent-strong: var(--form-accent-strong);
+--color-form-accent-disabled: var(--form-accent-disabled);
+
+/* Dashboard palette → bg-dashboard-card-bg, text-dashboard-text, border-dashboard-card-border, … */
+--color-dashboard-card-bg: var(--dashboard-card-bg);
+--color-dashboard-card-border: var(--dashboard-card-border);
+--color-dashboard-text: var(--dashboard-text);
+--color-dashboard-text-muted: var(--dashboard-text-muted);
+--color-dashboard-text-subtle: var(--dashboard-text-subtle);
+--color-dashboard-divider: var(--dashboard-divider);
+--color-dashboard-accent: var(--dashboard-accent);
+--color-dashboard-accent-hover: var(--dashboard-accent-hover);
+--color-dashboard-accent-soft: var(--dashboard-accent-soft);
+--color-dashboard-accent-on: var(--dashboard-accent-on);
+--color-dashboard-heading-on-pattern: var(--dashboard-heading-on-pattern);
+--color-dashboard-subheading-on-pattern: var(--dashboard-subheading-on-pattern);
 /* Body font size → text-body */
 --text-body: var(--font-size-body);
 
@@ -278,6 +346,54 @@
     bottom: 10%;
     width: 1px;
     background-color: hsl(0, 0%, 58%); /* --gray-400 from design system */
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Welcome dashboard – tile / nav / cta primitives.
+   All colors come from the `--dashboard-*` tokens declared in `:root`, so the
+   palette is reskinnable from a single place.
+   ----------------------------------------------------------------------------- */
+
+/* White tile floating on the bg-pattern. Used for nav + every card.
+   Uses @apply (like .dashboard-nav-link and .dashboard-card-cta below) so
+   the color tokens go through the same Tailwind pipeline as utilities.
+   `box-shadow` stays raw because the design uses a layered multi-shadow
+   that isn't worth a one-off theme token. */
+.dashboard-card {
+  @apply rounded-xl border border-dashboard-card-border bg-dashboard-card-bg text-dashboard-text;
+  box-shadow: var(--dashboard-card-shadow, 0 1px 3px rgb(0 0 0 / 0.08));
+}
+
+/* Sidebar nav row: pill on mobile (horizontal scroll), full-width on desktop. */
+.dashboard-nav-link {
+  @apply flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-dashboard-text transition-colors;
+}
+.dashboard-nav-link:hover {
+  @apply bg-dashboard-accent-soft text-dashboard-accent-hover;
+}
+.dashboard-nav-link:focus-visible {
+  @apply outline-2 outline-offset-2 outline-dashboard-accent;
+}
+.dashboard-nav-link--active {
+  @apply bg-dashboard-accent-soft text-dashboard-accent;
+}
+
+/* "See all →" link inside a card footer. */
+.dashboard-card-cta {
+  @apply inline-flex items-center gap-1 text-sm font-medium text-dashboard-accent transition-colors;
+}
+.dashboard-card-cta:hover {
+  @apply text-dashboard-accent-hover underline;
+}
+.dashboard-card-cta:focus-visible {
+  @apply rounded-sm outline-2 outline-offset-2 outline-dashboard-accent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-nav-link,
+  .dashboard-card-cta {
+    transition: none;
   }
 }
 

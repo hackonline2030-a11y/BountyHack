@@ -1,0 +1,81 @@
+import type { FC, ReactNode, SVGProps } from "react";
+
+/**
+ * Tiny inline icon set used by the dashboard sidebar. Kept in this folder so
+ * the dashboard doesn't pull a 3rd-party icon library; each glyph is a 24x24
+ * stroked SVG that inherits `currentColor`, so the nav can recolor it via the
+ * `--dashboard-*` palette without prop drilling.
+ */
+
+type IconProps = SVGProps<SVGSVGElement>;
+
+const IconBase: FC<IconProps & { children: ReactNode }> = ({
+  children,
+  ...rest
+}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.75}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    focusable="false"
+    {...rest}
+  >
+    {children}
+  </svg>
+);
+
+export const EmailIcon: FC<IconProps> = (p) => (
+  <IconBase {...p}>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="m3 7 9 6 9-6" />
+  </IconBase>
+);
+
+export const TrackIcon: FC<IconProps> = (p) => (
+  <IconBase {...p}>
+    <path d="M3 12h3l3-7 5 14 3-7h4" />
+  </IconBase>
+);
+
+export const CourseIcon: FC<IconProps> = (p) => (
+  <IconBase {...p}>
+    <path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2Z" />
+    <path d="M8 7h8M8 11h8M8 15h5" />
+  </IconBase>
+);
+
+export const TeamIcon: FC<IconProps> = (p) => (
+  <IconBase {...p}>
+    <circle cx="9" cy="8" r="3" />
+    <path d="M3 20a6 6 0 0 1 12 0" />
+    <circle cx="17" cy="9" r="2.5" />
+    <path d="M15 17a4.5 4.5 0 0 1 6 4" />
+  </IconBase>
+);
+
+export const MentorIcon: FC<IconProps> = (p) => (
+  <IconBase {...p}>
+    <path d="M22 10 12 4 2 10l10 6 10-6Z" />
+    <path d="M6 12v5a6 6 0 0 0 12 0v-5" />
+  </IconBase>
+);
+
+export const SupportIcon: FC<IconProps> = (p) => (
+  <IconBase {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9.5 9.5a2.5 2.5 0 0 1 5 0c0 1.7-2.5 2-2.5 4" />
+    <path d="M12 17.5h.01" />
+  </IconBase>
+);
+
+export const SettingsIcon: FC<IconProps> = (p) => (
+  <IconBase {...p}>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.07.07a2 2 0 1 1-2.83 2.83l-.07-.07a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.34l-.07.07a2 2 0 1 1-2.83-2.83l.07-.07A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 8.94 1.7 1.7 0 0 0 4.26 7.07l-.07-.07a2 2 0 1 1 2.83-2.83l.07.07a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1.03-1.56V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1.03 1.55 1.7 1.7 0 0 0 1.87-.34l.07-.07a2 2 0 1 1 2.83 2.83l-.07.07a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.56 1.03Z" />
+  </IconBase>
+);
