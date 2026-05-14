@@ -6,6 +6,14 @@ import { StubIdProvider } from "@modules/core/provider/stub.id-provider";
 import { StubClockProvider } from "@modules/core/provider/stub.clock-provider";
 import { MetaFactory } from "@modules/report-draft/core/model/meta.factory";
 import { DescriptionFactory } from "@modules/report-draft/core/model/description.factory";
+import {
+  CollectionFactory,
+  ExploitationFactory,
+  FinalFactory,
+  ProofOfConceptFactory,
+  RemediationFactory,
+  RisksFactory,
+} from "@modules/report-draft/core/model/long-form-steps.factory";
 
 /**
  * Builds a `CreateReportDraftDeps` with sensible defaults so each test
@@ -157,40 +165,42 @@ describe("ReportDraftFactory", () => {
   });
 
   // ──────────────────────────────────────────────────────────────────────
-  // The 6 free-form Markdown steps
+  // The 6 structured long-form steps (COLLECTION → FINAL)
   // ──────────────────────────────────────────────────────────────────────
   it.each([
-    ["collection"],
-    ["exploitation"],
-    ["proofOfConcept"],
-    ["risks"],
-    ["remediation"],
-    ["final"],
-  ] as const)("starts %s with an empty Markdown payload", (stepKey) => {
+    ["collection", CollectionFactory.create()],
+    ["exploitation", ExploitationFactory.create()],
+    ["proofOfConcept", ProofOfConceptFactory.create()],
+    ["risks", RisksFactory.create()],
+    ["remediation", RemediationFactory.create()],
+    ["final", FinalFactory.create()],
+  ] as const)("starts %s with an empty structured payload", (stepKey, emptyShape) => {
     const draft = ReportDraftFactory.create(makeDeps());
 
-    expect(draft[stepKey].payload).toEqual("");
+    expect(draft[stepKey].payload).toEqual(emptyShape);
   });
 
-  it("can be restored with specific Markdown step payloads (overrides take precedence)", () => {
+  it("can be restored with specific long-form step payloads (overrides take precedence)", () => {
     const draft = ReportDraftFactory.create(
       makeDeps({
         overrides: {
-          collection: "C",
-          exploitation: "E",
-          proofOfConcept: "P",
-          risks: "R",
-          remediation: "RM",
-          final: "F",
+          collection: CollectionFactory.create({ hypothesis: "C" }),
+          exploitation: ExploitationFactory.create({ prerequisites: "E" }),
+          proofOfConcept: ProofOfConceptFactory.create({ environment: "P" }),
+          risks: RisksFactory.create({ confidentiality: "R" }),
+          remediation: RemediationFactory.create({ shortTermMitigation: "RM" }),
+          final: FinalFactory.create({ conclusion: "F" }),
         },
       }),
     );
 
-    expect(draft.collection.payload).toEqual("C");
-    expect(draft.exploitation.payload).toEqual("E");
-    expect(draft.proofOfConcept.payload).toEqual("P");
-    expect(draft.risks.payload).toEqual("R");
-    expect(draft.remediation.payload).toEqual("RM");
-    expect(draft.final.payload).toEqual("F");
+    expect(draft.collection.payload).toEqual(CollectionFactory.create({ hypothesis: "C" }));
+    expect(draft.exploitation.payload).toEqual(ExploitationFactory.create({ prerequisites: "E" }));
+    expect(draft.proofOfConcept.payload).toEqual(ProofOfConceptFactory.create({ environment: "P" }));
+    expect(draft.risks.payload).toEqual(RisksFactory.create({ confidentiality: "R" }));
+    expect(draft.remediation.payload).toEqual(
+      RemediationFactory.create({ shortTermMitigation: "RM" }),
+    );
+    expect(draft.final.payload).toEqual(FinalFactory.create({ conclusion: "F" }));
   });
 });

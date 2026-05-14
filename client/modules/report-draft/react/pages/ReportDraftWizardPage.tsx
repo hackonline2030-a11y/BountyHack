@@ -5,7 +5,7 @@ import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-
 import { useAppSelector } from "@store/redux/store";
 import { DescriptionSection } from "@modules/report-draft/react/sections/description/DescriptionSection";
 import { MetaSection } from "@modules/report-draft/react/sections/meta/MetaSection";
-import { ReportDraftTextareaStep } from "@modules/report-draft/react/pages/ReportDraftTextareaStep";
+import { LongFormReportStepSection } from "@modules/report-draft/react/pages/LongFormReportStepSection";
 
 const STEP_LABELS: Record<ReportDraftDomainModel.ReportDraftStep, string> = {
   [ReportDraftDomainModel.ReportDraftStep.META]: "Métadonnées",
@@ -20,7 +20,7 @@ const STEP_LABELS: Record<ReportDraftDomainModel.ReportDraftStep, string> = {
 
 const TOTAL_STEPS = 8;
 
-/** Route the current step to its dedicated section, or fall back to the legacy textarea body. */
+/** Route the current step to its dedicated section. */
 const renderStepBody = (
   step: ReportDraftDomainModel.ReportDraftStep,
   label: string,
@@ -30,8 +30,13 @@ const renderStepBody = (
       return <MetaSection />;
     case ReportDraftDomainModel.ReportDraftStep.DESCRIPTION:
       return <DescriptionSection />;
-    default:
-      return <ReportDraftTextareaStep step={step} label={label} />;
+    case ReportDraftDomainModel.ReportDraftStep.COLLECTION:
+    case ReportDraftDomainModel.ReportDraftStep.EXPLOITATION:
+    case ReportDraftDomainModel.ReportDraftStep.PROOF_OF_CONCEPT:
+    case ReportDraftDomainModel.ReportDraftStep.RISKS:
+    case ReportDraftDomainModel.ReportDraftStep.REMEDIATION:
+    case ReportDraftDomainModel.ReportDraftStep.FINAL:
+      return <LongFormReportStepSection step={step} label={label} />;
   }
 };
 
