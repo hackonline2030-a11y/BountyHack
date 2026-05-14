@@ -1,0 +1,39 @@
+{
+  "myReports": {
+    "metaTitle": "Mes rapports",
+    "heading": "Mes rapports",
+    "subheading": "Retrouvez ici tous vos rapports de vulnérabilité en cours de rédaction et leur état d'avancement.",
+    "actions": {
+      "newReport": "Nouveau rapport",
+      "creating": "Création en cours…",
+      "retry": "Réessayer"
+    },
+    "list": {
+      "loadingAriaLabel": "Chargement de vos rapports",
+      "empty": {
+        "title": "Aucun rapport pour le moment",
+        "description": "Lancez votre premier rapport de vulnérabilité — chaque étape se sauvegarde au fur et à mesure.",
+        "cta": "Créer mon premier rapport"
+      },
+      "error": {
+        "title": "Impossible de charger vos rapports",
+        "description": "Une erreur est survenue lors du chargement. {{message}}"
+      }
+    },
+    "card": {
+      "untitled": "Rapport sans titre",
+      "updatedAt": "Mis à jour le {{date}}",
+      "stepsProgress": "{{approved}} / {{total}} étapes validées",
+      "stepsProgressAria": "{{approved}} étapes validées sur {{total}}",
+      "open": "Ouvrir"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "under-review": "En relecture",
+      "ready-to-program": "Prêt à soumettre",
+      "submitted-to-program": "Soumis au programme",
+      "given-up": "Abandonné",
+      "rejected": "Rejeté"
+    }
+  }
+}
