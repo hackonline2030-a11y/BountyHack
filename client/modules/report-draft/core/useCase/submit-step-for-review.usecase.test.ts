@@ -8,7 +8,7 @@ import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-s
 import { createTestStore } from "@modules/testing/environements";
 
 describe("submitStepForReview use case", () => {
-  const HUNTER_ID = 42;
+  const HUNTER_ID = "u-42";
   const DRAFT_ID = "draft-1";
   const SUBMISSION_ID = "submission-1";
   const CREATED_AT = "2026-04-01T00:00:00.000Z";

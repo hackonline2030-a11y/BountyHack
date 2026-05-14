@@ -17,7 +17,7 @@ const submissionFixture = (
   payload: { hello: "world" },
   attachmentsSnapshot: [],
   submittedAt: "2026-05-14T09:00:00.000Z",
-  submittedBy: 42,
+  submittedBy: "u-42",
   reviewerRole: "mentor",
   decision: "pending",
   ...overrides,
@@ -51,13 +51,13 @@ describe("InMemorySubmissionsGateway (ISubmissionsGateway contract)", () => {
       submissionFixture({
         decision: "approve",
         decidedAt: "2026-05-14T10:00:00.000Z",
-        decidedBy: 99,
+        decidedBy: "u-99",
       }),
     );
 
     const found = await repo.findById("submission-1");
     expect(found?.decision).toEqual("approve");
-    expect(found?.decidedBy).toEqual(99);
+    expect(found?.decidedBy).toEqual("u-99");
   });
 
   // ──────────────────────────────────────────────────────────────────────

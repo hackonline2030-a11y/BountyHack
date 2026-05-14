@@ -12,7 +12,7 @@ import { createTestStore } from "@modules/testing/environements";
 const seedPendingSubmission = async (
   reportDraftsGateway: InMemoryReportDraftsGateway,
   submissionsGateway: InMemorySubmissionsGateway,
-  options: { draftId: string; hunterId: number; submissionId: string },
+  options: { draftId: string; hunterId: string; submissionId: string },
 ): Promise<void> => {
   const draft = ReportDraftFactory.create({
     idProvider: new StubIdProvider([options.draftId]),
@@ -33,8 +33,8 @@ const seedPendingSubmission = async (
 };
 
 describe("requestStepRevisions use case", () => {
-  const HUNTER_ID = 42;
-  const REVIEWER_ID = 99;
+  const HUNTER_ID = "u-42";
+  const REVIEWER_ID = "u-99";
   const DRAFT_ID = "draft-1";
   const SUBMISSION_ID = "submission-1";
   const COMMENT_ID_1 = "comment-1";

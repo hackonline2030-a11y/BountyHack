@@ -15,34 +15,44 @@ import {
   cvssVector,
 } from "@modules/report-draft/core/cvss/cvss-3.1";
 import { DescriptionForm } from "@modules/report-draft/core/form/description.form";
+import { DescriptionFactory } from "@modules/report-draft/core/model/description.factory";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { reportDraftSlice } from "@modules/report-draft/core/store/report-draft.slice";
-import { submitDescription } from "@modules/report-draft/core/useCase/submit-description.usecase";
+import { saveStepPayload } from "@modules/report-draft/core/useCase/save-step-payload.usecase";
+import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-step-for-review.usecase";
+import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
-/**
- * Presenter hook for the DESCRIPTION section. Owns the local draft of the 8
- * CVSS base metrics, exposes typed setters, computes the derived CVSS
- * (vector / score / severity) live, and surfaces the dispatchers the
- * section needs to advance, retreat, or reset.
- *
- * The draft is held locally (not in Redux) until the user clicks
- * "Continue" — same idea as the META section: keep keystroke-level state in
- * React, flush to the store only on submit.
- */
+const DESCRIPTION_STEP = ReportDraftDomainModel.ReportDraftStep.DESCRIPTION;
+
 export const useDescriptionSection = () => {
   const dispatch = useAppDispatch();
-  const stateDescription = useAppSelector((s) => s.reportDraft.description);
-  const metaScopeSlug = useAppSelector((s) => s.reportDraft.meta.scopeSlug);
+  const currentDraftId = useAppSelector((s) => s.reportDrafts.currentDraftId);
+  const draftRow = useAppSelector((s) =>
+    currentDraftId ? s.reportDrafts.byId[currentDraftId] : undefined,
+  );
+  const transition = useAppSelector((s) => s.reportDrafts.transition);
+
+  const persistedDescription = draftRow?.description.payload ?? null;
+  const stepStatus = draftRow?.description.status ?? "in-progress";
+  const metaScopeSlug = draftRow?.meta.payload.scopeSlug ?? "";
+  const submittedBy = draftRow?.hunterId ?? "";
+
+  const [reviewerRole, setReviewerRole] =
+    useState<ReportDraftDomainModel.ReviewerRole>("mentor");
 
   const form = useMemo(() => new DescriptionForm(), []);
 
+  const initialDraft = useMemo<ReportDraftDomainModel.DescriptionFields>(
+    () => persistedDescription ?? DescriptionFactory.create(),
+    [persistedDescription],
+  );
   const [draft, setDraft] =
-    useState<ReportDraftDomainModel.DescriptionFields>(stateDescription);
+    useState<ReportDraftDomainModel.DescriptionFields>(initialDraft);
 
   useEffect(() => {
-    setDraft(stateDescription);
-  }, [stateDescription]);
+    setDraft(initialDraft);
+  }, [initialDraft]);
 
   const setField = useCallback(
     <K extends keyof ReportDraftDomainModel.DescriptionFields>(
@@ -55,15 +65,45 @@ export const useDescriptionSection = () => {
   );
 
   const isSubmitable = useMemo(() => form.isSubmitable(draft), [form, draft]);
+  const editable = isWizardStepEditable(stepStatus);
+  const canNavigateNext = stepStatus === "approved";
+  const transitionBusy = transition.status === "loading";
+  const transitionErr =
+    transition.status === "error" ? transition.message : null;
 
   const derivedVector = useMemo(() => cvssVector(draft), [draft]);
   const derivedScore = useMemo(() => cvssBaseScore(draft), [draft]);
   const derivedSeverity = useMemo(() => cvssSeverity(derivedScore), [derivedScore]);
 
-  const onContinue = useCallback(() => {
-    if (!isSubmitable) return;
-    dispatch(submitDescription(draft));
-  }, [dispatch, draft, isSubmitable]);
+  const onNext = useCallback(() => {
+    if (!canNavigateNext) return;
+    dispatch(
+      reportDraftSlice.actions.setStep(ReportDraftDomainModel.ReportDraftStep.COLLECTION),
+    );
+  }, [dispatch, canNavigateNext]);
+
+  const onSaveDraft = useCallback(async () => {
+    if (!currentDraftId || !editable || !isSubmitable) return;
+    await dispatch(
+      saveStepPayload({
+        draftId: currentDraftId,
+        step: DESCRIPTION_STEP,
+        payload: draft,
+      }),
+    );
+  }, [dispatch, currentDraftId, editable, isSubmitable, draft]);
+
+  const onSubmitForReview = useCallback(async () => {
+    if (!currentDraftId || !submittedBy || !isSubmitable) return;
+    await dispatch(
+      submitStepForReview({
+        draftId: currentDraftId,
+        step: DESCRIPTION_STEP,
+        reviewerRole,
+        submittedBy,
+      }),
+    );
+  }, [dispatch, currentDraftId, submittedBy, isSubmitable, reviewerRole]);
 
   const onBack = useCallback(() => {
     dispatch(
@@ -72,16 +112,25 @@ export const useDescriptionSection = () => {
   }, [dispatch]);
 
   const onReset = useCallback(() => {
-    dispatch(reportDraftSlice.actions.resetReportDraft());
-  }, [dispatch]);
+    setDraft(initialDraft);
+  }, [initialDraft]);
 
   return {
     draft,
     setField,
     isSubmitable,
-    onContinue,
+    editable,
+    stepStatus,
+    canNavigateNext,
+    reviewerRole,
+    setReviewerRole,
+    onNext,
+    onSaveDraft,
+    onSubmitForReview,
     onBack,
     onReset,
+    transitionBusy,
+    transitionErr,
     derived: {
       vector: derivedVector,
       score: derivedScore,

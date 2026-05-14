@@ -5,7 +5,7 @@ import { createReportDraft } from "@modules/report-draft/core/useCase/create-rep
 import { createTestStore } from "@modules/testing/environements";
 
 describe("createReportDraft use case", () => {
-  const HUNTER_ID = 42;
+  const HUNTER_ID = "u-42";
   const DRAFT_ID = "draft-1";
   const CREATED_AT = "2026-01-01T10:00:00.000Z";
 

@@ -6,11 +6,11 @@ import { listMyDrafts } from "@modules/report-draft/core/useCase/list-my-drafts.
 import { createTestStore } from "@modules/testing/environements";
 
 describe("listMyDrafts use case", () => {
-  const HUNTER_ID = 11;
+  const HUNTER_ID = "u-11";
 
   const seedDrafts = async (
     gateway: InMemoryReportDraftsGateway,
-    drafts: ReadonlyArray<{ id: string; createdAt: string; hunterId?: number }>,
+    drafts: ReadonlyArray<{ id: string; createdAt: string; hunterId?: string }>,
   ) => {
     for (const d of drafts) {
       const draft = ReportDraftFactory.create({
@@ -66,7 +66,7 @@ describe("listMyDrafts use case", () => {
     const reportDraftsGateway = new InMemoryReportDraftsGateway();
     await seedDrafts(reportDraftsGateway, [
       { id: "mine", createdAt: "2026-01-01T00:00:00.000Z" },
-      { id: "theirs", createdAt: "2026-01-01T00:00:00.000Z", hunterId: 99 },
+      { id: "theirs", createdAt: "2026-01-01T00:00:00.000Z", hunterId: "u-99" },
     ]);
     const store = createTestStore({ dependencies: { reportDraftsGateway } });
 

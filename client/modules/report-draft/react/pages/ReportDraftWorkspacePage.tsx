@@ -1,43 +1,78 @@
 "use client";
 
 import { type FC, type KeyboardEvent, useCallback, useState } from "react";
-import { ReportDraftWizardPage } from "@modules/report-draft/react/pages/ReportDraftWizardPage";
+import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
+import { reportDraftStepToStateKey } from "@modules/report-draft/core/model/report-draft-step-keys";
 import {
   ReportDraftCumulativePreview,
   ReportDraftPreview,
 } from "@modules/report-draft/react/components/ReportDraftPreview";
+import { ReportDraftStepCommentsPanel } from "@modules/report-draft/react/pages/ReportDraftStepCommentsPanel";
+import { ReportDraftWizardPage } from "@modules/report-draft/react/pages/ReportDraftWizardPage";
+import {
+  stepStatusLabelFr,
+  stepStatusPillClassFr,
+} from "@modules/report-draft/react/wizard/step-status-fr";
+import { useAppSelector } from "@store/redux/store";
 
 /**
- * Top-level wrapper of the report-draft workspace.
- *
- * Hosts a small tab bar (more tabs may be added later, e.g. comments from
- * MENTOR / QUALITY_CHECKER roles once they're wired):
- *  - "Édition"      : the existing wizard form (unchanged).
- *  - "Aperçu étape" : a pure React preview (no Puppeteer/Chromium) showing the
- *                     content tied to the current step only.
- *  - "Aperçu"       : a pure React preview showing the meta header and every
- *                     section filled so far — i.e. from DESCRIPTION up to and
- *                     including the current step. Future steps are not shown.
- *
- * All panels stay mounted while inactive (just hidden) so the form keeps its
- * local textarea state when the user toggles tabs.
+ * Enveloppe workspace : onglets Édition / aperçus / **Commentaires** (retours
+ * reviewer pour l’étape wizard courante). Sous la barre d’onglets : pill
+ * d’état de l’étape (machine à états domaine).
  */
-type WorkspaceTab = "form" | "stepPreview" | "cumulativePreview";
+type WorkspaceTab = "form" | "stepPreview" | "cumulativePreview" | "comments";
 
 const TAB_ORDER: readonly WorkspaceTab[] = [
   "form",
   "stepPreview",
   "cumulativePreview",
+  "comments",
 ] as const;
 
 const TAB_LABELS: Record<WorkspaceTab, string> = {
   form: "Édition",
   stepPreview: "Aperçu étape",
   cumulativePreview: "Aperçu",
+  comments: "Commentaires",
+};
+
+const STEP_LABELS: Record<ReportDraftDomainModel.ReportDraftStep, string> = {
+  [ReportDraftDomainModel.ReportDraftStep.META]: "Métadonnées",
+  [ReportDraftDomainModel.ReportDraftStep.DESCRIPTION]: "Description",
+  [ReportDraftDomainModel.ReportDraftStep.COLLECTION]: "Collecte",
+  [ReportDraftDomainModel.ReportDraftStep.EXPLOITATION]: "Exploitation",
+  [ReportDraftDomainModel.ReportDraftStep.PROOF_OF_CONCEPT]: "Preuve de concept",
+  [ReportDraftDomainModel.ReportDraftStep.RISKS]: "Risques",
+  [ReportDraftDomainModel.ReportDraftStep.REMEDIATION]: "Remédiation",
+  [ReportDraftDomainModel.ReportDraftStep.FINAL]: "Finalisation",
 };
 
 const tabButtonId = (key: WorkspaceTab) => `report-draft-tab-${key}`;
 const tabPanelId = (key: WorkspaceTab) => `report-draft-panel-${key}`;
+
+const WorkspaceStepStatusPill: FC = () => {
+  const step = useAppSelector((s) => s.reportDraft.step);
+  const draftId = useAppSelector((s) => s.reportDrafts.currentDraftId);
+  const draft = useAppSelector((s) =>
+    draftId ? s.reportDrafts.byId[draftId] : undefined,
+  );
+
+  if (!draft) return null;
+
+  const key = reportDraftStepToStateKey(step);
+  const stepState = draft[key] as ReportDraftDomainModel.StepState<unknown>;
+  const status = stepState.status;
+  const stepLabel = STEP_LABELS[step];
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 border-b border-form-border px-1 pb-3">
+      <span className="text-xs font-medium uppercase tracking-wide text-form-text-muted">
+        Étape — {stepLabel}
+      </span>
+      <span className={stepStatusPillClassFr(status)}>{stepStatusLabelFr(status)}</span>
+    </div>
+  );
+};
 
 export const ReportDraftWorkspacePage: FC = () => {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("form");
@@ -62,7 +97,7 @@ export const ReportDraftWorkspacePage: FC = () => {
       <div
         role="tablist"
         aria-label="Espace de rédaction du rapport"
-        className="flex w-full gap-6 border-b border-form-border"
+        className="flex w-full flex-wrap gap-4 border-b border-form-border sm:gap-6"
       >
         {TAB_ORDER.map((key) => {
           const isActive = key === activeTab;
@@ -89,6 +124,8 @@ export const ReportDraftWorkspacePage: FC = () => {
         })}
       </div>
 
+      <WorkspaceStepStatusPill />
+
       <div
         role="tabpanel"
         id={tabPanelId("form")}
@@ -114,6 +151,16 @@ export const ReportDraftWorkspacePage: FC = () => {
         hidden={activeTab !== "cumulativePreview"}
       >
         <ReportDraftCumulativePreview />
+      </div>
+
+      <div
+        role="tabpanel"
+        id={tabPanelId("comments")}
+        aria-labelledby={tabButtonId("comments")}
+        hidden={activeTab !== "comments"}
+        className="min-h-[120px]"
+      >
+        <ReportDraftStepCommentsPanel />
       </div>
     </div>
   );

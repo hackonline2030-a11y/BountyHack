@@ -1,12 +1,16 @@
 import { StubClockProvider } from "@modules/core/provider/stub.clock-provider";
 import { StubIdProvider } from "@modules/core/provider/stub.id-provider";
 import { InMemoryReportDraftsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.report-drafts.gateway-infra";
+import { InMemoryReviewerCommentsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.reviewer-comments.gateway-infra";
+import { InMemorySubmissionsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.submissions.gateway-infra";
+import { MetaFactory } from "@modules/report-draft/core/model/meta.factory";
+import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { ReportDraftFactory } from "@modules/report-draft/core/model/report-draft.factory";
 import { loadReportDraft } from "@modules/report-draft/core/useCase/load-report-draft.usecase";
 import { createTestStore } from "@modules/testing/environements";
 
 describe("loadReportDraft use case", () => {
-  const HUNTER_ID = 7;
+  const HUNTER_ID = "u-7";
   const DRAFT_ID = "draft-loaded";
 
   const setup = async (options?: { seedDraft?: boolean }) => {
@@ -60,6 +64,57 @@ describe("loadReportDraft use case", () => {
       message: "Draft 'missing' not found.",
     });
     expect(store.getState().reportDrafts.currentDraftId).toBeNull();
+  });
+
+  it("hydrates submissions and reviewer comments into the slice", async () => {
+    const reportDraftsGateway = new InMemoryReportDraftsGateway();
+    const submissionsGateway = new InMemorySubmissionsGateway();
+    const reviewerCommentsGateway = new InMemoryReviewerCommentsGateway();
+
+    const draft = ReportDraftFactory.create({
+      idProvider: new StubIdProvider([DRAFT_ID]),
+      clock: new StubClockProvider(["2026-02-01T00:00:00.000Z"]),
+      hunterId: HUNTER_ID,
+    });
+    await reportDraftsGateway.save(draft);
+
+    const submission: ReportDraftDomainModel.Submission<ReportDraftDomainModel.MetaFields> = {
+      id: "sub-1",
+      reportDraftId: DRAFT_ID,
+      step: ReportDraftDomainModel.ReportDraftStep.META,
+      round: 1,
+      payload: MetaFactory.create({ reportTitle: "t" }),
+      attachmentsSnapshot: [],
+      submittedAt: "2026-02-02T00:00:00.000Z",
+      submittedBy: HUNTER_ID,
+      reviewerRole: "mentor",
+      decision: "request-changes",
+    };
+    await submissionsGateway.save(submission);
+
+    await reviewerCommentsGateway.saveMany([
+      {
+        id: "com-1",
+        submissionId: "sub-1",
+        authorId: "u-mentor",
+        authorRole: "mentor",
+        body: "Précise le scope.",
+        createdAt: "2026-02-02T01:00:00.000Z",
+      },
+    ]);
+
+    const store = createTestStore({
+      dependencies: {
+        reportDraftsGateway,
+        submissionsGateway,
+        reviewerCommentsGateway,
+      },
+    });
+
+    await store.dispatch(loadReportDraft({ draftId: DRAFT_ID }));
+
+    expect(store.getState().reportDrafts.submissionsById["sub-1"]?.id).toBe("sub-1");
+    expect(store.getState().reportDrafts.commentsById["com-1"]?.body).toBe("Précise le scope.");
   });
 
   it("flips load to error when the gateway throws", async () => {

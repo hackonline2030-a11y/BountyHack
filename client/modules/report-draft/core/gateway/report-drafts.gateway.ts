@@ -41,6 +41,6 @@ export interface IReportDraftsGateway {
    * the top. Ties (identical updatedAt) are broken by `id` ascending.
    */
   findByHunterId(
-    hunterId: number,
+    hunterId: string,
   ): Promise<ReportDraftDomainModel.ReportDraft[]>;
 }

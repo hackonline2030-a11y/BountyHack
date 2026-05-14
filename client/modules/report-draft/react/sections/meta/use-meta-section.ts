@@ -8,31 +8,46 @@ import {
 } from "@modules/report-draft/core/catalog/scopes.catalog";
 import { VULNERABLE_PARTS } from "@modules/report-draft/core/catalog/vulnerable-parts.catalog";
 import { MetaForm } from "@modules/report-draft/core/form/meta.form";
+import { MetaFactory } from "@modules/report-draft/core/model/meta.factory";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { reportDraftSlice } from "@modules/report-draft/core/store/report-draft.slice";
-import { submitMeta } from "@modules/report-draft/core/useCase/submit-meta.usecase";
+import { saveStepPayload } from "@modules/report-draft/core/useCase/save-step-payload.usecase";
+import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-step-for-review.usecase";
+import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
+const META_STEP = ReportDraftDomainModel.ReportDraftStep.META;
+
 /**
- * Presenter hook for the META section. Owns the local draft, exposes typed
- * setters, computes the "submitable" gate, and surfaces the dispatchers the
- * section needs to advance, retreat, or reset.
- *
- * The draft is held locally (not in Redux) until the user clicks
- * "Continue" — same idea as the textarea step in the existing wizard: keep
- * keystroke-level state in React, flush to the store only on submit.
+ * META : **Enregistrer le brouillon** (persiste sans revue), **Soumettre pour revue**,
+ * **Suivant** uniquement après `approved` sur cette étape (validation reviewer).
  */
 export const useMetaSection = () => {
   const dispatch = useAppDispatch();
-  const stateMeta = useAppSelector((s) => s.reportDraft.meta);
+  const currentDraftId = useAppSelector((s) => s.reportDrafts.currentDraftId);
+  const draftRow = useAppSelector((s) =>
+    currentDraftId ? s.reportDrafts.byId[currentDraftId] : undefined,
+  );
+  const transition = useAppSelector((s) => s.reportDrafts.transition);
+
+  const persistedMeta = draftRow?.meta.payload ?? null;
+  const stepStatus = draftRow?.meta.status ?? "in-progress";
+  const submittedBy = draftRow?.hunterId ?? "";
+
+  const [reviewerRole, setReviewerRole] =
+    useState<ReportDraftDomainModel.ReviewerRole>("mentor");
 
   const form = useMemo(() => new MetaForm(), []);
 
-  const [draft, setDraft] = useState<ReportDraftDomainModel.MetaFields>(stateMeta);
+  const initialDraft = useMemo<ReportDraftDomainModel.MetaFields>(
+    () => persistedMeta ?? MetaFactory.create(),
+    [persistedMeta],
+  );
+  const [draft, setDraft] = useState<ReportDraftDomainModel.MetaFields>(initialDraft);
 
   useEffect(() => {
-    setDraft(stateMeta);
-  }, [stateMeta]);
+    setDraft(initialDraft);
+  }, [initialDraft]);
 
   const setField = useCallback(
     <K extends keyof ReportDraftDomainModel.MetaFields>(
@@ -45,22 +60,57 @@ export const useMetaSection = () => {
   );
 
   const isSubmitable = useMemo(() => form.isSubmitable(draft), [form, draft]);
+  const editable = isWizardStepEditable(stepStatus);
+  const canNavigateNext = stepStatus === "approved";
+  const transitionBusy = transition.status === "loading";
+  const transitionErr =
+    transition.status === "error" ? transition.message : null;
 
-  const onContinue = useCallback(() => {
-    if (!isSubmitable) return;
-    dispatch(submitMeta(draft));
-  }, [dispatch, draft, isSubmitable]);
+  const onNext = useCallback(() => {
+    if (!canNavigateNext) return;
+    dispatch(
+      reportDraftSlice.actions.setStep(ReportDraftDomainModel.ReportDraftStep.DESCRIPTION),
+    );
+  }, [dispatch, canNavigateNext]);
+
+  const onSaveDraft = useCallback(async () => {
+    if (!currentDraftId || !editable || !isSubmitable) return;
+    await dispatch(
+      saveStepPayload({ draftId: currentDraftId, step: META_STEP, payload: draft }),
+    );
+  }, [dispatch, currentDraftId, editable, isSubmitable, draft]);
+
+  const onSubmitForReview = useCallback(async () => {
+    if (!currentDraftId || !submittedBy || !isSubmitable) return;
+    await dispatch(
+      submitStepForReview({
+        draftId: currentDraftId,
+        step: META_STEP,
+        reviewerRole,
+        submittedBy,
+      }),
+    );
+  }, [dispatch, currentDraftId, submittedBy, isSubmitable, reviewerRole]);
 
   const onReset = useCallback(() => {
-    dispatch(reportDraftSlice.actions.resetReportDraft());
-  }, [dispatch]);
+    setDraft(initialDraft);
+  }, [initialDraft]);
 
   return {
     draft,
     setField,
     isSubmitable,
-    onContinue,
+    editable,
+    stepStatus,
+    canNavigateNext,
+    reviewerRole,
+    setReviewerRole,
+    onNext,
+    onSaveDraft,
+    onSubmitForReview,
     onReset,
+    transitionBusy,
+    transitionErr,
     catalogs: {
       bugTypes: BUG_TYPES,
       scopes: SCOPES,

@@ -16,7 +16,7 @@ const makeDeps = (
 ): CreateReportDraftDeps => ({
   idProvider: new StubIdProvider(),
   clock: new StubClockProvider(),
-  hunterId: 42,
+  hunterId: "u-42",
   ...overrides,
 });
 
@@ -69,9 +69,9 @@ describe("ReportDraftFactory", () => {
   // ownership + aggregate status + timestamps
   // ──────────────────────────────────────────────────────────────────────
   it("assigns the draft to the hunter who created it", () => {
-    const draft = ReportDraftFactory.create(makeDeps({ hunterId: 7 }));
+    const draft = ReportDraftFactory.create(makeDeps({ hunterId: "u-7" }));
 
-    expect(draft.hunterId).toEqual(7);
+    expect(draft.hunterId).toEqual("u-7");
   });
 
   it("starts in 'draft' aggregate status (editable, not yet under review)", () => {

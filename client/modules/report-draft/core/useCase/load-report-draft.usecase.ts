@@ -32,6 +32,18 @@ export const loadReportDraft =
 
       dispatch(reportDraftsSlice.actions.draftUpserted(draft));
       dispatch(reportDraftsSlice.actions.setCurrentDraftId(draft.id));
+
+      const submissions = await deps.submissionsGateway.findByDraftId(draft.id);
+      for (const submission of submissions) {
+        dispatch(reportDraftsSlice.actions.submissionUpserted(submission));
+        const comments = await deps.reviewerCommentsGateway.findBySubmissionId(
+          submission.id,
+        );
+        if (comments.length > 0) {
+          dispatch(reportDraftsSlice.actions.commentsUpserted(comments));
+        }
+      }
+
       dispatch(reportDraftsSlice.actions.loadSucceeded());
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

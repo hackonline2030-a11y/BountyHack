@@ -7,12 +7,12 @@ import { IClockProvider } from "@modules/core/provider/clock-provider";
 export interface CreateReportDraftDeps {
   idProvider: { next: () => string };
   clock: IClockProvider;
-  hunterId: number;
+  hunterId: string;
   overrides?: {
     id?: string;
     version?: number;
     aggregateStatus?: ReportDraftDomainModel.AggregateStatus;
-    hunterId?: number;
+    hunterId?: string;
     createdAt?: string;
     updatedAt?: string;
     meta?: ReportDraftDomainModel.MetaFields;

@@ -23,14 +23,14 @@ export default async function MyReportsRoute({ params }: PageProps) {
   await verifySessionForRoles(lng, [AppRoleCode.HUNTER]);
 
   /**
-   * The hunter's id lives on the JWT `sub` claim (string). The domain
-   * model carries it as a `number` (PG bigint surfaced through Prisma),
-   * so we convert at the boundary. A malformed sub means a broken token —
-   * fall through to the 404 path rather than crashing the route.
+   * The hunter's id is the JWT `sub` claim (string, e.g. `"user-42"`),
+   * which is also the user uid surfaced by Nest `GET /users/me`. We keep
+   * it as-is — the report-draft domain consumes string uids end-to-end.
+   * An empty `sub` would mean a broken token; surface as 404.
    */
   const payload = await verifySession(lng);
-  const hunterId = Number(payload.sub);
-  if (!Number.isFinite(hunterId)) {
+  const hunterId = payload.sub?.trim();
+  if (!hunterId) {
     notFound();
   }
 

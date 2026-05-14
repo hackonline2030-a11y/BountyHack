@@ -119,6 +119,8 @@ export const reportDraftsSlice = createSlice({
 
     loadStarted: (state) => {
       state.load = { status: "loading" };
+      state.submissionsById = {};
+      state.commentsById = {};
     },
     loadSucceeded: (state) => {
       state.load = { status: "success" };

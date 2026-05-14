@@ -17,7 +17,7 @@ export const submitStepForReview =
     draftId: string;
     step: ReportDraftDomainModel.ReportDraftStep;
     reviewerRole: ReportDraftDomainModel.ReviewerRole;
-    submittedBy: number;
+    submittedBy: string;
   }) =>
   async (
     dispatch: AppDispatch,
