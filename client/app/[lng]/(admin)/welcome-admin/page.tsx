@@ -2,30 +2,31 @@ import type { Metadata } from "next";
 import { getT } from "next-i18next/server";
 import { notFound } from "next/navigation";
 import { Section } from "@modules/app/nextjs/components/sections/Section";
-import { getWelcomeDashboardUser } from "@/lib/dal/welcome-user";
-import { verifySession } from "@/lib/dal/session";
+import { getWelcomeUser } from "@/lib/dal/welcome-user";
+import { verifySessionForRoles } from "@/lib/dal/session";
+import { AppRoleCode } from "@/lib/app-role-code";
 import { isSupportedLanguage } from "@modules/auth/core/model/locale.policy";
 
 type PageProps = { params: Promise<{ lng: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { lng } = await params;
-  const { t } = await getT("welcomeDashboard", { lng });
-  return { title: t("welcomeDashboard.metaTitle") };
+  const { t } = await getT("welcomeHunter", { lng });
+  return { title: t("welcomeHunter.metaTitle") };
 }
 
-export default async function WelcomeDashboardPage({ params }: PageProps) {
+export default async function WelcomeAdminPage({ params }: PageProps) {
   const { lng } = await params;
   if (!isSupportedLanguage(lng)) {
     notFound();
   }
-  await verifySession(lng);
-  const { displayName } = await getWelcomeDashboardUser(lng);
-  const { t } = await getT("welcomeDashboard", { lng });
+  await verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN]);
+  const { displayName } = await getWelcomeUser(lng);
+  const { t } = await getT("welcomeHunter", { lng });
   const heading =
     displayName !== null
-      ? t("welcomeDashboard.headingWithUsername", { username: displayName })
-      : t("welcomeDashboard.heading");
+      ? t("welcomeHunter.headingWithUsername", { username: displayName })
+      : t("welcomeHunter.heading");
 
   return (
     <main className="flex w-full min-h-[calc(100vh-(var(--header-height)+var(--footer-height)))] flex-col">

@@ -5,7 +5,7 @@
  *
  * All strings are in French (matching the project's default copy); they are
  * placeholders for fixture data, not user-facing translated content — those
- * live in `welcomeDashboard.json`.
+ * live in `welcomeHunter.json`.
  */
 
 export type CurrentTrackFixture = {

@@ -22,5 +22,8 @@
     "privacy": "Privacy policy",
     "notice": "Legal notice",
     "credits": "Credits"
+  },
+  "errors": {
+    "network": "Network error. Please try again."
   }
 }

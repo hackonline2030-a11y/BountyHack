@@ -21,3 +21,16 @@ export const REGISTER_ROLE_OPTIONS: AppRoleCode[] = [
   AppRoleCode.COORDINATOR,
   AppRoleCode.QUALITY_CONTENT,
 ];
+
+/**
+ * Roles that may currently hold an application session on the Next.js BFF.
+ *
+ * `POST /api/session` rejects login for any role outside this allow-list and
+ * **never sets the session cookie** in that case — so we don't create
+ * "doomed" sessions just to revoke them client-side. Extend this list when
+ * a new role gains its own dashboard.
+ */
+export const APP_LOGIN_ALLOWED_ROLES: readonly AppRoleCode[] = [
+  AppRoleCode.SUPER_ADMIN,
+  AppRoleCode.HUNTER,
+];

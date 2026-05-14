@@ -8,8 +8,9 @@ const i18nConfig: I18nConfig = {
   ns: [
     'common',
     'connexion',
+    'register',
     'passwordReset',
-    'welcomeDashboard',
+    'welcomeHunter',
     'parameters',
     'legal',
     'credits',

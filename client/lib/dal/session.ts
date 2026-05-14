@@ -1,21 +1,17 @@
 import "server-only";
 
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { cookies, headers } from "next/headers";
+import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import { createRequireAppSessionDependencies } from "@modules/auth/core/auth.factory";
 import { requireAppSessionUseCase } from "@modules/auth/core/usecase/require-app-session.usecase";
 import { ACCESS_TOKEN_COOKIE_NAME } from "@modules/auth/core/model/session.constants";
 import type { AppRoleCode } from "@/lib/app-role-code";
 import { nestInternalApiUrl } from "@/lib/server/nest-internal-url";
+import { extractRequestMetadata, logAuditEvent } from "@/lib/server/audit-log";
 
 function loginHref(lng: string): string {
   return `/${lng}/login`;
-}
-
-function forbiddenHref(lng: string, relative: string): string {
-  const seg = relative.replace(/^\/+/, "").replace(/\/+$/, "") || "welcome-dashboard";
-  return `/${lng}/${seg}`;
 }
 
 function roleCodeFromUsersMePayload(data: unknown): string | null {
@@ -53,19 +49,21 @@ export async function hasValidSession(): Promise<boolean> {
   return result.ok;
 }
 
-export type VerifySessionForRolesOptions = {
-  /**
-   * Path after `/${lng}/` when the user is authenticated but their `roleCode`
-   * is not in `allowedRoles` (default: `welcome-dashboard`).
-   */
-  forbiddenRelative?: string;
-};
-
 /**
  * Session gate + RBAC using Nest **`GET …/users/me`** (`roleCode` from Postgres identity).
  *
  * Use on Server Components when a route must be limited to specific roles — pass one or several
  * {@link AppRoleCode} values; the user needs **any** of them (OR semantics).
+ *
+ * Behavior:
+ * - Unauthenticated (no/invalid session cookie) → `redirect(/${lng}/login)` (inherited from `verifySession`).
+ * - Authenticated but `roleCode ∉ allowedRoles` → **`notFound()`** (renders the 404 page).
+ *
+ * Why **`notFound()`** rather than `forbidden()`?
+ *   `forbidden()` is still behind an experimental flag (`authInterrupts`) in Next.js 16 and is
+ *   not recommended for production. A 404 also doesn't disclose that the route exists at all —
+ *   an unauthorized hunter probing `/welcome-admin` gets exactly the same response as someone
+ *   typing a random URL, which is the safer security posture for an app of this kind.
  *
  * @example Super-admin-only surface
  * ```ts
@@ -74,21 +72,18 @@ export type VerifySessionForRolesOptions = {
  *
  * @example Hunter or mentor
  * ```ts
- * await verifySessionForRoles(lng, [AppRoleCode.HUNTER, AppRoleCode.MENTOR], {
- *   forbiddenRelative: "welcome-dashboard",
- * });
+ * await verifySessionForRoles(lng, [AppRoleCode.HUNTER, AppRoleCode.MENTOR]);
  * ```
  */
 export async function verifySessionForRoles(
   lng: string,
   allowedRoles: readonly AppRoleCode[],
-  options?: VerifySessionForRolesOptions,
 ): Promise<void> {
   if (!allowedRoles.length) {
     throw new Error("verifySessionForRoles: allowedRoles must be non-empty");
   }
 
-  await verifySession(lng);
+  const payload = await verifySession(lng);
 
   const token = (await cookies()).get(ACCESS_TOKEN_COOKIE_NAME)?.value?.trim();
   if (!token) {
@@ -104,14 +99,44 @@ export async function verifySessionForRoles(
     cache: "no-store",
   });
 
+  const requestMeta = extractRequestMetadata(await headers());
+  const auditBase = {
+    event: "rbac.denied",
+    outcome: "deny" as const,
+    userId: payload.sub,
+    email: payload.email,
+    allowedRoles: allowedRoles as readonly string[],
+    ...requestMeta,
+  };
+
+  /**
+   * 401 from Nest means the cookie JWT is stale/rejected → treat as
+   * unauthenticated and bounce to login. Anything else (5xx, network/parse
+   * failure, missing/unknown `roleCode`) → 404, because we cannot establish
+   * that the user is allowed and must not fall through to another screen.
+   */
+  if (res.status === 401) {
+    logAuditEvent({ ...auditBase, reason: "users_me_unauthorized" });
+    redirect(loginHref(lng));
+  }
   if (!res.ok) {
-    redirect(forbiddenHref(lng, options?.forbiddenRelative ?? "welcome-dashboard"));
+    logAuditEvent({
+      ...auditBase,
+      reason: "users_me_unreachable",
+      roleCode: null,
+    });
+    notFound();
   }
 
   const data: unknown = await res.json().catch(() => null);
   const roleCode = roleCodeFromUsersMePayload(data);
   const allowed = new Set(allowedRoles);
   if (!roleCode || !allowed.has(roleCode as AppRoleCode)) {
-    redirect(forbiddenHref(lng, options?.forbiddenRelative ?? "welcome-dashboard"));
+    logAuditEvent({
+      ...auditBase,
+      reason: roleCode ? "role_mismatch" : "missing_role_code",
+      roleCode,
+    });
+    notFound();
   }
 }

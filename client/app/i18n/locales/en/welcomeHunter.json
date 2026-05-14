@@ -1,5 +1,5 @@
 {
-  "welcomeDashboard": {
+  "welcomeHunter": {
     "metaTitle": "Welcome to your dashboard",
     "heading": "Welcome",
     "headingWithUsername": "Welcome, {{username}}",
