@@ -1,0 +1,39 @@
+{
+  "myReports": {
+    "metaTitle": "My reports",
+    "heading": "My reports",
+    "subheading": "Track every vulnerability report you're currently drafting and where it stands in the review pipeline.",
+    "actions": {
+      "newReport": "New report",
+      "creating": "Creating…",
+      "retry": "Retry"
+    },
+    "list": {
+      "loadingAriaLabel": "Loading your reports",
+      "empty": {
+        "title": "No report yet",
+        "description": "Start your first vulnerability report — every step is auto-saved as you go.",
+        "cta": "Create my first report"
+      },
+      "error": {
+        "title": "Couldn't load your reports",
+        "description": "Something went wrong while loading the list. {{message}}"
+      }
+    },
+    "card": {
+      "untitled": "Untitled report",
+      "updatedAt": "Updated on {{date}}",
+      "stepsProgress": "{{approved}} / {{total}} steps approved",
+      "stepsProgressAria": "{{approved}} steps approved out of {{total}}",
+      "open": "Open"
+    },
+    "status": {
+      "draft": "Draft",
+      "under-review": "Under review",
+      "ready-to-program": "Ready to submit",
+      "submitted-to-program": "Submitted to program",
+      "given-up": "Given up",
+      "rejected": "Rejected"
+    }
+  }
+}

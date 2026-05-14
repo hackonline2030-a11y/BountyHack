@@ -26,7 +26,7 @@ export const createReportDraft =
     dispatch: AppDispatch,
     _getState: AppGetState,
     deps: Dependencies,
-  ): Promise<void> => {
+  ): Promise<string | null> => {
     dispatch(reportDraftsSlice.actions.createReportDraftStarted());
 
     try {
@@ -42,8 +42,10 @@ export const createReportDraft =
       dispatch(
         reportDraftsSlice.actions.createReportDraftSucceeded({ draftId: draft.id }),
       );
+      return draft.id;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       dispatch(reportDraftsSlice.actions.createReportDraftFailed({ message }));
+      return null;
     }
   };

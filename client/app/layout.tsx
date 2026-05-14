@@ -11,12 +11,14 @@ import enPasswordReset from "@/app/i18n/locales/en/passwordReset.json";
 import enCredits from "@/app/i18n/locales/en/credits.json";
 import enLegal from "@/app/i18n/locales/en/legal.json";
 import enParameters from "@/app/i18n/locales/en/parameters.json";
+import enMyReports from "@/app/i18n/locales/en/myReports.json";
 import frCommon from "@/app/i18n/locales/fr/common.json";
 import frConnexion from "@/app/i18n/locales/fr/connexion.json";
 import frPasswordReset from "@/app/i18n/locales/fr/passwordReset.json";
 import frCredits from "@/app/i18n/locales/fr/credits.json";
 import frLegal from "@/app/i18n/locales/fr/legal.json";
 import frParameters from "@/app/i18n/locales/fr/parameters.json";
+import frMyReports from "@/app/i18n/locales/fr/myReports.json";
 import "@/app/globals.css";
 import { ThemeProvider } from "@/modules/app/nextjs/ThemeProvider";
 import { AppWrapper } from "@/modules/app/nextjs/appWrapper";
@@ -34,6 +36,7 @@ const clientI18nResources = {
     parameters: enParameters,
     legal: enLegal,
     credits: enCredits,
+    myReports: enMyReports,
   },
   fr: {
     common: frCommon,
@@ -42,6 +45,7 @@ const clientI18nResources = {
     parameters: frParameters,
     legal: frLegal,
     credits: frCredits,
+    myReports: frMyReports,
   },
 } satisfies Resource;
 
@@ -99,7 +103,10 @@ export default async function RootLayout({
 }) {
   const lang =
     (await headers()).get(LANG_HEADER) ?? i18nConfig.fallbackLng ?? "en";
-  await getT(["common", "connexion", "passwordReset", "legal", "credits"], { lng: lang });
+  await getT(
+    ["common", "connexion", "passwordReset", "legal", "credits", "myReports"],
+    { lng: lang },
+  );
 
   return (
     <html

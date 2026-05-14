@@ -127,4 +127,22 @@ describe("createReportDraft use case", () => {
     expect(store.getState().reportDrafts.byId).toEqual({});
     expect(store.getState().reportDrafts.currentDraftId).toBeNull();
   });
+
+  it("returns the newly created draft id on success", async () => {
+    const { store } = setup();
+
+    const result = await store.dispatch(createReportDraft({ hunterId: HUNTER_ID }));
+
+    expect(result).toBe(DRAFT_ID);
+  });
+
+  it("returns null when persistence fails", async () => {
+    const brokenGateway = new InMemoryReportDraftsGateway();
+    jest.spyOn(brokenGateway, "save").mockRejectedValueOnce(new Error("DB is down"));
+    const { store } = setup({ gateway: brokenGateway });
+
+    const result = await store.dispatch(createReportDraft({ hunterId: HUNTER_ID }));
+
+    expect(result).toBeNull();
+  });
 });
