@@ -1,9 +1,9 @@
 import { Model } from 'mongoose';
 import { IUserRepository } from '../../ports/user-repository.interface';
 import { MongoUser } from './mongo-user';
-import { UserRecord } from '../../models';
+import { UserAdminSummary, UserRecord } from '../../models';
 import { CreateUserProfilePayload } from '../../payloads';
-import { HttpException, HttpStatus, Inject } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, NotImplementedException } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 
 export class MongoUserRepository implements IUserRepository {
@@ -29,5 +29,16 @@ export class MongoUserRepository implements IUserRepository {
     }
 
     return { uid: String(record._id), username: record.username };
+  }
+
+  /**
+   * The admin listing surface is intentionally Postgres-Prisma only at this stage —
+   * Mongo does not yet carry RBAC role rows. Surface a 501 if a Mongo deployment
+   * ever lands on this endpoint so the caller cannot silently get an empty list.
+   */
+  async listAdminSummaries(): Promise<UserAdminSummary[]> {
+    throw new NotImplementedException(
+      'Admin user listing is not implemented on the Mongo adapter yet.',
+    );
   }
 }

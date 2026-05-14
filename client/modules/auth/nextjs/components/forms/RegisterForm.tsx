@@ -55,7 +55,14 @@ export function RegisterForm() {
 
       setStatus("success");
       setMessage(t("registerForm.successRegister"));
-      router.replace(`${prefix}/login`);
+      /**
+       * The admin who registered the user stays on the admin surface — landing
+       * on /administration where the new row is visible in the management table.
+       * `router.refresh()` re-runs the Server Component on that route so the
+       * fresh user shows up without a manual reload.
+       */
+      router.replace(`${prefix}/administration`);
+      router.refresh();
     } catch {
       setStatus("error");
       setMessage(t("common:errors.network"));

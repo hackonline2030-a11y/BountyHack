@@ -41,12 +41,12 @@ export const ReportDraftWizardPage: FC = () => {
   const stepIndex = step + 1;
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-4 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-lg flex-col gap-4 px-1 py-2">
       <header className="flex flex-col gap-1">
-        <p className="text-sm text-white/70">
+        <p className="text-sm text-form-text-muted">
           Étape {stepIndex} / {TOTAL_STEPS} (brouillon en mémoire)
         </p>
-        <h1 className="text-2xl font-semibold text-white">{label}</h1>
+        <h1 className="text-2xl font-semibold text-form-text">{label}</h1>
       </header>
       {renderStepBody(step, label)}
     </div>
@@ -87,7 +87,7 @@ const TextareaStep: FC<TextareaStepProps> = ({ step, label }) => {
   return (
     <>
       <textarea
-        className="min-h-[160px] rounded-md border border-white/20 bg-black/30 p-3 text-white placeholder:text-white/40"
+        className="min-h-[160px] rounded-md border border-form-border bg-form-surface p-3 text-form-text placeholder:text-form-placeholder focus:border-form-border-strong focus:outline-none focus:ring-2 focus:ring-form-accent/40"
         value={draft}
         placeholder="Contenu de l’étape…"
         onChange={(e) => setDraft(e.target.value)}
@@ -96,7 +96,7 @@ const TextareaStep: FC<TextareaStepProps> = ({ step, label }) => {
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
-          className="rounded-md bg-white/10 px-4 py-2 text-white hover:bg-white/20 disabled:opacity-40"
+          className="rounded-md border border-form-border bg-form-surface px-4 py-2 text-form-text-muted hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
           onClick={onBack}
           disabled={step === ReportDraftDomainModel.ReportDraftStep.META}
         >
@@ -104,14 +104,14 @@ const TextareaStep: FC<TextareaStepProps> = ({ step, label }) => {
         </button>
         <button
           type="button"
-          className="rounded-md bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-500"
+          className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2"
           onClick={onContinue}
         >
           {isLast ? "Terminer" : "Continuer"}
         </button>
         <button
           type="button"
-          className="ml-auto rounded-md border border-white/30 px-3 py-2 text-sm text-white/80 hover:bg-white/10"
+          className="ml-auto rounded-md border border-form-border px-3 py-2 text-sm text-form-text-muted hover:bg-form-overlay"
           onClick={() => {
             dispatch(reportDraftSlice.actions.resetReportDraft());
           }}

@@ -232,7 +232,7 @@ export const MetaSection: FC = () => {
       <div className="flex flex-wrap gap-3 pt-2">
         <button
           type="button"
-          className="rounded-md bg-form-overlay px-4 py-2 text-form-text opacity-40"
+          className="rounded-md border border-form-border bg-form-surface px-4 py-2 text-form-text-muted disabled:cursor-not-allowed disabled:opacity-50"
           disabled
           aria-label="Retour (indisponible — première étape)"
         >
@@ -240,14 +240,14 @@ export const MetaSection: FC = () => {
         </button>
         <button
           type="submit"
-          className="rounded-md bg-form-accent px-4 py-2 font-medium text-form-text hover:bg-form-accent-hover disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
+          className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
           disabled={!isSubmitable}
         >
           Continuer
         </button>
         <button
           type="button"
-          className="ml-auto rounded-md border border-form-border-strong px-3 py-2 text-sm text-form-text-muted hover:bg-form-overlay"
+          className="ml-auto rounded-md border border-form-border px-3 py-2 text-sm text-form-text-muted hover:bg-form-overlay"
           onClick={onReset}
         >
           Réinitialiser
@@ -258,13 +258,13 @@ export const MetaSection: FC = () => {
 };
 
 const textInputClass =
-  "w-full rounded-md border border-form-border bg-form-surface px-3 py-2 text-form-text placeholder:text-form-placeholder focus:border-form-accent-hover focus:outline-none";
+  "w-full rounded-md border border-form-border bg-form-surface px-3 py-2 text-form-text placeholder:text-form-placeholder focus:border-form-border-strong focus:outline-none focus:ring-2 focus:ring-form-accent/40";
 
 const textareaClass =
-  "w-full rounded-md border border-form-border bg-form-surface p-3 text-form-text placeholder:text-form-placeholder focus:border-form-accent-hover focus:outline-none";
+  "w-full rounded-md border border-form-border bg-form-surface p-3 text-form-text placeholder:text-form-placeholder focus:border-form-border-strong focus:outline-none focus:ring-2 focus:ring-form-accent/40";
 
 const selectClass =
-  "w-full rounded-md border border-form-border bg-form-surface px-3 py-2 text-form-text focus:border-form-accent-hover focus:outline-none";
+  "w-full rounded-md border border-form-border bg-form-surface px-3 py-2 text-form-text focus:border-form-border-strong focus:outline-none focus:ring-2 focus:ring-form-accent/40";
 
 type FieldProps = {
   id: string;

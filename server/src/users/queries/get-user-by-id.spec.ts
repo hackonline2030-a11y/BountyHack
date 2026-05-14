@@ -8,6 +8,7 @@ describe('GetUserByIdQuery', () => {
     const repository: jest.Mocked<IUserRepository> = {
       addUsername: jest.fn(),
       findById: jest.fn().mockResolvedValue(user),
+      listAdminSummaries: jest.fn(),
     };
     const query = new GetUserByIdQuery(repository);
 
@@ -21,6 +22,7 @@ describe('GetUserByIdQuery', () => {
     const repository: jest.Mocked<IUserRepository> = {
       addUsername: jest.fn(),
       findById: jest.fn().mockResolvedValue(null),
+      listAdminSummaries: jest.fn(),
     };
     const query = new GetUserByIdQuery(repository);
 

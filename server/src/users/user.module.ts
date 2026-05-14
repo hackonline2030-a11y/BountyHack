@@ -14,6 +14,7 @@ import { AddUsername } from './commands/add-username';
 import { CommonModule } from '../core/common.module';
 import { variables } from '../shared/variables.config';
 import { GetUserByIdQuery } from './queries/get-user-by-id';
+import { ListUsersAdminSummariesQuery } from './queries/list-users-admin-summaries.query';
 import { InMemoryUserRepository } from './adapters/in-memory/in-memory-user-repository';
 
 function resolveUserRepositoryClass() {
@@ -64,6 +65,13 @@ const inMemoryAuthImports =
       inject: [I_USER_REPOSITORY],
       useFactory: (repository) => {
         return new GetUserByIdQuery(repository);
+      },
+    },
+    {
+      provide: ListUsersAdminSummariesQuery,
+      inject: [I_USER_REPOSITORY],
+      useFactory: (repository: IUserRepository) => {
+        return new ListUsersAdminSummariesQuery(repository);
       },
     },
   ],

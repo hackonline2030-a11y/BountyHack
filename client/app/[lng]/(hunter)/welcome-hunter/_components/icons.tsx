@@ -73,6 +73,14 @@ export const SupportIcon: FC<IconProps> = (p) => (
   </IconBase>
 );
 
+export const ReportIcon: FC<IconProps> = (p) => (
+  <IconBase {...p}>
+    <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+    <path d="M14 3v6h6" />
+    <path d="m9 14 2 2 4-4" />
+  </IconBase>
+);
+
 export const SettingsIcon: FC<IconProps> = (p) => (
   <IconBase {...p}>
     <circle cx="12" cy="12" r="3" />

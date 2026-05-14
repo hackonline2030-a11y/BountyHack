@@ -13,6 +13,7 @@ export class MetaFactory {
     data?: Partial<ReportDraftDomainModel.MetaFields>,
   ): ReportDraftDomainModel.MetaFields {
     return {
+      reportTitle: "",
       bugType: "",
       scopeSlug: "",
       endpoint: "",

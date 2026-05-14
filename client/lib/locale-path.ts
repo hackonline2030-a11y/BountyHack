@@ -26,3 +26,13 @@ export function isPasswordResetPath(pathname: string): boolean {
 export function isAdministrationRegisterPath(pathname: string): boolean {
   return /^\/(en|fr)\/administration\/register$/.test(pathname);
 }
+
+/**
+ * Matches any admin surface under `/{lng}/administration` — currently the
+ * user-management table (`/administration`) and the register form
+ * (`/administration/register`). Used by the header to keep the “Admin”
+ * link highlighted while the user navigates inside the section.
+ */
+export function isAdministrationPath(pathname: string): boolean {
+  return /^\/(en|fr)\/administration(?:\/.*)?$/.test(pathname);
+}
