@@ -15,7 +15,7 @@ import { AppDispatch, AppGetState } from "@store/redux/store";
  *
  * The `payload` parameter is intentionally `unknown` — the caller
  * narrows to the right per-step type (`MetaFields`, `DescriptionFields`,
- * `string`, …) before dispatch.
+ * long-form field records, …) before dispatch.
  */
 export const saveStepPayload =
   (input: {

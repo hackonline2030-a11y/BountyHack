@@ -1,6 +1,9 @@
 "use client";
 
 import { type FC, useCallback, useEffect, useMemo, useState } from "react";
+import { longFormFormForStep } from "@modules/report-draft/core/form/long-form-steps.form";
+import { normalizeLongFormPayload } from "@modules/report-draft/core/model/long-form-steps.factory";
+import type { LongFormWizardStep } from "@modules/report-draft/core/model/long-form-steps.factory";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { reportDraftStepToStateKey } from "@modules/report-draft/core/model/report-draft-step-keys";
 import { reportDraftSlice } from "@modules/report-draft/core/store/report-draft.slice";
@@ -9,17 +12,55 @@ import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-s
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
+const Step = ReportDraftDomainModel.ReportDraftStep;
+
+const FIELD_LABELS_FR: Record<LongFormWizardStep, Record<string, string>> = {
+  [Step.COLLECTION]: {
+    hypothesis: "Hypothèse de travail",
+    reconNarrative: "Collecte et reconnaissance",
+    endpointsAndParameters: "Endpoints, paramètres et entrées observés",
+    evidenceSummary: "Synthèse des éléments collectés",
+  },
+  [Step.EXPLOITATION]: {
+    prerequisites: "Prérequis (auth, rôle, configuration…)",
+    attackPath: "Chemin d’attaque",
+    exploitationNarrative: "Scénario d’exploitation",
+    impactIfExploited: "Impact si exploité",
+  },
+  [Step.PROOF_OF_CONCEPT]: {
+    environment: "Environnement de test",
+    stepsToReproduce: "Étapes de reproduction",
+    proofArtifactsDescription: "Requêtes, payloads, captures (texte)",
+    expectedBehavior: "Comportement attendu vs observé",
+  },
+  [Step.RISKS]: {
+    confidentiality: "Risque pour la confidentialité",
+    integrity: "Risque pour l’intégrité",
+    availability: "Risque pour la disponibilité",
+    overallRiskStatement: "Synthèse du risque global",
+  },
+  [Step.REMEDIATION]: {
+    shortTermMitigation: "Atténuation court terme",
+    longTermFix: "Correctif durable",
+    verificationSteps: "Vérification après correctif",
+  },
+  [Step.FINAL]: {
+    conclusion: "Conclusion",
+    references: "Références (CVE, CWE, liens…)",
+    bugBountyNotes: "Notes finales / chaîne de bugs",
+  },
+};
+
 type Props = {
-  step: ReportDraftDomainModel.ReportDraftStep;
+  step: LongFormWizardStep;
   label: string;
 };
 
 /**
- * Étapes texte (COLLECTION → FINAL). **Enregistrer le brouillon**, **Soumettre pour revue**,
- * **Suivant** (vers l’étape suivante) seulement si l’étape est `approved` — sauf dernière étape
- * où « Suivant » est absent (plus de navigation).
+ * Étapes structurées (COLLECTION → FINAL). Brouillon, soumission et « Suivant »
+ * suivent la même machine d’état que META / DESCRIPTION.
  */
-export const ReportDraftTextareaStep: FC<Props> = ({ step, label }) => {
+export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
   const dispatch = useAppDispatch();
   const currentDraftId = useAppSelector((s) => s.reportDrafts.currentDraftId);
   const draftRow = useAppSelector((s) =>
@@ -28,19 +69,20 @@ export const ReportDraftTextareaStep: FC<Props> = ({ step, label }) => {
   const transition = useAppSelector((s) => s.reportDrafts.transition);
 
   const stateKey = useMemo(() => reportDraftStepToStateKey(step), [step]);
-  const persistedPayload =
-    draftRow?.[stateKey] != null
-      ? (draftRow[stateKey] as ReportDraftDomainModel.StepState<string>).payload
-      : "";
-  const stepStatus =
-    draftRow?.[stateKey] != null
-      ? (draftRow[stateKey] as ReportDraftDomainModel.StepState<string>).status
-      : "in-progress";
+  const rawPayload = draftRow?.[stateKey]?.payload;
+  const persistedPayload = useMemo(
+    () => normalizeLongFormPayload(step, rawPayload),
+    [step, rawPayload],
+  );
+
+  const stepStatus = draftRow?.[stateKey]?.status ?? "in-progress";
 
   const submittedBy = draftRow?.hunterId ?? "";
   const [reviewerRole, setReviewerRole] =
     useState<ReportDraftDomainModel.ReviewerRole>("mentor");
-  const [draft, setDraft] = useState(persistedPayload);
+
+  const form = useMemo(() => longFormFormForStep(step), [step]);
+  const [draft, setDraft] = useState<Record<string, string>>(persistedPayload);
 
   useEffect(() => {
     setDraft(persistedPayload);
@@ -48,7 +90,13 @@ export const ReportDraftTextareaStep: FC<Props> = ({ step, label }) => {
 
   const editable = isWizardStepEditable(stepStatus);
   const canNavigateNext = stepStatus === "approved";
-  const isLast = step === ReportDraftDomainModel.ReportDraftStep.FINAL;
+  const isLast = step === Step.FINAL;
+
+  const hasAnyContent = useMemo(
+    () => Object.values(draft).some((v) => v.trim().length > 0),
+    [draft],
+  );
+  const submitReady = form.isSubmitable(draft);
 
   const onNext = useCallback(() => {
     if (isLast || !canNavigateNext) return;
@@ -57,11 +105,11 @@ export const ReportDraftTextareaStep: FC<Props> = ({ step, label }) => {
   }, [dispatch, step, isLast, canNavigateNext]);
 
   const onSaveDraft = useCallback(async () => {
-    if (!currentDraftId || !editable || draft.trim().length === 0) return;
+    if (!currentDraftId || !editable || !hasAnyContent) return;
     await dispatch(
       saveStepPayload({ draftId: currentDraftId, step, payload: draft }),
     );
-  }, [dispatch, currentDraftId, editable, draft, step]);
+  }, [dispatch, currentDraftId, editable, draft, step, hasAnyContent]);
 
   const submitForReview = useCallback(async () => {
     if (!currentDraftId || !submittedBy) return;
@@ -76,7 +124,6 @@ export const ReportDraftTextareaStep: FC<Props> = ({ step, label }) => {
   }, [dispatch, currentDraftId, step, reviewerRole, submittedBy]);
 
   const onBack = useCallback(() => {
-    if (step <= ReportDraftDomainModel.ReportDraftStep.META) return;
     const prev = (step - 1) as ReportDraftDomainModel.ReportDraftStep;
     dispatch(reportDraftSlice.actions.setStep(prev));
   }, [dispatch, step]);
@@ -85,10 +132,15 @@ export const ReportDraftTextareaStep: FC<Props> = ({ step, label }) => {
   const transitionErr =
     transition.status === "error" ? transition.message : null;
 
+  const labelsForStep = FIELD_LABELS_FR[step];
+
   return (
     <>
       {transitionErr ? (
-        <p role="alert" className="rounded-md border border-rose-200 bg-rose-50 p-2 text-sm text-rose-900">
+        <p
+          role="alert"
+          className="rounded-md border border-rose-200 bg-rose-50 p-2 text-sm text-rose-900"
+        >
           {transitionErr}
         </p>
       ) : null}
@@ -109,14 +161,24 @@ export const ReportDraftTextareaStep: FC<Props> = ({ step, label }) => {
           quitter le wizard.
         </p>
       ) : null}
-      <textarea
-        className="min-h-[160px] rounded-md border border-form-border bg-form-surface p-3 text-form-text placeholder:text-form-placeholder focus:border-form-border-strong focus:outline-none focus:ring-2 focus:ring-form-accent/40 disabled:cursor-not-allowed disabled:opacity-60"
-        value={draft}
-        placeholder="Contenu de l’étape…"
-        onChange={(e) => setDraft(e.target.value)}
-        aria-label={label}
-        disabled={!editable}
-      />
+
+      <div className="flex flex-col gap-4" aria-label={label}>
+        {form.keys().map((fieldKey) => (
+          <label key={fieldKey} className="flex flex-col gap-1">
+            <span className="text-sm font-medium text-form-text">
+              {labelsForStep[fieldKey] ?? fieldKey}
+            </span>
+            <textarea
+              className="min-h-[96px] rounded-md border border-form-border bg-form-surface p-3 text-form-text placeholder:text-form-placeholder focus:border-form-border-strong focus:outline-none focus:ring-2 focus:ring-form-accent/40 disabled:cursor-not-allowed disabled:opacity-60"
+              value={draft[fieldKey] ?? ""}
+              placeholder="…"
+              onChange={(e) => setDraft(form.setField(draft, fieldKey, e.target.value))}
+              disabled={!editable}
+            />
+          </label>
+        ))}
+      </div>
+
       <div className="flex flex-col gap-2">
         <label className="text-sm text-form-text-muted" htmlFor={`reviewer-${step}`}>
           Revue demandée à
@@ -140,7 +202,7 @@ export const ReportDraftTextareaStep: FC<Props> = ({ step, label }) => {
           type="button"
           className="rounded-md border border-form-border bg-form-surface px-4 py-2 text-form-text-muted hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
           onClick={onBack}
-          disabled={step === ReportDraftDomainModel.ReportDraftStep.META || transitionBusy}
+          disabled={transitionBusy}
         >
           Retour
         </button>
@@ -148,7 +210,7 @@ export const ReportDraftTextareaStep: FC<Props> = ({ step, label }) => {
           type="button"
           className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
           onClick={() => void onSaveDraft()}
-          disabled={transitionBusy || !editable || draft.trim().length === 0}
+          disabled={transitionBusy || !editable || !hasAnyContent}
         >
           Enregistrer le brouillon
         </button>
@@ -171,12 +233,7 @@ export const ReportDraftTextareaStep: FC<Props> = ({ step, label }) => {
           type="button"
           className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
           onClick={() => void submitForReview()}
-          disabled={
-            transitionBusy ||
-            !editable ||
-            !submittedBy ||
-            draft.trim().length === 0
-          }
+          disabled={transitionBusy || !editable || !submittedBy || !submitReady}
         >
           Soumettre cette étape pour revue
         </button>

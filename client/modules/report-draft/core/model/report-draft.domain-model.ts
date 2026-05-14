@@ -1,6 +1,6 @@
 export namespace ReportDraftDomainModel {
   // ============================================================
-  // Enum et 2 payloads structurés
+  // Enum et payloads structurés (META, DESCRIPTION, étapes longues)
   // ============================================================
   export enum ReportDraftStep {
     META = 0,
@@ -65,27 +65,51 @@ export namespace ReportDraftDomainModel {
   };
 
   /**
-   * The 6 remaining steps (COLLECTION, EXPLOITATION, PROOF_OF_CONCEPT,
-   * RISKS, REMEDIATION, FINAL) use a free-form **Markdown** string as
-   * payload — matching how hunters write on YesWeHack ("Styling with
-   * MarkDown is supported", cf. `bugdescription.png`) and how the
-   * reference PDF report is organised (prose + code blocks + embedded
-   * screenshots).
+   * Structured payloads for COLLECTION → FINAL (YesWeHack-style sections).
+   * Each field is plain text (Markdown-friendly prose is fine). Binaries
+   * stay in `StepState.attachments`.
    *
-   * Rich content (code, lists, references to images) is expressed via
-   * Markdown syntax. Binary assets live in `StepState.attachments`.
-   *
-   * - COLLECTION       → infos gathered before exploiting (source-code
-   *                       reading, app behaviour, observations).
-   * - EXPLOITATION     → reasoning about HOW the vulnerability can be
-   *                       turned into a working exploit.
-   * - PROOF_OF_CONCEPT → concrete reproduction steps (input params,
-   *                       expected output, CTF flag if any).
-   * - RISKS            → impact analysis ("what an attacker could do").
-   * - REMEDIATION      → suggested fix.
-   * - FINAL            → synthesis (and optional "Bug chain" sub-section
-   *                       referencing related vulnerabilities).
+   * Required-field rules live in `long-form-steps.form.ts` (`*Form.isSubmitable`).
    */
+  export type CollectionFields = {
+    hypothesis: string;
+    reconNarrative: string;
+    endpointsAndParameters: string;
+    evidenceSummary: string;
+  };
+
+  export type ExploitationFields = {
+    prerequisites: string;
+    attackPath: string;
+    exploitationNarrative: string;
+    impactIfExploited: string;
+  };
+
+  export type ProofOfConceptFields = {
+    environment: string;
+    stepsToReproduce: string;
+    proofArtifactsDescription: string;
+    expectedBehavior: string;
+  };
+
+  export type RisksFields = {
+    confidentiality: string;
+    integrity: string;
+    availability: string;
+    overallRiskStatement: string;
+  };
+
+  export type RemediationFields = {
+    shortTermMitigation: string;
+    longTermFix: string;
+    verificationSteps: string;
+  };
+
+  export type FinalFields = {
+    conclusion: string;
+    references: string;
+    bugBountyNotes: string;
+  };
 
   export type ReportDraftId = string;
 
@@ -157,12 +181,12 @@ export namespace ReportDraftDomainModel {
     aggregateStatus: AggregateStatus;
     meta: StepState<MetaFields>;
     description: StepState<DescriptionFields>;
-    collection: StepState<string>;
-    exploitation: StepState<string>;
-    proofOfConcept: StepState<string>;
-    risks: StepState<string>;
-    remediation: StepState<string>;
-    final: StepState<string>;
+    collection: StepState<CollectionFields>;
+    exploitation: StepState<ExploitationFields>;
+    proofOfConcept: StepState<ProofOfConceptFields>;
+    risks: StepState<RisksFields>;
+    remediation: StepState<RemediationFields>;
+    final: StepState<FinalFields>;
     createdAt: string;
     updatedAt: string;
     // TODO V2 (dette consciente) : terminationReason / terminatedBy /
