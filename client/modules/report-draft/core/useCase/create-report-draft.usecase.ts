@@ -21,7 +21,7 @@ import { AppDispatch, AppGetState } from "@store/redux/store";
  * coherent (no half-committed draft) and the UI can retry.
  */
 export const createReportDraft =
-  (input: { hunterId: number }) =>
+  (input: { hunterId: string }) =>
   async (
     dispatch: AppDispatch,
     _getState: AppGetState,

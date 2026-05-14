@@ -1,18 +1,32 @@
 "use client";
 
 import { type FC, type ReactNode } from "react";
+import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { useMetaSection } from "@modules/report-draft/react/sections/meta/use-meta-section";
 
 /**
- * META step UI. Renders the 11 structured fields described in the report
- * spec. Pure presentation: the presenter hook owns the draft + handlers.
- *
- * The Continue button is gated by `isSubmitable` (eight fields required —
- * see `MetaForm`). Back is disabled because META is the first step.
+ * META step UI. Chaque action est explicite : **Suivant** (brouillon + navigation)
+ * vs **Soumettre pour revue** (soumission reviewer), conformément au produit.
  */
 export const MetaSection: FC = () => {
-  const { draft, setField, isSubmitable, onContinue, onReset, catalogs } =
-    useMetaSection();
+  const {
+    draft,
+    setField,
+    isSubmitable,
+    editable,
+    canNavigateNext,
+    reviewerRole,
+    setReviewerRole,
+    onNext,
+    onSaveDraft,
+    onSubmitForReview,
+    onReset,
+    transitionBusy,
+    transitionErr,
+    catalogs,
+  } = useMetaSection();
+
+  const lockedOff = !editable || transitionBusy;
 
   const scopeSelectValue =
     draft.scopeSlug === "" || catalogs.scopes.includes(draft.scopeSlug)
@@ -35,16 +49,49 @@ export const MetaSection: FC = () => {
       className="flex flex-col gap-4"
       onSubmit={(event) => {
         event.preventDefault();
-        onContinue();
       }}
       noValidate
     >
+      {transitionErr ? (
+        <p
+          role="alert"
+          className="rounded-md border border-rose-200 bg-rose-50 p-2 text-sm text-rose-900"
+        >
+          {transitionErr}
+        </p>
+      ) : null}
+      {!editable ? (
+        <p className="rounded-md border border-amber-200 bg-amber-50 p-2 text-sm text-amber-950">
+          Cette étape est en attente de revue ou figée. Consulte l’onglet « Commentaires » pour les
+          retours. « Suivant » vers l’étape suivante n’est actif qu’après validation (pastille
+          « Validée »).
+        </p>
+      ) : null}
+      <Field
+        id="meta-report-title"
+        label="Titre du rapport"
+        hint="Titre court affiché dans la liste « Mes rapports » et en en-tête du rapport final"
+        required
+      >
+        <input
+          id="meta-report-title"
+          type="text"
+          value={draft.reportTitle}
+          placeholder="Ex. Path traversal — téléchargement de fichier arbitraire"
+          onChange={(e) => setField("reportTitle", e.target.value)}
+          className={textInputClass}
+          disabled={lockedOff}
+          required
+        />
+      </Field>
+
       <Field id="meta-bug-type" label="Type de bug" required>
         <select
           id="meta-bug-type"
           value={draft.bugType}
           onChange={(e) => setField("bugType", e.target.value)}
           className={selectClass}
+          disabled={lockedOff}
           required
         >
           <option value="">— Sélectionner —</option>
@@ -62,6 +109,7 @@ export const MetaSection: FC = () => {
           value={scopeSelectValue}
           onChange={(e) => onScopeSelectChange(e.target.value)}
           className={selectClass}
+          disabled={lockedOff}
           required
         >
           <option value="">— Sélectionner —</option>
@@ -79,6 +127,7 @@ export const MetaSection: FC = () => {
             placeholder="slug du programme (ex. dojo-50)"
             onChange={(e) => setField("scopeSlug", e.target.value)}
             className={`${textInputClass} mt-2`}
+            disabled={lockedOff}
             aria-label="Scope personnalisé"
           />
         )}
@@ -97,6 +146,7 @@ export const MetaSection: FC = () => {
           placeholder="GET /?action=…"
           onChange={(e) => setField("endpoint", e.target.value)}
           className={textInputClass}
+          disabled={lockedOff}
           required
         />
       </Field>
@@ -112,6 +162,7 @@ export const MetaSection: FC = () => {
           value={draft.vulnerablePartCategory}
           onChange={(e) => setField("vulnerablePartCategory", e.target.value)}
           className={selectClass}
+          disabled={lockedOff}
           required
         >
           <option value="">— Sélectionner —</option>
@@ -136,6 +187,7 @@ export const MetaSection: FC = () => {
           placeholder="filename"
           onChange={(e) => setField("vulnerablePartName", e.target.value)}
           className={textInputClass}
+          disabled={lockedOff}
           required
         />
       </Field>
@@ -152,6 +204,7 @@ export const MetaSection: FC = () => {
           placeholder="public/%;/my_secret.txt"
           onChange={(e) => setField("payload", e.target.value)}
           className={`${textareaClass} min-h-[120px]`}
+          disabled={lockedOff}
           required
         />
       </Field>
@@ -168,6 +221,7 @@ export const MetaSection: FC = () => {
           placeholder="macOS 14, Firefox 138, Burp Suite Community"
           onChange={(e) => setField("technicalEnvironment", e.target.value)}
           className={`${textareaClass} min-h-[100px]`}
+          disabled={lockedOff}
           required
         />
       </Field>
@@ -183,6 +237,7 @@ export const MetaSection: FC = () => {
           placeholder="PHP application (custom file storage), signature-based access…"
           onChange={(e) => setField("applicationFingerprint", e.target.value)}
           className={`${textareaClass} min-h-[80px]`}
+          disabled={lockedOff}
         />
       </Field>
 
@@ -194,6 +249,7 @@ export const MetaSection: FC = () => {
           placeholder="CVE-2024-…"
           onChange={(e) => setField("cve", e.target.value)}
           className={textInputClass}
+          disabled={lockedOff}
         />
       </Field>
 
@@ -209,6 +265,7 @@ export const MetaSection: FC = () => {
           placeholder="Access to unauthorized resources"
           onChange={(e) => setField("impact", e.target.value)}
           className={textInputClass}
+          disabled={lockedOff}
         />
       </Field>
 
@@ -225,9 +282,29 @@ export const MetaSection: FC = () => {
           placeholder="203.0.113.42, 198.51.100.7"
           onChange={(e) => setField("ipsUsed", e.target.value)}
           className={textInputClass}
+          disabled={lockedOff}
           required
         />
       </Field>
+
+      <div className="flex flex-col gap-2 border-t border-form-border pt-4">
+        <label className="text-sm text-form-text-muted" htmlFor="meta-reviewer-role">
+          Soumission pour revue — assigner à
+        </label>
+        <select
+          id="meta-reviewer-role"
+          className="w-full max-w-xs rounded-md border border-form-border bg-form-surface px-3 py-2 text-sm text-form-text"
+          value={reviewerRole}
+          onChange={(e) =>
+            setReviewerRole(e.target.value as ReportDraftDomainModel.ReviewerRole)
+          }
+          disabled={lockedOff}
+        >
+          <option value="mentor">Mentor</option>
+          <option value="quality_checker">Quality checker</option>
+          <option value="hunter">Hunter (pair review)</option>
+        </select>
+      </div>
 
       <div className="flex flex-wrap gap-3 pt-2">
         <button
@@ -239,16 +316,39 @@ export const MetaSection: FC = () => {
           Retour
         </button>
         <button
-          type="submit"
-          className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
-          disabled={!isSubmitable}
+          type="button"
+          className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={() => void onSaveDraft()}
+          disabled={transitionBusy || !editable || !isSubmitable}
         >
-          Continuer
+          Enregistrer le brouillon
+        </button>
+        <button
+          type="button"
+          className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={onNext}
+          disabled={transitionBusy || !canNavigateNext}
+          title={
+            canNavigateNext
+              ? undefined
+              : "Disponible uniquement après validation de cette étape par le reviewer."
+          }
+        >
+          Suivant
+        </button>
+        <button
+          type="button"
+          className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
+          onClick={() => void onSubmitForReview()}
+          disabled={transitionBusy || !editable || !isSubmitable}
+        >
+          Soumettre cette étape pour revue
         </button>
         <button
           type="button"
           className="ml-auto rounded-md border border-form-border px-3 py-2 text-sm text-form-text-muted hover:bg-form-overlay"
           onClick={onReset}
+          disabled={lockedOff}
         >
           Réinitialiser
         </button>

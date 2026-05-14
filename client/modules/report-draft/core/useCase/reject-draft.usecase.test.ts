@@ -6,7 +6,7 @@ import { rejectDraft } from "@modules/report-draft/core/useCase/reject-draft.use
 import { createTestStore } from "@modules/testing/environements";
 
 describe("rejectDraft use case", () => {
-  const HUNTER_ID = 42;
+  const HUNTER_ID = "u-42";
   const DRAFT_ID = "draft-1";
 
   const setup = async () => {
@@ -25,7 +25,7 @@ describe("rejectDraft use case", () => {
     const { store } = await setup();
 
     await store.dispatch(
-      rejectDraft({ draftId: DRAFT_ID, byUser: 99, byRole: "quality_checker" }),
+      rejectDraft({ draftId: DRAFT_ID, byUser: "u-99", byRole: "quality_checker" }),
     );
 
     expect(store.getState().reportDrafts.transition).toEqual({ status: "success" });
@@ -38,7 +38,7 @@ describe("rejectDraft use case", () => {
     const { store, reportDraftsGateway } = await setup();
 
     await store.dispatch(
-      rejectDraft({ draftId: DRAFT_ID, byUser: 99, byRole: "mentor" }),
+      rejectDraft({ draftId: DRAFT_ID, byUser: "u-99", byRole: "mentor" }),
     );
 
     const persisted = await reportDraftsGateway.findById(DRAFT_ID);
@@ -49,7 +49,7 @@ describe("rejectDraft use case", () => {
     const store = createTestStore();
 
     await store.dispatch(
-      rejectDraft({ draftId: "ghost", byUser: 99, byRole: "quality_checker" }),
+      rejectDraft({ draftId: "ghost", byUser: "u-99", byRole: "quality_checker" }),
     );
 
     expect(store.getState().reportDrafts.transition).toEqual({
@@ -62,10 +62,10 @@ describe("rejectDraft use case", () => {
     const { store } = await setup();
 
     await store.dispatch(
-      rejectDraft({ draftId: DRAFT_ID, byUser: 99, byRole: "quality_checker" }),
+      rejectDraft({ draftId: DRAFT_ID, byUser: "u-99", byRole: "quality_checker" }),
     );
     await store.dispatch(
-      rejectDraft({ draftId: DRAFT_ID, byUser: 99, byRole: "quality_checker" }),
+      rejectDraft({ draftId: DRAFT_ID, byUser: "u-99", byRole: "quality_checker" }),
     );
 
     const transition = store.getState().reportDrafts.transition;

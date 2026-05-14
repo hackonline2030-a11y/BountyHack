@@ -1,18 +1,28 @@
 import { ReportDraftAggregate } from "@modules/report-draft/core/model/report-draft.aggregate";
+import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { reportDraftsSlice } from "@modules/report-draft/core/store/report-drafts.slice";
 import { Dependencies } from "@store/dependencies";
 import { AppDispatch, AppGetState } from "@store/redux/store";
 
 /**
- * Use case: reviewer approves a pending submission. Loads both the
- * draft and the submission, runs `aggregate.approveStep` (which mutates
- * the submission in place — `decision = approve`, `decidedAt`,
- * `decidedBy` — and flips the step to `approved`, possibly promoting
- * the whole draft to `ready-to-program` when every step is approved),
- * then persists both entities and mirrors them into the slice.
+ * Use case: persist the in-progress payload of a single step (typing
+ * autosave / "Continuer" button before any review submission).
+ *
+ * Pure edit — no transition. The aggregate's guard rejects edits on
+ * locked steps (`awaiting-review` / `approved`) or on a draft in a
+ * terminal state (`given-up` / `rejected` / `submitted-to-program`), so
+ * the use case stays a thin orchestration layer.
+ *
+ * The `payload` parameter is intentionally `unknown` — the caller
+ * narrows to the right per-step type (`MetaFields`, `DescriptionFields`,
+ * `string`, …) before dispatch.
  */
-export const approveStep =
-  (input: { draftId: string; submissionId: string; decidedBy: string }) =>
+export const saveStepPayload =
+  (input: {
+    draftId: string;
+    step: ReportDraftDomainModel.ReportDraftStep;
+    payload: unknown;
+  }) =>
   async (
     dispatch: AppDispatch,
     _getState: AppGetState,
@@ -31,27 +41,15 @@ export const approveStep =
         return;
       }
 
-      const submission = await deps.submissionsGateway.findById(input.submissionId);
-      if (submission === null) {
-        dispatch(
-          reportDraftsSlice.actions.transitionFailed({
-            message: `Submission '${input.submissionId}' not found.`,
-          }),
-        );
-        return;
-      }
-
       const aggregate = new ReportDraftAggregate(draft, {
         idProvider: deps.idProvider,
         clock: deps.clock,
       });
-      aggregate.approveStep({ submission, decidedBy: input.decidedBy });
+      aggregate.updateStepPayload({ step: input.step, payload: input.payload });
 
       await deps.reportDraftsGateway.save(aggregate.state);
-      await deps.submissionsGateway.save(submission);
 
       dispatch(reportDraftsSlice.actions.draftUpserted(aggregate.state));
-      dispatch(reportDraftsSlice.actions.submissionUpserted(submission));
       dispatch(reportDraftsSlice.actions.transitionSucceeded());
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

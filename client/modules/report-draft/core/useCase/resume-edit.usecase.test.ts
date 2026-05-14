@@ -14,7 +14,7 @@ import { createTestStore } from "@modules/testing/environements";
 const seedDraftNeedsRevisionOnMeta = async (
   gateway: InMemoryReportDraftsGateway,
   draftId: string,
-  hunterId: number,
+  hunterId: string,
 ) => {
   const draft = ReportDraftFactory.create({
     idProvider: new StubIdProvider([draftId]),
@@ -35,16 +35,16 @@ const seedDraftNeedsRevisionOnMeta = async (
   });
   aggregate.requestStepRevisions({
     submission,
-    decidedBy: 99,
+    decidedBy: "u-99",
     comments: [
-      { body: "fix me", authorId: 99, authorRole: "quality_checker", anchor: undefined },
+      { body: "fix me", authorId: "u-99", authorRole: "quality_checker", anchor: undefined },
     ],
   });
   await gateway.save(aggregate.state);
 };
 
 describe("resumeEdit use case", () => {
-  const HUNTER_ID = 42;
+  const HUNTER_ID = "u-42";
   const DRAFT_ID = "draft-1";
 
   it("flips transition to success and the META step back to in-progress", async () => {

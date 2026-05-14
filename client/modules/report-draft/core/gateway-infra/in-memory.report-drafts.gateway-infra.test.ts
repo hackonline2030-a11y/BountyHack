@@ -21,7 +21,7 @@ const buildDraft = (
   ReportDraftFactory.create({
     idProvider: new StubIdProvider([overrides.id ?? "draft-1"]),
     clock: new StubClockProvider([overrides.createdAt ?? "2026-05-14T08:00:00.000Z"]),
-    hunterId: overrides.hunterId ?? 42,
+    hunterId: overrides.hunterId ?? "u-42",
     overrides,
   });
 
@@ -86,11 +86,11 @@ describe("InMemoryReportDraftsGateway (IReportDraftsGateway contract)", () => {
   // ──────────────────────────────────────────────────────────────────────
   it("findByHunterId returns only the drafts owned by the given hunter", async () => {
     const repo = new InMemoryReportDraftsGateway();
-    await repo.save(buildDraft({ id: "d1", hunterId: 42 }));
-    await repo.save(buildDraft({ id: "d2", hunterId: 99 }));
-    await repo.save(buildDraft({ id: "d3", hunterId: 42 }));
+    await repo.save(buildDraft({ id: "d1", hunterId: "u-42" }));
+    await repo.save(buildDraft({ id: "d2", hunterId: "u-99" }));
+    await repo.save(buildDraft({ id: "d3", hunterId: "u-42" }));
 
-    const result = await repo.findByHunterId(42);
+    const result = await repo.findByHunterId("u-42");
 
     expect(result.map((d) => d.id).sort()).toEqual(["d1", "d3"]);
   });
@@ -98,16 +98,16 @@ describe("InMemoryReportDraftsGateway (IReportDraftsGateway contract)", () => {
   it("findByHunterId sorts by updatedAt DESC (most recently touched first)", async () => {
     const repo = new InMemoryReportDraftsGateway();
     await repo.save(
-      buildDraft({ id: "d-oldest", hunterId: 42, updatedAt: "2026-05-10T08:00:00.000Z" }),
+      buildDraft({ id: "d-oldest", hunterId: "u-42", updatedAt: "2026-05-10T08:00:00.000Z" }),
     );
     await repo.save(
-      buildDraft({ id: "d-newest", hunterId: 42, updatedAt: "2026-05-14T08:00:00.000Z" }),
+      buildDraft({ id: "d-newest", hunterId: "u-42", updatedAt: "2026-05-14T08:00:00.000Z" }),
     );
     await repo.save(
-      buildDraft({ id: "d-middle", hunterId: 42, updatedAt: "2026-05-12T08:00:00.000Z" }),
+      buildDraft({ id: "d-middle", hunterId: "u-42", updatedAt: "2026-05-12T08:00:00.000Z" }),
     );
 
-    const result = await repo.findByHunterId(42);
+    const result = await repo.findByHunterId("u-42");
 
     expect(result.map((d) => d.id)).toEqual(["d-newest", "d-middle", "d-oldest"]);
   });
@@ -115,27 +115,27 @@ describe("InMemoryReportDraftsGateway (IReportDraftsGateway contract)", () => {
   it("findByHunterId breaks updatedAt ties with id ASC (deterministic)", async () => {
     const repo = new InMemoryReportDraftsGateway();
     const sharedTimestamp = "2026-05-14T08:00:00.000Z";
-    await repo.save(buildDraft({ id: "d-c", hunterId: 42, updatedAt: sharedTimestamp }));
-    await repo.save(buildDraft({ id: "d-a", hunterId: 42, updatedAt: sharedTimestamp }));
-    await repo.save(buildDraft({ id: "d-b", hunterId: 42, updatedAt: sharedTimestamp }));
+    await repo.save(buildDraft({ id: "d-c", hunterId: "u-42", updatedAt: sharedTimestamp }));
+    await repo.save(buildDraft({ id: "d-a", hunterId: "u-42", updatedAt: sharedTimestamp }));
+    await repo.save(buildDraft({ id: "d-b", hunterId: "u-42", updatedAt: sharedTimestamp }));
 
-    const result = await repo.findByHunterId(42);
+    const result = await repo.findByHunterId("u-42");
 
     expect(result.map((d) => d.id)).toEqual(["d-a", "d-b", "d-c"]);
   });
 
   it("findByHunterId returns an empty array when no draft belongs to the hunter", async () => {
     const repo = new InMemoryReportDraftsGateway();
-    await repo.save(buildDraft({ id: "d1", hunterId: 99 }));
+    await repo.save(buildDraft({ id: "d1", hunterId: "u-99" }));
 
-    expect(await repo.findByHunterId(42)).toEqual([]);
+    expect(await repo.findByHunterId("u-42")).toEqual([]);
   });
 
   it("findByHunterId returns clones — mutations on the result do not affect the store", async () => {
     const repo = new InMemoryReportDraftsGateway();
-    await repo.save(buildDraft({ id: "d1", hunterId: 42, aggregateStatus: "draft" }));
+    await repo.save(buildDraft({ id: "d1", hunterId: "u-42", aggregateStatus: "draft" }));
 
-    const [first] = await repo.findByHunterId(42);
+    const [first] = await repo.findByHunterId("u-42");
     first.aggregateStatus = "given-up";
 
     const fresh = await repo.findById("d1");

@@ -32,7 +32,7 @@ export class InMemoryReportDraftsGateway implements IReportDraftsGateway {
   }
 
   async findByHunterId(
-    hunterId: number,
+    hunterId: string,
   ): Promise<ReportDraftDomainModel.ReportDraft[]> {
     return Array.from(this.store.values())
       .filter((d) => d.hunterId === hunterId)

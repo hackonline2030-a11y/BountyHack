@@ -6,7 +6,7 @@ import { giveUpDraft } from "@modules/report-draft/core/useCase/give-up-draft.us
 import { createTestStore } from "@modules/testing/environements";
 
 describe("giveUpDraft use case", () => {
-  const HUNTER_ID = 42;
+  const HUNTER_ID = "u-42";
   const DRAFT_ID = "draft-1";
 
   const setup = async () => {
@@ -25,7 +25,7 @@ describe("giveUpDraft use case", () => {
     const { store } = await setup();
 
     await store.dispatch(
-      giveUpDraft({ draftId: DRAFT_ID, byUser: 99, byRole: "quality_checker" }),
+      giveUpDraft({ draftId: DRAFT_ID, byUser: "u-99", byRole: "quality_checker" }),
     );
 
     expect(store.getState().reportDrafts.transition).toEqual({ status: "success" });
@@ -49,7 +49,7 @@ describe("giveUpDraft use case", () => {
     const store = createTestStore();
 
     await store.dispatch(
-      giveUpDraft({ draftId: "ghost", byUser: 99, byRole: "quality_checker" }),
+      giveUpDraft({ draftId: "ghost", byUser: "u-99", byRole: "quality_checker" }),
     );
 
     expect(store.getState().reportDrafts.transition).toEqual({
@@ -62,10 +62,10 @@ describe("giveUpDraft use case", () => {
     const { store } = await setup();
 
     await store.dispatch(
-      giveUpDraft({ draftId: DRAFT_ID, byUser: 99, byRole: "quality_checker" }),
+      giveUpDraft({ draftId: DRAFT_ID, byUser: "u-99", byRole: "quality_checker" }),
     );
     await store.dispatch(
-      giveUpDraft({ draftId: DRAFT_ID, byUser: 99, byRole: "quality_checker" }),
+      giveUpDraft({ draftId: DRAFT_ID, byUser: "u-99", byRole: "quality_checker" }),
     );
 
     const transition = store.getState().reportDrafts.transition;

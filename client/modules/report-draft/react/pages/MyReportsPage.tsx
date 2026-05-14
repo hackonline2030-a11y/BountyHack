@@ -19,7 +19,7 @@ const STEP_KEYS = [
 const STEPS_TOTAL = STEP_KEYS.length;
 
 type Props = {
-  hunterId: number;
+  hunterId: string;
   lng: string;
 };
 

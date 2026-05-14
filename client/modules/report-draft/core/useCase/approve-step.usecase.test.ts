@@ -18,7 +18,7 @@ const seedPendingSubmission = async (
   submissionsGateway: InMemorySubmissionsGateway,
   options: {
     draftId: string;
-    hunterId: number;
+    hunterId: string;
     step: ReportDraftDomainModel.ReportDraftStep;
     submissionId: string;
   },
@@ -42,8 +42,8 @@ const seedPendingSubmission = async (
 };
 
 describe("approveStep use case", () => {
-  const HUNTER_ID = 42;
-  const REVIEWER_ID = 99;
+  const HUNTER_ID = "u-42";
+  const REVIEWER_ID = "u-99";
   const DRAFT_ID = "draft-1";
   const SUBMISSION_ID = "submission-1";
   const DECIDED_AT = "2026-01-03T00:00:00.000Z";

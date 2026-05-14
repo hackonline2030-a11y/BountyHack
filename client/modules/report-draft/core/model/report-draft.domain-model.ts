@@ -133,7 +133,7 @@ export namespace ReportDraftDomainModel {
     storageKey: string;
     thumbnailUrl?: string;
     uploadedAt: string;
-    uploadedBy: number;
+    uploadedBy: string;
   }
 
   // ============================================================
@@ -152,7 +152,7 @@ export namespace ReportDraftDomainModel {
   // ============================================================
   export interface ReportDraft {
     id: ReportDraftId;
-    hunterId: number;                  // user id du propriétaire
+    hunterId: string;                  // user uid du propriétaire (JWT sub)
     version: number;                   // optimistic-lock
     aggregateStatus: AggregateStatus;
     meta: StepState<MetaFields>;
@@ -180,11 +180,11 @@ export namespace ReportDraftDomainModel {
     payload: TPayload;                                   // SNAPSHOT immuable
     attachmentsSnapshot: Attachment[];                   // SNAPSHOT immuable des assets attachés au moment de la soumission
     submittedAt: string;
-    submittedBy: number;                                 // hunter user id
+    submittedBy: string;                                 // hunter user uid (JWT sub)
     reviewerRole: ReviewerRole;
     decision: "pending" | "approve" | "request-changes";
     decidedAt?: string;
-    decidedBy?: number;
+    decidedBy?: string;
   }
 
   // ============================================================
@@ -193,7 +193,7 @@ export namespace ReportDraftDomainModel {
   export interface ReviewerComment {
     id: string;                                        // uuid/uuidv7 via IIdProvider
     submissionId: string;                              // FK Submission, pas ReportDraft
-    authorId: number;
+    authorId: string;                                  // user uid (JWT sub)
     authorRole: ReviewerRole;
     anchor?: {
       field: string;

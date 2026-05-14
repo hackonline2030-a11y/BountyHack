@@ -15,7 +15,7 @@ import { AppDispatch, AppGetState } from "@store/redux/store";
 export const giveUpDraft =
   (input: {
     draftId: string;
-    byUser: number;
+    byUser: string;
     byRole: ReportDraftDomainModel.ReviewerRole;
   }) =>
   async (

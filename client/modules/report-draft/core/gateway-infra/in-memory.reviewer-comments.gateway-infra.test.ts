@@ -10,7 +10,7 @@ const commentFixture = (
 ): ReportDraftDomainModel.ReviewerComment => ({
   id: "comment-1",
   submissionId: "submission-1",
-  authorId: 99,
+  authorId: "u-99",
   authorRole: "mentor",
   body: "Please clarify this part.",
   createdAt: "2026-05-14T10:00:00.000Z",

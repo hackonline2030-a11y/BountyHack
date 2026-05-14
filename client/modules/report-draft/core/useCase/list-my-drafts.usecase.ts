@@ -10,7 +10,7 @@ import { AppDispatch, AppGetState } from "@store/redux/store";
  * sorts by `updatedAt DESC` so the latest-edited draft comes first).
  */
 export const listMyDrafts =
-  (input: { hunterId: number }) =>
+  (input: { hunterId: string }) =>
   async (
     dispatch: AppDispatch,
     _getState: AppGetState,

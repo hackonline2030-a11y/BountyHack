@@ -3,6 +3,7 @@
 import { type FC, type ReactNode } from "react";
 import type { CvssMetricOption } from "@modules/report-draft/core/catalog/cvss-metrics.catalog";
 import type { CvssSeverity } from "@modules/report-draft/core/cvss/cvss-3.1";
+import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { useDescriptionSection } from "@modules/report-draft/react/sections/description/use-description-section";
 
 /**
@@ -19,13 +20,23 @@ export const DescriptionSection: FC = () => {
     draft,
     setField,
     isSubmitable,
-    onContinue,
+    editable,
+    canNavigateNext,
+    reviewerRole,
+    setReviewerRole,
+    onNext,
+    onSaveDraft,
+    onSubmitForReview,
     onBack,
     onReset,
+    transitionBusy,
+    transitionErr,
     derived,
     metaScopeSlug,
     catalogs,
   } = useDescriptionSection();
+
+  const lockedOff = !editable || transitionBusy;
 
   const scopeHint =
     metaScopeSlug !== ""
@@ -37,10 +48,23 @@ export const DescriptionSection: FC = () => {
       className="flex flex-col gap-4"
       onSubmit={(event) => {
         event.preventDefault();
-        onContinue();
       }}
       noValidate
     >
+      {transitionErr ? (
+        <p
+          role="alert"
+          className="rounded-md border border-rose-200 bg-rose-50 p-2 text-sm text-rose-900"
+        >
+          {transitionErr}
+        </p>
+      ) : null}
+      {!editable ? (
+        <p className="rounded-md border border-amber-200 bg-amber-50 p-2 text-sm text-amber-950">
+          Cette étape est en attente de revue ou figée. Voir l’onglet « Commentaires ». « Suivant »
+          n’est actif qu’après validation (« Validée »).
+        </p>
+      ) : null}
       <DerivedPanel
         vector={derived.vector}
         score={derived.score}
@@ -52,6 +76,7 @@ export const DescriptionSection: FC = () => {
         label="Attack Vector (AV)"
         hint="Comment l'exploit est-il déclenché ?"
         required
+        disabled={lockedOff}
         value={draft.attackVector}
         options={catalogs.attackVector}
         onChange={(v) => setField("attackVector", v)}
@@ -62,6 +87,7 @@ export const DescriptionSection: FC = () => {
         label="Privileges Required (PR)"
         hint="Privilèges nécessaires sur la cible pour exploiter."
         required
+        disabled={lockedOff}
         value={draft.privilegesRequired}
         options={catalogs.privilegesRequired}
         onChange={(v) => setField("privilegesRequired", v)}
@@ -71,6 +97,7 @@ export const DescriptionSection: FC = () => {
         id="desc-attack-complexity"
         label="Attack Complexity (AC)"
         hint="Conditions hors du contrôle de l'attaquant (Low = aucune)."
+        disabled={lockedOff}
         value={draft.attackComplexity}
         options={catalogs.attackComplexity}
         onChange={(v) => setField("attackComplexity", v)}
@@ -80,6 +107,7 @@ export const DescriptionSection: FC = () => {
         id="desc-user-interaction"
         label="User Interaction (UI)"
         hint="Une action utilisateur est-elle requise ?"
+        disabled={lockedOff}
         value={draft.userInteraction}
         options={catalogs.userInteraction}
         onChange={(v) => setField("userInteraction", v)}
@@ -89,6 +117,7 @@ export const DescriptionSection: FC = () => {
         id="desc-scope"
         label="Scope (S)"
         hint={scopeHint}
+        disabled={lockedOff}
         value={draft.scope}
         options={catalogs.scope}
         onChange={(v) => setField("scope", v)}
@@ -98,6 +127,7 @@ export const DescriptionSection: FC = () => {
         id="desc-confidentiality"
         label="Confidentiality (C)"
         hint="Impact sur la confidentialité des données accessibles."
+        disabled={lockedOff}
         value={draft.confidentiality}
         options={catalogs.ciaImpact}
         onChange={(v) => setField("confidentiality", v)}
@@ -107,6 +137,7 @@ export const DescriptionSection: FC = () => {
         id="desc-integrity"
         label="Integrity (I)"
         hint="Impact sur l'intégrité des données ou systèmes."
+        disabled={lockedOff}
         value={draft.integrity}
         options={catalogs.ciaImpact}
         onChange={(v) => setField("integrity", v)}
@@ -116,30 +147,74 @@ export const DescriptionSection: FC = () => {
         id="desc-availability"
         label="Availability (A)"
         hint="Impact sur la disponibilité du service ou des ressources."
+        disabled={lockedOff}
         value={draft.availability}
         options={catalogs.ciaImpact}
         onChange={(v) => setField("availability", v)}
       />
 
+      <div className="flex flex-col gap-2 border-t border-form-border pt-4">
+        <label className="text-sm text-form-text-muted" htmlFor="desc-reviewer-role">
+          Soumission pour revue — assigner à
+        </label>
+        <select
+          id="desc-reviewer-role"
+          className="w-full max-w-xs rounded-md border border-form-border bg-form-surface px-3 py-2 text-sm text-form-text"
+          value={reviewerRole}
+          onChange={(e) =>
+            setReviewerRole(e.target.value as ReportDraftDomainModel.ReviewerRole)
+          }
+          disabled={lockedOff}
+        >
+          <option value="mentor">Mentor</option>
+          <option value="quality_checker">Quality checker</option>
+          <option value="hunter">Hunter (pair review)</option>
+        </select>
+      </div>
+
       <div className="flex flex-wrap gap-3 pt-2">
         <button
           type="button"
-          className="rounded-md border border-form-border bg-form-surface px-4 py-2 text-form-text-muted hover:bg-form-overlay"
+          className="rounded-md border border-form-border bg-form-surface px-4 py-2 text-form-text-muted hover:bg-form-overlay disabled:opacity-50"
           onClick={onBack}
+          disabled={transitionBusy}
         >
           Retour
         </button>
         <button
-          type="submit"
-          className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
-          disabled={!isSubmitable}
+          type="button"
+          className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={() => void onSaveDraft()}
+          disabled={transitionBusy || !editable || !isSubmitable}
         >
-          Continuer
+          Enregistrer le brouillon
+        </button>
+        <button
+          type="button"
+          className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={onNext}
+          disabled={transitionBusy || !canNavigateNext}
+          title={
+            canNavigateNext
+              ? undefined
+              : "Disponible uniquement après validation de cette étape par le reviewer."
+          }
+        >
+          Suivant
+        </button>
+        <button
+          type="button"
+          className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
+          onClick={() => void onSubmitForReview()}
+          disabled={transitionBusy || !editable || !isSubmitable}
+        >
+          Soumettre cette étape pour revue
         </button>
         <button
           type="button"
           className="ml-auto rounded-md border border-form-border px-3 py-2 text-sm text-form-text-muted hover:bg-form-overlay"
           onClick={onReset}
+          disabled={lockedOff}
         >
           Réinitialiser
         </button>
@@ -156,6 +231,7 @@ type MetricFieldProps = {
   label: string;
   hint?: string;
   required?: boolean;
+  disabled?: boolean;
   value: string;
   options: ReadonlyArray<CvssMetricOption>;
   onChange: (value: string) => void;
@@ -166,6 +242,7 @@ const MetricField: FC<MetricFieldProps> = ({
   label,
   hint,
   required,
+  disabled = false,
   value,
   options,
   onChange,
@@ -181,6 +258,7 @@ const MetricField: FC<MetricFieldProps> = ({
       onChange={(e) => onChange(e.target.value)}
       className={selectClass}
       required={required}
+      disabled={disabled}
     >
       <option value="">— Sélectionner —</option>
       {options.map((option) => (

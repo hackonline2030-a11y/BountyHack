@@ -24,7 +24,7 @@ import { useAppDispatch, useAppSelector } from "@store/redux/store";
  * freely without touching data flow.
  */
 export type UseMyReportsPageInput = {
-  hunterId: number;
+  hunterId: string;
   lng: string;
 };
 

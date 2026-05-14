@@ -22,7 +22,7 @@ export const requestStepRevisions =
   (input: {
     draftId: string;
     submissionId: string;
-    decidedBy: number;
+    decidedBy: string;
     comments: ReadonlyArray<ReviewerCommentDraft>;
   }) =>
   async (

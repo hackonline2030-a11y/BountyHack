@@ -1,6 +1,11 @@
 import { IClockProvider } from "@modules/core/provider/clock-provider";
 import { IIdProvider } from "@modules/core/provider/id-provider";
 import { ReportDraftDomainModel } from "./report-draft.domain-model";
+import {
+  REPORT_DRAFT_STEP_STATE_KEYS,
+  reportDraftStepToStateKey,
+  type ReportDraftStepStateKey,
+} from "./report-draft-step-keys";
 
 export interface ReportDraftAggregateDeps {
   idProvider: IIdProvider;
@@ -55,11 +60,11 @@ export class ReportDraftAggregate {
   submitStepForReview(input: {
     step: ReportDraftDomainModel.ReportDraftStep;
     reviewerRole: ReportDraftDomainModel.ReviewerRole;
-    submittedBy: number;
+    submittedBy: string;
   }): ReportDraftDomainModel.Submission<unknown> {
     this.guardAggregateNotTerminal("submit a step on");
 
-    const stepKey = stepEnumToKey(input.step);
+    const stepKey = reportDraftStepToStateKey(input.step);
     const stepState = this._state[stepKey] as ReportDraftDomainModel.StepState<unknown>;
     if (stepState.status !== "in-progress" && stepState.status !== "needs-revision") {
       throw new Error(
@@ -99,6 +104,35 @@ export class ReportDraftAggregate {
   }
 
   /**
+   * Replace a step's in-progress payload (typing autosave / "Continuer"
+   * button). Pure edit, no transition: bumps `updatedAt` + `version` but
+   * leaves status, round and reviewer assignment untouched.
+   *
+   * Editing is only legal while the step is still mutable — `in-progress`
+   * or `needs-revision`. Touching a step that's `awaiting-review` (locked
+   * for a reviewer) or `approved` (frozen) is a domain-level error.
+   */
+  updateStepPayload<T>(input: {
+    step: ReportDraftDomainModel.ReportDraftStep;
+    payload: T;
+  }): void {
+    this.guardAggregateNotTerminal("edit a step on");
+
+    const stepKey = reportDraftStepToStateKey(input.step);
+    const stepState = this._state[stepKey] as ReportDraftDomainModel.StepState<unknown>;
+    if (stepState.status !== "in-progress" && stepState.status !== "needs-revision") {
+      throw new Error(
+        `ReportDraftAggregate: cannot edit step ${ReportDraftDomainModel.ReportDraftStep[input.step]}: ` +
+          `current status is '${stepState.status}', expected 'in-progress' or 'needs-revision'.`,
+      );
+    }
+
+    stepState.payload = input.payload;
+    this._state.updatedAt = this.deps.clock.now();
+    this._state.version += 1;
+  }
+
+  /**
    * Re-open a step previously marked "needs-revision" so the hunter can
    * edit it again. Does NOT bump the round counter — only `submitStepForReview`
    * does (one round = one submit/review cycle).
@@ -106,7 +140,7 @@ export class ReportDraftAggregate {
   resumeEdit(step: ReportDraftDomainModel.ReportDraftStep): void {
     this.guardAggregateNotTerminal("resume editing on");
 
-    const stepKey = stepEnumToKey(step);
+    const stepKey = reportDraftStepToStateKey(step);
     const stepState = this._state[stepKey] as ReportDraftDomainModel.StepState<unknown>;
     if (stepState.status !== "needs-revision") {
       throw new Error(
@@ -132,7 +166,7 @@ export class ReportDraftAggregate {
    */
   approveStep(input: {
     submission: ReportDraftDomainModel.Submission<unknown>;
-    decidedBy: number;
+    decidedBy: string;
   }): void {
     this.guardAggregateNotTerminal("approve a step on");
     const { submission, decidedBy } = input;
@@ -165,7 +199,7 @@ export class ReportDraftAggregate {
    */
   requestStepRevisions(input: {
     submission: ReportDraftDomainModel.Submission<unknown>;
-    decidedBy: number;
+    decidedBy: string;
     comments: ReadonlyArray<ReviewerCommentDraft>;
   }): ReportDraftDomainModel.ReviewerComment[] {
     this.guardAggregateNotTerminal("request revisions on");
@@ -215,7 +249,7 @@ export class ReportDraftAggregate {
    * V2: persist `byUser` / `byRole` / `reason` on the draft for audit.
    */
   giveUpDraft(input: {
-    byUser: number;
+    byUser: string;
     byRole: ReportDraftDomainModel.ReviewerRole;
   }): void {
     this.guardAggregateNotTerminal("give up");
@@ -234,7 +268,7 @@ export class ReportDraftAggregate {
    * V2: persist `byUser` / `byRole` / `reason` on the draft for audit.
    */
   rejectDraft(input: {
-    byUser: number;
+    byUser: string;
     byRole: ReportDraftDomainModel.ReviewerRole;
   }): void {
     this.guardAggregateNotTerminal("reject");
@@ -275,7 +309,7 @@ export class ReportDraftAggregate {
   private guardSubmissionMatchesPendingStep(
     submission: ReportDraftDomainModel.Submission<unknown>,
     actionVerb: string,
-  ): StepKey {
+  ): ReportDraftStepStateKey {
     if (submission.reportDraftId !== this._state.id) {
       throw new Error(
         `ReportDraftAggregate: cannot ${actionVerb} submission ${submission.id}: ` +
@@ -289,7 +323,7 @@ export class ReportDraftAggregate {
       );
     }
 
-    const stepKey = stepEnumToKey(submission.step);
+    const stepKey = reportDraftStepToStateKey(submission.step);
     const stepState = this._state[stepKey] as ReportDraftDomainModel.StepState<unknown>;
     if (submission.round !== stepState.currentRound) {
       throw new Error(
@@ -309,61 +343,7 @@ export class ReportDraftAggregate {
   }
 
   private allStepsApproved(): boolean {
-    return STEP_KEYS.every((key) => this._state[key].status === "approved");
-  }
-}
-
-// ────────────────────────────────────────────────────────────────────────
-// Step <-> property-key mapping
-// ────────────────────────────────────────────────────────────────────────
-
-type StepKey =
-  | "meta"
-  | "description"
-  | "collection"
-  | "exploitation"
-  | "proofOfConcept"
-  | "risks"
-  | "remediation"
-  | "final";
-
-const STEP_KEYS: ReadonlyArray<StepKey> = [
-  "meta",
-  "description",
-  "collection",
-  "exploitation",
-  "proofOfConcept",
-  "risks",
-  "remediation",
-  "final",
-];
-
-/**
- * Maps a {@link ReportDraftDomainModel.ReportDraftStep} enum value to the
- * corresponding key on {@link ReportDraftDomainModel.ReportDraft}.
- *
- * The exhaustive `switch` on the enum lets TypeScript flag any missing case
- * if a new step is added — keeps the aggregate in sync with the domain.
- */
-function stepEnumToKey(step: ReportDraftDomainModel.ReportDraftStep): StepKey {
-  const Step = ReportDraftDomainModel.ReportDraftStep;
-  switch (step) {
-    case Step.META:
-      return "meta";
-    case Step.DESCRIPTION:
-      return "description";
-    case Step.COLLECTION:
-      return "collection";
-    case Step.EXPLOITATION:
-      return "exploitation";
-    case Step.PROOF_OF_CONCEPT:
-      return "proofOfConcept";
-    case Step.RISKS:
-      return "risks";
-    case Step.REMEDIATION:
-      return "remediation";
-    case Step.FINAL:
-      return "final";
+    return REPORT_DRAFT_STEP_STATE_KEYS.every((key) => this._state[key].status === "approved");
   }
 }
 
