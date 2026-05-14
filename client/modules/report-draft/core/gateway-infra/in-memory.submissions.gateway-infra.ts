@@ -1,8 +1,8 @@
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
-import { SubmissionRepository } from "./submission-repository";
+import type { ISubmissionsGateway } from "@modules/report-draft/core/gateway/submissions.gateway";
 
 /**
- * Test / dev-mode adapter for {@link SubmissionRepository} backed by a
+ * Test / dev-mode adapter for {@link ISubmissionsGateway} backed by a
  * `Map`. Faithful to the port's contract:
  *
  * - `save` deep-clones the incoming submission so subsequent mutations of
@@ -16,7 +16,7 @@ import { SubmissionRepository } from "./submission-repository";
  * the whole `report-draft` flow end-to-end in dev (no DB required) and to
  * exercise use cases in tests without mocking.
  */
-export class InMemorySubmissionRepository implements SubmissionRepository {
+export class InMemorySubmissionsGateway implements ISubmissionsGateway {
   private readonly store = new Map<
     string,
     ReportDraftDomainModel.Submission<unknown>

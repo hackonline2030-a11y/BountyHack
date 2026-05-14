@@ -28,9 +28,9 @@ export type ReviewerCommentDraft = Pick<
  * passed-in submissions) in place and may return ancillary domain objects
  * (new Submission, new ReviewerComment[], …).
  *
- * The aggregate is **pure domain** : no repository is injected. Persistence
+ * The aggregate is **pure domain** : no gateway is injected. Persistence
  * of returned artefacts is the caller's responsibility (a use case at the
- * application layer that owns `SubmissionRepository`, etc.).
+ * application layer that owns `ISubmissionsGateway`, etc.).
  */
 export class ReportDraftAggregate {
   constructor(

@@ -1,21 +1,25 @@
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 
 /**
- * Hexagonal port for persisting {@link ReportDraftDomainModel.Submission}s.
+ * Outbound port for storing and retrieving
+ * {@link ReportDraftDomainModel.Submission}s. Speaks the domain language
+ * directly (not `Response` / DTOs) because submissions live entirely
+ * inside the `report-draft` bounded context — no external API is involved
+ * for now. Future adapters (Prisma, Postgres, etc.) are expected to
+ * (de)serialise transparently.
  *
- * Production will use a Postgres / Prisma adapter; tests and dev workflows
- * use {@link InMemorySubmissionRepository}. Both MUST honour the same
- * contract (see `submission-repository.contract.test.ts`):
+ * Contract honoured by every implementation
+ * (cf. `in-memory.submissions.gateway-infra.test.ts`):
  *
  * - `save` is upsert-by-id (creates or replaces).
  * - Stored submissions are isolated from caller-side mutations (deep-clone
  *   on the way in and on the way out).
  *
- * The repository is **payload-agnostic** — submissions are stored as
+ * The gateway is **payload-agnostic** — submissions are stored as
  * `Submission<unknown>`. Callers know the expected payload shape from the
  * `step` discriminant and cast at the use-case layer.
  */
-export interface SubmissionRepository {
+export interface ISubmissionsGateway {
   /**
    * Insert or replace the submission. Two consecutive `save`s with the
    * same id keep only the latest version (typical workflow: save once

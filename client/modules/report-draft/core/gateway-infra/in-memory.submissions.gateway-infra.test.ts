@@ -1,4 +1,4 @@
-import { InMemorySubmissionRepository } from "@modules/report-draft/core/persistence/in-memory.submission-repository";
+import { InMemorySubmissionsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.submissions.gateway-infra";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 
 const Step = ReportDraftDomainModel.ReportDraftStep;
@@ -23,12 +23,12 @@ const submissionFixture = (
   ...overrides,
 });
 
-describe("InMemorySubmissionRepository (SubmissionRepository contract)", () => {
+describe("InMemorySubmissionsGateway (ISubmissionsGateway contract)", () => {
   // ──────────────────────────────────────────────────────────────────────
   // save / findById round-trip
   // ──────────────────────────────────────────────────────────────────────
   it("save + findById round-trip returns an equivalent submission", async () => {
-    const repo = new InMemorySubmissionRepository();
+    const repo = new InMemorySubmissionsGateway();
     const submission = submissionFixture();
 
     await repo.save(submission);
@@ -38,13 +38,13 @@ describe("InMemorySubmissionRepository (SubmissionRepository contract)", () => {
   });
 
   it("findById returns null for an unknown id", async () => {
-    const repo = new InMemorySubmissionRepository();
+    const repo = new InMemorySubmissionsGateway();
 
     expect(await repo.findById("does-not-exist")).toBeNull();
   });
 
   it("save with the same id overwrites the previous version (decision update flow)", async () => {
-    const repo = new InMemorySubmissionRepository();
+    const repo = new InMemorySubmissionsGateway();
     await repo.save(submissionFixture({ decision: "pending" }));
 
     await repo.save(
@@ -64,7 +64,7 @@ describe("InMemorySubmissionRepository (SubmissionRepository contract)", () => {
   // Isolation — store insulated from caller-side mutations
   // ──────────────────────────────────────────────────────────────────────
   it("save deep-clones the input — later mutations on the original do not leak", async () => {
-    const repo = new InMemorySubmissionRepository();
+    const repo = new InMemorySubmissionsGateway();
     const submission = submissionFixture({ decision: "pending" });
 
     await repo.save(submission);
@@ -75,7 +75,7 @@ describe("InMemorySubmissionRepository (SubmissionRepository contract)", () => {
   });
 
   it("findById returns a clone — mutations on the result do not affect the store", async () => {
-    const repo = new InMemorySubmissionRepository();
+    const repo = new InMemorySubmissionsGateway();
     await repo.save(submissionFixture({ decision: "pending" }));
 
     const first = await repo.findById("submission-1");
@@ -89,7 +89,7 @@ describe("InMemorySubmissionRepository (SubmissionRepository contract)", () => {
   // findByDraftId
   // ──────────────────────────────────────────────────────────────────────
   it("findByDraftId returns only the submissions matching the draft id", async () => {
-    const repo = new InMemorySubmissionRepository();
+    const repo = new InMemorySubmissionsGateway();
     await repo.save(submissionFixture({ id: "s1", reportDraftId: "draft-1" }));
     await repo.save(submissionFixture({ id: "s2", reportDraftId: "draft-2" }));
     await repo.save(
@@ -102,7 +102,7 @@ describe("InMemorySubmissionRepository (SubmissionRepository contract)", () => {
   });
 
   it("findByDraftId returns submissions ordered by round then step (deterministic)", async () => {
-    const repo = new InMemorySubmissionRepository();
+    const repo = new InMemorySubmissionsGateway();
     await repo.save(
       submissionFixture({ id: "s-meta-r2", step: Step.META, round: 2 }),
     );
@@ -123,7 +123,7 @@ describe("InMemorySubmissionRepository (SubmissionRepository contract)", () => {
   });
 
   it("findByDraftId returns an empty array when no submissions match", async () => {
-    const repo = new InMemorySubmissionRepository();
+    const repo = new InMemorySubmissionsGateway();
     await repo.save(submissionFixture({ reportDraftId: "draft-99" }));
 
     expect(await repo.findByDraftId("draft-1")).toEqual([]);
@@ -133,7 +133,7 @@ describe("InMemorySubmissionRepository (SubmissionRepository contract)", () => {
   // findLatestForStep
   // ──────────────────────────────────────────────────────────────────────
   it("findLatestForStep returns the highest-round submission for the (draft, step) pair", async () => {
-    const repo = new InMemorySubmissionRepository();
+    const repo = new InMemorySubmissionsGateway();
     await repo.save(
       submissionFixture({ id: "round-1", step: Step.META, round: 1 }),
     );
@@ -150,7 +150,7 @@ describe("InMemorySubmissionRepository (SubmissionRepository contract)", () => {
   });
 
   it("findLatestForStep ignores submissions for a different step on the same draft", async () => {
-    const repo = new InMemorySubmissionRepository();
+    const repo = new InMemorySubmissionsGateway();
     await repo.save(
       submissionFixture({ id: "meta-r1", step: Step.META, round: 1 }),
     );
@@ -164,14 +164,14 @@ describe("InMemorySubmissionRepository (SubmissionRepository contract)", () => {
   });
 
   it("findLatestForStep returns null when the step has never been submitted", async () => {
-    const repo = new InMemorySubmissionRepository();
+    const repo = new InMemorySubmissionsGateway();
     await repo.save(submissionFixture({ step: Step.META, round: 1 }));
 
     expect(await repo.findLatestForStep("draft-1", Step.FINAL)).toBeNull();
   });
 
   it("findLatestForStep ignores submissions on other drafts even at higher rounds", async () => {
-    const repo = new InMemorySubmissionRepository();
+    const repo = new InMemorySubmissionsGateway();
     await repo.save(
       submissionFixture({
         id: "other-draft-r5",
