@@ -6,6 +6,7 @@ import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-
  * defer to `MetaForm.isSubmitable`.
  */
 const REQUIRED_FIELDS: ReadonlyArray<keyof ReportDraftDomainModel.MetaFields> = [
+  "reportTitle",
   "bugType",
   "scopeSlug",
   "endpoint",

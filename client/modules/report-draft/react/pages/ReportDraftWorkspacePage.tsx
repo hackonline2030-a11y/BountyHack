@@ -58,11 +58,11 @@ export const ReportDraftWorkspacePage: FC = () => {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8">
+    <div className="mx-auto my-6 flex w-full max-w-4xl flex-col gap-6 rounded-lg border border-black/10 bg-form-surface px-4 py-6 shadow-xl sm:my-10 sm:px-6 sm:py-8">
       <div
         role="tablist"
         aria-label="Espace de rédaction du rapport"
-        className="flex w-full gap-6 border-b border-white/10"
+        className="flex w-full gap-6 border-b border-form-border"
       >
         {TAB_ORDER.map((key) => {
           const isActive = key === activeTab;
@@ -77,10 +77,10 @@ export const ReportDraftWorkspacePage: FC = () => {
               tabIndex={isActive ? 0 : -1}
               onClick={() => setActiveTab(key)}
               onKeyDown={onTabKeyDown}
-              className={`-mb-px border-b-2 px-1 py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 ${
+              className={`-mb-px border-b-2 px-1 py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent ${
                 isActive
-                  ? "border-white text-white"
-                  : "border-transparent text-white/60 hover:text-white"
+                  ? "border-form-accent text-form-text"
+                  : "border-transparent text-form-text-muted hover:text-form-text"
               }`}
             >
               {TAB_LABELS[key]}

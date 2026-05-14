@@ -3,13 +3,20 @@ import { UnauthorizedException } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { AddUsername } from '../commands/add-username';
 import { GetUserByIdQuery } from '../queries/get-user-by-id';
-import { UserProfileResponseDto } from '../dto/user.dto';
+import { ListUsersAdminSummariesQuery } from '../queries/list-users-admin-summaries.query';
+import {
+  UserAdminSummaryDto,
+  UserAdminSummaryListResponseDto,
+  UserProfileResponseDto,
+} from '../dto/user.dto';
 import { RequestWithIdentity } from '../../auth/adapters/http/request-with-identity';
+import { AppRoleCode } from '../../shared/rbac/app-role.code';
 
 describe('UsersController', () => {
   let controller: UsersController;
   let addUsername: jest.Mocked<AddUsername>;
   let getUserByIdQuery: jest.Mocked<GetUserByIdQuery>;
+  let listUsersAdminSummariesQuery: jest.Mocked<ListUsersAdminSummariesQuery>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -23,12 +30,17 @@ describe('UsersController', () => {
           provide: GetUserByIdQuery,
           useValue: { execute: jest.fn() },
         },
+        {
+          provide: ListUsersAdminSummariesQuery,
+          useValue: { execute: jest.fn() },
+        },
       ],
     }).compile();
 
     controller = module.get<UsersController>(UsersController);
     addUsername = module.get(AddUsername);
     getUserByIdQuery = module.get(GetUserByIdQuery);
+    listUsersAdminSummariesQuery = module.get(ListUsersAdminSummariesQuery);
   });
 
   it('should create user profile for authenticated user', async () => {
@@ -75,5 +87,53 @@ describe('UsersController', () => {
         roleCode: null,
       }),
     );
+  });
+
+  describe('list() — admin user summaries', () => {
+    it('returns the items wrapped in a typed response DTO', async () => {
+      listUsersAdminSummariesQuery.execute.mockResolvedValue([
+        {
+          uid: 'u-1',
+          username: 'alice',
+          email: 'alice@example.com',
+          roleCode: AppRoleCode.SUPER_ADMIN,
+        },
+        {
+          uid: 'u-2',
+          username: 'bob',
+          email: null,
+          roleCode: AppRoleCode.HUNTER,
+        },
+      ]);
+
+      const result = await controller.list();
+
+      expect(listUsersAdminSummariesQuery.execute).toHaveBeenCalledTimes(1);
+      expect(result).toBeInstanceOf(UserAdminSummaryListResponseDto);
+      expect(result.items).toHaveLength(2);
+      expect(result.items[0]).toBeInstanceOf(UserAdminSummaryDto);
+      expect(result.items[0]).toEqual({
+        uid: 'u-1',
+        username: 'alice',
+        email: 'alice@example.com',
+        roleCode: AppRoleCode.SUPER_ADMIN,
+      });
+      expect(result.items[1].email).toBeNull();
+    });
+
+    it('returns an empty items array when no users are present', async () => {
+      listUsersAdminSummariesQuery.execute.mockResolvedValue([]);
+
+      const result = await controller.list();
+
+      expect(result.items).toEqual([]);
+    });
+
+    it('propagates errors from the use case', async () => {
+      const error = new Error('boom');
+      listUsersAdminSummariesQuery.execute.mockRejectedValue(error);
+
+      await expect(controller.list()).rejects.toBe(error);
+    });
   });
 });

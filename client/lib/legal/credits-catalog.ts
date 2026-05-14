@@ -40,6 +40,12 @@ export const CREDITS_CATALOG: Record<CreditCategory, CreditItem[]> = {
       author: "Xinh Studio",
       sourceUrl: "https://www.magnific.com/icon/profile_11045305",
     },
+    {
+      name: "Fond d'écran",
+      author: "SVGBackgrounds.com (Matt Visiwig)",
+      sourceUrl: "https://www.svgbackgrounds.com/set/free-svg-backgrounds-and-patterns/",
+      license: "Free SVG Backgrounds and Patterns",
+    },
   ],
   videos: [],
   fonts: [],

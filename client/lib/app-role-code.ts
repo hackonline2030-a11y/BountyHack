@@ -11,6 +11,9 @@ export enum AppRoleCode {
   QUALITY_CONTENT = "QUALITY_CONTENT",
 }
 
+/** Frozen list of every known {@link AppRoleCode} (handy for runtime membership checks). */
+export const APP_ROLE_CODE_VALUES: readonly AppRoleCode[] = Object.values(AppRoleCode);
+
 /** Order shown in admin register dropdown. */
 export const REGISTER_ROLE_OPTIONS: AppRoleCode[] = [
   AppRoleCode.USER,
@@ -33,4 +36,5 @@ export const REGISTER_ROLE_OPTIONS: AppRoleCode[] = [
 export const APP_LOGIN_ALLOWED_ROLES: readonly AppRoleCode[] = [
   AppRoleCode.SUPER_ADMIN,
   AppRoleCode.HUNTER,
+  AppRoleCode.QUALITY_CHECKER,
 ];

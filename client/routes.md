@@ -12,7 +12,8 @@ All user-facing pages live under the dynamic segment **`[lng]`** (supported loca
 | `/{lng}/login` | Login (public) |
 | `/{lng}/forgot-password` | Forgot password — `POST …/auth/password-reset/request` (Nest direct from browser; neutral success copy) |
 | `/{lng}/password-reset` | Set new password from e-mail link (`?token=…`) — `POST …/auth/password-reset/confirm` |
-| `/{lng}/administration/register` | **Admin:** register a new user via Nest; **`verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN])`**; others → **`notFound()`** (404) (see [`lib/dal/session.ts`](lib/dal/session.ts)) |
+| `/{lng}/administration` | **Admin:** user-management table (username / email / roleCode) backed by Nest `GET …/users`; **`verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN])`**; others → **`notFound()`** (404) |
+| `/{lng}/administration/register` | **Admin:** register a new user via Nest; **`verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN])`**; others → **`notFound()`** (404) (see [`lib/dal/session.ts`](lib/dal/session.ts)). Successful submit redirects back to `/{lng}/administration` and refreshes the table. |
 | `/{lng}/welcome-hunter` | Hunter welcome dashboard under `(hunter)`; **`verifySessionForRoles(lng, [AppRoleCode.HUNTER])`**; others → **`notFound()`** (404) |
 | `/{lng}/welcome-admin` | Admin welcome page under `(admin)`; **`verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN])`**; others → **`notFound()`** (404) |
 | `/{lng}/parameters` | Settings (session required); **Security** includes TOTP enrollment UI |
@@ -37,7 +38,8 @@ There is **no separate route middleware** file for “logged-in only” pages. P
 | `/{lng}/welcome-hunter` | [`getWelcomeUser(lng)`](lib/dal/welcome-user.ts); **`verifySessionForRoles(lng, [AppRoleCode.HUNTER])`** |
 | `/{lng}/welcome-admin` | [`getWelcomeUser(lng)`](lib/dal/welcome-user.ts); **`verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN])`** |
 | `/{lng}/parameters` | [`getParametersProfile(lng)`](lib/dal/parameters-profile.ts) loads `twoFactorEnabled` from `GET …/users/me`; TOTP actions use BFF `POST /api/account/...` |
-| `/{lng}/administration/register` | [`RegisterForm`](app/_components/forms/RegisterForm.tsx); **`verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN])`** |
+| `/{lng}/administration` | [`listAdminUsers(lng)`](lib/dal/admin-users.ts) calls Nest `GET …/users` (admin-only) and feeds [`UserManagementTable`](modules/admin/nextjs/components/UserManagementTable.tsx); **`verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN])`** |
+| `/{lng}/administration/register` | [`RegisterForm`](modules/auth/nextjs/components/forms/RegisterForm.tsx); **`verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN])`**. On success: `router.replace('/{lng}/administration')` then `router.refresh()`. |
 
 So “session protected” here means: **valid JWT in the Next origin cookie**, verified server-side before HTML for that route.
 
@@ -108,6 +110,12 @@ Some data is loaded **only on the Next.js server** during Server Component rende
   1. Reads the access token from the **httpOnly** cookie.
   2. **`GET`** `nestInternalApiUrl("users/me")` with `Authorization: Bearer <token>`, `cache: "no-store"`.
   3. Maps the JSON `username` field to UI data; no JWT/email fallback. On failure or missing username, logs **`Aucun pseudo trouvé`** and the UI shows only the plain “Bienvenue” / “Welcome” heading.
+
+- **Admin user listing:** [`lib/dal/admin-users.ts`](lib/dal/admin-users.ts) — `listAdminUsers(lng)` (`"server-only"`); **called only after** `verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN])`:
+
+  1. Reads the access token from the **httpOnly** cookie (redirect to login if missing).
+  2. **`GET`** `nestInternalApiUrl("users")` with `Authorization: Bearer <token>`, `cache: "no-store"`. The Nest endpoint is decorated with **`@AuthRoles(AppRoleCode.SUPER_ADMIN)`**, so a stolen cookie tied to a non-admin account is rejected with **403** here — independent of the Next page gate.
+  3. Parses `{ items: UserAdminSummaryDto[] }` (each row: `uid`, `username`, `email`, `roleCode`) into a typed `AdminUserSummary[]`. Unknown role codes are coerced to `null` rather than rendered verbatim. Errors are returned as a discriminated union (`unreachable` / `malformed_payload`) so the page can show a localised banner instead of a stack trace.
 
 **Why DevTools does not show this `GET`:** the request is made **from the Next server to Nest**, while the browser only requests the document (e.g. `GET /fr/welcome-hunter`). To observe the Nest call, use Nest’s request logs or tooling on the server process—not the browser Network panel (unless you deliberately move the fetch to the client, which has different security implications).
 

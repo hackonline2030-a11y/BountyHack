@@ -51,6 +51,7 @@ export default async function WelcomeHunterPage({ params }: PageProps) {
   const navLabels: DashboardNavLabels = {
     label: t("welcomeHunter.nav.label"),
     emails: t("welcomeHunter.nav.emails"),
+    reports: t("welcomeHunter.nav.reports"),
     tracks: t("welcomeHunter.nav.tracks"),
     courses: t("welcomeHunter.nav.courses"),
     teams: t("welcomeHunter.nav.teams"),
@@ -66,6 +67,7 @@ export default async function WelcomeHunterPage({ params }: PageProps) {
    */
   const navHrefs: DashboardNavHrefs = {
     emails: `${prefix}/emails`,
+    reports: `${prefix}/my-reports`,
     tracks: `${prefix}/tracks`,
     courses: `${prefix}/courses`,
     teams: `${prefix}/teams`,

@@ -7,6 +7,7 @@
     "nav": {
       "label": "Dashboard navigation",
       "emails": "Emails",
+      "reports": "My reports",
       "tracks": "My tracks",
       "courses": "My courses",
       "teams": "My teams",

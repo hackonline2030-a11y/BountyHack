@@ -1,0 +1,34 @@
+{
+  "administrationPage": {
+    "metaTitle": "Administration",
+    "heading": "User management",
+    "subheading": "All registered accounts and their application role.",
+    "registerLink": "Register a new user",
+    "errors": {
+      "unreachable": "The users service is unreachable right now. Please try again in a moment.",
+      "malformed_payload": "Unexpected response from the users service. Contact an administrator if the issue persists."
+    }
+  },
+  "userManagementTable": {
+    "caption": "List of application users",
+    "empty": "No users registered yet.",
+    "columns": {
+      "username": "Username",
+      "email": "Email",
+      "role": "Role"
+    },
+    "values": {
+      "noEmail": "—",
+      "noRole": "No role"
+    },
+    "roles": {
+      "USER": "User",
+      "SUPER_ADMIN": "Super admin",
+      "HUNTER": "Hunter (junior researcher)",
+      "MENTOR": "Mentor",
+      "QUALITY_CHECKER": "Quality checker",
+      "COORDINATOR": "Coordinator",
+      "QUALITY_CONTENT": "Pedagogical content quality"
+    }
+  }
+}

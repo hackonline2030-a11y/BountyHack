@@ -1,0 +1,34 @@
+{
+  "administrationPage": {
+    "metaTitle": "Administration",
+    "heading": "Gestion des utilisateurs",
+    "subheading": "Liste des comptes enregistrés et de leur rôle applicatif.",
+    "registerLink": "Inscrire un nouvel utilisateur",
+    "errors": {
+      "unreachable": "Impossible de joindre le service utilisateurs pour le moment. Réessaye dans quelques instants.",
+      "malformed_payload": "Réponse inattendue du service utilisateurs. Contacte un administrateur si le problème persiste."
+    }
+  },
+  "userManagementTable": {
+    "caption": "Liste des utilisateurs de l'application",
+    "empty": "Aucun utilisateur enregistré pour le moment.",
+    "columns": {
+      "username": "Nom d'utilisateur",
+      "email": "E-mail",
+      "role": "Rôle"
+    },
+    "values": {
+      "noEmail": "—",
+      "noRole": "Sans rôle"
+    },
+    "roles": {
+      "USER": "Utilisateur",
+      "SUPER_ADMIN": "Super administrateur",
+      "HUNTER": "Chercheur (junior / bug bounty)",
+      "MENTOR": "Mentor",
+      "QUALITY_CHECKER": "Contrôle qualité",
+      "COORDINATOR": "Coordinateur",
+      "QUALITY_CONTENT": "Qualité du contenu pédagogique"
+    }
+  }
+}
