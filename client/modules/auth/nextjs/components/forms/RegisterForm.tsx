@@ -17,7 +17,7 @@ const inputBase =
   "w-full bg-white placeholder:text-gray-500 text-gray-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow";
 
 export function RegisterForm() {
-  const { t } = useT("connexion");
+  const { t } = useT(["register", "common"]);
   const router = useRouter();
   const pathname = usePathname();
   const prefix = localePrefixFromPathname(pathname);
@@ -58,7 +58,7 @@ export function RegisterForm() {
       router.replace(`${prefix}/login`);
     } catch {
       setStatus("error");
-      setMessage(t("errors.network"));
+      setMessage(t("common:errors.network"));
     }
   }
 

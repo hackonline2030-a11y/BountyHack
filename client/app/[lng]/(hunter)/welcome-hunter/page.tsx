@@ -3,8 +3,9 @@ import Link from "next/link";
 import { getT } from "next-i18next/server";
 import { notFound } from "next/navigation";
 import { Section } from "@modules/app/nextjs/components/sections/Section";
-import { getWelcomeDashboardUser } from "@/lib/dal/welcome-user";
-import { verifySession } from "@/lib/dal/session";
+import { getWelcomeUser } from "@/lib/dal/welcome-user";
+import { verifySessionForRoles } from "@/lib/dal/session";
+import { AppRoleCode } from "@/lib/app-role-code";
 import { isSupportedLanguage } from "@modules/auth/core/model/locale.policy";
 import {
   DashboardSidebar,
@@ -26,36 +27,36 @@ type PageProps = { params: Promise<{ lng: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { lng } = await params;
-  const { t } = await getT("welcomeDashboard", { lng });
-  return { title: t("welcomeDashboard.metaTitle") };
+  const { t } = await getT("welcomeHunter", { lng });
+  return { title: t("welcomeHunter.metaTitle") };
 }
 
-export default async function WelcomeDashboardPage({ params }: PageProps) {
+export default async function WelcomeHunterPage({ params }: PageProps) {
   const { lng } = await params;
   if (!isSupportedLanguage(lng)) {
     notFound();
   }
-  await verifySession(lng);
+  await verifySessionForRoles(lng, [AppRoleCode.HUNTER]);
 
-  const { displayName } = await getWelcomeDashboardUser(lng);
-  const { t } = await getT("welcomeDashboard", { lng });
+  const { displayName } = await getWelcomeUser(lng);
+  const { t } = await getT("welcomeHunter", { lng });
 
   const heading =
     displayName !== null
-      ? t("welcomeDashboard.headingWithUsername", { username: displayName })
-      : t("welcomeDashboard.heading");
+      ? t("welcomeHunter.headingWithUsername", { username: displayName })
+      : t("welcomeHunter.heading");
 
   const prefix = `/${lng}`;
 
   const navLabels: DashboardNavLabels = {
-    label: t("welcomeDashboard.nav.label"),
-    emails: t("welcomeDashboard.nav.emails"),
-    tracks: t("welcomeDashboard.nav.tracks"),
-    courses: t("welcomeDashboard.nav.courses"),
-    teams: t("welcomeDashboard.nav.teams"),
-    mentors: t("welcomeDashboard.nav.mentors"),
-    support: t("welcomeDashboard.nav.support"),
-    settings: t("welcomeDashboard.nav.settings"),
+    label: t("welcomeHunter.nav.label"),
+    emails: t("welcomeHunter.nav.emails"),
+    tracks: t("welcomeHunter.nav.tracks"),
+    courses: t("welcomeHunter.nav.courses"),
+    teams: t("welcomeHunter.nav.teams"),
+    mentors: t("welcomeHunter.nav.mentors"),
+    support: t("welcomeHunter.nav.support"),
+    settings: t("welcomeHunter.nav.settings"),
   };
 
   /**
@@ -88,17 +89,17 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
   });
 
   const formatRelativeAgo = (minutes: number): string => {
-    if (minutes < 60) return t("welcomeDashboard.cards.messages.ago", { value: `${minutes} min` });
+    if (minutes < 60) return t("welcomeHunter.cards.messages.ago", { value: `${minutes} min` });
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return t("welcomeDashboard.cards.messages.ago", { value: `${hours} h` });
+    if (hours < 24) return t("welcomeHunter.cards.messages.ago", { value: `${hours} h` });
     const days = Math.floor(hours / 24);
-    return t("welcomeDashboard.cards.messages.ago", { value: `${days} j` });
+    return t("welcomeHunter.cards.messages.ago", { value: `${days} j` });
   };
 
   const newsTagLabel = (tag: NewsTag): string => {
-    if (tag === "announcement") return t("welcomeDashboard.cards.news.tagAnnouncement");
-    if (tag === "info") return t("welcomeDashboard.cards.news.tagInfo");
-    return t("welcomeDashboard.cards.news.tagUpdate");
+    if (tag === "announcement") return t("welcomeHunter.cards.news.tagAnnouncement");
+    if (tag === "info") return t("welcomeHunter.cards.news.tagInfo");
+    return t("welcomeHunter.cards.news.tagUpdate");
   };
 
   return (
@@ -113,7 +114,7 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
               {heading}
             </h1>
             <p className="mt-1 text-sm text-dashboard-subheading-on-pattern sm:text-base">
-              {t("welcomeDashboard.subheading")}
+              {t("welcomeHunter.subheading")}
             </p>
           </header>
 
@@ -126,7 +127,7 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
                 {/* Parcours suivi */}
                 <DashboardCard
                   titleId="card-current-track"
-                  title={t("welcomeDashboard.cards.currentTrack.title")}
+                  title={t("welcomeHunter.cards.currentTrack.title")}
                   subtitle={track.title}
                 >
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-dashboard-text-subtle">
@@ -138,7 +139,7 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={trackPercent}
-                    aria-label={t("welcomeDashboard.cards.currentTrack.title")}
+                    aria-label={t("welcomeHunter.cards.currentTrack.title")}
                   >
                     <div
                       className="h-full rounded-full bg-dashboard-accent"
@@ -147,21 +148,21 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
                   </div>
                   <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
                     <span className="font-semibold text-dashboard-text">
-                      {t("welcomeDashboard.cards.currentTrack.progressLabel", { percent: trackPercent })}
+                      {t("welcomeHunter.cards.currentTrack.progressLabel", { percent: trackPercent })}
                     </span>
                     <span className="text-dashboard-text-muted">
-                      {t("welcomeDashboard.cards.currentTrack.remainingLabel", { n: modulesLeft })}
+                      {t("welcomeHunter.cards.currentTrack.remainingLabel", { n: modulesLeft })}
                     </span>
                   </div>
                   <p className="mt-3 text-xs text-dashboard-text-subtle">
-                    {t("welcomeDashboard.cards.currentTrack.nextLabel")}
+                    {t("welcomeHunter.cards.currentTrack.nextLabel")}
                   </p>
                   <p className="mt-0.5 line-clamp-2 text-sm text-dashboard-text-muted">
                     → {track.nextModule}
                   </p>
                   <div className="mt-auto pt-4">
                     <Link href={navHrefs.tracks} className="dashboard-card-cta">
-                      {t("welcomeDashboard.cards.currentTrack.cta")} →
+                      {t("welcomeHunter.cards.currentTrack.cta")} →
                     </Link>
                   </div>
                 </DashboardCard>
@@ -169,12 +170,12 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
                 {/* Mes badges */}
                 <DashboardCard
                   titleId="card-badges"
-                  title={t("welcomeDashboard.cards.badges.title")}
-                  subtitle={t("welcomeDashboard.cards.badges.subtitle", { n: badgesFixture.length })}
+                  title={t("welcomeHunter.cards.badges.title")}
+                  subtitle={t("welcomeHunter.cards.badges.subtitle", { n: badgesFixture.length })}
                 >
                   {badgesFixture.length === 0 ? (
                     <p className="text-sm text-dashboard-text-muted">
-                      {t("welcomeDashboard.cards.badges.empty")}
+                      {t("welcomeHunter.cards.badges.empty")}
                     </p>
                   ) : (
                     <ul role="list" className="flex flex-wrap gap-2">
@@ -194,7 +195,7 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
                   )}
                   <div className="mt-auto pt-4">
                     <Link href={`${prefix}/badges`} className="dashboard-card-cta">
-                      {t("welcomeDashboard.cards.badges.cta")} →
+                      {t("welcomeHunter.cards.badges.cta")} →
                     </Link>
                   </div>
                 </DashboardCard>
@@ -202,11 +203,11 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
                 {/* Mes derniers messages */}
                 <DashboardCard
                   titleId="card-messages"
-                  title={t("welcomeDashboard.cards.messages.title")}
+                  title={t("welcomeHunter.cards.messages.title")}
                 >
                   {messagesFixture.length === 0 ? (
                     <p className="text-sm text-dashboard-text-muted">
-                      {t("welcomeDashboard.cards.messages.empty")}
+                      {t("welcomeHunter.cards.messages.empty")}
                     </p>
                   ) : (
                     <ul role="list" className="flex flex-col divide-y divide-dashboard-divider">
@@ -216,7 +217,7 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
                             <p className="flex min-w-0 items-center gap-1.5 truncate text-sm font-medium text-dashboard-text">
                               {m.unread && (
                                 <span
-                                  aria-label={t("welcomeDashboard.cards.messages.unread")}
+                                  aria-label={t("welcomeHunter.cards.messages.unread")}
                                   className="inline-block size-1.5 shrink-0 rounded-full bg-dashboard-accent"
                                 />
                               )}
@@ -235,7 +236,7 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
                   )}
                   <div className="mt-auto pt-4">
                     <Link href={`${prefix}/messages`} className="dashboard-card-cta">
-                      {t("welcomeDashboard.cards.messages.cta")} →
+                      {t("welcomeHunter.cards.messages.cta")} →
                     </Link>
                   </div>
                 </DashboardCard>
@@ -243,7 +244,7 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
                 {/* Actualité pédagogique */}
                 <DashboardCard
                   titleId="card-news"
-                  title={t("welcomeDashboard.cards.news.title")}
+                  title={t("welcomeHunter.cards.news.title")}
                 >
                   <ul role="list" className="flex flex-col gap-3">
                     {newsFixture.slice(0, 3).map((n) => (
@@ -267,7 +268,7 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
                   </ul>
                   <div className="mt-auto pt-4">
                     <Link href={`${prefix}/news`} className="dashboard-card-cta">
-                      {t("welcomeDashboard.cards.news.cta")} →
+                      {t("welcomeHunter.cards.news.cta")} →
                     </Link>
                   </div>
                 </DashboardCard>
@@ -277,8 +278,8 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
               <div className="flex flex-col gap-4 sm:gap-5">
                 <DashboardCard
                   titleId="card-chat"
-                  title={t("welcomeDashboard.cards.chat.title")}
-                  subtitle={t("welcomeDashboard.cards.chat.subtitle", { n: chatRoomsFixture.length })}
+                  title={t("welcomeHunter.cards.chat.title")}
+                  subtitle={t("welcomeHunter.cards.chat.subtitle", { n: chatRoomsFixture.length })}
                 >
                   <ul role="list" className="flex flex-col divide-y divide-dashboard-divider">
                     {chatRoomsFixture.map((r) => (
@@ -296,14 +297,14 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
                         </div>
                         {r.unread > 0 ? (
                           <span
-                            aria-label={t("welcomeDashboard.cards.chat.unreadAria", { n: r.unread })}
+                            aria-label={t("welcomeHunter.cards.chat.unreadAria", { n: r.unread })}
                             className="shrink-0 rounded-full bg-dashboard-accent px-2 py-0.5 text-[10px] font-bold text-dashboard-accent-on"
                           >
                             {r.unread}
                           </span>
                         ) : (
                           <span className="shrink-0 text-[10px] text-dashboard-text-subtle">
-                            {t("welcomeDashboard.cards.chat.members", { n: r.members })}
+                            {t("welcomeHunter.cards.chat.members", { n: r.members })}
                           </span>
                         )}
                       </li>
@@ -311,19 +312,19 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
                   </ul>
                   <div className="mt-auto pt-4">
                     <Link href={`${prefix}/chat`} className="dashboard-card-cta">
-                      {t("welcomeDashboard.cards.chat.cta")} →
+                      {t("welcomeHunter.cards.chat.cta")} →
                     </Link>
                   </div>
                 </DashboardCard>
 
                 <DashboardCard
                   titleId="card-agenda"
-                  title={t("welcomeDashboard.cards.agenda.title")}
-                  subtitle={t("welcomeDashboard.cards.agenda.subtitle")}
+                  title={t("welcomeHunter.cards.agenda.title")}
+                  subtitle={t("welcomeHunter.cards.agenda.subtitle")}
                 >
                   {agendaFixture.length === 0 ? (
                     <p className="text-sm text-dashboard-text-muted">
-                      {t("welcomeDashboard.cards.agenda.empty")}
+                      {t("welcomeHunter.cards.agenda.empty")}
                     </p>
                   ) : (
                     <ul role="list" className="flex flex-col divide-y divide-dashboard-divider">
@@ -331,8 +332,8 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
                         const start = new Date(a.date);
                         const locationLabel =
                           a.location === "remote"
-                            ? t("welcomeDashboard.cards.agenda.locationRemote")
-                            : t("welcomeDashboard.cards.agenda.locationOnsite");
+                            ? t("welcomeHunter.cards.agenda.locationRemote")
+                            : t("welcomeHunter.cards.agenda.locationOnsite");
                         return (
                           <li
                             key={a.id}
@@ -364,7 +365,7 @@ export default async function WelcomeDashboardPage({ params }: PageProps) {
                   )}
                   <div className="mt-auto pt-4">
                     <Link href={`${prefix}/agenda`} className="dashboard-card-cta">
-                      {t("welcomeDashboard.cards.agenda.cta")} →
+                      {t("welcomeHunter.cards.agenda.cta")} →
                     </Link>
                   </div>
                 </DashboardCard>

@@ -11,7 +11,7 @@ type PageProps = { params: Promise<{ lng: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { lng } = await params;
-  const { t } = await getT("connexion", { lng });
+  const { t } = await getT("register", { lng });
   return { title: t("registerPage.metaTitle") };
 }
 
@@ -21,7 +21,7 @@ export default async function AdministrationRegisterPage({ params }: PageProps) 
     notFound();
   }
   await verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN]);
-  const { t } = await getT("connexion", { lng });
+  const { t } = await getT("register", { lng });
 
   return (
     <main className="flex w-full min-h-[calc(100vh-(var(--header-height)+var(--footer-height)))] flex-col">
