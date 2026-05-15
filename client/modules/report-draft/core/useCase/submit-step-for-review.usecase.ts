@@ -18,6 +18,8 @@ export const submitStepForReview =
     step: ReportDraftDomainModel.ReportDraftStep;
     reviewerRole: ReportDraftDomainModel.ReviewerRole;
     submittedBy: string;
+    /** When set, persisted on the draft before the submission snapshot. */
+    payload?: unknown;
   }) =>
   async (
     dispatch: AppDispatch,
@@ -27,7 +29,7 @@ export const submitStepForReview =
     dispatch(reportDraftsSlice.actions.transitionStarted());
 
     try {
-      const draft = await deps.reportDraftsGateway.findById(input.draftId);
+      const draft = await deps.reportDraftRepository.findById(input.draftId);
       if (draft === null) {
         dispatch(
           reportDraftsSlice.actions.transitionFailed({
@@ -41,14 +43,17 @@ export const submitStepForReview =
         idProvider: deps.idProvider,
         clock: deps.clock,
       });
+      if (input.payload !== undefined) {
+        aggregate.updateStepPayload({ step: input.step, payload: input.payload });
+      }
       const submission = aggregate.submitStepForReview({
         step: input.step,
         reviewerRole: input.reviewerRole,
         submittedBy: input.submittedBy,
       });
 
-      await deps.reportDraftsGateway.save(aggregate.state);
-      await deps.submissionsGateway.save(submission);
+      await deps.reportDraftRepository.save(aggregate.state);
+      await deps.submissionRepository.save(submission);
 
       dispatch(reportDraftsSlice.actions.draftUpserted(aggregate.state));
       dispatch(reportDraftsSlice.actions.submissionUpserted(submission));

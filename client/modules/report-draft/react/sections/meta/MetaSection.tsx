@@ -12,7 +12,6 @@ export const MetaSection: FC = () => {
   const {
     draft,
     setField,
-    isSubmitable,
     editable,
     canNavigateNext,
     reviewerRole,
@@ -71,7 +70,6 @@ export const MetaSection: FC = () => {
         id="meta-report-title"
         label="Titre du rapport"
         hint="Titre court affiché dans la liste « Mes rapports » et en en-tête du rapport final"
-        required
       >
         <input
           id="meta-report-title"
@@ -81,18 +79,16 @@ export const MetaSection: FC = () => {
           onChange={(e) => setField("reportTitle", e.target.value)}
           className={textInputClass}
           disabled={lockedOff}
-          required
         />
       </Field>
 
-      <Field id="meta-bug-type" label="Type de bug" required>
+      <Field id="meta-bug-type" label="Type de bug">
         <select
           id="meta-bug-type"
           value={draft.bugType}
           onChange={(e) => setField("bugType", e.target.value)}
           className={selectClass}
           disabled={lockedOff}
-          required
         >
           <option value="">— Sélectionner —</option>
           {catalogs.bugTypes.map((option) => (
@@ -103,14 +99,13 @@ export const MetaSection: FC = () => {
         </select>
       </Field>
 
-      <Field id="meta-scope" label="Scope (programme YesWeHack)" required>
+      <Field id="meta-scope" label="Scope (programme YesWeHack)">
         <select
           id="meta-scope"
           value={scopeSelectValue}
           onChange={(e) => onScopeSelectChange(e.target.value)}
           className={selectClass}
           disabled={lockedOff}
-          required
         >
           <option value="">— Sélectionner —</option>
           {catalogs.scopes.map((slug) => (
@@ -137,7 +132,6 @@ export const MetaSection: FC = () => {
         id="meta-endpoint"
         label="Endpoint"
         hint="Verbe HTTP + chemin (ex. GET /?action=...&filename=...&signature=...)"
-        required
       >
         <input
           id="meta-endpoint"
@@ -147,7 +141,6 @@ export const MetaSection: FC = () => {
           onChange={(e) => setField("endpoint", e.target.value)}
           className={textInputClass}
           disabled={lockedOff}
-          required
         />
       </Field>
 
@@ -155,7 +148,6 @@ export const MetaSection: FC = () => {
         id="meta-vulnerable-part-category"
         label="Vulnerable part — catégorie"
         hint="Où la vulnérabilité a été exploitée"
-        required
       >
         <select
           id="meta-vulnerable-part-category"
@@ -163,7 +155,6 @@ export const MetaSection: FC = () => {
           onChange={(e) => setField("vulnerablePartCategory", e.target.value)}
           className={selectClass}
           disabled={lockedOff}
-          required
         >
           <option value="">— Sélectionner —</option>
           {catalogs.vulnerableParts.map((option) => (
@@ -178,7 +169,6 @@ export const MetaSection: FC = () => {
         id="meta-vulnerable-part-name"
         label="Vulnerable part — nom"
         hint="Nom du paramètre / header / cookie ciblé (ex. filename)"
-        required
       >
         <input
           id="meta-vulnerable-part-name"
@@ -188,7 +178,6 @@ export const MetaSection: FC = () => {
           onChange={(e) => setField("vulnerablePartName", e.target.value)}
           className={textInputClass}
           disabled={lockedOff}
-          required
         />
       </Field>
 
@@ -196,7 +185,6 @@ export const MetaSection: FC = () => {
         id="meta-payload"
         label="Payload"
         hint="Comment la protection a été contournée (script, query, code…)"
-        required
       >
         <textarea
           id="meta-payload"
@@ -205,7 +193,6 @@ export const MetaSection: FC = () => {
           onChange={(e) => setField("payload", e.target.value)}
           className={`${textareaClass} min-h-[120px]`}
           disabled={lockedOff}
-          required
         />
       </Field>
 
@@ -213,7 +200,6 @@ export const MetaSection: FC = () => {
         id="meta-technical-environment"
         label="Environnement technique"
         hint="OS, navigateur, outils utilisés (ex. burpsuite, curl…)"
-        required
       >
         <textarea
           id="meta-technical-environment"
@@ -222,7 +208,6 @@ export const MetaSection: FC = () => {
           onChange={(e) => setField("technicalEnvironment", e.target.value)}
           className={`${textareaClass} min-h-[100px]`}
           disabled={lockedOff}
-          required
         />
       </Field>
 
@@ -273,7 +258,6 @@ export const MetaSection: FC = () => {
         id="meta-ips-used"
         label="IPs utilisées"
         hint="IP(s) publiques utilisées pendant le test, séparées par des virgules"
-        required
       >
         <input
           id="meta-ips-used"
@@ -283,7 +267,6 @@ export const MetaSection: FC = () => {
           onChange={(e) => setField("ipsUsed", e.target.value)}
           className={textInputClass}
           disabled={lockedOff}
-          required
         />
       </Field>
 
@@ -319,7 +302,7 @@ export const MetaSection: FC = () => {
           type="button"
           className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
           onClick={() => void onSaveDraft()}
-          disabled={transitionBusy || !editable || !isSubmitable}
+          disabled={transitionBusy || !editable}
         >
           Enregistrer le brouillon
         </button>
@@ -340,7 +323,7 @@ export const MetaSection: FC = () => {
           type="button"
           className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
           onClick={() => void onSubmitForReview()}
-          disabled={transitionBusy || !editable || !isSubmitable}
+          disabled={transitionBusy || !editable}
         >
           Soumettre cette étape pour revue
         </button>

@@ -67,7 +67,7 @@ export default async function WelcomeQualityCheckerPage({ params }: PageProps) {
    */
   const navHrefs: DashboardNavHrefs = {
     emails: `${prefix}/emails`,
-    reports: `${prefix}/reports`,
+    reports: `${prefix}/submissions`,
     colleagues: `${prefix}/colleagues`,
     support: `${prefix}/support`,
     settings: `${prefix}/parameters`,

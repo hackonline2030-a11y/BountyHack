@@ -35,55 +35,19 @@ describe("DescriptionForm", () => {
   });
 
   describe("isSubmitable", () => {
-    it("returns false on a freshly created empty DescriptionFields", () => {
-      expect(form.isSubmitable(DescriptionFactory.create())).toBe(false);
+    it("returns true for an empty description (V1 — no field gates)", () => {
+      expect(form.isSubmitable(DescriptionFactory.create())).toBe(true);
     });
 
-    it("returns true when both required metrics are filled (AV + PR)", () => {
-      const required = DescriptionFactory.create({
-        attackVector: "N",
-        privilegesRequired: "N",
-      });
-
-      expect(form.isSubmitable(required)).toBe(true);
-    });
-
-    it("returns false when attackVector is missing, even if other metrics are set", () => {
-      const missingAV = DescriptionFactory.create({
-        attackVector: "",
-        privilegesRequired: "L",
-        userInteraction: "N",
-        scope: "U",
-        confidentiality: "H",
-        integrity: "H",
-        availability: "H",
-      });
-
-      expect(form.isSubmitable(missingAV)).toBe(false);
-    });
-
-    it("returns false when privilegesRequired is missing, even if everything else is set", () => {
-      const missingPR = DescriptionFactory.create({
-        attackVector: "N",
-        attackComplexity: "L",
-        privilegesRequired: "",
-        userInteraction: "N",
-        scope: "U",
-        confidentiality: "H",
-        integrity: "H",
-        availability: "H",
-      });
-
-      expect(form.isSubmitable(missingPR)).toBe(false);
-    });
-
-    it("returns false when required metrics contain only whitespace", () => {
-      const whitespace = DescriptionFactory.create({
-        attackVector: "  ",
-        privilegesRequired: "\t",
-      });
-
-      expect(form.isSubmitable(whitespace)).toBe(false);
+    it("returns true when only some metrics are filled", () => {
+      expect(
+        form.isSubmitable(
+          DescriptionFactory.create({
+            attackVector: "N",
+            privilegesRequired: "",
+          }),
+        ),
+      ).toBe(true);
     });
   });
 

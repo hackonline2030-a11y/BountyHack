@@ -1,6 +1,6 @@
 import { StubClockProvider } from "@modules/core/provider/stub.clock-provider";
 import { StubIdProvider } from "@modules/core/provider/stub.id-provider";
-import { InMemoryReportDraftsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.report-drafts.gateway-infra";
+import { InMemoryReportDraftRepository } from "@modules/report-draft/core/repository-infra/in-memory.report-draft.repository-infra";
 import { ReportDraftFactory } from "@modules/report-draft/core/model/report-draft.factory";
 import { rejectDraft } from "@modules/report-draft/core/useCase/reject-draft.usecase";
 import { createTestStore } from "@modules/testing/environements";
@@ -10,15 +10,15 @@ describe("rejectDraft use case", () => {
   const DRAFT_ID = "draft-1";
 
   const setup = async () => {
-    const reportDraftsGateway = new InMemoryReportDraftsGateway();
+    const reportDraftRepository = new InMemoryReportDraftRepository();
     const draft = ReportDraftFactory.create({
       idProvider: new StubIdProvider([DRAFT_ID]),
       clock: new StubClockProvider(["2026-01-01T00:00:00.000Z"]),
       hunterId: HUNTER_ID,
     });
-    await reportDraftsGateway.save(draft);
-    const store = createTestStore({ dependencies: { reportDraftsGateway } });
-    return { store, reportDraftsGateway };
+    await reportDraftRepository.save(draft);
+    const store = createTestStore({ dependencies: { reportDraftRepository } });
+    return { store, reportDraftRepository };
   };
 
   it("flips transition to success and the aggregate status to rejected", async () => {
@@ -35,13 +35,13 @@ describe("rejectDraft use case", () => {
   });
 
   it("persists the terminal status through the gateway", async () => {
-    const { store, reportDraftsGateway } = await setup();
+    const { store, reportDraftRepository } = await setup();
 
     await store.dispatch(
       rejectDraft({ draftId: DRAFT_ID, byUser: "u-99", byRole: "mentor" }),
     );
 
-    const persisted = await reportDraftsGateway.findById(DRAFT_ID);
+    const persisted = await reportDraftRepository.findById(DRAFT_ID);
     expect(persisted!.aggregateStatus).toBe("rejected");
   });
 

@@ -20,7 +20,7 @@ export const resumeEdit =
     dispatch(reportDraftsSlice.actions.transitionStarted());
 
     try {
-      const draft = await deps.reportDraftsGateway.findById(input.draftId);
+      const draft = await deps.reportDraftRepository.findById(input.draftId);
       if (draft === null) {
         dispatch(
           reportDraftsSlice.actions.transitionFailed({
@@ -36,7 +36,7 @@ export const resumeEdit =
       });
       aggregate.resumeEdit(input.step);
 
-      await deps.reportDraftsGateway.save(aggregate.state);
+      await deps.reportDraftRepository.save(aggregate.state);
 
       dispatch(reportDraftsSlice.actions.draftUpserted(aggregate.state));
       dispatch(reportDraftsSlice.actions.transitionSucceeded());

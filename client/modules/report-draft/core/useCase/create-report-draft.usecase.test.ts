@@ -1,6 +1,6 @@
 import { StubClockProvider } from "@modules/core/provider/stub.clock-provider";
 import { StubIdProvider } from "@modules/core/provider/stub.id-provider";
-import { InMemoryReportDraftsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.report-drafts.gateway-infra";
+import { InMemoryReportDraftRepository } from "@modules/report-draft/core/repository-infra/in-memory.report-draft.repository-infra";
 import { createReportDraft } from "@modules/report-draft/core/useCase/create-report-draft.usecase";
 import { createTestStore } from "@modules/testing/environements";
 
@@ -12,17 +12,17 @@ describe("createReportDraft use case", () => {
   const setup = (overrides?: {
     idSequence?: ReadonlyArray<string>;
     clockSequence?: ReadonlyArray<string>;
-    gateway?: InMemoryReportDraftsGateway;
+    repository?: InMemoryReportDraftRepository;
   }) => {
-    const reportDraftsGateway = overrides?.gateway ?? new InMemoryReportDraftsGateway();
+    const reportDraftRepository = overrides?.repository ?? new InMemoryReportDraftRepository();
     const store = createTestStore({
       dependencies: {
         idProvider: new StubIdProvider(overrides?.idSequence ?? [DRAFT_ID]),
         clock: new StubClockProvider(overrides?.clockSequence ?? [CREATED_AT]),
-        reportDraftsGateway,
+        reportDraftRepository,
       },
     });
-    return { store, reportDraftsGateway };
+    return { store, reportDraftRepository };
   };
 
   it("flips the creation state to loading while the gateway is saving", async () => {
@@ -47,11 +47,11 @@ describe("createReportDraft use case", () => {
   });
 
   it("persists the freshly built draft through the report-drafts gateway", async () => {
-    const { store, reportDraftsGateway } = setup();
+    const { store, reportDraftRepository } = setup();
 
     await store.dispatch(createReportDraft({ hunterId: HUNTER_ID }));
 
-    const persisted = await reportDraftsGateway.findById(DRAFT_ID);
+    const persisted = await reportDraftRepository.findById(DRAFT_ID);
     expect(persisted).not.toBeNull();
     expect(persisted!.id).toBe(DRAFT_ID);
     expect(persisted!.hunterId).toBe(HUNTER_ID);
@@ -105,9 +105,9 @@ describe("createReportDraft use case", () => {
   });
 
   it("flips the creation state to error when the gateway throws", async () => {
-    const brokenGateway = new InMemoryReportDraftsGateway();
+    const brokenGateway = new InMemoryReportDraftRepository();
     jest.spyOn(brokenGateway, "save").mockRejectedValueOnce(new Error("DB is down"));
-    const { store } = setup({ gateway: brokenGateway });
+    const { store } = setup({ repository: brokenGateway });
 
     await store.dispatch(createReportDraft({ hunterId: HUNTER_ID }));
 
@@ -118,9 +118,9 @@ describe("createReportDraft use case", () => {
   });
 
   it("does not insert a draft into the slice when persistence fails", async () => {
-    const brokenGateway = new InMemoryReportDraftsGateway();
+    const brokenGateway = new InMemoryReportDraftRepository();
     jest.spyOn(brokenGateway, "save").mockRejectedValueOnce(new Error("DB is down"));
-    const { store } = setup({ gateway: brokenGateway });
+    const { store } = setup({ repository: brokenGateway });
 
     await store.dispatch(createReportDraft({ hunterId: HUNTER_ID }));
 
@@ -137,9 +137,9 @@ describe("createReportDraft use case", () => {
   });
 
   it("returns null when persistence fails", async () => {
-    const brokenGateway = new InMemoryReportDraftsGateway();
+    const brokenGateway = new InMemoryReportDraftRepository();
     jest.spyOn(brokenGateway, "save").mockRejectedValueOnce(new Error("DB is down"));
-    const { store } = setup({ gateway: brokenGateway });
+    const { store } = setup({ repository: brokenGateway });
 
     const result = await store.dispatch(createReportDraft({ hunterId: HUNTER_ID }));
 

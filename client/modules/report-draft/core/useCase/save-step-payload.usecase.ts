@@ -31,7 +31,7 @@ export const saveStepPayload =
     dispatch(reportDraftsSlice.actions.transitionStarted());
 
     try {
-      const draft = await deps.reportDraftsGateway.findById(input.draftId);
+      const draft = await deps.reportDraftRepository.findById(input.draftId);
       if (draft === null) {
         dispatch(
           reportDraftsSlice.actions.transitionFailed({
@@ -47,7 +47,7 @@ export const saveStepPayload =
       });
       aggregate.updateStepPayload({ step: input.step, payload: input.payload });
 
-      await deps.reportDraftsGateway.save(aggregate.state);
+      await deps.reportDraftRepository.save(aggregate.state);
 
       dispatch(reportDraftsSlice.actions.draftUpserted(aggregate.state));
       dispatch(reportDraftsSlice.actions.transitionSucceeded());

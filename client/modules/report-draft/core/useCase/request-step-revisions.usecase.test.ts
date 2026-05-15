@@ -1,8 +1,8 @@
 import { StubClockProvider } from "@modules/core/provider/stub.clock-provider";
 import { StubIdProvider } from "@modules/core/provider/stub.id-provider";
-import { InMemoryReportDraftsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.report-drafts.gateway-infra";
-import { InMemoryReviewerCommentsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.reviewer-comments.gateway-infra";
-import { InMemorySubmissionsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.submissions.gateway-infra";
+import { InMemoryReportDraftRepository } from "@modules/report-draft/core/repository-infra/in-memory.report-draft.repository-infra";
+import { InMemoryReviewerCommentRepository } from "@modules/report-draft/core/repository-infra/in-memory.reviewer-comment.repository-infra";
+import { InMemorySubmissionRepository } from "@modules/report-draft/core/repository-infra/in-memory.submission.repository-infra";
 import { ReportDraftAggregate } from "@modules/report-draft/core/model/report-draft.aggregate";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { ReportDraftFactory } from "@modules/report-draft/core/model/report-draft.factory";
@@ -10,8 +10,8 @@ import { requestStepRevisions } from "@modules/report-draft/core/useCase/request
 import { createTestStore } from "@modules/testing/environements";
 
 const seedPendingSubmission = async (
-  reportDraftsGateway: InMemoryReportDraftsGateway,
-  submissionsGateway: InMemorySubmissionsGateway,
+  reportDraftRepository: InMemoryReportDraftRepository,
+  submissionRepository: InMemorySubmissionRepository,
   options: { draftId: string; hunterId: string; submissionId: string },
 ): Promise<void> => {
   const draft = ReportDraftFactory.create({
@@ -28,8 +28,8 @@ const seedPendingSubmission = async (
     reviewerRole: "quality_checker",
     submittedBy: options.hunterId,
   });
-  await reportDraftsGateway.save(aggregate.state);
-  await submissionsGateway.save(submission);
+  await reportDraftRepository.save(aggregate.state);
+  await submissionRepository.save(submission);
 };
 
 describe("requestStepRevisions use case", () => {
@@ -49,10 +49,10 @@ describe("requestStepRevisions use case", () => {
   };
 
   const setup = async (options?: { idSequence?: ReadonlyArray<string> }) => {
-    const reportDraftsGateway = new InMemoryReportDraftsGateway();
-    const submissionsGateway = new InMemorySubmissionsGateway();
-    const reviewerCommentsGateway = new InMemoryReviewerCommentsGateway();
-    await seedPendingSubmission(reportDraftsGateway, submissionsGateway, {
+    const reportDraftRepository = new InMemoryReportDraftRepository();
+    const submissionRepository = new InMemorySubmissionRepository();
+    const reviewerCommentRepository = new InMemoryReviewerCommentRepository();
+    await seedPendingSubmission(reportDraftRepository, submissionRepository, {
       draftId: DRAFT_ID,
       hunterId: HUNTER_ID,
       submissionId: SUBMISSION_ID,
@@ -61,12 +61,12 @@ describe("requestStepRevisions use case", () => {
       dependencies: {
         idProvider: new StubIdProvider(options?.idSequence ?? [COMMENT_ID_1]),
         clock: new StubClockProvider([DECIDED_AT]),
-        reportDraftsGateway,
-        submissionsGateway,
-        reviewerCommentsGateway,
+        reportDraftRepository,
+        submissionRepository,
+        reviewerCommentRepository,
       },
     });
-    return { store, reportDraftsGateway, submissionsGateway, reviewerCommentsGateway };
+    return { store, reportDraftRepository, submissionRepository, reviewerCommentRepository };
   };
 
   it("flips transition to success and the step to needs-revision", async () => {
@@ -88,7 +88,7 @@ describe("requestStepRevisions use case", () => {
   });
 
   it("marks the submission decision as request-changes (gateway + slice)", async () => {
-    const { store, submissionsGateway } = await setup();
+    const { store, submissionRepository } = await setup();
 
     await store.dispatch(
       requestStepRevisions({
@@ -99,7 +99,7 @@ describe("requestStepRevisions use case", () => {
       }),
     );
 
-    const persisted = await submissionsGateway.findById(SUBMISSION_ID);
+    const persisted = await submissionRepository.findById(SUBMISSION_ID);
     expect(persisted!.decision).toBe("request-changes");
     expect(persisted!.decidedBy).toBe(REVIEWER_ID);
     expect(persisted!.decidedAt).toBe(DECIDED_AT);
@@ -109,7 +109,7 @@ describe("requestStepRevisions use case", () => {
   });
 
   it("persists every comment with a fresh id and the decision timestamp", async () => {
-    const { store, reviewerCommentsGateway } = await setup({
+    const { store, reviewerCommentRepository } = await setup({
       idSequence: [COMMENT_ID_1, COMMENT_ID_2],
     });
 
@@ -125,7 +125,7 @@ describe("requestStepRevisions use case", () => {
       }),
     );
 
-    const stored = await reviewerCommentsGateway.findBySubmissionId(SUBMISSION_ID);
+    const stored = await reviewerCommentRepository.findBySubmissionId(SUBMISSION_ID);
     expect(stored).toHaveLength(2);
     expect(stored.map((c) => c.id)).toEqual([COMMENT_ID_1, COMMENT_ID_2]);
     expect(stored.every((c) => c.createdAt === DECIDED_AT)).toBe(true);

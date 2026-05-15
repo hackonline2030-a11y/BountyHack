@@ -1,3 +1,4 @@
+import { isSubmitableForWizard } from "@modules/report-draft/core/form/form-gates";
 import { ReportDraftDomainModel as M } from "@modules/report-draft/core/model/report-draft.domain-model";
 import {
   CollectionFactory,
@@ -7,9 +8,6 @@ import {
   RemediationFactory,
   RisksFactory,
 } from "@modules/report-draft/core/model/long-form-steps.factory";
-
-const allTrimmedNonEmpty = (state: Record<string, string>, keys: readonly string[]): boolean =>
-  keys.every((k) => (state[k] ?? "").trim().length > 0);
 
 export interface ILongFormStepForm {
   setField(state: Record<string, string>, key: string, value: string): Record<string, string>;
@@ -24,8 +22,8 @@ export class CollectionForm implements ILongFormStepForm {
     return { ...state, [key]: value };
   }
 
-  isSubmitable(state: Record<string, string>): boolean {
-    return allTrimmedNonEmpty(state, this.keysList);
+  isSubmitable(_state: Record<string, string>): boolean {
+    return isSubmitableForWizard();
   }
 
   keys(): readonly string[] {
@@ -40,8 +38,8 @@ export class ExploitationForm implements ILongFormStepForm {
     return { ...state, [key]: value };
   }
 
-  isSubmitable(state: Record<string, string>): boolean {
-    return allTrimmedNonEmpty(state, this.keysList);
+  isSubmitable(_state: Record<string, string>): boolean {
+    return isSubmitableForWizard();
   }
 
   keys(): readonly string[] {
@@ -56,8 +54,8 @@ export class ProofOfConceptForm implements ILongFormStepForm {
     return { ...state, [key]: value };
   }
 
-  isSubmitable(state: Record<string, string>): boolean {
-    return allTrimmedNonEmpty(state, this.keysList);
+  isSubmitable(_state: Record<string, string>): boolean {
+    return isSubmitableForWizard();
   }
 
   keys(): readonly string[] {
@@ -72,8 +70,8 @@ export class RisksForm implements ILongFormStepForm {
     return { ...state, [key]: value };
   }
 
-  isSubmitable(state: Record<string, string>): boolean {
-    return allTrimmedNonEmpty(state, this.keysList);
+  isSubmitable(_state: Record<string, string>): boolean {
+    return isSubmitableForWizard();
   }
 
   keys(): readonly string[] {
@@ -88,8 +86,8 @@ export class RemediationForm implements ILongFormStepForm {
     return { ...state, [key]: value };
   }
 
-  isSubmitable(state: Record<string, string>): boolean {
-    return allTrimmedNonEmpty(state, this.keysList);
+  isSubmitable(_state: Record<string, string>): boolean {
+    return isSubmitableForWizard();
   }
 
   keys(): readonly string[] {
@@ -104,8 +102,8 @@ export class FinalForm implements ILongFormStepForm {
     return { ...state, [key]: value };
   }
 
-  isSubmitable(state: Record<string, string>): boolean {
-    return allTrimmedNonEmpty(state, this.keysList);
+  isSubmitable(_state: Record<string, string>): boolean {
+    return isSubmitableForWizard();
   }
 
   keys(): readonly string[] {

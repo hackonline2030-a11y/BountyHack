@@ -1,8 +1,8 @@
 import { StubClockProvider } from "@modules/core/provider/stub.clock-provider";
 import { StubIdProvider } from "@modules/core/provider/stub.id-provider";
-import { InMemoryReportDraftsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.report-drafts.gateway-infra";
-import { InMemoryReviewerCommentsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.reviewer-comments.gateway-infra";
-import { InMemorySubmissionsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.submissions.gateway-infra";
+import { InMemoryReportDraftRepository } from "@modules/report-draft/core/repository-infra/in-memory.report-draft.repository-infra";
+import { InMemoryReviewerCommentRepository } from "@modules/report-draft/core/repository-infra/in-memory.reviewer-comment.repository-infra";
+import { InMemorySubmissionRepository } from "@modules/report-draft/core/repository-infra/in-memory.submission.repository-infra";
 import { MetaFactory } from "@modules/report-draft/core/model/meta.factory";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { ReportDraftFactory } from "@modules/report-draft/core/model/report-draft.factory";
@@ -14,17 +14,17 @@ describe("loadReportDraft use case", () => {
   const DRAFT_ID = "draft-loaded";
 
   const setup = async (options?: { seedDraft?: boolean }) => {
-    const reportDraftsGateway = new InMemoryReportDraftsGateway();
+    const reportDraftRepository = new InMemoryReportDraftRepository();
     if (options?.seedDraft ?? true) {
       const draft = ReportDraftFactory.create({
         idProvider: new StubIdProvider([DRAFT_ID]),
         clock: new StubClockProvider(["2026-02-01T00:00:00.000Z"]),
         hunterId: HUNTER_ID,
       });
-      await reportDraftsGateway.save(draft);
+      await reportDraftRepository.save(draft);
     }
-    const store = createTestStore({ dependencies: { reportDraftsGateway } });
-    return { store, reportDraftsGateway };
+    const store = createTestStore({ dependencies: { reportDraftRepository } });
+    return { store, reportDraftRepository };
   };
 
   it("flips load to loading while the gateway is fetching", async () => {
@@ -67,16 +67,16 @@ describe("loadReportDraft use case", () => {
   });
 
   it("hydrates submissions and reviewer comments into the slice", async () => {
-    const reportDraftsGateway = new InMemoryReportDraftsGateway();
-    const submissionsGateway = new InMemorySubmissionsGateway();
-    const reviewerCommentsGateway = new InMemoryReviewerCommentsGateway();
+    const reportDraftRepository = new InMemoryReportDraftRepository();
+    const submissionRepository = new InMemorySubmissionRepository();
+    const reviewerCommentRepository = new InMemoryReviewerCommentRepository();
 
     const draft = ReportDraftFactory.create({
       idProvider: new StubIdProvider([DRAFT_ID]),
       clock: new StubClockProvider(["2026-02-01T00:00:00.000Z"]),
       hunterId: HUNTER_ID,
     });
-    await reportDraftsGateway.save(draft);
+    await reportDraftRepository.save(draft);
 
     const submission: ReportDraftDomainModel.Submission<ReportDraftDomainModel.MetaFields> = {
       id: "sub-1",
@@ -90,9 +90,9 @@ describe("loadReportDraft use case", () => {
       reviewerRole: "mentor",
       decision: "request-changes",
     };
-    await submissionsGateway.save(submission);
+    await submissionRepository.save(submission);
 
-    await reviewerCommentsGateway.saveMany([
+    await reviewerCommentRepository.saveMany([
       {
         id: "com-1",
         submissionId: "sub-1",
@@ -105,9 +105,9 @@ describe("loadReportDraft use case", () => {
 
     const store = createTestStore({
       dependencies: {
-        reportDraftsGateway,
-        submissionsGateway,
-        reviewerCommentsGateway,
+        reportDraftRepository,
+        submissionRepository,
+        reviewerCommentRepository,
       },
     });
 
@@ -118,11 +118,11 @@ describe("loadReportDraft use case", () => {
   });
 
   it("flips load to error when the gateway throws", async () => {
-    const reportDraftsGateway = new InMemoryReportDraftsGateway();
+    const reportDraftRepository = new InMemoryReportDraftRepository();
     jest
-      .spyOn(reportDraftsGateway, "findById")
+      .spyOn(reportDraftRepository, "findById")
       .mockRejectedValueOnce(new Error("DB outage"));
-    const store = createTestStore({ dependencies: { reportDraftsGateway } });
+    const store = createTestStore({ dependencies: { reportDraftRepository } });
 
     await store.dispatch(loadReportDraft({ draftId: DRAFT_ID }));
 

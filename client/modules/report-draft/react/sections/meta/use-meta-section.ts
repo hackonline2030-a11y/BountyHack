@@ -13,6 +13,7 @@ import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-
 import { reportDraftSlice } from "@modules/report-draft/core/store/report-draft.slice";
 import { saveStepPayload } from "@modules/report-draft/core/useCase/save-step-payload.usecase";
 import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-step-for-review.usecase";
+import { reviewerRoleFromDraftStep } from "@modules/report-draft/react/wizard/reviewer-role-from-draft";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
@@ -36,6 +37,11 @@ export const useMetaSection = () => {
 
   const [reviewerRole, setReviewerRole] =
     useState<ReportDraftDomainModel.ReviewerRole>("mentor");
+
+  useEffect(() => {
+    const fromDraft = reviewerRoleFromDraftStep(draftRow, META_STEP);
+    setReviewerRole(fromDraft ?? "mentor");
+  }, [currentDraftId, draftRow]);
 
   const form = useMemo(() => new MetaForm(), []);
 
@@ -74,23 +80,24 @@ export const useMetaSection = () => {
   }, [dispatch, canNavigateNext]);
 
   const onSaveDraft = useCallback(async () => {
-    if (!currentDraftId || !editable || !isSubmitable) return;
+    if (!currentDraftId || !editable) return;
     await dispatch(
       saveStepPayload({ draftId: currentDraftId, step: META_STEP, payload: draft }),
     );
-  }, [dispatch, currentDraftId, editable, isSubmitable, draft]);
+  }, [dispatch, currentDraftId, editable, draft]);
 
   const onSubmitForReview = useCallback(async () => {
-    if (!currentDraftId || !submittedBy || !isSubmitable) return;
+    if (!currentDraftId || !submittedBy) return;
     await dispatch(
       submitStepForReview({
         draftId: currentDraftId,
         step: META_STEP,
         reviewerRole,
         submittedBy,
+        payload: draft,
       }),
     );
-  }, [dispatch, currentDraftId, submittedBy, isSubmitable, reviewerRole]);
+  }, [dispatch, currentDraftId, submittedBy, reviewerRole, draft]);
 
   const onReset = useCallback(() => {
     setDraft(initialDraft);

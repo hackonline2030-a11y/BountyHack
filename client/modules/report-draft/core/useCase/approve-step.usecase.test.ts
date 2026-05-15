@@ -1,7 +1,7 @@
 import { StubClockProvider } from "@modules/core/provider/stub.clock-provider";
 import { StubIdProvider } from "@modules/core/provider/stub.id-provider";
-import { InMemoryReportDraftsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.report-drafts.gateway-infra";
-import { InMemorySubmissionsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.submissions.gateway-infra";
+import { InMemoryReportDraftRepository } from "@modules/report-draft/core/repository-infra/in-memory.report-draft.repository-infra";
+import { InMemorySubmissionRepository } from "@modules/report-draft/core/repository-infra/in-memory.submission.repository-infra";
 import { ReportDraftAggregate } from "@modules/report-draft/core/model/report-draft.aggregate";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { ReportDraftFactory } from "@modules/report-draft/core/model/report-draft.factory";
@@ -14,8 +14,8 @@ import { createTestStore } from "@modules/testing/environements";
  * submission, returning the submission id so the test can act on it.
  */
 const seedPendingSubmission = async (
-  reportDraftsGateway: InMemoryReportDraftsGateway,
-  submissionsGateway: InMemorySubmissionsGateway,
+  reportDraftRepository: InMemoryReportDraftRepository,
+  submissionRepository: InMemorySubmissionRepository,
   options: {
     draftId: string;
     hunterId: string;
@@ -37,8 +37,8 @@ const seedPendingSubmission = async (
     reviewerRole: "quality_checker",
     submittedBy: options.hunterId,
   });
-  await reportDraftsGateway.save(aggregate.state);
-  await submissionsGateway.save(submission);
+  await reportDraftRepository.save(aggregate.state);
+  await submissionRepository.save(submission);
 };
 
 describe("approveStep use case", () => {
@@ -49,9 +49,9 @@ describe("approveStep use case", () => {
   const DECIDED_AT = "2026-01-03T00:00:00.000Z";
 
   const setup = async () => {
-    const reportDraftsGateway = new InMemoryReportDraftsGateway();
-    const submissionsGateway = new InMemorySubmissionsGateway();
-    await seedPendingSubmission(reportDraftsGateway, submissionsGateway, {
+    const reportDraftRepository = new InMemoryReportDraftRepository();
+    const submissionRepository = new InMemorySubmissionRepository();
+    await seedPendingSubmission(reportDraftRepository, submissionRepository, {
       draftId: DRAFT_ID,
       hunterId: HUNTER_ID,
       step: ReportDraftDomainModel.ReportDraftStep.META,
@@ -61,11 +61,11 @@ describe("approveStep use case", () => {
     const store = createTestStore({
       dependencies: {
         clock: new StubClockProvider([DECIDED_AT]),
-        reportDraftsGateway,
-        submissionsGateway,
+        reportDraftRepository,
+        submissionRepository,
       },
     });
-    return { store, reportDraftsGateway, submissionsGateway };
+    return { store, reportDraftRepository, submissionRepository };
   };
 
   it("flips transition to loading then success", async () => {
@@ -98,7 +98,7 @@ describe("approveStep use case", () => {
   });
 
   it("updates the submission decision in the gateway and the slice", async () => {
-    const { store, submissionsGateway } = await setup();
+    const { store, submissionRepository } = await setup();
 
     await store.dispatch(
       approveStep({
@@ -108,7 +108,7 @@ describe("approveStep use case", () => {
       }),
     );
 
-    const persisted = await submissionsGateway.findById(SUBMISSION_ID);
+    const persisted = await submissionRepository.findById(SUBMISSION_ID);
     expect(persisted!.decision).toBe("approve");
     expect(persisted!.decidedBy).toBe(REVIEWER_ID);
     expect(persisted!.decidedAt).toBe(DECIDED_AT);

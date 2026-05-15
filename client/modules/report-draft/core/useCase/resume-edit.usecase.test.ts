@@ -1,6 +1,6 @@
 import { StubClockProvider } from "@modules/core/provider/stub.clock-provider";
 import { StubIdProvider } from "@modules/core/provider/stub.id-provider";
-import { InMemoryReportDraftsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.report-drafts.gateway-infra";
+import { InMemoryReportDraftRepository } from "@modules/report-draft/core/repository-infra/in-memory.report-draft.repository-infra";
 import { ReportDraftAggregate } from "@modules/report-draft/core/model/report-draft.aggregate";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { ReportDraftFactory } from "@modules/report-draft/core/model/report-draft.factory";
@@ -12,7 +12,7 @@ import { createTestStore } from "@modules/testing/environements";
  * back as `needs-revision` — the exact precondition for `resumeEdit`.
  */
 const seedDraftNeedsRevisionOnMeta = async (
-  gateway: InMemoryReportDraftsGateway,
+  repository: InMemoryReportDraftRepository,
   draftId: string,
   hunterId: string,
 ) => {
@@ -40,7 +40,7 @@ const seedDraftNeedsRevisionOnMeta = async (
       { body: "fix me", authorId: "u-99", authorRole: "quality_checker", anchor: undefined },
     ],
   });
-  await gateway.save(aggregate.state);
+  await repository.save(aggregate.state);
 };
 
 describe("resumeEdit use case", () => {
@@ -48,9 +48,9 @@ describe("resumeEdit use case", () => {
   const DRAFT_ID = "draft-1";
 
   it("flips transition to success and the META step back to in-progress", async () => {
-    const reportDraftsGateway = new InMemoryReportDraftsGateway();
-    await seedDraftNeedsRevisionOnMeta(reportDraftsGateway, DRAFT_ID, HUNTER_ID);
-    const store = createTestStore({ dependencies: { reportDraftsGateway } });
+    const reportDraftRepository = new InMemoryReportDraftRepository();
+    await seedDraftNeedsRevisionOnMeta(reportDraftRepository, DRAFT_ID, HUNTER_ID);
+    const store = createTestStore({ dependencies: { reportDraftRepository } });
 
     await store.dispatch(
       resumeEdit({
@@ -66,9 +66,9 @@ describe("resumeEdit use case", () => {
   });
 
   it("does not bump the currentRound counter", async () => {
-    const reportDraftsGateway = new InMemoryReportDraftsGateway();
-    await seedDraftNeedsRevisionOnMeta(reportDraftsGateway, DRAFT_ID, HUNTER_ID);
-    const store = createTestStore({ dependencies: { reportDraftsGateway } });
+    const reportDraftRepository = new InMemoryReportDraftRepository();
+    await seedDraftNeedsRevisionOnMeta(reportDraftRepository, DRAFT_ID, HUNTER_ID);
+    const store = createTestStore({ dependencies: { reportDraftRepository } });
 
     await store.dispatch(
       resumeEdit({
@@ -97,14 +97,14 @@ describe("resumeEdit use case", () => {
   });
 
   it("surfaces the aggregate guard error when the step is not awaiting revision", async () => {
-    const reportDraftsGateway = new InMemoryReportDraftsGateway();
+    const reportDraftRepository = new InMemoryReportDraftRepository();
     const fresh = ReportDraftFactory.create({
       idProvider: new StubIdProvider([DRAFT_ID]),
       clock: new StubClockProvider(["2026-01-01T00:00:00.000Z"]),
       hunterId: HUNTER_ID,
     });
-    await reportDraftsGateway.save(fresh);
-    const store = createTestStore({ dependencies: { reportDraftsGateway } });
+    await reportDraftRepository.save(fresh);
+    const store = createTestStore({ dependencies: { reportDraftRepository } });
 
     await store.dispatch(
       resumeEdit({

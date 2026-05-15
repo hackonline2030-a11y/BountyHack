@@ -11,6 +11,7 @@ import {
   isAuthHeaderLoginHighlightPath,
   localePrefixFromPathname,
 } from "@/lib/locale-path";
+import { SESSION_REFRESHED_EVENT } from "@/lib/session-refresh";
 
 export const Header: React.FC<{ className?: string }> = ({ className = "" }) => {
   const { t } = useT("common");
@@ -54,7 +55,7 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
 
   useEffect(() => {
     let cancelled = false;
-    async function loadSessionStatus() {
+    async function loadSessionStatus(): Promise<void> {
       try {
         const res = await fetch("/api/session/status", {
           method: "GET",
@@ -98,8 +99,15 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
       }
     }
     void loadSessionStatus();
+
+    const onSessionRefreshed = () => {
+      void loadSessionStatus();
+    };
+    window.addEventListener(SESSION_REFRESHED_EVENT, onSessionRefreshed);
+
     return () => {
       cancelled = true;
+      window.removeEventListener(SESSION_REFRESHED_EVENT, onSessionRefreshed);
     };
   }, [pathname]);
 
