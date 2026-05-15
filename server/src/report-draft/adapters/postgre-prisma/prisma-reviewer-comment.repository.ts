@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '../../../generated/prisma/client';
 import { PrismaService } from '../../../core/infrastructure/database/prisma/prisma.service';
 import type { IReviewerCommentRepository } from '../../ports/reviewer-comment-repository.interface';
 import type { ReviewerCommentWire } from '../../models/report-draft-api.types';
@@ -23,7 +24,7 @@ export class PrismaReviewerCommentRepository implements IReviewerCommentReposito
             anchor: data.anchor,
             body: data.body,
             resolvedAt: data.resolvedAt,
-          },
+          } satisfies Prisma.ReviewerCommentUncheckedUpdateInput,
         });
       }
     });

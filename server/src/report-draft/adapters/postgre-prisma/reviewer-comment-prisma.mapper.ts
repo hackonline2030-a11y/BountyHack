@@ -1,3 +1,4 @@
+import { Prisma } from '../../../generated/prisma/client';
 import type { ReviewerComment } from '../../../generated/prisma/client';
 import type {
   ReviewerCommentAnchorWire,
@@ -13,7 +14,7 @@ export class ReviewerCommentPrismaMapper {
       authorId: row.authorId,
       authorRole: ReportDraftEnumMapper.reviewerRoleToWire(row.authorRole),
       anchor: row.anchor
-        ? (row.anchor as ReviewerCommentAnchorWire)
+        ? (row.anchor as unknown as ReviewerCommentAnchorWire)
         : undefined,
       body: row.body,
       createdAt: row.createdAt.toISOString(),
@@ -21,13 +22,18 @@ export class ReviewerCommentPrismaMapper {
     };
   }
 
-  static persistenceFromWire(comment: ReviewerCommentWire) {
+  static persistenceFromWire(
+    comment: ReviewerCommentWire,
+  ): Prisma.ReviewerCommentUncheckedCreateInput {
     return {
       id: comment.id,
       submissionId: comment.submissionId,
       authorId: comment.authorId,
       authorRole: ReportDraftEnumMapper.reviewerRoleFromWire(comment.authorRole),
-      anchor: comment.anchor ?? null,
+      anchor:
+        comment.anchor != null
+          ? (comment.anchor as unknown as Prisma.InputJsonValue)
+          : Prisma.DbNull,
       body: comment.body,
       createdAt: new Date(comment.createdAt),
       resolvedAt: comment.resolvedAt ? new Date(comment.resolvedAt) : null,
