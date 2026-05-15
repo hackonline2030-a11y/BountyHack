@@ -11,6 +11,10 @@ const STEP_INCLUDE = {
   attachments: true,
 } as const;
 
+const TEAM_INCLUDE = {
+  members: { include: { user: true } },
+} as const;
+
 @Injectable()
 export class PrismaReportDraftRepository implements IReportDraftRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -80,6 +84,7 @@ export class PrismaReportDraftRepository implements IReportDraftRepository {
         steps: {
           include: STEP_INCLUDE,
         },
+        reportTeam: { include: TEAM_INCLUDE },
       },
     });
     if (!row) {
@@ -95,6 +100,7 @@ export class PrismaReportDraftRepository implements IReportDraftRepository {
         steps: {
           include: STEP_INCLUDE,
         },
+        reportTeam: { include: TEAM_INCLUDE },
       },
       orderBy: { updatedAt: 'desc' },
     });

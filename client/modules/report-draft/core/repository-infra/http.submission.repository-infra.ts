@@ -61,4 +61,14 @@ export class HttpSubmissionRepository implements ISubmissionRepository {
     const res = await fetchBff(url, { credentials: "include", cache: "no-store" });
     return parseJsonResponse(res);
   }
+
+  async findMentorPeerSubmissionsForQc(): Promise<
+    ReportDraftDomainModel.Submission<unknown>[]
+  > {
+    const res = await fetchBff("/api/report-draft/submissions?mentorPeerForQc=true", {
+      credentials: "include",
+      cache: "no-store",
+    });
+    return parseJsonResponse(res);
+  }
 }

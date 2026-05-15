@@ -45,6 +45,16 @@ export const ReportIcon: FC<IconProps> = (p) => (
   </IconBase>
 );
 
+/** Report team membership — same glyph as hunter/mentor dashboards. */
+export const TeamIcon: FC<IconProps> = (p) => (
+  <IconBase {...p}>
+    <circle cx="9" cy="8" r="3" />
+    <path d="M3 20a6 6 0 0 1 12 0" />
+    <circle cx="17" cy="9" r="2.5" />
+    <path d="M15 17a4.5 4.5 0 0 1 6 4" />
+  </IconBase>
+);
+
 /** Two adjacent silhouettes — used for "My colleagues" (mentors, peers). */
 export const ColleagueIcon: FC<IconProps> = (p) => (
   <IconBase {...p}>

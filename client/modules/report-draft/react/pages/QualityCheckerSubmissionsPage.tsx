@@ -7,11 +7,13 @@ import {
   submissionRowIsActionable,
   submissionRowStatusLabel,
 } from "@modules/report-draft/core/model/submission-review-status";
+import { listMentorPeerSubmissionsForQc } from "@modules/report-draft/core/useCase/list-mentor-peer-submissions-for-qc.usecase";
 import { listReviewerSubmissions } from "@modules/report-draft/core/useCase/list-reviewer-submissions.usecase";
 import {
   isUnauthorizedHttpError,
   sessionExpiredUserMessage,
 } from "@/lib/session-refresh";
+import { SubmissionReviewDraftTitleCell } from "@modules/report-draft/react/components/SubmissionReviewDraftTitleCell";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
 type Props = {
@@ -28,6 +30,8 @@ const decisionLabelFr = (
       return "approuvé";
     case "request-changes":
       return "révisions";
+    case "endorse":
+      return "avis mentor OK";
     default:
       return decision;
   }
@@ -40,37 +44,49 @@ export const QualityCheckerSubmissionsPage: React.FC<Props> = ({ lng }) => {
   const submissionsById = useAppSelector((s) => s.reportDrafts.submissionsById);
   const draftsById = useAppSelector((s) => s.reportDrafts.byId);
 
+  const mentorPeerIds = useAppSelector((s) => s.reportDrafts.mentorPeerSubmissionIds);
+
   useEffect(() => {
     void dispatch(listReviewerSubmissions({ reviewerRole: "quality_checker" }));
+    void dispatch(listMentorPeerSubmissionsForQc());
   }, [dispatch]);
 
   const rows = useMemo(
     () =>
       submissionIds
         .map((id) => submissionsById[id])
-        .filter((s) => s != null),
+        .filter((s) => s != null && s.reviewerRole === "quality_checker"),
     [submissionIds, submissionsById],
   );
 
+  const mentorRows = useMemo(
+    () =>
+      mentorPeerIds
+        .map((id) => submissionsById[id])
+        .filter((s) => s != null && s.reviewerRole === "mentor"),
+    [mentorPeerIds, submissionsById],
+  );
+
   return (
-    <div className="mx-auto w-full max-w-6xl px-2 py-6">
+    <div className="mx-auto w-full max-w-6xl px-2 py-6 sm:px-4">
+      <div className="dashboard-card flex flex-col gap-6 p-5 sm:p-6">
       <header className="mb-6">
         <Link
           href={`/${lng}/welcome-quality-checker`}
-          className="text-sm text-form-accent hover:underline"
+          className="text-sm text-dashboard-accent hover:underline"
         >
           ← Accueil QC
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-form-text">Historique des revues</h1>
-        <p className="text-sm text-form-text-muted">
-          Une ligne par rapport et par round. Seul le bouton <strong>Revoir</strong> (statut en
-          attente) permet de valider ou demander des révisions ; <strong>Consulter</strong> est
-          lecture seule. Vérifiez l&apos;ID rapport si plusieurs brouillons sont en parallèle.
+        <h1 className="mt-2 text-2xl font-semibold text-dashboard-text">Historique des revues</h1>
+        <p className="text-sm text-dashboard-text-muted">
+          Seul le QC peut <strong>valider l&apos;étape</strong> (bouton Suivant côté hunter). Les
+          retours mentor sur vos équipes sont listés en bas (lecture seule + commentaires partagés
+          sur la fiche de revue).
         </p>
       </header>
 
       {reviewList.status === "loading" ? (
-        <p className="text-sm text-form-text-muted">Chargement…</p>
+        <p className="text-sm text-dashboard-text-muted">Chargement…</p>
       ) : null}
       {reviewList.status === "error" ? (
         <p role="alert" className="rounded-md border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
@@ -81,7 +97,7 @@ export const QualityCheckerSubmissionsPage: React.FC<Props> = ({ lng }) => {
       ) : null}
 
       {reviewList.status === "success" && rows.length === 0 ? (
-        <p className="rounded-md border border-form-border bg-form-overlay p-4 text-sm text-form-text-muted">
+        <p className="rounded-md border border-dashboard-card-border bg-white p-4 text-sm text-dashboard-text-muted">
           Aucune soumission enregistrée pour le quality checker. Demandez au hunter de cliquer sur
           « Soumettre pour revue » avec « Quality checker » sélectionné, puis rafraîchissez.
         </p>
@@ -105,9 +121,6 @@ export const QualityCheckerSubmissionsPage: React.FC<Props> = ({ lng }) => {
             <tbody>
               {rows.map((submission) => {
                 const draft = draftsById[submission.reportDraftId];
-                const title =
-                  draft?.meta.payload.reportTitle?.trim() ||
-                  (draft ? "Sans titre" : "Brouillon introuvable");
                 const statusLabel = submissionRowStatusLabel(submission, draft);
                 const actionable = submissionRowIsActionable(submission, draft);
 
@@ -116,9 +129,8 @@ export const QualityCheckerSubmissionsPage: React.FC<Props> = ({ lng }) => {
                     key={submission.id}
                     className="border-b border-form-border last:border-0"
                   >
-                    <td className="px-3 py-3 font-medium text-form-text">{title}</td>
-                    <td className="max-w-[120px] truncate px-3 py-3 font-mono text-xs text-form-text-muted">
-                      {submission.reportDraftId}
+                    <td className="px-3 py-3 align-top">
+                      <SubmissionReviewDraftTitleCell draft={draft} />
                     </td>
                     <td className="px-3 py-3 text-form-text">
                       {STEP_TITLE_FR[submission.step]}
@@ -164,15 +176,65 @@ export const QualityCheckerSubmissionsPage: React.FC<Props> = ({ lng }) => {
         </div>
       ) : null}
 
+      {mentorRows.length > 0 ? (
+        <section className="mt-10">
+          <h2 className="text-lg font-semibold text-dashboard-text">Conseil mentor (lecture seule)</h2>
+          <p className="mt-1 text-sm text-dashboard-text-muted">
+            Soumissions adressées au mentor sur vos équipes rapport. Ouvrez une ligne pour lire les
+            commentaires ; validez l&apos;étape depuis une ligne QC ci-dessus.
+          </p>
+          <div className="mt-4 overflow-x-auto rounded-lg border border-violet-200 bg-white shadow-sm">
+            <table className="w-full min-w-[960px] text-left text-sm">
+              <thead className="border-b border-violet-100 bg-violet-50 text-form-text-muted">
+                <tr>
+                  <th className="px-3 py-3 font-medium">Rapport</th>
+                  <th className="px-3 py-3 font-medium">Étape</th>
+                  <th className="px-3 py-3 font-medium">Statut</th>
+                  <th className="px-3 py-3 font-medium" />
+                </tr>
+              </thead>
+              <tbody>
+                {mentorRows.map((submission) => {
+                  const draft = draftsById[submission.reportDraftId];
+                  const statusLabel = submissionRowStatusLabel(submission, draft);
+                  return (
+                    <tr
+                      key={submission.id}
+                      className="border-b border-violet-100 last:border-0"
+                    >
+                      <td className="px-3 py-3 align-top">
+                        <SubmissionReviewDraftTitleCell draft={draft} />
+                      </td>
+                      <td className="px-3 py-3">{STEP_TITLE_FR[submission.step]}</td>
+                      <td className="px-3 py-3 text-form-text-muted">{statusLabel}</td>
+                      <td className="px-3 py-3 text-right">
+                        <Link
+                          href={`/${lng}/submissions/${submission.id}`}
+                          className="rounded-md border border-violet-300 px-3 py-1.5 text-xs font-medium text-violet-950 hover:bg-violet-50"
+                        >
+                          Consulter
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
+
       <button
         type="button"
-        className="mt-4 rounded-md border border-form-border px-4 py-2 text-sm text-form-text hover:bg-form-overlay"
-        onClick={() =>
-          void dispatch(listReviewerSubmissions({ reviewerRole: "quality_checker" }))
-        }
+        className="mt-4 rounded-md border border-dashboard-card-border px-4 py-2 text-sm text-dashboard-text hover:bg-dashboard-accent-soft/40"
+        onClick={() => {
+          void dispatch(listReviewerSubmissions({ reviewerRole: "quality_checker" }));
+          void dispatch(listMentorPeerSubmissionsForQc());
+        }}
       >
         Rafraîchir la liste
       </button>
+      </div>
     </div>
   );
 };

@@ -4,8 +4,15 @@ import {
   ReviewerRole,
   StepStatus,
 } from '../../../generated/prisma/enums';
-import type { ReportDraftAttachment, ReportDraftStep } from '../../../generated/prisma/client';
-import type { ReportDraft } from '../../../generated/prisma/client';
+import type {
+  ReportDraft,
+  ReportDraftAttachment,
+  ReportDraftStep,
+  ReportTeam,
+  ReportTeamMember,
+  User,
+} from '../../../generated/prisma/client';
+import { ReportTeamPrismaMapper } from '../../../report-team/adapters/postgre-prisma/report-team-prisma.mapper';
 import {
   REPORT_DRAFT_STEP_STATE_KEYS,
   type AggregateStatusWire,
@@ -17,8 +24,13 @@ import {
   type StepStatusWire,
 } from '../../models/report-draft-api.types';
 
+export type ReportTeamWithMembersRow = ReportTeam & {
+  members: (ReportTeamMember & { user: User })[];
+};
+
 export type ReportDraftWithSteps = ReportDraft & {
   steps: (ReportDraftStep & { attachments: ReportDraftAttachment[] })[];
+  reportTeam?: ReportTeamWithMembersRow | null;
 };
 
 const STATE_KEY_BY_DRAFT_STEP: Record<DraftStep, ReportDraftStepStateKeyWire> = {
@@ -135,6 +147,15 @@ export class ReportDraftPrismaMapper {
         draft[key] = emptyStepState();
       }
     }
+
+    draft.reportTeam = row.reportTeam
+      ? {
+          label: row.reportTeam.label,
+          members: row.reportTeam.members.map((m) =>
+            ReportTeamPrismaMapper.memberToWire(m),
+          ),
+        }
+      : null;
 
     return draft;
   }

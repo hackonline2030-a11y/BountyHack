@@ -19,7 +19,13 @@ export default async function ReportDraftPage({ params }: PageProps) {
   if (!isSupportedLanguage(lng)) {
     notFound();
   }
-  await verifySessionForRoles(lng, [AppRoleCode.HUNTER]);
+  await verifySessionForRoles(lng, [
+    AppRoleCode.HUNTER,
+    AppRoleCode.QUALITY_CHECKER,
+    AppRoleCode.MENTOR,
+    AppRoleCode.COORDINATOR,
+    AppRoleCode.SUPER_ADMIN,
+  ]);
 
   /**
    * Hunter identity = JWT `sub` (string user uid, same as Nest

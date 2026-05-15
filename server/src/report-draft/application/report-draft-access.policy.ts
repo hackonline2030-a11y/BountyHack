@@ -7,12 +7,14 @@ import type {
 } from '../models/report-draft-api.types';
 import type { IReportDraftRepository } from '../ports/report-draft-repository.interface';
 import type { ISubmissionRepository } from '../ports/submission-repository.interface';
+import type { IReportTeamRepository } from '../../report-team/ports/report-team-repository.interface';
 
 @Injectable()
 export class ReportDraftAccessPolicy {
   constructor(
     private readonly reportDraftRepository: IReportDraftRepository,
     private readonly submissionRepository: ISubmissionRepository,
+    private readonly reportTeamRepository: IReportTeamRepository,
   ) {}
 
   async assertDraftOwnedByHunter(
@@ -38,11 +40,24 @@ export class ReportDraftAccessPolicy {
     );
   }
 
-  assertCanReadDraft(identity: Identity, draft: { hunterId: string }): void {
+  async assertCanReadDraft(
+    identity: Identity,
+    draft: { id: string; hunterId: string },
+  ): Promise<void> {
     if (draft.hunterId === identity.uid) {
       return;
     }
     if (this.isReviewerStaff(identity)) {
+      return;
+    }
+    if (identity.roleCode === AppRoleCode.COORDINATOR) {
+      return;
+    }
+    const isTeamMember = await this.reportTeamRepository.isMemberOfDraft(
+      identity.uid,
+      draft.id,
+    );
+    if (isTeamMember) {
       return;
     }
     throw new ForbiddenException('Cannot access this report draft');
@@ -62,6 +77,9 @@ export class ReportDraftAccessPolicy {
       return;
     }
     if (this.identityMatchesReviewerRole(identity, submission.reviewerRole)) {
+      return;
+    }
+    if (await this.canReadPeerReviewerSubmission(identity, submission)) {
       return;
     }
     throw new ForbiddenException('Cannot access this submission');
@@ -94,13 +112,51 @@ export class ReportDraftAccessPolicy {
       submission.submittedBy === identity.uid &&
       draft.hunterId === identity.uid;
 
-    const isReviewerDecision =
-      submission.decision !== 'pending' &&
-      submission.decidedBy === identity.uid &&
-      this.identityMatchesReviewerRole(identity, submission.reviewerRole);
-
-    if (isHunterSubmit || isReviewerDecision) {
+    if (isHunterSubmit) {
       return;
+    }
+
+    if (
+      submission.decision !== 'pending' &&
+      submission.decidedBy === identity.uid
+    ) {
+      if (submission.decision === 'approve') {
+        if (
+          identity.roleCode !== AppRoleCode.QUALITY_CHECKER &&
+          identity.roleCode !== AppRoleCode.SUPER_ADMIN
+        ) {
+          throw new ForbiddenException(
+            'Only a quality checker can approve a wizard step',
+          );
+        }
+        if (
+          submission.reviewerRole !== 'quality_checker' &&
+          submission.reviewerRole !== 'super_admin'
+        ) {
+          throw new ForbiddenException(
+            'Step approval applies to quality-checker submissions only',
+          );
+        }
+        return;
+      }
+
+      if (submission.decision === 'endorse') {
+        if (identity.roleCode !== AppRoleCode.MENTOR) {
+          throw new ForbiddenException(
+            'Only a mentor can record an advisory endorsement',
+          );
+        }
+        if (submission.reviewerRole !== 'mentor') {
+          throw new ForbiddenException(
+            'Endorsement applies to mentor-targeted submissions only',
+          );
+        }
+        return;
+      }
+
+      if (this.identityMatchesReviewerRole(identity, submission.reviewerRole)) {
+        return;
+      }
     }
 
     throw new ForbiddenException('Cannot save this submission');
@@ -139,6 +195,30 @@ export class ReportDraftAccessPolicy {
       identity.roleCode === AppRoleCode.QUALITY_CHECKER ||
       identity.roleCode === AppRoleCode.MENTOR ||
       identity.roleCode === AppRoleCode.SUPER_ADMIN
+    );
+  }
+
+  /** Mentor and QC on the same report team can read each other's review threads. */
+  private async canReadPeerReviewerSubmission(
+    identity: Identity,
+    submission: SubmissionWire,
+  ): Promise<boolean> {
+    if (
+      submission.reviewerRole !== 'mentor' &&
+      submission.reviewerRole !== 'quality_checker'
+    ) {
+      return false;
+    }
+    if (
+      identity.roleCode !== AppRoleCode.MENTOR &&
+      identity.roleCode !== AppRoleCode.QUALITY_CHECKER &&
+      identity.roleCode !== AppRoleCode.SUPER_ADMIN
+    ) {
+      return false;
+    }
+    return this.reportTeamRepository.isMemberOfDraft(
+      identity.uid,
+      submission.reportDraftId,
     );
   }
 

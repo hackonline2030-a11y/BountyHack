@@ -46,7 +46,7 @@ export const useMetaSection = () => {
   const form = useMemo(() => new MetaForm(), []);
 
   const initialDraft = useMemo<ReportDraftDomainModel.MetaFields>(
-    () => persistedMeta ?? MetaFactory.create(),
+    () => MetaFactory.create(persistedMeta ?? undefined),
     [persistedMeta],
   );
   const [draft, setDraft] = useState<ReportDraftDomainModel.MetaFields>(initialDraft);

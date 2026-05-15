@@ -234,6 +234,9 @@ export type UserWhereInput = {
   role?: Prisma.XOR<Prisma.RoleNullableScalarRelationFilter, Prisma.RoleWhereInput> | null
   reportDrafts?: Prisma.ReportDraftListRelationFilter
   reports?: Prisma.ReportListRelationFilter
+  reportTeamMembers?: Prisma.ReportTeamMemberListRelationFilter
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestListRelationFilter
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -249,6 +252,9 @@ export type UserOrderByWithRelationInput = {
   role?: Prisma.RoleOrderByWithRelationInput
   reportDrafts?: Prisma.ReportDraftOrderByRelationAggregateInput
   reports?: Prisma.ReportOrderByRelationAggregateInput
+  reportTeamMembers?: Prisma.ReportTeamMemberOrderByRelationAggregateInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestOrderByRelationAggregateInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -267,6 +273,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   role?: Prisma.XOR<Prisma.RoleNullableScalarRelationFilter, Prisma.RoleWhereInput> | null
   reportDrafts?: Prisma.ReportDraftListRelationFilter
   reports?: Prisma.ReportListRelationFilter
+  reportTeamMembers?: Prisma.ReportTeamMemberListRelationFilter
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestListRelationFilter
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -307,6 +316,9 @@ export type UserCreateInput = {
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
   reportDrafts?: Prisma.ReportDraftCreateNestedManyWithoutHunterInput
   reports?: Prisma.ReportCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -321,6 +333,9 @@ export type UserUncheckedCreateInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportDrafts?: Prisma.ReportDraftUncheckedCreateNestedManyWithoutHunterInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserUpdateInput = {
@@ -335,6 +350,9 @@ export type UserUpdateInput = {
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
   reportDrafts?: Prisma.ReportDraftUpdateManyWithoutHunterNestedInput
   reports?: Prisma.ReportUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -349,6 +367,9 @@ export type UserUncheckedUpdateInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reportDrafts?: Prisma.ReportDraftUncheckedUpdateManyWithoutHunterNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -427,6 +448,11 @@ export type UserOrderByRelationAggregateInput = {
 export type UserScalarRelationFilter = {
   is?: Prisma.UserWhereInput
   isNot?: Prisma.UserWhereInput
+}
+
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -565,6 +591,50 @@ export type UserUpdateOneRequiredWithoutReportsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReportsInput, Prisma.UserUpdateWithoutReportsInput>, Prisma.UserUncheckedUpdateWithoutReportsInput>
 }
 
+export type UserCreateNestedOneWithoutReportTeamMembersInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReportTeamMembersInput, Prisma.UserUncheckedCreateWithoutReportTeamMembersInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReportTeamMembersInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutReportTeamMembersNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReportTeamMembersInput, Prisma.UserUncheckedCreateWithoutReportTeamMembersInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReportTeamMembersInput
+  upsert?: Prisma.UserUpsertWithoutReportTeamMembersInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReportTeamMembersInput, Prisma.UserUpdateWithoutReportTeamMembersInput>, Prisma.UserUncheckedUpdateWithoutReportTeamMembersInput>
+}
+
+export type UserCreateNestedOneWithoutReportTeamJoinRequestsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReportTeamJoinRequestsInput, Prisma.UserUncheckedCreateWithoutReportTeamJoinRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReportTeamJoinRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutReportTeamJoinRequestsDecidedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReportTeamJoinRequestsDecidedInput, Prisma.UserUncheckedCreateWithoutReportTeamJoinRequestsDecidedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReportTeamJoinRequestsDecidedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutReportTeamJoinRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReportTeamJoinRequestsInput, Prisma.UserUncheckedCreateWithoutReportTeamJoinRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReportTeamJoinRequestsInput
+  upsert?: Prisma.UserUpsertWithoutReportTeamJoinRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReportTeamJoinRequestsInput, Prisma.UserUpdateWithoutReportTeamJoinRequestsInput>, Prisma.UserUncheckedUpdateWithoutReportTeamJoinRequestsInput>
+}
+
+export type UserUpdateOneWithoutReportTeamJoinRequestsDecidedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReportTeamJoinRequestsDecidedInput, Prisma.UserUncheckedCreateWithoutReportTeamJoinRequestsDecidedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReportTeamJoinRequestsDecidedInput
+  upsert?: Prisma.UserUpsertWithoutReportTeamJoinRequestsDecidedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReportTeamJoinRequestsDecidedInput, Prisma.UserUpdateWithoutReportTeamJoinRequestsDecidedInput>, Prisma.UserUncheckedUpdateWithoutReportTeamJoinRequestsDecidedInput>
+}
+
 export type UserCreateWithoutRoleInput = {
   id: string
   username: string
@@ -576,6 +646,9 @@ export type UserCreateWithoutRoleInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   reportDrafts?: Prisma.ReportDraftCreateNestedManyWithoutHunterInput
   reports?: Prisma.ReportCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserUncheckedCreateWithoutRoleInput = {
@@ -589,6 +662,9 @@ export type UserUncheckedCreateWithoutRoleInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportDrafts?: Prisma.ReportDraftUncheckedCreateNestedManyWithoutHunterInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserCreateOrConnectWithoutRoleInput = {
@@ -640,6 +716,9 @@ export type UserCreateWithoutRefreshTokensInput = {
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
   reportDrafts?: Prisma.ReportDraftCreateNestedManyWithoutHunterInput
   reports?: Prisma.ReportCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserUncheckedCreateWithoutRefreshTokensInput = {
@@ -653,6 +732,9 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportDrafts?: Prisma.ReportDraftUncheckedCreateNestedManyWithoutHunterInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserCreateOrConnectWithoutRefreshTokensInput = {
@@ -682,6 +764,9 @@ export type UserUpdateWithoutRefreshTokensInput = {
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
   reportDrafts?: Prisma.ReportDraftUpdateManyWithoutHunterNestedInput
   reports?: Prisma.ReportUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRefreshTokensInput = {
@@ -695,6 +780,9 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reportDrafts?: Prisma.ReportDraftUncheckedUpdateManyWithoutHunterNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserCreateWithoutPasswordResetTokensInput = {
@@ -708,6 +796,9 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
   reportDrafts?: Prisma.ReportDraftCreateNestedManyWithoutHunterInput
   reports?: Prisma.ReportCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -721,6 +812,9 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   reportDrafts?: Prisma.ReportDraftUncheckedCreateNestedManyWithoutHunterInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -750,6 +844,9 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
   reportDrafts?: Prisma.ReportDraftUpdateManyWithoutHunterNestedInput
   reports?: Prisma.ReportUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -763,6 +860,9 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   reportDrafts?: Prisma.ReportDraftUncheckedUpdateManyWithoutHunterNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserCreateWithoutTwoFactorsInput = {
@@ -776,6 +876,9 @@ export type UserCreateWithoutTwoFactorsInput = {
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
   reportDrafts?: Prisma.ReportDraftCreateNestedManyWithoutHunterInput
   reports?: Prisma.ReportCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserUncheckedCreateWithoutTwoFactorsInput = {
@@ -789,6 +892,9 @@ export type UserUncheckedCreateWithoutTwoFactorsInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportDrafts?: Prisma.ReportDraftUncheckedCreateNestedManyWithoutHunterInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserCreateOrConnectWithoutTwoFactorsInput = {
@@ -818,6 +924,9 @@ export type UserUpdateWithoutTwoFactorsInput = {
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
   reportDrafts?: Prisma.ReportDraftUpdateManyWithoutHunterNestedInput
   reports?: Prisma.ReportUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTwoFactorsInput = {
@@ -831,6 +940,9 @@ export type UserUncheckedUpdateWithoutTwoFactorsInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reportDrafts?: Prisma.ReportDraftUncheckedUpdateManyWithoutHunterNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserCreateWithoutReportDraftsInput = {
@@ -844,6 +956,9 @@ export type UserCreateWithoutReportDraftsInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
   reports?: Prisma.ReportCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserUncheckedCreateWithoutReportDraftsInput = {
@@ -857,6 +972,9 @@ export type UserUncheckedCreateWithoutReportDraftsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reports?: Prisma.ReportUncheckedCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserCreateOrConnectWithoutReportDraftsInput = {
@@ -886,6 +1004,9 @@ export type UserUpdateWithoutReportDraftsInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
   reports?: Prisma.ReportUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReportDraftsInput = {
@@ -899,6 +1020,9 @@ export type UserUncheckedUpdateWithoutReportDraftsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserCreateWithoutReportsInput = {
@@ -912,6 +1036,9 @@ export type UserCreateWithoutReportsInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
   reportDrafts?: Prisma.ReportDraftCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserUncheckedCreateWithoutReportsInput = {
@@ -925,6 +1052,9 @@ export type UserUncheckedCreateWithoutReportsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportDrafts?: Prisma.ReportDraftUncheckedCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserCreateOrConnectWithoutReportsInput = {
@@ -954,6 +1084,9 @@ export type UserUpdateWithoutReportsInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
   reportDrafts?: Prisma.ReportDraftUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReportsInput = {
@@ -967,6 +1100,249 @@ export type UserUncheckedUpdateWithoutReportsInput = {
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reportDrafts?: Prisma.ReportDraftUncheckedUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
+}
+
+export type UserCreateWithoutReportTeamMembersInput = {
+  id: string
+  username: string
+  email?: string | null
+  passwordHash?: string | null
+  twoFactorEnabled?: bigint | number
+  twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  role?: Prisma.RoleCreateNestedOneWithoutUsersInput
+  reportDrafts?: Prisma.ReportDraftCreateNestedManyWithoutHunterInput
+  reports?: Prisma.ReportCreateNestedManyWithoutHunterInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutDecidedByInput
+}
+
+export type UserUncheckedCreateWithoutReportTeamMembersInput = {
+  id: string
+  username: string
+  email?: string | null
+  passwordHash?: string | null
+  twoFactorEnabled?: bigint | number
+  roleId?: number | null
+  twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  reportDrafts?: Prisma.ReportDraftUncheckedCreateNestedManyWithoutHunterInput
+  reports?: Prisma.ReportUncheckedCreateNestedManyWithoutHunterInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
+}
+
+export type UserCreateOrConnectWithoutReportTeamMembersInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReportTeamMembersInput, Prisma.UserUncheckedCreateWithoutReportTeamMembersInput>
+}
+
+export type UserUpsertWithoutReportTeamMembersInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReportTeamMembersInput, Prisma.UserUncheckedUpdateWithoutReportTeamMembersInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReportTeamMembersInput, Prisma.UserUncheckedCreateWithoutReportTeamMembersInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReportTeamMembersInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReportTeamMembersInput, Prisma.UserUncheckedUpdateWithoutReportTeamMembersInput>
+}
+
+export type UserUpdateWithoutReportTeamMembersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
+  reportDrafts?: Prisma.ReportDraftUpdateManyWithoutHunterNestedInput
+  reports?: Prisma.ReportUpdateManyWithoutHunterNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUpdateManyWithoutDecidedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReportTeamMembersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  reportDrafts?: Prisma.ReportDraftUncheckedUpdateManyWithoutHunterNestedInput
+  reports?: Prisma.ReportUncheckedUpdateManyWithoutHunterNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
+}
+
+export type UserCreateWithoutReportTeamJoinRequestsInput = {
+  id: string
+  username: string
+  email?: string | null
+  passwordHash?: string | null
+  twoFactorEnabled?: bigint | number
+  twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  role?: Prisma.RoleCreateNestedOneWithoutUsersInput
+  reportDrafts?: Prisma.ReportDraftCreateNestedManyWithoutHunterInput
+  reports?: Prisma.ReportCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutDecidedByInput
+}
+
+export type UserUncheckedCreateWithoutReportTeamJoinRequestsInput = {
+  id: string
+  username: string
+  email?: string | null
+  passwordHash?: string | null
+  twoFactorEnabled?: bigint | number
+  roleId?: number | null
+  twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  reportDrafts?: Prisma.ReportDraftUncheckedCreateNestedManyWithoutHunterInput
+  reports?: Prisma.ReportUncheckedCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
+}
+
+export type UserCreateOrConnectWithoutReportTeamJoinRequestsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReportTeamJoinRequestsInput, Prisma.UserUncheckedCreateWithoutReportTeamJoinRequestsInput>
+}
+
+export type UserCreateWithoutReportTeamJoinRequestsDecidedInput = {
+  id: string
+  username: string
+  email?: string | null
+  passwordHash?: string | null
+  twoFactorEnabled?: bigint | number
+  twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  role?: Prisma.RoleCreateNestedOneWithoutUsersInput
+  reportDrafts?: Prisma.ReportDraftCreateNestedManyWithoutHunterInput
+  reports?: Prisma.ReportCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutReportTeamJoinRequestsDecidedInput = {
+  id: string
+  username: string
+  email?: string | null
+  passwordHash?: string | null
+  twoFactorEnabled?: bigint | number
+  roleId?: number | null
+  twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  reportDrafts?: Prisma.ReportDraftUncheckedCreateNestedManyWithoutHunterInput
+  reports?: Prisma.ReportUncheckedCreateNestedManyWithoutHunterInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedCreateNestedManyWithoutUserInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutReportTeamJoinRequestsDecidedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReportTeamJoinRequestsDecidedInput, Prisma.UserUncheckedCreateWithoutReportTeamJoinRequestsDecidedInput>
+}
+
+export type UserUpsertWithoutReportTeamJoinRequestsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReportTeamJoinRequestsInput, Prisma.UserUncheckedUpdateWithoutReportTeamJoinRequestsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReportTeamJoinRequestsInput, Prisma.UserUncheckedCreateWithoutReportTeamJoinRequestsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReportTeamJoinRequestsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReportTeamJoinRequestsInput, Prisma.UserUncheckedUpdateWithoutReportTeamJoinRequestsInput>
+}
+
+export type UserUpdateWithoutReportTeamJoinRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
+  reportDrafts?: Prisma.ReportDraftUpdateManyWithoutHunterNestedInput
+  reports?: Prisma.ReportUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUpdateManyWithoutDecidedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReportTeamJoinRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  reportDrafts?: Prisma.ReportDraftUncheckedUpdateManyWithoutHunterNestedInput
+  reports?: Prisma.ReportUncheckedUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
+}
+
+export type UserUpsertWithoutReportTeamJoinRequestsDecidedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReportTeamJoinRequestsDecidedInput, Prisma.UserUncheckedUpdateWithoutReportTeamJoinRequestsDecidedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReportTeamJoinRequestsDecidedInput, Prisma.UserUncheckedCreateWithoutReportTeamJoinRequestsDecidedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReportTeamJoinRequestsDecidedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReportTeamJoinRequestsDecidedInput, Prisma.UserUncheckedUpdateWithoutReportTeamJoinRequestsDecidedInput>
+}
+
+export type UserUpdateWithoutReportTeamJoinRequestsDecidedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
+  reportDrafts?: Prisma.ReportDraftUpdateManyWithoutHunterNestedInput
+  reports?: Prisma.ReportUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReportTeamJoinRequestsDecidedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  reportDrafts?: Prisma.ReportDraftUncheckedUpdateManyWithoutHunterNestedInput
+  reports?: Prisma.ReportUncheckedUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyRoleInput = {
@@ -988,6 +1364,9 @@ export type UserUpdateWithoutRoleInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   reportDrafts?: Prisma.ReportDraftUpdateManyWithoutHunterNestedInput
   reports?: Prisma.ReportUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRoleInput = {
@@ -1001,6 +1380,9 @@ export type UserUncheckedUpdateWithoutRoleInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reportDrafts?: Prisma.ReportDraftUncheckedUpdateManyWithoutHunterNestedInput
   reports?: Prisma.ReportUncheckedUpdateManyWithoutHunterNestedInput
+  reportTeamMembers?: Prisma.ReportTeamMemberUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequests?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  reportTeamJoinRequestsDecided?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutRoleInput = {
@@ -1022,6 +1404,9 @@ export type UserCountOutputType = {
   passwordResetTokens: number
   reportDrafts: number
   reports: number
+  reportTeamMembers: number
+  reportTeamJoinRequests: number
+  reportTeamJoinRequestsDecided: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1030,6 +1415,9 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
   reportDrafts?: boolean | UserCountOutputTypeCountReportDraftsArgs
   reports?: boolean | UserCountOutputTypeCountReportsArgs
+  reportTeamMembers?: boolean | UserCountOutputTypeCountReportTeamMembersArgs
+  reportTeamJoinRequests?: boolean | UserCountOutputTypeCountReportTeamJoinRequestsArgs
+  reportTeamJoinRequestsDecided?: boolean | UserCountOutputTypeCountReportTeamJoinRequestsDecidedArgs
 }
 
 /**
@@ -1077,6 +1465,27 @@ export type UserCountOutputTypeCountReportsArgs<ExtArgs extends runtime.Types.Ex
   where?: Prisma.ReportWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReportTeamMembersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReportTeamMemberWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReportTeamJoinRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReportTeamJoinRequestWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReportTeamJoinRequestsDecidedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReportTeamJoinRequestWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1091,6 +1500,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   role?: boolean | Prisma.User$roleArgs<ExtArgs>
   reportDrafts?: boolean | Prisma.User$reportDraftsArgs<ExtArgs>
   reports?: boolean | Prisma.User$reportsArgs<ExtArgs>
+  reportTeamMembers?: boolean | Prisma.User$reportTeamMembersArgs<ExtArgs>
+  reportTeamJoinRequests?: boolean | Prisma.User$reportTeamJoinRequestsArgs<ExtArgs>
+  reportTeamJoinRequestsDecided?: boolean | Prisma.User$reportTeamJoinRequestsDecidedArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1131,6 +1543,9 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   role?: boolean | Prisma.User$roleArgs<ExtArgs>
   reportDrafts?: boolean | Prisma.User$reportDraftsArgs<ExtArgs>
   reports?: boolean | Prisma.User$reportsArgs<ExtArgs>
+  reportTeamMembers?: boolean | Prisma.User$reportTeamMembersArgs<ExtArgs>
+  reportTeamJoinRequests?: boolean | Prisma.User$reportTeamJoinRequestsArgs<ExtArgs>
+  reportTeamJoinRequestsDecided?: boolean | Prisma.User$reportTeamJoinRequestsDecidedArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1149,6 +1564,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     role: Prisma.$RolePayload<ExtArgs> | null
     reportDrafts: Prisma.$ReportDraftPayload<ExtArgs>[]
     reports: Prisma.$ReportPayload<ExtArgs>[]
+    reportTeamMembers: Prisma.$ReportTeamMemberPayload<ExtArgs>[]
+    reportTeamJoinRequests: Prisma.$ReportTeamJoinRequestPayload<ExtArgs>[]
+    reportTeamJoinRequestsDecided: Prisma.$ReportTeamJoinRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1563,6 +1981,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   role<T extends Prisma.User$roleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$roleArgs<ExtArgs>>): Prisma.Prisma__RoleClient<runtime.Types.Result.GetResult<Prisma.$RolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   reportDrafts<T extends Prisma.User$reportDraftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reportDraftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportDraftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reports<T extends Prisma.User$reportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reportTeamMembers<T extends Prisma.User$reportTeamMembersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reportTeamMembersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportTeamMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reportTeamJoinRequests<T extends Prisma.User$reportTeamJoinRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reportTeamJoinRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportTeamJoinRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reportTeamJoinRequestsDecided<T extends Prisma.User$reportTeamJoinRequestsDecidedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reportTeamJoinRequestsDecidedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportTeamJoinRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2135,6 +2556,78 @@ export type User$reportsArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   take?: number
   skip?: number
   distinct?: Prisma.ReportScalarFieldEnum | Prisma.ReportScalarFieldEnum[]
+}
+
+/**
+ * User.reportTeamMembers
+ */
+export type User$reportTeamMembersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReportTeamMember
+   */
+  select?: Prisma.ReportTeamMemberSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReportTeamMember
+   */
+  omit?: Prisma.ReportTeamMemberOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportTeamMemberInclude<ExtArgs> | null
+  where?: Prisma.ReportTeamMemberWhereInput
+  orderBy?: Prisma.ReportTeamMemberOrderByWithRelationInput | Prisma.ReportTeamMemberOrderByWithRelationInput[]
+  cursor?: Prisma.ReportTeamMemberWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReportTeamMemberScalarFieldEnum | Prisma.ReportTeamMemberScalarFieldEnum[]
+}
+
+/**
+ * User.reportTeamJoinRequests
+ */
+export type User$reportTeamJoinRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReportTeamJoinRequest
+   */
+  select?: Prisma.ReportTeamJoinRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReportTeamJoinRequest
+   */
+  omit?: Prisma.ReportTeamJoinRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportTeamJoinRequestInclude<ExtArgs> | null
+  where?: Prisma.ReportTeamJoinRequestWhereInput
+  orderBy?: Prisma.ReportTeamJoinRequestOrderByWithRelationInput | Prisma.ReportTeamJoinRequestOrderByWithRelationInput[]
+  cursor?: Prisma.ReportTeamJoinRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReportTeamJoinRequestScalarFieldEnum | Prisma.ReportTeamJoinRequestScalarFieldEnum[]
+}
+
+/**
+ * User.reportTeamJoinRequestsDecided
+ */
+export type User$reportTeamJoinRequestsDecidedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReportTeamJoinRequest
+   */
+  select?: Prisma.ReportTeamJoinRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReportTeamJoinRequest
+   */
+  omit?: Prisma.ReportTeamJoinRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportTeamJoinRequestInclude<ExtArgs> | null
+  where?: Prisma.ReportTeamJoinRequestWhereInput
+  orderBy?: Prisma.ReportTeamJoinRequestOrderByWithRelationInput | Prisma.ReportTeamJoinRequestOrderByWithRelationInput[]
+  cursor?: Prisma.ReportTeamJoinRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReportTeamJoinRequestScalarFieldEnum | Prisma.ReportTeamJoinRequestScalarFieldEnum[]
 }
 
 /**

@@ -400,7 +400,10 @@ export const ModelName = {
   ReviewerComment: 'ReviewerComment',
   SubmissionAttachmentSnapshot: 'SubmissionAttachmentSnapshot',
   SubmissionContentSnapshot: 'SubmissionContentSnapshot',
-  Report: 'Report'
+  Report: 'Report',
+  ReportTeam: 'ReportTeam',
+  ReportTeamMember: 'ReportTeamMember',
+  ReportTeamJoinRequest: 'ReportTeamJoinRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -416,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "report"
+    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "report" | "reportTeam" | "reportTeamMember" | "reportTeamJoinRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1678,6 +1681,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ReportTeam: {
+      payload: Prisma.$ReportTeamPayload<ExtArgs>
+      fields: Prisma.ReportTeamFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReportTeamFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReportTeamFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamPayload>
+        }
+        findFirst: {
+          args: Prisma.ReportTeamFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReportTeamFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamPayload>
+        }
+        findMany: {
+          args: Prisma.ReportTeamFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamPayload>[]
+        }
+        create: {
+          args: Prisma.ReportTeamCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamPayload>
+        }
+        createMany: {
+          args: Prisma.ReportTeamCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReportTeamCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamPayload>[]
+        }
+        delete: {
+          args: Prisma.ReportTeamDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamPayload>
+        }
+        update: {
+          args: Prisma.ReportTeamUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReportTeamDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReportTeamUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReportTeamUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReportTeamUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamPayload>
+        }
+        aggregate: {
+          args: Prisma.ReportTeamAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReportTeam>
+        }
+        groupBy: {
+          args: Prisma.ReportTeamGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReportTeamGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReportTeamCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReportTeamCountAggregateOutputType> | number
+        }
+      }
+    }
+    ReportTeamMember: {
+      payload: Prisma.$ReportTeamMemberPayload<ExtArgs>
+      fields: Prisma.ReportTeamMemberFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReportTeamMemberFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamMemberPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReportTeamMemberFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamMemberPayload>
+        }
+        findFirst: {
+          args: Prisma.ReportTeamMemberFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamMemberPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReportTeamMemberFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamMemberPayload>
+        }
+        findMany: {
+          args: Prisma.ReportTeamMemberFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamMemberPayload>[]
+        }
+        create: {
+          args: Prisma.ReportTeamMemberCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamMemberPayload>
+        }
+        createMany: {
+          args: Prisma.ReportTeamMemberCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReportTeamMemberCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamMemberPayload>[]
+        }
+        delete: {
+          args: Prisma.ReportTeamMemberDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamMemberPayload>
+        }
+        update: {
+          args: Prisma.ReportTeamMemberUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamMemberPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReportTeamMemberDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReportTeamMemberUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReportTeamMemberUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamMemberPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReportTeamMemberUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamMemberPayload>
+        }
+        aggregate: {
+          args: Prisma.ReportTeamMemberAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReportTeamMember>
+        }
+        groupBy: {
+          args: Prisma.ReportTeamMemberGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReportTeamMemberGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReportTeamMemberCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReportTeamMemberCountAggregateOutputType> | number
+        }
+      }
+    }
+    ReportTeamJoinRequest: {
+      payload: Prisma.$ReportTeamJoinRequestPayload<ExtArgs>
+      fields: Prisma.ReportTeamJoinRequestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReportTeamJoinRequestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamJoinRequestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReportTeamJoinRequestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamJoinRequestPayload>
+        }
+        findFirst: {
+          args: Prisma.ReportTeamJoinRequestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamJoinRequestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReportTeamJoinRequestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamJoinRequestPayload>
+        }
+        findMany: {
+          args: Prisma.ReportTeamJoinRequestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamJoinRequestPayload>[]
+        }
+        create: {
+          args: Prisma.ReportTeamJoinRequestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamJoinRequestPayload>
+        }
+        createMany: {
+          args: Prisma.ReportTeamJoinRequestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReportTeamJoinRequestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamJoinRequestPayload>[]
+        }
+        delete: {
+          args: Prisma.ReportTeamJoinRequestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamJoinRequestPayload>
+        }
+        update: {
+          args: Prisma.ReportTeamJoinRequestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamJoinRequestPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReportTeamJoinRequestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReportTeamJoinRequestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReportTeamJoinRequestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamJoinRequestPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReportTeamJoinRequestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamJoinRequestPayload>
+        }
+        aggregate: {
+          args: Prisma.ReportTeamJoinRequestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReportTeamJoinRequest>
+        }
+        groupBy: {
+          args: Prisma.ReportTeamJoinRequestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReportTeamJoinRequestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReportTeamJoinRequestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReportTeamJoinRequestCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1926,6 +2151,43 @@ export const ReportScalarFieldEnum = {
 export type ReportScalarFieldEnum = (typeof ReportScalarFieldEnum)[keyof typeof ReportScalarFieldEnum]
 
 
+export const ReportTeamScalarFieldEnum = {
+  id: 'id',
+  reportDraftId: 'reportDraftId',
+  label: 'label',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReportTeamScalarFieldEnum = (typeof ReportTeamScalarFieldEnum)[keyof typeof ReportTeamScalarFieldEnum]
+
+
+export const ReportTeamMemberScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  role: 'role',
+  joinedAt: 'joinedAt'
+} as const
+
+export type ReportTeamMemberScalarFieldEnum = (typeof ReportTeamMemberScalarFieldEnum)[keyof typeof ReportTeamMemberScalarFieldEnum]
+
+
+export const ReportTeamJoinRequestScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  requestedRole: 'requestedRole',
+  message: 'message',
+  status: 'status',
+  requestedAt: 'requestedAt',
+  decidedAt: 'decidedAt',
+  decidedById: 'decidedById'
+} as const
+
+export type ReportTeamJoinRequestScalarFieldEnum = (typeof ReportTeamJoinRequestScalarFieldEnum)[keyof typeof ReportTeamJoinRequestScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2170,6 +2432,34 @@ export type ListEnumReportStatusFieldRefInput<$PrismaModel> = FieldRefInputType<
 
 
 /**
+ * Reference to a field of type 'ReportTeamMemberRole'
+ */
+export type EnumReportTeamMemberRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReportTeamMemberRole'>
+    
+
+
+/**
+ * Reference to a field of type 'ReportTeamMemberRole[]'
+ */
+export type ListEnumReportTeamMemberRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReportTeamMemberRole[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ReportTeamJoinRequestStatus'
+ */
+export type EnumReportTeamJoinRequestStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReportTeamJoinRequestStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ReportTeamJoinRequestStatus[]'
+ */
+export type ListEnumReportTeamJoinRequestStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReportTeamJoinRequestStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -2309,6 +2599,9 @@ export type GlobalOmitConfig = {
   submissionAttachmentSnapshot?: Prisma.SubmissionAttachmentSnapshotOmit
   submissionContentSnapshot?: Prisma.SubmissionContentSnapshotOmit
   report?: Prisma.ReportOmit
+  reportTeam?: Prisma.ReportTeamOmit
+  reportTeamMember?: Prisma.ReportTeamMemberOmit
+  reportTeamJoinRequest?: Prisma.ReportTeamJoinRequestOmit
 }
 
 /* Types for Logging */

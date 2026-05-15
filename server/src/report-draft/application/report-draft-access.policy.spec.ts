@@ -3,6 +3,7 @@ import { AppRoleCode } from '../../shared/rbac/app-role.code';
 import { ReportDraftAccessPolicy } from './report-draft-access.policy';
 import type { IReportDraftRepository } from '../ports/report-draft-repository.interface';
 import type { ISubmissionRepository } from '../ports/submission-repository.interface';
+import type { IReportTeamRepository } from '../../report-team/ports/report-team-repository.interface';
 import type { ReportDraftWire, SubmissionWire } from '../models/report-draft-api.types';
 
 function minimalDraft(overrides?: Partial<ReportDraftWire>): ReportDraftWire {
@@ -60,11 +61,20 @@ describe('ReportDraftAccessPolicy', () => {
     findByDraftId: jest.fn(),
     findPendingForReviewerRole: jest.fn(),
     findAllForReviewerRole: jest.fn(),
+    findMentorSubmissionsForDraftIds: jest.fn(),
+  };
+
+  const reportTeamRepository: jest.Mocked<
+    Pick<IReportTeamRepository, 'isMemberOfDraft' | 'findDraftIdsForMember'>
+  > = {
+    isMemberOfDraft: jest.fn().mockResolvedValue(false),
+    findDraftIdsForMember: jest.fn().mockResolvedValue([]),
   };
 
   const policy = new ReportDraftAccessPolicy(
     reportDraftRepository,
     submissionRepository,
+    reportTeamRepository as IReportTeamRepository,
   );
 
   beforeEach(() => {

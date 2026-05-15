@@ -84,6 +84,17 @@ export const STEP_TITLE_FR: Record<M.ReportDraftStep, string> = {
   [M.ReportDraftStep.FINAL]: "Finalisation",
 };
 
+export const STEP_TITLE_EN: Record<M.ReportDraftStep, string> = {
+  [M.ReportDraftStep.META]: "Metadata",
+  [M.ReportDraftStep.DESCRIPTION]: "Description",
+  [M.ReportDraftStep.COLLECTION]: "Collection",
+  [M.ReportDraftStep.EXPLOITATION]: "Exploitation",
+  [M.ReportDraftStep.PROOF_OF_CONCEPT]: "Proof of concept",
+  [M.ReportDraftStep.RISKS]: "Risks",
+  [M.ReportDraftStep.REMEDIATION]: "Remediation",
+  [M.ReportDraftStep.FINAL]: "Finalization",
+};
+
 export function stepFieldsFromPayload(
   step: M.ReportDraftStep,
   payload: unknown,

@@ -46,7 +46,11 @@ describe('GetReportDraftByIdQuery', () => {
     findPendingForReviewerRole: jest.fn(),
     findAllForReviewerRole: jest.fn(),
   };
-  const access = new ReportDraftAccessPolicy(repository, submissionRepository);
+  const access = new ReportDraftAccessPolicy(
+    repository,
+    submissionRepository,
+    { isMemberOfDraft: jest.fn(), findDraftIdsForMember: jest.fn() } as never,
+  );
   const query = new GetReportDraftByIdQuery(repository, access);
 
   it('allows hunter owner', async () => {

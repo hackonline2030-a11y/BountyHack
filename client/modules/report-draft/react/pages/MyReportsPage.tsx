@@ -4,6 +4,14 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { useT } from "next-i18next/client";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
+import { formatReportTeamMembersDisplay } from "@modules/report-draft/core/view/format-report-team-members";
+import {
+  hunterDraftActivityHints,
+  reviewerDisplayNameFromTeam,
+} from "@modules/report-draft/core/view/hunter-draft-review-activity";
+import { HunterReviewHistoryTable } from "@modules/report-draft/react/components/HunterReviewHistoryTable";
+import { reviewerRoleLabelFr } from "@modules/report-draft/react/review/reviewer-role-label";
+import { useAppSelector } from "@store/redux/store";
 import { useMyReportsPage } from "@modules/report-draft/react/pages/use-my-reports-page";
 
 const STEP_KEYS = [
@@ -24,16 +32,13 @@ type Props = {
 };
 
 /**
- * Client-side root of the `/my-reports` route. Holds no business logic —
- * all the data-flow + create-and-navigate orchestration lives in
- * `useMyReportsPage`. This component only renders the four UI states
- * (loading skeleton, error, empty, list) and the "Nouveau rapport" CTA.
+ * Hunter “Mes rapports” page: list and open existing drafts (creation is not
+ * exposed here; the API only allows saving already-provisioned drafts).
  */
 export const MyReportsPage: React.FC<Props> = ({ hunterId, lng }) => {
-  const { t } = useT("myReports");
-  const { loadStatus, drafts, isCreating, createDraft } = useMyReportsPage({
+  const { t } = useT(["myReports", "reportTeams"]);
+  const { loadStatus, drafts } = useMyReportsPage({
     hunterId,
-    lng,
   });
 
   const dateFormatter = useMemo(
@@ -51,68 +56,60 @@ export const MyReportsPage: React.FC<Props> = ({ hunterId, lng }) => {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <header className="flex flex-col gap-3 pb-6 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-dashboard-heading-on-pattern sm:text-3xl">
-            {t("myReports.heading")}
-          </h1>
-          <p className="mt-1 max-w-2xl text-sm text-dashboard-subheading-on-pattern sm:text-base">
-            {t("myReports.subheading")}
-          </p>
-        </div>
+      <div className="dashboard-card flex flex-col gap-8 p-5 sm:p-6 lg:p-8">
+        <header>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-dashboard-text sm:text-3xl">
+              {t("myReports.heading")}
+            </h1>
+            <p className="mt-1 max-w-2xl text-sm text-dashboard-text-muted sm:text-base">
+              {t("myReports.subheading")}
+            </p>
+          </div>
+        </header>
 
-        <button
-          type="button"
-          onClick={createDraft}
-          disabled={isCreating}
-          className="inline-flex items-center justify-center rounded-md bg-dashboard-accent px-4 py-2 text-sm font-semibold text-dashboard-accent-on shadow-sm transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-dashboard-accent disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isCreating
-            ? t("myReports.actions.creating")
-            : t("myReports.actions.newReport")}
-        </button>
-      </header>
+        {loadStatus.status === "loading" || loadStatus.status === "idle" ? (
+          <ListSkeleton ariaLabel={t("myReports.list.loadingAriaLabel")} />
+        ) : null}
 
-      {loadStatus.status === "loading" || loadStatus.status === "idle" ? (
-        <ListSkeleton ariaLabel={t("myReports.list.loadingAriaLabel")} />
-      ) : null}
+        {loadStatus.status === "error" ? (
+          <ErrorState
+            title={t("myReports.list.error.title")}
+            description={t("myReports.list.error.description", {
+              message: loadStatus.message,
+            })}
+          />
+        ) : null}
 
-      {loadStatus.status === "error" ? (
-        <ErrorState
-          title={t("myReports.list.error.title")}
-          description={t("myReports.list.error.description", {
-            message: loadStatus.message,
-          })}
-        />
-      ) : null}
+        {showEmpty ? (
+          <EmptyState
+            title={t("myReports.list.empty.title")}
+            description={t("myReports.list.empty.description")}
+          />
+        ) : null}
 
-      {showEmpty ? (
-        <EmptyState
-          title={t("myReports.list.empty.title")}
-          description={t("myReports.list.empty.description")}
-          ctaLabel={t("myReports.list.empty.cta")}
-          onCta={createDraft}
-          disabled={isCreating}
-        />
-      ) : null}
-
-      {showList ? (
-        <ul
-          role="list"
-          className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3"
-        >
-          {drafts.map((draft) => (
-            <li key={draft.id}>
-              <DraftCard
-                draft={draft}
-                lng={lng}
-                dateFormatter={dateFormatter}
-                t={t}
-              />
-            </li>
-          ))}
-        </ul>
-      ) : null}
+        {showList ? (
+          <>
+            <ul
+              role="list"
+              className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3"
+            >
+              {drafts.map((draft) => (
+                <li key={draft.id}>
+                  <MyReportsDraftCard
+                    draft={draft}
+                    lng={lng}
+                    dateFormatter={dateFormatter}
+                    roleLabel={(role) => t(`reportTeams:reportTeams.roles.${role}`)}
+                    t={t}
+                  />
+                </li>
+              ))}
+            </ul>
+            <HunterReviewHistoryTable lng={lng} />
+          </>
+        ) : null}
+      </div>
     </div>
   );
 };
@@ -123,14 +120,55 @@ export const MyReportsPage: React.FC<Props> = ({ hunterId, lng }) => {
 
 type TFunction = ReturnType<typeof useT>["t"];
 
-const DraftCard: React.FC<{
+const MyReportsDraftCard: React.FC<{
   draft: ReportDraftDomainModel.ReportDraft;
   lng: string;
   dateFormatter: Intl.DateTimeFormat;
+  roleLabel: (role: string) => string;
   t: TFunction;
-}> = ({ draft, lng, dateFormatter, t }) => {
-  const title = draft.meta.payload.reportTitle?.trim() ?? "";
-  const displayTitle = title === "" ? t("myReports.card.untitled") : title;
+}> = ({ draft, lng, dateFormatter, roleLabel, t }) => {
+  const submissionsById = useAppSelector((s) => s.reportDrafts.submissionsById);
+  const commentsById = useAppSelector((s) => s.reportDrafts.commentsById);
+
+  const subsForDraft = useMemo(
+    () => Object.values(submissionsById).filter((s) => s.reportDraftId === draft.id),
+    [submissionsById, draft.id],
+  );
+
+  const commentsForDraft = useMemo(() => {
+    const ids = new Set(subsForDraft.map((s) => s.id));
+    return Object.values(commentsById).filter((c) => ids.has(c.submissionId));
+  }, [commentsById, subsForDraft]);
+
+  const activity = useMemo(
+    () => hunterDraftActivityHints(draft, subsForDraft, commentsForDraft),
+    [draft, subsForDraft, commentsForDraft],
+  );
+
+  const shortWhen = useMemo(
+    () =>
+      new Intl.DateTimeFormat(undefined, {
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    [],
+  );
+
+  const contentTitle = draft.meta.payload.reportTitle?.trim() ?? "";
+  const team = draft.reportTeam;
+  const headline =
+    team?.label?.trim() ||
+    (contentTitle === ""
+      ? t("myReports.card.untitled")
+      : contentTitle);
+  const headlineIsTeam = Boolean(team?.label?.trim());
+
+  const membersLine =
+    team && team.members.length > 0
+      ? formatReportTeamMembersDisplay(team.members, roleLabel)
+      : null;
 
   const approvedSteps = STEP_KEYS.reduce(
     (n, key) => n + (draft[key].status === "approved" ? 1 : 0),
@@ -140,15 +178,67 @@ const DraftCard: React.FC<{
   return (
     <Link
       href={`/${lng}/report-draft/${draft.id}`}
-      aria-label={`${displayTitle} — ${t("myReports.card.open")}`}
+      aria-label={`${headline} — ${t("myReports.card.open")}`}
       className="group flex h-full flex-col gap-3 rounded-lg border border-dashboard-card-border bg-dashboard-card p-4 shadow-sm transition hover:border-dashboard-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-dashboard-accent sm:p-5"
     >
       <div className="flex items-start justify-between gap-3">
         <h2 className="line-clamp-2 text-base font-semibold text-dashboard-text">
-          {displayTitle}
+          {headline}
         </h2>
         <StatusBadge status={draft.aggregateStatus} t={t} />
       </div>
+
+      {headlineIsTeam && contentTitle ? (
+        <p className="line-clamp-2 text-xs text-dashboard-text-muted">
+          {t("myReports.card.contentTitleSecondary", { title: contentTitle })}
+        </p>
+      ) : null}
+
+      {membersLine ? (
+        <p
+          className="line-clamp-2 text-xs text-dashboard-text-subtle"
+          title={membersLine}
+          aria-label={`${t("myReports.card.teamMembersAria")}: ${membersLine}`}
+        >
+          {membersLine}
+        </p>
+      ) : null}
+
+      {activity.latestMentorEndorse ? (
+        <div className="rounded-md border border-emerald-200/80 bg-emerald-50/90 px-2 py-1.5 text-[11px] font-medium leading-snug text-emerald-950">
+          {t("myReports.activity.endorseBanner", {
+            name: reviewerDisplayNameFromTeam(draft, activity.latestMentorEndorse.decidedBy),
+            date: shortWhen.format(new Date(activity.latestMentorEndorse.decidedAt)),
+          })}
+        </div>
+      ) : null}
+
+      {activity.latestStaffComment ? (
+        <div className="rounded-md border border-sky-200/80 bg-sky-50/90 px-2 py-1.5 text-[11px] leading-snug text-sky-950">
+          {(() => {
+            const c = activity.latestStaffComment;
+            const name = reviewerDisplayNameFromTeam(draft, c.authorId);
+            const rLabel =
+              c.authorRole === "mentor" || c.authorRole === "quality_checker"
+                ? roleLabel(c.authorRole)
+                : reviewerRoleLabelFr(c.authorRole);
+            const preview =
+              c.body.length > 90 ? `${c.body.slice(0, 87)}…` : c.body;
+            return (
+              <>
+                {t("myReports.activity.commentBanner", {
+                  name,
+                  role: rLabel,
+                  date: shortWhen.format(new Date(c.createdAt)),
+                })}
+                {preview.length > 0
+                  ? ` ${t("myReports.activity.commentPreview", { preview })}`
+                  : null}
+              </>
+            );
+          })()}
+        </div>
+      ) : null}
 
       <p className="text-xs text-dashboard-text-subtle">
         {t("myReports.card.updatedAt", {
@@ -237,26 +327,15 @@ const ListSkeleton: React.FC<{ ariaLabel: string }> = ({ ariaLabel }) => (
   </div>
 );
 
-const EmptyState: React.FC<{
-  title: string;
-  description: string;
-  ctaLabel: string;
-  onCta: () => void;
-  disabled: boolean;
-}> = ({ title, description, ctaLabel, onCta, disabled }) => (
+const EmptyState: React.FC<{ title: string; description: string }> = ({
+  title,
+  description,
+}) => (
   <div className="rounded-lg border border-dashed border-dashboard-card-border bg-dashboard-card/50 p-8 text-center sm:p-12">
     <h2 className="text-lg font-semibold text-dashboard-text sm:text-xl">{title}</h2>
     <p className="mx-auto mt-2 max-w-md text-sm text-dashboard-text-muted">
       {description}
     </p>
-    <button
-      type="button"
-      onClick={onCta}
-      disabled={disabled}
-      className="mt-6 inline-flex items-center justify-center rounded-md bg-dashboard-accent px-4 py-2 text-sm font-semibold text-dashboard-accent-on shadow-sm transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-dashboard-accent disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      {ctaLabel}
-    </button>
   </div>
 );
 

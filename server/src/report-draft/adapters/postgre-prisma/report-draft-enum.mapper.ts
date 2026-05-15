@@ -49,12 +49,14 @@ const DECISION_TO_WIRE: Record<SubmissionDecision, SubmissionDecisionWire> = {
   [SubmissionDecision.PENDING]: 'pending',
   [SubmissionDecision.APPROVE]: 'approve',
   [SubmissionDecision.REQUEST_CHANGES]: 'request-changes',
+  [SubmissionDecision.ENDORSE]: 'endorse',
 };
 
 const DECISION_FROM_WIRE: Record<SubmissionDecisionWire, SubmissionDecision> = {
   pending: SubmissionDecision.PENDING,
   approve: SubmissionDecision.APPROVE,
   'request-changes': SubmissionDecision.REQUEST_CHANGES,
+  endorse: SubmissionDecision.ENDORSE,
 };
 
 export class ReportDraftEnumMapper {

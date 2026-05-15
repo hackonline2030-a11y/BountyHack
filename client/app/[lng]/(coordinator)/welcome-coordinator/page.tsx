@@ -41,15 +41,17 @@ export default async function WelcomeCoordinatorPage({ params }: PageProps) {
         classNames="bg-pattern flex flex-1 flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
       >
         <div className="mx-auto w-full max-w-4xl flex flex-col gap-6">
-          <header>
-            <h1 className="text-2xl font-bold tracking-tight text-dashboard-heading-on-pattern sm:text-3xl">
-              {heading}
-            </h1>
-            <p className="mt-1 text-sm text-dashboard-subheading-on-pattern sm:text-base">
-              {t("welcomeCoordinator.subheading")}
-            </p>
-          </header>
-          <ReportTeamMockBanner message={t("reportTeams:reportTeams.mockBanner")} />
+          <div className="dashboard-card flex flex-col gap-4 p-5 sm:p-6">
+            <header>
+              <h1 className="text-2xl font-bold tracking-tight text-dashboard-text sm:text-3xl">
+                {heading}
+              </h1>
+              <p className="mt-1 text-sm text-dashboard-text-muted sm:text-base">
+                {t("welcomeCoordinator.subheading")}
+              </p>
+            </header>
+            <ReportTeamMockBanner message={t("reportTeams:reportTeams.mockBanner")} />
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <section className="dashboard-card flex flex-col p-5">
               <h2 className="text-base font-semibold text-dashboard-text">

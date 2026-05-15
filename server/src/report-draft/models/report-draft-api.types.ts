@@ -3,6 +3,14 @@
  * `ReportDraftDomainModel` JSON exchanged via BFF / Nest.
  */
 
+import type { ReportTeamMemberWire } from '../../report-team/models/report-team-api.types';
+
+/** Coordinator-chosen title + squad; server-only enrichment, not persisted from client PUT. */
+export interface ReportDraftTeamWire {
+  label: string;
+  members: ReportTeamMemberWire[];
+}
+
 export type AggregateStatusWire =
   | 'draft'
   | 'under-review'
@@ -23,7 +31,11 @@ export type ReviewerRoleWire =
   | 'quality_checker'
   | 'super_admin';
 
-export type SubmissionDecisionWire = 'pending' | 'approve' | 'request-changes';
+export type SubmissionDecisionWire =
+  | 'pending'
+  | 'approve'
+  | 'request-changes'
+  | 'endorse';
 
 /** Numeric wizard step (client `ReportDraftStep` enum 0–7). */
 export type SubmissionStepWire = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
@@ -72,6 +84,8 @@ export interface ReportDraftWire {
   final: StepStateWire;
   createdAt: string;
   updatedAt: string;
+  /** Associated report-team (label + members) when one exists — read-only from client saves. */
+  reportTeam?: ReportDraftTeamWire | null;
 }
 
 export const REPORT_DRAFT_STEP_STATE_KEYS: readonly ReportDraftStepStateKeyWire[] =

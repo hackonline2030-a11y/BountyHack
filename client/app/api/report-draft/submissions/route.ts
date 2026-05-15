@@ -1,14 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { bearerTokenFromSessionOrUnauthorized } from "@/lib/server/bearer-from-session";
 import { fetchNestReportDraft } from "@/lib/server/nest-report-draft-fetch";
-import { requireReportDraftApiSession } from "@/lib/report-draft/api-auth";
+import {
+  jsonFromNestResponse,
+  requireReportWorkflowParticipantBearer,
+} from "@/lib/report-draft/api-auth";
 import type { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
+
+export const dynamic = "force-dynamic";
 
 function nestQuery(request: NextRequest): string {
   const draftId = request.nextUrl.searchParams.get("draftId");
   const pendingForReviewer = request.nextUrl.searchParams.get("pendingForReviewer");
   const forReviewer = request.nextUrl.searchParams.get("forReviewer");
+  const mentorPeerForQc = request.nextUrl.searchParams.get("mentorPeerForQc");
 
+  if (mentorPeerForQc === "true") {
+    return "submissions?mentorPeerForQc=true";
+  }
   if (forReviewer) {
     return `submissions?forReviewer=${encodeURIComponent(forReviewer)}`;
   }
@@ -22,36 +30,30 @@ function nestQuery(request: NextRequest): string {
 }
 
 export async function GET(request: NextRequest) {
-  const auth = await requireReportDraftApiSession();
+  const auth = await requireReportWorkflowParticipantBearer();
   if ("response" in auth) return auth.response;
 
   const draftId = request.nextUrl.searchParams.get("draftId");
   const pendingForReviewer = request.nextUrl.searchParams.get("pendingForReviewer");
   const forReviewer = request.nextUrl.searchParams.get("forReviewer");
+  const mentorPeerForQc = request.nextUrl.searchParams.get("mentorPeerForQc");
 
-  if (!forReviewer && !pendingForReviewer && !draftId?.trim()) {
+  if (!forReviewer && !pendingForReviewer && !draftId?.trim() && mentorPeerForQc !== "true") {
     return NextResponse.json(
       { error: "draftId, pendingForReviewer or forReviewer required" },
       { status: 400 },
     );
   }
 
-  const bearer = await bearerTokenFromSessionOrUnauthorized();
-  if ("unauthorized" in bearer) return bearer.unauthorized;
-
-  const nestRes = await fetchNestReportDraft(nestQuery(request), bearer.token, {
+  const nestRes = await fetchNestReportDraft(nestQuery(request), auth.token, {
     method: "GET",
+    cache: "no-store",
   });
-
-  const body = await nestRes.text();
-  return new NextResponse(body, {
-    status: nestRes.status,
-    headers: { "Content-Type": "application/json" },
-  });
+  return jsonFromNestResponse(nestRes, await nestRes.text());
 }
 
 export async function PUT(request: NextRequest) {
-  const auth = await requireReportDraftApiSession();
+  const auth = await requireReportWorkflowParticipantBearer();
   if ("response" in auth) return auth.response;
 
   let submission: ReportDraftDomainModel.Submission<unknown>;
@@ -61,18 +63,11 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const bearer = await bearerTokenFromSessionOrUnauthorized();
-  if ("unauthorized" in bearer) return bearer.unauthorized;
-
-  const nestRes = await fetchNestReportDraft("submissions", bearer.token, {
+  const nestRes = await fetchNestReportDraft("submissions", auth.token, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(submission),
+    cache: "no-store",
   });
-
-  const body = await nestRes.text();
-  return new NextResponse(body, {
-    status: nestRes.status,
-    headers: { "Content-Type": "application/json" },
-  });
+  return jsonFromNestResponse(nestRes, await nestRes.text());
 }

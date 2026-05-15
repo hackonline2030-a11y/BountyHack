@@ -19,7 +19,7 @@ export class GetReportDraftByIdQuery {
     if (draft === null) {
       return null;
     }
-    this.access.assertCanReadDraft(identity, draft);
+    await this.access.assertCanReadDraft(identity, draft);
     return draft;
   }
 }

@@ -32,11 +32,21 @@ export function submissionRowStatusLabel(
       return "En attente de revue";
     case "approve":
       return "Étape validée";
+    case "endorse":
+      return "Avis mentor favorable";
     case "request-changes":
-      return "Révisions demandées";
+      return submission.reviewerRole === "mentor"
+        ? "Révisions demandées (mentor)"
+        : "Révisions demandées";
     default:
       return submission.decision;
   }
+}
+
+export function submissionRowIsMentorPeer(
+  submission: ReportDraftDomainModel.Submission<unknown>,
+): boolean {
+  return submission.reviewerRole === "mentor";
 }
 
 export function submissionRowIsActionable(
@@ -47,4 +57,11 @@ export function submissionRowIsActionable(
     return false;
   }
   return submission.decision === "pending";
+}
+
+/** Mentor/QC can still open decided mentor rows for consultation. */
+export function submissionRowIsConsultable(
+  submission: ReportDraftDomainModel.Submission<unknown>,
+): boolean {
+  return submission.decision !== "pending";
 }

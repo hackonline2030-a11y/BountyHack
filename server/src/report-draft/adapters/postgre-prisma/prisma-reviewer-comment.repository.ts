@@ -4,6 +4,8 @@ import { PrismaService } from '../../../core/infrastructure/database/prisma/pris
 import type { IReviewerCommentRepository } from '../../ports/reviewer-comment-repository.interface';
 import type { ReviewerCommentWire } from '../../models/report-draft-api.types';
 import { ReviewerCommentPrismaMapper } from './reviewer-comment-prisma.mapper';
+import { ReportDraftEnumMapper } from './report-draft-enum.mapper';
+import type { SubmissionStepWire } from '../../models/report-draft-api.types';
 
 @Injectable()
 export class PrismaReviewerCommentRepository implements IReviewerCommentRepository {
@@ -33,6 +35,30 @@ export class PrismaReviewerCommentRepository implements IReviewerCommentReposito
   async findBySubmissionId(submissionId: string): Promise<ReviewerCommentWire[]> {
     const rows = await this.prisma.reviewerComment.findMany({
       where: { submissionId },
+      orderBy: { createdAt: 'asc' },
+    });
+    return rows.map((row) => ReviewerCommentPrismaMapper.toDomain(row));
+  }
+
+  async findByReportDraftStep(
+    reportDraftId: string,
+    step: number,
+  ): Promise<ReviewerCommentWire[]> {
+    const draftStep = await this.prisma.reportDraftStep.findFirst({
+      where: {
+        reportDraftId,
+        step: ReportDraftEnumMapper.draftStepFromStepNumber(step as SubmissionStepWire),
+      },
+      select: { id: true },
+    });
+    if (draftStep === null) {
+      return [];
+    }
+
+    const rows = await this.prisma.reviewerComment.findMany({
+      where: {
+        submission: { reportDraftStepId: draftStep.id },
+      },
       orderBy: { createdAt: 'asc' },
     });
     return rows.map((row) => ReviewerCommentPrismaMapper.toDomain(row));

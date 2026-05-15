@@ -6,12 +6,14 @@ import {
   ReportIcon,
   SettingsIcon,
   SupportIcon,
+  TeamIcon,
 } from "./icons";
 
 export type DashboardNavLabels = {
   label: string;
   emails: string;
   reports: string;
+  teams: string;
   colleagues: string;
   support: string;
   settings: string;
@@ -20,6 +22,7 @@ export type DashboardNavLabels = {
 export type DashboardNavHrefs = {
   emails: string;
   reports: string;
+  teams: string;
   colleagues: string;
   support: string;
   settings: string;
@@ -32,21 +35,16 @@ type NavItem = {
   Icon: FC<SVGProps<SVGSVGElement>>;
 };
 
-/**
- * Quality-checker nav. Streamlined vs. the hunter dashboard: no learning
- * tracks / courses / teams / mentors entries — QC focuses on the report-
- * review queue and on coordinating with colleagues (mentors, leads,
- * fellow checkers).
- */
 const NAV_ITEMS: ReadonlyArray<NavItem> = [
   { key: "emails", Icon: EmailIcon },
   { key: "reports", Icon: ReportIcon },
+  { key: "teams", Icon: TeamIcon },
   { key: "colleagues", Icon: ColleagueIcon },
   { key: "support", Icon: SupportIcon },
   { key: "settings", Icon: SettingsIcon },
 ];
 
-const GROUP_BREAKS: ReadonlySet<NavKey> = new Set(["emails", "colleagues"]);
+const GROUP_BREAKS: ReadonlySet<NavKey> = new Set(["emails", "teams"]);
 
 type Props = {
   labels: DashboardNavLabels;

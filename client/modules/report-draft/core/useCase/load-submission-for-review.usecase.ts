@@ -36,7 +36,9 @@ export const loadSubmissionForReview =
         return;
       }
 
-      const comments = await deps.reviewerCommentRepository.findBySubmissionId(submission.id);
+      const comments = await deps.reviewerCommentRepository.findForReviewStep(
+        submission.id,
+      );
 
       dispatch(reportDraftsSlice.actions.draftUpserted(draft));
       dispatch(reportDraftsSlice.actions.submissionUpserted(submission));

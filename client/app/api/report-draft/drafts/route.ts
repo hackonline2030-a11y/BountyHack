@@ -1,36 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
-import { bearerTokenFromSessionOrUnauthorized } from "@/lib/server/bearer-from-session";
 import { fetchNestReportDraft } from "@/lib/server/nest-report-draft-fetch";
-import { requireReportDraftApiSession } from "@/lib/report-draft/api-auth";
+import {
+  jsonFromNestResponse,
+  requireReportWorkflowParticipantBearer,
+} from "@/lib/report-draft/api-auth";
 import type { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
-  const auth = await requireReportDraftApiSession();
+  const auth = await requireReportWorkflowParticipantBearer();
   if ("response" in auth) return auth.response;
 
   const hunterId = request.nextUrl.searchParams.get("hunterId");
   if (!hunterId?.trim()) {
-    return NextResponse.json({ error: "hunterId query param required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "hunterId query param required" },
+      { status: 400 },
+    );
   }
-
-  const bearer = await bearerTokenFromSessionOrUnauthorized();
-  if ("unauthorized" in bearer) return bearer.unauthorized;
 
   const nestRes = await fetchNestReportDraft(
     `?hunterId=${encodeURIComponent(hunterId.trim())}`,
-    bearer.token,
-    { method: "GET" },
+    auth.token,
+    { method: "GET", cache: "no-store" },
   );
-
-  const body = await nestRes.text();
-  return new NextResponse(body, {
-    status: nestRes.status,
-    headers: { "Content-Type": "application/json" },
-  });
+  return jsonFromNestResponse(nestRes, await nestRes.text());
 }
 
 export async function PUT(request: NextRequest) {
-  const auth = await requireReportDraftApiSession();
+  const auth = await requireReportWorkflowParticipantBearer();
   if ("response" in auth) return auth.response;
 
   let draft: ReportDraftDomainModel.ReportDraft;
@@ -40,18 +39,11 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const bearer = await bearerTokenFromSessionOrUnauthorized();
-  if ("unauthorized" in bearer) return bearer.unauthorized;
-
-  const nestRes = await fetchNestReportDraft("", bearer.token, {
+  const nestRes = await fetchNestReportDraft("", auth.token, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(draft),
+    cache: "no-store",
   });
-
-  const body = await nestRes.text();
-  return new NextResponse(body, {
-    status: nestRes.status,
-    headers: { "Content-Type": "application/json" },
-  });
+  return jsonFromNestResponse(nestRes, await nestRes.text());
 }

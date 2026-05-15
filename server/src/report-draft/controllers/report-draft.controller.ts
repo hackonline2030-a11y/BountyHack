@@ -14,8 +14,8 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Auth } from '../../auth/auth.decorator';
 import { RequestWithIdentity } from '../../auth/adapters/http/request-with-identity';
+import { AuthReportWorkflowParticipant } from '../../shared/rbac/report-workflow-auth.decorator';
 import {
   ApiHttpForbidden,
   ApiHttpInternalServerError,
@@ -37,8 +37,11 @@ export class ReportDraftController {
   ) {}
 
   @Put()
-  @Auth()
-  @ApiOperation({ summary: 'Create or update a report draft aggregate' })
+  @AuthReportWorkflowParticipant()
+  @ApiOperation({
+    summary:
+      'Persist updates to an existing report draft (draft row must already exist)',
+  })
   @ApiOkResponse({
     description: 'Draft persisted',
     schema: { example: { ok: true } },
@@ -55,7 +58,7 @@ export class ReportDraftController {
   }
 
   @Get()
-  @Auth()
+  @AuthReportWorkflowParticipant()
   @ApiOperation({ summary: 'List report drafts for a hunter' })
   @ApiOkResponse({ description: 'Array of report drafts' })
   @ApiHttpUnauthorized('Missing or invalid bearer token.')
@@ -75,7 +78,7 @@ export class ReportDraftController {
   }
 
   @Get('draft/:draftId')
-  @Auth()
+  @AuthReportWorkflowParticipant()
   @ApiOperation({ summary: 'Get one report draft by id' })
   @ApiOkResponse({ description: 'Report draft JSON' })
   @ApiHttpUnauthorized('Missing or invalid bearer token.')

@@ -164,12 +164,51 @@ export class ReportDraftAggregate {
    * step to "approved", and — if every step is now approved — promotes the
    * aggregate to "ready-to-program".
    */
+  /**
+   * Mentor advisory OK — records `endorse` on the submission and re-opens the
+   * step for the hunter to submit to the quality checker. Does NOT approve the step.
+   */
+  endorseSubmission(input: {
+    submission: ReportDraftDomainModel.Submission<unknown>;
+    decidedBy: string;
+  }): void {
+    this.guardAggregateNotTerminal("endorse a submission on");
+    const { submission, decidedBy } = input;
+    if (submission.reviewerRole !== "mentor") {
+      throw new Error(
+        "ReportDraftAggregate: endorseSubmission applies only to mentor-targeted submissions.",
+      );
+    }
+    const stepKey = this.guardSubmissionMatchesPendingStep(submission, "endorse");
+
+    const stepState = this._state[stepKey] as ReportDraftDomainModel.StepState<unknown>;
+    const now = this.deps.clock.now();
+
+    submission.decision = "endorse";
+    submission.decidedAt = now;
+    submission.decidedBy = decidedBy;
+
+    stepState.status = "in-progress";
+    stepState.assignedReviewerRole = null;
+
+    this._state.updatedAt = now;
+    this._state.version += 1;
+  }
+
   approveStep(input: {
     submission: ReportDraftDomainModel.Submission<unknown>;
     decidedBy: string;
   }): void {
     this.guardAggregateNotTerminal("approve a step on");
     const { submission, decidedBy } = input;
+    if (
+      submission.reviewerRole !== "quality_checker" &&
+      submission.reviewerRole !== "super_admin"
+    ) {
+      throw new Error(
+        "ReportDraftAggregate: only a quality checker (or super admin) can approve a wizard step.",
+      );
+    }
     const stepKey = this.guardSubmissionMatchesPendingStep(submission, "approve");
 
     const stepState = this._state[stepKey] as ReportDraftDomainModel.StepState<unknown>;

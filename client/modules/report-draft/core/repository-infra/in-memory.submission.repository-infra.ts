@@ -58,6 +58,12 @@ export class InMemorySubmissionRepository implements ISubmissionRepository {
       .sort((a, b) => sortSubmissionsNewestFirst(a, b))
       .map(clone);
   }
+
+  async findMentorPeerSubmissionsForQc(): Promise<
+    ReportDraftDomainModel.Submission<unknown>[]
+  > {
+    return this.findAllForReviewerRole("mentor");
+  }
 }
 
 function sortSubmissionsNewestFirst(

@@ -236,6 +236,7 @@ export type ReportDraftWhereInput = {
   pendingReport?: Prisma.XOR<Prisma.ReportNullableScalarRelationFilter, Prisma.ReportWhereInput> | null
   steps?: Prisma.ReportDraftStepListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
+  reportTeam?: Prisma.XOR<Prisma.ReportTeamNullableScalarRelationFilter, Prisma.ReportTeamWhereInput> | null
 }
 
 export type ReportDraftOrderByWithRelationInput = {
@@ -250,6 +251,7 @@ export type ReportDraftOrderByWithRelationInput = {
   pendingReport?: Prisma.ReportOrderByWithRelationInput
   steps?: Prisma.ReportDraftStepOrderByRelationAggregateInput
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
+  reportTeam?: Prisma.ReportTeamOrderByWithRelationInput
 }
 
 export type ReportDraftWhereUniqueInput = Prisma.AtLeast<{
@@ -267,6 +269,7 @@ export type ReportDraftWhereUniqueInput = Prisma.AtLeast<{
   pendingReport?: Prisma.XOR<Prisma.ReportNullableScalarRelationFilter, Prisma.ReportWhereInput> | null
   steps?: Prisma.ReportDraftStepListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
+  reportTeam?: Prisma.XOR<Prisma.ReportTeamNullableScalarRelationFilter, Prisma.ReportTeamWhereInput> | null
 }, "id" | "pendingReportId">
 
 export type ReportDraftOrderByWithAggregationInput = {
@@ -307,6 +310,7 @@ export type ReportDraftCreateInput = {
   pendingReport?: Prisma.ReportCreateNestedOneWithoutPendingForDraftInput
   steps?: Prisma.ReportDraftStepCreateNestedManyWithoutReportDraftInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutReportDraftInput
+  reportTeam?: Prisma.ReportTeamCreateNestedOneWithoutReportDraftInput
 }
 
 export type ReportDraftUncheckedCreateInput = {
@@ -319,6 +323,7 @@ export type ReportDraftUncheckedCreateInput = {
   updatedAt?: Date | string
   steps?: Prisma.ReportDraftStepUncheckedCreateNestedManyWithoutReportDraftInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutReportDraftInput
+  reportTeam?: Prisma.ReportTeamUncheckedCreateNestedOneWithoutReportDraftInput
 }
 
 export type ReportDraftUpdateInput = {
@@ -331,6 +336,7 @@ export type ReportDraftUpdateInput = {
   pendingReport?: Prisma.ReportUpdateOneWithoutPendingForDraftNestedInput
   steps?: Prisma.ReportDraftStepUpdateManyWithoutReportDraftNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutReportDraftNestedInput
+  reportTeam?: Prisma.ReportTeamUpdateOneWithoutReportDraftNestedInput
 }
 
 export type ReportDraftUncheckedUpdateInput = {
@@ -343,6 +349,7 @@ export type ReportDraftUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   steps?: Prisma.ReportDraftStepUncheckedUpdateManyWithoutReportDraftNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutReportDraftNestedInput
+  reportTeam?: Prisma.ReportTeamUncheckedUpdateOneWithoutReportDraftNestedInput
 }
 
 export type ReportDraftCreateManyInput = {
@@ -537,6 +544,20 @@ export type ReportDraftUncheckedUpdateOneWithoutPendingReportNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ReportDraftUpdateToOneWithWhereWithoutPendingReportInput, Prisma.ReportDraftUpdateWithoutPendingReportInput>, Prisma.ReportDraftUncheckedUpdateWithoutPendingReportInput>
 }
 
+export type ReportDraftCreateNestedOneWithoutReportTeamInput = {
+  create?: Prisma.XOR<Prisma.ReportDraftCreateWithoutReportTeamInput, Prisma.ReportDraftUncheckedCreateWithoutReportTeamInput>
+  connectOrCreate?: Prisma.ReportDraftCreateOrConnectWithoutReportTeamInput
+  connect?: Prisma.ReportDraftWhereUniqueInput
+}
+
+export type ReportDraftUpdateOneRequiredWithoutReportTeamNestedInput = {
+  create?: Prisma.XOR<Prisma.ReportDraftCreateWithoutReportTeamInput, Prisma.ReportDraftUncheckedCreateWithoutReportTeamInput>
+  connectOrCreate?: Prisma.ReportDraftCreateOrConnectWithoutReportTeamInput
+  upsert?: Prisma.ReportDraftUpsertWithoutReportTeamInput
+  connect?: Prisma.ReportDraftWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ReportDraftUpdateToOneWithWhereWithoutReportTeamInput, Prisma.ReportDraftUpdateWithoutReportTeamInput>, Prisma.ReportDraftUncheckedUpdateWithoutReportTeamInput>
+}
+
 export type ReportDraftCreateWithoutHunterInput = {
   id?: string
   version?: number
@@ -546,6 +567,7 @@ export type ReportDraftCreateWithoutHunterInput = {
   pendingReport?: Prisma.ReportCreateNestedOneWithoutPendingForDraftInput
   steps?: Prisma.ReportDraftStepCreateNestedManyWithoutReportDraftInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutReportDraftInput
+  reportTeam?: Prisma.ReportTeamCreateNestedOneWithoutReportDraftInput
 }
 
 export type ReportDraftUncheckedCreateWithoutHunterInput = {
@@ -557,6 +579,7 @@ export type ReportDraftUncheckedCreateWithoutHunterInput = {
   updatedAt?: Date | string
   steps?: Prisma.ReportDraftStepUncheckedCreateNestedManyWithoutReportDraftInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutReportDraftInput
+  reportTeam?: Prisma.ReportTeamUncheckedCreateNestedOneWithoutReportDraftInput
 }
 
 export type ReportDraftCreateOrConnectWithoutHunterInput = {
@@ -607,6 +630,7 @@ export type ReportDraftCreateWithoutStepsInput = {
   hunter: Prisma.UserCreateNestedOneWithoutReportDraftsInput
   pendingReport?: Prisma.ReportCreateNestedOneWithoutPendingForDraftInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutReportDraftInput
+  reportTeam?: Prisma.ReportTeamCreateNestedOneWithoutReportDraftInput
 }
 
 export type ReportDraftUncheckedCreateWithoutStepsInput = {
@@ -618,6 +642,7 @@ export type ReportDraftUncheckedCreateWithoutStepsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutReportDraftInput
+  reportTeam?: Prisma.ReportTeamUncheckedCreateNestedOneWithoutReportDraftInput
 }
 
 export type ReportDraftCreateOrConnectWithoutStepsInput = {
@@ -645,6 +670,7 @@ export type ReportDraftUpdateWithoutStepsInput = {
   hunter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsNestedInput
   pendingReport?: Prisma.ReportUpdateOneWithoutPendingForDraftNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutReportDraftNestedInput
+  reportTeam?: Prisma.ReportTeamUpdateOneWithoutReportDraftNestedInput
 }
 
 export type ReportDraftUncheckedUpdateWithoutStepsInput = {
@@ -656,6 +682,7 @@ export type ReportDraftUncheckedUpdateWithoutStepsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutReportDraftNestedInput
+  reportTeam?: Prisma.ReportTeamUncheckedUpdateOneWithoutReportDraftNestedInput
 }
 
 export type ReportDraftCreateWithoutSubmissionsInput = {
@@ -667,6 +694,7 @@ export type ReportDraftCreateWithoutSubmissionsInput = {
   hunter: Prisma.UserCreateNestedOneWithoutReportDraftsInput
   pendingReport?: Prisma.ReportCreateNestedOneWithoutPendingForDraftInput
   steps?: Prisma.ReportDraftStepCreateNestedManyWithoutReportDraftInput
+  reportTeam?: Prisma.ReportTeamCreateNestedOneWithoutReportDraftInput
 }
 
 export type ReportDraftUncheckedCreateWithoutSubmissionsInput = {
@@ -678,6 +706,7 @@ export type ReportDraftUncheckedCreateWithoutSubmissionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   steps?: Prisma.ReportDraftStepUncheckedCreateNestedManyWithoutReportDraftInput
+  reportTeam?: Prisma.ReportTeamUncheckedCreateNestedOneWithoutReportDraftInput
 }
 
 export type ReportDraftCreateOrConnectWithoutSubmissionsInput = {
@@ -705,6 +734,7 @@ export type ReportDraftUpdateWithoutSubmissionsInput = {
   hunter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsNestedInput
   pendingReport?: Prisma.ReportUpdateOneWithoutPendingForDraftNestedInput
   steps?: Prisma.ReportDraftStepUpdateManyWithoutReportDraftNestedInput
+  reportTeam?: Prisma.ReportTeamUpdateOneWithoutReportDraftNestedInput
 }
 
 export type ReportDraftUncheckedUpdateWithoutSubmissionsInput = {
@@ -716,6 +746,7 @@ export type ReportDraftUncheckedUpdateWithoutSubmissionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   steps?: Prisma.ReportDraftStepUncheckedUpdateManyWithoutReportDraftNestedInput
+  reportTeam?: Prisma.ReportTeamUncheckedUpdateOneWithoutReportDraftNestedInput
 }
 
 export type ReportDraftCreateWithoutPendingReportInput = {
@@ -727,6 +758,7 @@ export type ReportDraftCreateWithoutPendingReportInput = {
   hunter: Prisma.UserCreateNestedOneWithoutReportDraftsInput
   steps?: Prisma.ReportDraftStepCreateNestedManyWithoutReportDraftInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutReportDraftInput
+  reportTeam?: Prisma.ReportTeamCreateNestedOneWithoutReportDraftInput
 }
 
 export type ReportDraftUncheckedCreateWithoutPendingReportInput = {
@@ -738,6 +770,7 @@ export type ReportDraftUncheckedCreateWithoutPendingReportInput = {
   updatedAt?: Date | string
   steps?: Prisma.ReportDraftStepUncheckedCreateNestedManyWithoutReportDraftInput
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutReportDraftInput
+  reportTeam?: Prisma.ReportTeamUncheckedCreateNestedOneWithoutReportDraftInput
 }
 
 export type ReportDraftCreateOrConnectWithoutPendingReportInput = {
@@ -765,6 +798,7 @@ export type ReportDraftUpdateWithoutPendingReportInput = {
   hunter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsNestedInput
   steps?: Prisma.ReportDraftStepUpdateManyWithoutReportDraftNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutReportDraftNestedInput
+  reportTeam?: Prisma.ReportTeamUpdateOneWithoutReportDraftNestedInput
 }
 
 export type ReportDraftUncheckedUpdateWithoutPendingReportInput = {
@@ -772,6 +806,71 @@ export type ReportDraftUncheckedUpdateWithoutPendingReportInput = {
   hunterId?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFieldUpdateOperationsInput | $Enums.ReportDraftAggregateStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  steps?: Prisma.ReportDraftStepUncheckedUpdateManyWithoutReportDraftNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutReportDraftNestedInput
+  reportTeam?: Prisma.ReportTeamUncheckedUpdateOneWithoutReportDraftNestedInput
+}
+
+export type ReportDraftCreateWithoutReportTeamInput = {
+  id?: string
+  version?: number
+  aggregateStatus?: $Enums.ReportDraftAggregateStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  hunter: Prisma.UserCreateNestedOneWithoutReportDraftsInput
+  pendingReport?: Prisma.ReportCreateNestedOneWithoutPendingForDraftInput
+  steps?: Prisma.ReportDraftStepCreateNestedManyWithoutReportDraftInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutReportDraftInput
+}
+
+export type ReportDraftUncheckedCreateWithoutReportTeamInput = {
+  id?: string
+  hunterId: string
+  version?: number
+  aggregateStatus?: $Enums.ReportDraftAggregateStatus
+  pendingReportId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  steps?: Prisma.ReportDraftStepUncheckedCreateNestedManyWithoutReportDraftInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutReportDraftInput
+}
+
+export type ReportDraftCreateOrConnectWithoutReportTeamInput = {
+  where: Prisma.ReportDraftWhereUniqueInput
+  create: Prisma.XOR<Prisma.ReportDraftCreateWithoutReportTeamInput, Prisma.ReportDraftUncheckedCreateWithoutReportTeamInput>
+}
+
+export type ReportDraftUpsertWithoutReportTeamInput = {
+  update: Prisma.XOR<Prisma.ReportDraftUpdateWithoutReportTeamInput, Prisma.ReportDraftUncheckedUpdateWithoutReportTeamInput>
+  create: Prisma.XOR<Prisma.ReportDraftCreateWithoutReportTeamInput, Prisma.ReportDraftUncheckedCreateWithoutReportTeamInput>
+  where?: Prisma.ReportDraftWhereInput
+}
+
+export type ReportDraftUpdateToOneWithWhereWithoutReportTeamInput = {
+  where?: Prisma.ReportDraftWhereInput
+  data: Prisma.XOR<Prisma.ReportDraftUpdateWithoutReportTeamInput, Prisma.ReportDraftUncheckedUpdateWithoutReportTeamInput>
+}
+
+export type ReportDraftUpdateWithoutReportTeamInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFieldUpdateOperationsInput | $Enums.ReportDraftAggregateStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  hunter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsNestedInput
+  pendingReport?: Prisma.ReportUpdateOneWithoutPendingForDraftNestedInput
+  steps?: Prisma.ReportDraftStepUpdateManyWithoutReportDraftNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutReportDraftNestedInput
+}
+
+export type ReportDraftUncheckedUpdateWithoutReportTeamInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  hunterId?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFieldUpdateOperationsInput | $Enums.ReportDraftAggregateStatus
+  pendingReportId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   steps?: Prisma.ReportDraftStepUncheckedUpdateManyWithoutReportDraftNestedInput
@@ -796,6 +895,7 @@ export type ReportDraftUpdateWithoutHunterInput = {
   pendingReport?: Prisma.ReportUpdateOneWithoutPendingForDraftNestedInput
   steps?: Prisma.ReportDraftStepUpdateManyWithoutReportDraftNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutReportDraftNestedInput
+  reportTeam?: Prisma.ReportTeamUpdateOneWithoutReportDraftNestedInput
 }
 
 export type ReportDraftUncheckedUpdateWithoutHunterInput = {
@@ -807,6 +907,7 @@ export type ReportDraftUncheckedUpdateWithoutHunterInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   steps?: Prisma.ReportDraftStepUncheckedUpdateManyWithoutReportDraftNestedInput
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutReportDraftNestedInput
+  reportTeam?: Prisma.ReportTeamUncheckedUpdateOneWithoutReportDraftNestedInput
 }
 
 export type ReportDraftUncheckedUpdateManyWithoutHunterInput = {
@@ -870,6 +971,7 @@ export type ReportDraftSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   pendingReport?: boolean | Prisma.ReportDraft$pendingReportArgs<ExtArgs>
   steps?: boolean | Prisma.ReportDraft$stepsArgs<ExtArgs>
   submissions?: boolean | Prisma.ReportDraft$submissionsArgs<ExtArgs>
+  reportTeam?: boolean | Prisma.ReportDraft$reportTeamArgs<ExtArgs>
   _count?: boolean | Prisma.ReportDraftCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reportDraft"]>
 
@@ -913,6 +1015,7 @@ export type ReportDraftInclude<ExtArgs extends runtime.Types.Extensions.Internal
   pendingReport?: boolean | Prisma.ReportDraft$pendingReportArgs<ExtArgs>
   steps?: boolean | Prisma.ReportDraft$stepsArgs<ExtArgs>
   submissions?: boolean | Prisma.ReportDraft$submissionsArgs<ExtArgs>
+  reportTeam?: boolean | Prisma.ReportDraft$reportTeamArgs<ExtArgs>
   _count?: boolean | Prisma.ReportDraftCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ReportDraftIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -931,6 +1034,7 @@ export type $ReportDraftPayload<ExtArgs extends runtime.Types.Extensions.Interna
     pendingReport: Prisma.$ReportPayload<ExtArgs> | null
     steps: Prisma.$ReportDraftStepPayload<ExtArgs>[]
     submissions: Prisma.$SubmissionPayload<ExtArgs>[]
+    reportTeam: Prisma.$ReportTeamPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1341,6 +1445,7 @@ export interface Prisma__ReportDraftClient<T, Null = never, ExtArgs extends runt
   pendingReport<T extends Prisma.ReportDraft$pendingReportArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReportDraft$pendingReportArgs<ExtArgs>>): Prisma.Prisma__ReportClient<runtime.Types.Result.GetResult<Prisma.$ReportPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   steps<T extends Prisma.ReportDraft$stepsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReportDraft$stepsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportDraftStepPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   submissions<T extends Prisma.ReportDraft$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReportDraft$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reportTeam<T extends Prisma.ReportDraft$reportTeamArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReportDraft$reportTeamArgs<ExtArgs>>): Prisma.Prisma__ReportTeamClient<runtime.Types.Result.GetResult<Prisma.$ReportTeamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1842,6 +1947,25 @@ export type ReportDraft$submissionsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.SubmissionScalarFieldEnum | Prisma.SubmissionScalarFieldEnum[]
+}
+
+/**
+ * ReportDraft.reportTeam
+ */
+export type ReportDraft$reportTeamArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReportTeam
+   */
+  select?: Prisma.ReportTeamSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReportTeam
+   */
+  omit?: Prisma.ReportTeamOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportTeamInclude<ExtArgs> | null
+  where?: Prisma.ReportTeamWhereInput
 }
 
 /**

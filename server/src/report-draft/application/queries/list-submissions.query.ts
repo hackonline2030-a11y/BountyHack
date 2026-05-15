@@ -1,22 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { AppRoleCode } from '../../../shared/rbac/app-role.code';
 import type { Identity } from '../../../auth/domain/models/identity';
 import type {
   ReviewerRoleWire,
   SubmissionWire,
 } from '../../models/report-draft-api.types';
 import type { ISubmissionRepository } from '../../ports/submission-repository.interface';
+import type { IReportTeamRepository } from '../../../report-team/ports/report-team-repository.interface';
 import { ReportDraftAccessPolicy } from '../report-draft-access.policy';
 
 export type ListSubmissionsInput =
   | { kind: 'draftId'; draftId: string }
   | { kind: 'pendingForReviewer'; reviewerRole: ReviewerRoleWire }
-  | { kind: 'forReviewer'; reviewerRole: ReviewerRoleWire };
+  | { kind: 'forReviewer'; reviewerRole: ReviewerRoleWire }
+  | { kind: 'mentorPeerForQc' };
 
 @Injectable()
 export class ListSubmissionsQuery {
   constructor(
     private readonly repository: ISubmissionRepository,
     private readonly access: ReportDraftAccessPolicy,
+    private readonly reportTeamRepository: IReportTeamRepository,
   ) {}
 
   async execute(
@@ -33,6 +37,20 @@ export class ListSubmissionsQuery {
       case 'forReviewer':
         this.access.assertCanQueryReviewerRole(identity, input.reviewerRole);
         return this.repository.findAllForReviewerRole(input.reviewerRole);
+      case 'mentorPeerForQc':
+        if (
+          identity.roleCode !== AppRoleCode.QUALITY_CHECKER &&
+          identity.roleCode !== AppRoleCode.SUPER_ADMIN
+        ) {
+          throw new ForbiddenException(
+            'Mentor peer submissions are visible to quality checkers only',
+          );
+        }
+        {
+          const draftIds =
+            await this.reportTeamRepository.findDraftIdsForMember(identity.uid);
+          return this.repository.findMentorSubmissionsForDraftIds(draftIds);
+        }
     }
   }
 }

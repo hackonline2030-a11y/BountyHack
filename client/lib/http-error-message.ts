@@ -34,7 +34,13 @@ export function friendlyHttpErrorMessage(
 
   if (statusCode === 403) {
     if (nestMessage.includes("reviewer role")) {
-      return "Votre compte n’a pas le rôle requis (quality checker) pour afficher cette liste.";
+      return "Votre compte n’a pas le rôle requis pour afficher cette liste de revues.";
+    }
+    if (nestMessage.includes("quality checker can approve")) {
+      return "Seul le quality checker peut valider une étape de rapport.";
+    }
+    if (nestMessage.includes("mentor can record")) {
+      return "Seul le mentor peut enregistrer un avis favorable.";
     }
     if (nestMessage.includes("report draft")) {
       return "Accès refusé à ce brouillon de rapport.";

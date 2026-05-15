@@ -33,22 +33,22 @@ export default async function WelcomeAdminPage({ params }: PageProps) {
     <main className="flex w-full min-h-[calc(100vh-(var(--header-height)+var(--footer-height)))] flex-col">
       <Section
         fluid
-        classNames="flex min-h-0 flex-1 flex-col items-center justify-center bg-pattern"
+        classNames="flex min-h-0 flex-1 flex-col items-center justify-center bg-pattern px-4 py-8"
       >
-        <article className="flex w-full max-w-md flex-col items-center gap-6 px-5 py-8 sm:px-6">
-          <h1 className="text-center text-3xl font-bold text-white">
+        <article className="dashboard-card flex w-full max-w-md flex-col items-center gap-6 p-8 sm:p-10">
+          <h1 className="text-center text-3xl font-bold text-dashboard-text">
             {heading}
           </h1>
           <nav className="flex flex-col items-center gap-3 text-sm">
             <Link
               href={`/${lng}/administration`}
-              className="text-white/90 underline-offset-2 hover:text-white hover:underline"
+              className="text-dashboard-accent underline-offset-2 hover:underline"
             >
               Administration
             </Link>
             <Link
               href={`/${lng}/administration/team-management`}
-              className="text-white/90 underline-offset-2 hover:text-white hover:underline"
+              className="text-dashboard-accent underline-offset-2 hover:underline"
             >
               Équipes rapport (super admin)
             </Link>

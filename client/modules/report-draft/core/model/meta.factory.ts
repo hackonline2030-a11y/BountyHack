@@ -12,7 +12,7 @@ export class MetaFactory {
   static create(
     data?: Partial<ReportDraftDomainModel.MetaFields>,
   ): ReportDraftDomainModel.MetaFields {
-    return {
+    const defaults: ReportDraftDomainModel.MetaFields = {
       reportTitle: "",
       bugType: "",
       scopeSlug: "",
@@ -25,7 +25,17 @@ export class MetaFactory {
       cve: "",
       impact: "",
       ipsUsed: "",
-      ...data,
     };
+    if (!data) {
+      return defaults;
+    }
+    const out = { ...defaults };
+    for (const key of Object.keys(defaults) as (keyof ReportDraftDomainModel.MetaFields)[]) {
+      const v = data[key];
+      if (v !== undefined && v !== null) {
+        out[key] = v;
+      }
+    }
+    return out;
   }
 }

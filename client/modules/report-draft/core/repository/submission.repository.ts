@@ -32,4 +32,9 @@ export interface ISubmissionRepository {
   findAllForReviewerRole(
     reviewerRole: ReportDraftDomainModel.ReviewerRole,
   ): Promise<ReportDraftDomainModel.Submission<unknown>[]>;
+
+  /** Mentor threads on report teams the QC belongs to (read-only on QC board). */
+  findMentorPeerSubmissionsForQc(): Promise<
+    ReportDraftDomainModel.Submission<unknown>[]
+  >;
 }

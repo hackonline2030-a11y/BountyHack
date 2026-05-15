@@ -121,6 +121,24 @@ export class PrismaSubmissionRepository implements ISubmissionRepository {
       .sort((a, b) => sortSubmissionsNewestFirst(a, b));
   }
 
+  async findMentorSubmissionsForDraftIds(
+    draftIds: readonly string[],
+  ): Promise<SubmissionWire[]> {
+    if (draftIds.length === 0) {
+      return [];
+    }
+    const rows = await this.prisma.submission.findMany({
+      where: {
+        reportDraftId: { in: [...draftIds] },
+        reviewerRole: 'MENTOR',
+      },
+      include: INCLUDE_SNAPSHOTS,
+    });
+    return rows
+      .map((row) => SubmissionPrismaMapper.toDomain(row as SubmissionWithSnapshots))
+      .sort((a, b) => sortSubmissionsNewestFirst(a, b));
+  }
+
   async findAllForReviewerRole(
     reviewerRole: ReviewerRoleWire,
   ): Promise<SubmissionWire[]> {

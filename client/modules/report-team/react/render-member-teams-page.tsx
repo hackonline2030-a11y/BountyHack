@@ -5,9 +5,7 @@ import { verifySessionForRoles } from "@/lib/dal/session";
 import { AppRoleCode } from "@/lib/app-role-code";
 import { isSupportedLanguage } from "@modules/auth/core/model/locale.policy";
 import type { ReportTeamMemberRole } from "@modules/report-team/model/report-team.types";
-import { buildAskJoinLabels } from "@modules/report-team/react/build-ask-join-labels";
-import { buildMemberPageCopy } from "@modules/report-team/react/build-member-page-copy";
-import { ReportTeamsMemberPage } from "@modules/report-team/react/ReportTeamsMemberPage";
+import { ReportTeamsMemberBootstrap } from "@modules/report-team/react/ReportTeamsMemberBootstrap";
 
 type Config = {
   allowedRoles: AppRoleCode[];
@@ -32,18 +30,12 @@ export function createMemberTeamsPage(config: Config) {
     if (!isSupportedLanguage(lng)) notFound();
     await verifySessionForRoles(lng, config.allowedRoles);
 
-    const { t } = await getT("reportTeams", { lng });
-    const prefix = `/${lng}`;
-
     return (
-      <ReportTeamsMemberPage
-        copy={buildMemberPageCopy(t, {
-          backHref: `${prefix}/${config.welcomePath}`,
-          backLabel: t("reportTeams.backToDashboard"),
-        })}
+      <ReportTeamsMemberBootstrap
+        lng={lng}
+        welcomePath={config.welcomePath}
         defaultRole={config.defaultRole}
         roleOptions={config.roleOptions}
-        askJoinLabels={buildAskJoinLabels(t)}
       />
     );
   }
