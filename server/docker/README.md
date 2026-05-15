@@ -30,7 +30,9 @@ Documentation générale du backend : [`../README.md`](../README.md).
 
    Si `docker compose` échoue mais `docker-compose` (V1 standalone) existe, le script **`start.sh`** bascule dessus automatiquement.
 
-3. **Droits utilisateur** : éviter de faire ceci si vous voulez rester en sécurité :
+3. **Droits utilisateur** : Avertissement.
+
+Eviter de faire ceci si vous voulez rester en sécurité ou faîte-le si vous êtes sûr de vous sur votre machine (cela permet de ne pas devoir s'authentifier):
 
    ```bash
    sudo usermod -aG docker "$USER"
