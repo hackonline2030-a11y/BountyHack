@@ -82,10 +82,8 @@ export const QualityCheckerSubmissionsPage: React.FC<Props> = ({ lng }) => {
 
       {reviewList.status === "success" && rows.length === 0 ? (
         <p className="rounded-md border border-form-border bg-form-overlay p-4 text-sm text-form-text-muted">
-          Aucune soumission enregistrée pour le rôle quality_checker sur ce serveur. Si le hunter
-          vient d&apos;envoyer une étape, vérifiez qu&apos;il a bien cliqué sur « Soumettre pour
-          revue » avec « Quality checker » sélectionné, puis rafraîchissez. En développement, un
-          redémarrage du serveur Next vide le store en mémoire.
+          Aucune soumission enregistrée pour le quality checker. Demandez au hunter de cliquer sur
+          « Soumettre pour revue » avec « Quality checker » sélectionné, puis rafraîchissez.
         </p>
       ) : null}
 
@@ -108,7 +106,8 @@ export const QualityCheckerSubmissionsPage: React.FC<Props> = ({ lng }) => {
               {rows.map((submission) => {
                 const draft = draftsById[submission.reportDraftId];
                 const title =
-                  draft?.meta.payload.reportTitle?.trim() || "Sans titre";
+                  draft?.meta.payload.reportTitle?.trim() ||
+                  (draft ? "Sans titre" : "Brouillon introuvable");
                 const statusLabel = submissionRowStatusLabel(submission, draft);
                 const actionable = submissionRowIsActionable(submission, draft);
 

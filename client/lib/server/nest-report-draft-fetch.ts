@@ -13,7 +13,11 @@ function reportDraftsNestUrl(relativePath: string): string {
   if (path.startsWith("?")) {
     return nestInternalApiUrl(`report-drafts${path}`);
   }
-  return nestInternalApiUrl(`report-drafts/${path}`);
+  if (path.startsWith("submissions") || path.startsWith("comments")) {
+    return nestInternalApiUrl(`report-drafts/${path}`);
+  }
+  // Avoid `report-drafts/:draftId` capturing `submissions` / `comments`.
+  return nestInternalApiUrl(`report-drafts/draft/${path}`);
 }
 
 export async function fetchNestReportDraft(

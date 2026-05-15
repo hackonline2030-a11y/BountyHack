@@ -50,15 +50,19 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
     },
     {
       provide: SaveReportDraftCommand,
-      inject: [I_REPORT_DRAFT_REPOSITORY],
-      useFactory: (repository: PrismaReportDraftRepository) =>
-        new SaveReportDraftCommand(repository),
+      inject: [I_REPORT_DRAFT_REPOSITORY, ReportDraftAccessPolicy],
+      useFactory: (
+        repository: PrismaReportDraftRepository,
+        access: ReportDraftAccessPolicy,
+      ) => new SaveReportDraftCommand(repository, access),
     },
     {
       provide: GetReportDraftByIdQuery,
-      inject: [I_REPORT_DRAFT_REPOSITORY],
-      useFactory: (repository: PrismaReportDraftRepository) =>
-        new GetReportDraftByIdQuery(repository),
+      inject: [I_REPORT_DRAFT_REPOSITORY, ReportDraftAccessPolicy],
+      useFactory: (
+        repository: PrismaReportDraftRepository,
+        access: ReportDraftAccessPolicy,
+      ) => new GetReportDraftByIdQuery(repository, access),
     },
     {
       provide: ListReportDraftsByHunterQuery,

@@ -1,14 +1,8 @@
 import { fetchBff } from "@/lib/bff-fetch";
+import { readFriendlyHttpError } from "@/lib/http-error-message";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import type { ISubmissionRepository } from "@modules/report-draft/core/repository/submission.repository";
-
-const json = async <T>(res: Response): Promise<T> => {
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `HTTP ${res.status}`);
-  }
-  return res.json() as Promise<T>;
-};
+import { parseJsonResponse } from "@modules/report-draft/core/repository-infra/http-json";
 
 export class HttpSubmissionRepository implements ISubmissionRepository {
   async save(submission: ReportDraftDomainModel.Submission<unknown>): Promise<void> {
@@ -19,7 +13,7 @@ export class HttpSubmissionRepository implements ISubmissionRepository {
       body: JSON.stringify(submission),
     });
     if (!res.ok) {
-      throw new Error(await res.text());
+      throw new Error(await readFriendlyHttpError(res, "Impossible d’enregistrer la soumission."));
     }
   }
 
@@ -28,8 +22,10 @@ export class HttpSubmissionRepository implements ISubmissionRepository {
       credentials: "include",
       cache: "no-store",
     });
-    if (res.status === 404) return null;
-    return json(res);
+    if (res.status === 404) {
+      return null;
+    }
+    return parseJsonResponse(res);
   }
 
   async findByDraftId(
@@ -37,7 +33,7 @@ export class HttpSubmissionRepository implements ISubmissionRepository {
   ): Promise<ReportDraftDomainModel.Submission<unknown>[]> {
     const url = `/api/report-draft/submissions?draftId=${encodeURIComponent(draftId)}`;
     const res = await fetchBff(url, { credentials: "include", cache: "no-store" });
-    return json(res);
+    return parseJsonResponse(res);
   }
 
   async findLatestForStep(
@@ -55,7 +51,7 @@ export class HttpSubmissionRepository implements ISubmissionRepository {
   ): Promise<ReportDraftDomainModel.Submission<unknown>[]> {
     const url = `/api/report-draft/submissions?pendingForReviewer=${encodeURIComponent(reviewerRole)}`;
     const res = await fetchBff(url, { credentials: "include", cache: "no-store" });
-    return json(res);
+    return parseJsonResponse(res);
   }
 
   async findAllForReviewerRole(
@@ -63,6 +59,6 @@ export class HttpSubmissionRepository implements ISubmissionRepository {
   ): Promise<ReportDraftDomainModel.Submission<unknown>[]> {
     const url = `/api/report-draft/submissions?forReviewer=${encodeURIComponent(reviewerRole)}`;
     const res = await fetchBff(url, { credentials: "include", cache: "no-store" });
-    return json(res);
+    return parseJsonResponse(res);
   }
 }

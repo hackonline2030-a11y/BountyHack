@@ -1,0 +1,78 @@
+{
+  "reportTeams": {
+    "metaTitle": "Équipes rapport",
+    "heading": "Mes équipes rapport",
+    "subheading": "Chaque équipe est identifiée par un identifiant unique. Seul le coordinateur peut valider les affectations ; vous pouvez demander à rejoindre une équipe.",
+    "mockBanner": "Maquette front — les données et demandes sont simulées en attendant l’API Nest.",
+    "backToDashboard": "Retour au tableau de bord",
+    "validity": {
+      "valid": "Équipe valide",
+      "incomplete": "Équipe incomplète",
+      "hint": "Une équipe rapport est valide lorsqu’elle compte au moins un hunter, un quality checker et un mentor."
+    },
+    "roles": {
+      "hunter": "Hunter",
+      "quality_checker": "Quality checker",
+      "mentor": "Mentor",
+      "super_admin": "Super admin"
+    },
+    "myTeams": {
+      "title": "Équipes dont je fais partie",
+      "empty": "Vous n’êtes affecté à aucune équipe rapport pour le moment.",
+      "teamId": "ID équipe",
+      "members": "Membres",
+      "updated": "Mise à jour"
+    },
+    "requests": {
+      "title": "Mes demandes",
+      "empty": "Aucune demande en cours.",
+      "statusPending": "En attente (coordinateur)",
+      "statusApproved": "Acceptée",
+      "statusRejected": "Refusée",
+      "submittedAt": "Demandé le {{date}}"
+    },
+    "askJoin": {
+      "title": "Demander à rejoindre une équipe",
+      "description": "Saisissez l’identifiant unique de l’équipe rapport. Le coordinateur validera ou refusera votre demande.",
+      "teamIdLabel": "Identifiant d’équipe rapport",
+      "teamIdPlaceholder": "rt-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "roleLabel": "Rôle demandé dans l’équipe",
+      "messageLabel": "Message pour le coordinateur (optionnel)",
+      "messagePlaceholder": "Précisez votre disponibilité ou le contexte…",
+      "submit": "Envoyer la demande",
+      "submitting": "Envoi…",
+      "success": "Demande enregistrée (maquette). Le coordinateur sera notifié.",
+      "errorTeamId": "L’identifiant d’équipe est requis.",
+      "errorGeneric": "Impossible d’envoyer la demande pour le moment."
+    },
+    "admin": {
+      "metaTitle": "Gestion des équipes rapport",
+      "heading": "Équipes rapport — administration",
+      "subheading": "Super admin : consultation, modification et suppression de toute équipe. L’affectation quotidienne reste du ressort du coordinateur.",
+      "table": {
+        "teamId": "ID équipe",
+        "label": "Libellé",
+        "validity": "Validité",
+        "members": "Membres",
+        "actions": "Actions"
+      },
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer cette équipe (maquette) ?",
+      "mockAction": "maquette — aucune API"
+    },
+    "coordinator": {
+      "metaTitle": "Coordination des équipes rapport",
+      "heading": "Coordination — équipes rapport",
+      "subheading": "Validez les demandes d’affectation et gérez la composition des équipes.",
+      "pendingTitle": "Demandes en attente",
+      "pendingEmpty": "Aucune demande en attente.",
+      "approve": "Accepter",
+      "reject": "Refuser",
+      "teamsTitle": "Équipes rapport",
+      "createTeam": "Créer une équipe",
+      "addMember": "Ajouter un membre",
+      "mockAction": "maquette — aucune API"
+    }
+  }
+}

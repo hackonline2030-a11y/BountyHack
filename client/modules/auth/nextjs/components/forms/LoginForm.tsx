@@ -17,7 +17,9 @@ const inputBase =
 type PostLoginTarget =
   | "welcome-admin"
   | "welcome-hunter"
-  | "welcome-quality-checker";
+  | "welcome-quality-checker"
+  | "welcome-mentor"
+  | "welcome-coordinator";
 
 /**
  * Maps the `roleCode` returned by `POST /api/session` to a dashboard slug.
@@ -31,6 +33,8 @@ function dashboardSlugForRole(roleCode: unknown): PostLoginTarget | null {
   if (roleCode === AppRoleCode.SUPER_ADMIN) return "welcome-admin";
   if (roleCode === AppRoleCode.HUNTER) return "welcome-hunter";
   if (roleCode === AppRoleCode.QUALITY_CHECKER) return "welcome-quality-checker";
+  if (roleCode === AppRoleCode.MENTOR) return "welcome-mentor";
+  if (roleCode === AppRoleCode.COORDINATOR) return "welcome-coordinator";
   return null;
 }
 

@@ -1,19 +1,9 @@
 import { fetchBff } from "@/lib/bff-fetch";
+import { readFriendlyHttpError } from "@/lib/http-error-message";
 import type { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import type { IReportDraftRepository } from "@modules/report-draft/core/repository/report-draft.repository";
+import { parseJsonResponse } from "@modules/report-draft/core/repository-infra/http-json";
 
-const json = async <T>(res: Response): Promise<T> => {
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `HTTP ${res.status}`);
-  }
-  return res.json() as Promise<T>;
-};
-
-/**
- * BFF-backed {@link IReportDraftRepository} — persists via Next API routes
- * into the server singleton store (shared across browsers in dev).
- */
 export class HttpReportDraftRepository implements IReportDraftRepository {
   async save(draft: ReportDraftDomainModel.ReportDraft): Promise<void> {
     const res = await fetchBff("/api/report-draft/drafts", {
@@ -23,7 +13,7 @@ export class HttpReportDraftRepository implements IReportDraftRepository {
       body: JSON.stringify(draft),
     });
     if (!res.ok) {
-      throw new Error(await res.text());
+      throw new Error(await readFriendlyHttpError(res, "Impossible d’enregistrer le brouillon."));
     }
   }
 
@@ -34,13 +24,15 @@ export class HttpReportDraftRepository implements IReportDraftRepository {
       credentials: "include",
       cache: "no-store",
     });
-    if (res.status === 404) return null;
-    return json(res);
+    if (res.status === 404) {
+      return null;
+    }
+    return parseJsonResponse(res);
   }
 
   async findByHunterId(hunterId: string): Promise<ReportDraftDomainModel.ReportDraft[]> {
     const url = `/api/report-draft/drafts?hunterId=${encodeURIComponent(hunterId)}`;
     const res = await fetchBff(url, { credentials: "include", cache: "no-store" });
-    return json(res);
+    return parseJsonResponse(res);
   }
 }

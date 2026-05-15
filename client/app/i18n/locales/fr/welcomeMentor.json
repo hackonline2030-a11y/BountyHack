@@ -1,0 +1,68 @@
+{
+  "welcomeMentor": {
+    "metaTitle": "Tableau de bord mentor",
+    "heading": "Bienvenue",
+    "headingWithUsername": "Bienvenue, {{username}}",
+    "subheading": "Accompagnement méthodologique et technique des chercheurs — sans accès YesWeHack ni soumission plateforme.",
+    "nav": {
+      "label": "Navigation du tableau de bord",
+      "emails": "Emails",
+      "reports": "Dossiers à accompagner",
+      "teams": "Équipes rapport",
+      "colleagues": "Collègues",
+      "support": "Support",
+      "settings": "Paramètres"
+    },
+    "mission": {
+      "title": "Votre rôle de mentor",
+      "intro": "Le mentor accompagne les participants sur les aspects méthodologiques et techniques, dans une logique de montée en compétence progressive.",
+      "items": {
+        "methodology": "Transmission des méthodologies de bug bounty",
+        "juniors": "Accompagnement technique des chercheurs juniors",
+        "impact": "Analyse de la pertinence et de l’impact des vulnérabilités",
+        "security": "Aide à la compréhension des mécanismes de sécurité",
+        "review": "Relecture technique avant phase de reporting"
+      },
+      "boundary": "Vous n’avez pas accès au compte YesWeHack et n’intervenez pas dans la soumission plateforme."
+    },
+    "cards": {
+      "reports": {
+        "title": "Dossiers à accompagner",
+        "subtitle": "{{n}} dossiers en cours",
+        "empty": "Aucun dossier en attente d’accompagnement.",
+        "stepLabel": "Étape {{current}}/{{total}}",
+        "submittedAgo": "Soumis il y a {{value}}",
+        "cta": "Voir les dossiers"
+      },
+      "teams": {
+        "title": "Équipes rapport",
+        "subtitle": "Rejoindre une équipe via le coordinateur",
+        "description": "Les équipes rapport sont constituées par le coordinateur (hunter, quality checker, mentor minimum). Vous pouvez demander à être affecté.",
+        "cta": "Mes équipes & demandes",
+        "askCta": "Demander une affectation"
+      },
+      "messages": {
+        "title": "Messages récents",
+        "empty": "Aucun message.",
+        "cta": "Voir tous les messages",
+        "ago": "il y a {{value}}",
+        "unread": "Non lu"
+      },
+      "news": {
+        "title": "Actualité pédagogique",
+        "tagAnnouncement": "Annonce",
+        "tagInfo": "Information",
+        "tagUpdate": "Mise à jour",
+        "cta": "Voir toute l’actualité"
+      },
+      "agenda": {
+        "title": "Agenda",
+        "subtitle": "Sessions de coaching",
+        "empty": "Aucun événement à venir.",
+        "locationRemote": "À distance",
+        "locationOnsite": "Sur site",
+        "cta": "Voir l’agenda"
+      }
+    }
+  }
+}

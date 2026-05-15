@@ -1,11 +1,15 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import type { Identity } from '../../../auth/domain/models/identity';
 import type { IReportDraftRepository } from '../../ports/report-draft-repository.interface';
 import type { ReportDraftWire } from '../../models/report-draft-api.types';
+import { ReportDraftAccessPolicy } from '../report-draft-access.policy';
 
 @Injectable()
 export class GetReportDraftByIdQuery {
-  constructor(private readonly repository: IReportDraftRepository) {}
+  constructor(
+    private readonly repository: IReportDraftRepository,
+    private readonly access: ReportDraftAccessPolicy,
+  ) {}
 
   async execute(
     identity: Identity,
@@ -15,9 +19,7 @@ export class GetReportDraftByIdQuery {
     if (draft === null) {
       return null;
     }
-    if (draft.hunterId !== identity.uid) {
-      throw new ForbiddenException('Cannot access this report draft');
-    }
+    this.access.assertCanReadDraft(identity, draft);
     return draft;
   }
 }

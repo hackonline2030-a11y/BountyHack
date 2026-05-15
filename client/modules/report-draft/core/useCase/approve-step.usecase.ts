@@ -47,8 +47,8 @@ export const approveStep =
       });
       aggregate.approveStep({ submission, decidedBy: input.decidedBy });
 
-      await deps.reportDraftRepository.save(aggregate.state);
       await deps.submissionRepository.save(submission);
+      await deps.reportDraftRepository.save(aggregate.state);
 
       dispatch(reportDraftsSlice.actions.draftUpserted(aggregate.state));
       dispatch(reportDraftsSlice.actions.submissionUpserted(submission));

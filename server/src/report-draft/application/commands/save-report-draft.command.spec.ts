@@ -1,6 +1,9 @@
 import { ForbiddenException } from '@nestjs/common';
+import { AppRoleCode } from '../../../shared/rbac/app-role.code';
 import { SaveReportDraftCommand } from './save-report-draft.command';
+import { ReportDraftAccessPolicy } from '../report-draft-access.policy';
 import type { IReportDraftRepository } from '../../ports/report-draft-repository.interface';
+import type { ISubmissionRepository } from '../../ports/submission-repository.interface';
 import type { ReportDraftWire } from '../../models/report-draft-api.types';
 
 function minimalDraft(overrides?: Partial<ReportDraftWire>): ReportDraftWire {
@@ -31,13 +34,23 @@ function minimalDraft(overrides?: Partial<ReportDraftWire>): ReportDraftWire {
 }
 
 describe('SaveReportDraftCommand', () => {
-  const repository: jest.Mocked<IReportDraftRepository> = {
+  const reportDraftRepository: jest.Mocked<IReportDraftRepository> = {
     save: jest.fn(),
     findById: jest.fn(),
     findByHunterId: jest.fn(),
   };
-
-  const command = new SaveReportDraftCommand(repository);
+  const submissionRepository: jest.Mocked<ISubmissionRepository> = {
+    save: jest.fn(),
+    findById: jest.fn(),
+    findByDraftId: jest.fn(),
+    findPendingForReviewerRole: jest.fn(),
+    findAllForReviewerRole: jest.fn(),
+  };
+  const access = new ReportDraftAccessPolicy(
+    reportDraftRepository,
+    submissionRepository,
+  );
+  const command = new SaveReportDraftCommand(reportDraftRepository, access);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -48,18 +61,38 @@ describe('SaveReportDraftCommand', () => {
       { uid: 'hunter-1', email: 'h@example.com' },
       minimalDraft(),
     );
-    expect(repository.save).toHaveBeenCalledWith(
+    expect(reportDraftRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'draft-1' }),
     );
   });
 
-  it('rejects when hunterId does not match identity', async () => {
+  it('allows quality checker to persist hunter draft after review', async () => {
+    await command.execute(
+      {
+        uid: 'qc-1',
+        email: 'qc@example.com',
+        roleCode: AppRoleCode.QUALITY_CHECKER,
+      },
+      minimalDraft({
+        meta: {
+          payload: {},
+          attachments: [],
+          status: 'needs-revision',
+          currentRound: 1,
+          assignedReviewerRole: 'quality_checker',
+        },
+      }),
+    );
+    expect(reportDraftRepository.save).toHaveBeenCalled();
+  });
+
+  it('rejects unrelated user', async () => {
     await expect(
       command.execute(
         { uid: 'other-hunter', email: 'o@example.com' },
         minimalDraft(),
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
-    expect(repository.save).not.toHaveBeenCalled();
+    expect(reportDraftRepository.save).not.toHaveBeenCalled();
   });
 });
