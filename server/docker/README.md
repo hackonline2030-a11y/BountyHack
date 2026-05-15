@@ -30,12 +30,18 @@ Documentation générale du backend : [`../README.md`](../README.md).
 
    Si `docker compose` échoue mais `docker-compose` (V1 standalone) existe, le script **`start.sh`** bascule dessus automatiquement.
 
-3. **Droits utilisateur** : éviter `sudo` sur chaque commande :
+3. **Droits utilisateur** : éviter de faire ceci si vous voulez rester en sécurité :
 
    ```bash
    sudo usermod -aG docker "$USER"
    # puis fermer/réouvrir la session (ou logout/login).
    ```
+   Cela permet l'escalade de privilège si quelqu'un sait accéder à votre session. Il faut s'interdire de faire cela en prod ou sur un outil partagé. C'est moins dangereux sur sa machine mais reste un abaissement important des sécurités.
+   Vous devrez alors vous authentifier sur chaque commande docker (sur wsl ou linux cela revient à faire `sudo` + entrer mot de passe avant les commandes docker)
+
+   Une autre manière de cumuler comfort et sécurité est mise en avant, à vous de voir si elle est sécure : 
+
+   [Mode rootless de docker](https://docs.docker.com/engine/security/rootless/)
 
 4. **Compose** doit pouvoir construire une image : aucun lien obligatoire avec le frontend du monorepo pour l’API (contexte de build : dossier **`server/`**).
 
