@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { bearerTokenFromSessionOrUnauthorized } from "@/lib/server/bearer-from-session";
+import { fetchNestReportDraft } from "@/lib/server/nest-report-draft-fetch";
 import { requireReportDraftApiSession } from "@/lib/report-draft/api-auth";
-import { getServerDraftStore } from "@/lib/report-draft/server-draft-store";
 
 type RouteContext = { params: Promise<{ submissionId: string }> };
 
@@ -9,10 +10,19 @@ export async function GET(_request: NextRequest, context: RouteContext) {
   if ("response" in auth) return auth.response;
 
   const { submissionId } = await context.params;
-  const { submissionRepository } = getServerDraftStore();
-  const submission = await submissionRepository.findById(submissionId);
-  if (submission === null) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-  return NextResponse.json(submission);
+
+  const bearer = await bearerTokenFromSessionOrUnauthorized();
+  if ("unauthorized" in bearer) return bearer.unauthorized;
+
+  const nestRes = await fetchNestReportDraft(
+    `submissions/${encodeURIComponent(submissionId)}`,
+    bearer.token,
+    { method: "GET" },
+  );
+
+  const body = await nestRes.text();
+  return new NextResponse(body, {
+    status: nestRes.status,
+    headers: { "Content-Type": "application/json" },
+  });
 }

@@ -23,6 +23,11 @@ export type ReviewerRoleWire =
   | 'quality_checker'
   | 'super_admin';
 
+export type SubmissionDecisionWire = 'pending' | 'approve' | 'request-changes';
+
+/** Numeric wizard step (client `ReportDraftStep` enum 0–7). */
+export type SubmissionStepWire = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
 export interface AttachmentWire {
   id: string;
   filename: string;
@@ -80,3 +85,36 @@ export const REPORT_DRAFT_STEP_STATE_KEYS: readonly ReportDraftStepStateKeyWire[
     'remediation',
     'final',
   ] as const;
+
+export interface SubmissionWire {
+  id: string;
+  reportDraftId: string;
+  step: SubmissionStepWire;
+  round: number;
+  payload: Record<string, unknown>;
+  attachmentsSnapshot: AttachmentWire[];
+  submittedAt: string;
+  submittedBy: string;
+  reviewerRole: ReviewerRoleWire;
+  decision: SubmissionDecisionWire;
+  decidedAt?: string;
+  decidedBy?: string;
+}
+
+export interface ReviewerCommentAnchorWire {
+  field: string;
+  lineStart?: number;
+  lineEnd?: number;
+  attachmentId?: string;
+}
+
+export interface ReviewerCommentWire {
+  id: string;
+  submissionId: string;
+  authorId: string;
+  authorRole: ReviewerRoleWire;
+  anchor?: ReviewerCommentAnchorWire;
+  body: string;
+  createdAt: string;
+  resolvedAt?: string;
+}
