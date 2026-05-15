@@ -63,9 +63,11 @@ export const requestStepRevisions =
         comments: input.comments,
       });
 
-      await deps.reportDraftRepository.save(aggregate.state);
+      // Persist decision + comments before draft status so a draft-save failure
+      // does not leave the hunter without reviewer feedback in Postgres.
       await deps.submissionRepository.save(submission);
       await deps.reviewerCommentRepository.saveMany(newComments);
+      await deps.reportDraftRepository.save(aggregate.state);
 
       dispatch(reportDraftsSlice.actions.draftUpserted(aggregate.state));
       dispatch(reportDraftsSlice.actions.submissionUpserted(submission));

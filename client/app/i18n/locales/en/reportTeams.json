@@ -1,0 +1,78 @@
+{
+  "reportTeams": {
+    "metaTitle": "Report teams",
+    "heading": "My report teams",
+    "subheading": "Each team has a unique identifier. Only the coordinator can approve assignments; you may request to join a team.",
+    "mockBanner": "Front-end mockup — data and requests are simulated until the Nest API is available.",
+    "backToDashboard": "Back to dashboard",
+    "validity": {
+      "valid": "Valid team",
+      "incomplete": "Incomplete team",
+      "hint": "A report team is valid when it has at least one hunter, one quality checker, and one mentor."
+    },
+    "roles": {
+      "hunter": "Hunter",
+      "quality_checker": "Quality checker",
+      "mentor": "Mentor",
+      "super_admin": "Super admin"
+    },
+    "myTeams": {
+      "title": "Teams I belong to",
+      "empty": "You are not assigned to any report team yet.",
+      "teamId": "Team ID",
+      "members": "Members",
+      "updated": "Updated"
+    },
+    "requests": {
+      "title": "My requests",
+      "empty": "No requests in progress.",
+      "statusPending": "Pending (coordinator)",
+      "statusApproved": "Approved",
+      "statusRejected": "Rejected",
+      "submittedAt": "Requested on {{date}}"
+    },
+    "askJoin": {
+      "title": "Request to join a team",
+      "description": "Enter the unique report team ID. The coordinator will approve or decline your request.",
+      "teamIdLabel": "Report team ID",
+      "teamIdPlaceholder": "rt-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "roleLabel": "Requested role on the team",
+      "messageLabel": "Message to the coordinator (optional)",
+      "messagePlaceholder": "Availability, context…",
+      "submit": "Send request",
+      "submitting": "Sending…",
+      "success": "Request recorded (mockup). The coordinator will be notified.",
+      "errorTeamId": "Team ID is required.",
+      "errorGeneric": "Could not send the request."
+    },
+    "admin": {
+      "metaTitle": "Report team management",
+      "heading": "Report teams — administration",
+      "subheading": "Super admin: view, edit, and delete any team. Day-to-day assignments remain with the coordinator.",
+      "table": {
+        "teamId": "Team ID",
+        "label": "Label",
+        "validity": "Validity",
+        "members": "Members",
+        "actions": "Actions"
+      },
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this team (mockup)?",
+      "mockAction": "mockup — no API yet"
+    },
+    "coordinator": {
+      "metaTitle": "Report team coordination",
+      "heading": "Coordination — report teams",
+      "subheading": "Approve assignment requests and manage team composition.",
+      "pendingTitle": "Pending requests",
+      "pendingEmpty": "No pending requests.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "teamsTitle": "Report teams",
+      "createTeam": "Create team",
+      "addMember": "Add member",
+      "mockAction": "mockup — no API yet"
+    }
+  }
+}

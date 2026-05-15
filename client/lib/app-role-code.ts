@@ -36,5 +36,7 @@ export const REGISTER_ROLE_OPTIONS: AppRoleCode[] = [
 export const APP_LOGIN_ALLOWED_ROLES: readonly AppRoleCode[] = [
   AppRoleCode.SUPER_ADMIN,
   AppRoleCode.HUNTER,
+  AppRoleCode.MENTOR,
   AppRoleCode.QUALITY_CHECKER,
+  AppRoleCode.COORDINATOR,
 ];

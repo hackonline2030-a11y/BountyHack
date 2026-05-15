@@ -23,9 +23,13 @@ export const listReviewerSubmissions =
 
       const draftIds = new Set(submissions.map((s) => s.reportDraftId));
       for (const draftId of draftIds) {
-        const draft = await deps.reportDraftRepository.findById(draftId);
-        if (draft) {
-          dispatch(reportDraftsSlice.actions.draftUpserted(draft));
+        try {
+          const draft = await deps.reportDraftRepository.findById(draftId);
+          if (draft) {
+            dispatch(reportDraftsSlice.actions.draftUpserted(draft));
+          }
+        } catch {
+          // Orphan submission (draft missing in DB): still list the row with a fallback title.
         }
       }
 

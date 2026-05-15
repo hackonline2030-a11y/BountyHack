@@ -25,6 +25,29 @@ export class ReportDraftAccessPolicy {
     }
   }
 
+  /** Hunter owns the draft, or staff reviewers persist QC/mentor review outcomes. */
+  assertCanSaveDraft(identity: Identity, draft: { hunterId: string }): void {
+    if (draft.hunterId === identity.uid) {
+      return;
+    }
+    if (this.isReviewerStaff(identity)) {
+      return;
+    }
+    throw new ForbiddenException(
+      'Cannot save a report draft owned by another hunter',
+    );
+  }
+
+  assertCanReadDraft(identity: Identity, draft: { hunterId: string }): void {
+    if (draft.hunterId === identity.uid) {
+      return;
+    }
+    if (this.isReviewerStaff(identity)) {
+      return;
+    }
+    throw new ForbiddenException('Cannot access this report draft');
+  }
+
   async assertCanReadSubmission(
     identity: Identity,
     submission: SubmissionWire,
@@ -109,6 +132,14 @@ export class ReportDraftAccessPolicy {
     if (!this.identityMatchesReviewerRole(identity, submission.reviewerRole)) {
       throw new ForbiddenException('Only the assigned reviewer can add comments');
     }
+  }
+
+  private isReviewerStaff(identity: Identity): boolean {
+    return (
+      identity.roleCode === AppRoleCode.QUALITY_CHECKER ||
+      identity.roleCode === AppRoleCode.MENTOR ||
+      identity.roleCode === AppRoleCode.SUPER_ADMIN
+    );
   }
 
   private identityMatchesReviewerRole(

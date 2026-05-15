@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getT } from "next-i18next/server";
 import { notFound } from "next/navigation";
 import { Section } from "@modules/app/nextjs/components/sections/Section";
@@ -38,6 +39,20 @@ export default async function WelcomeAdminPage({ params }: PageProps) {
           <h1 className="text-center text-3xl font-bold text-white">
             {heading}
           </h1>
+          <nav className="flex flex-col items-center gap-3 text-sm">
+            <Link
+              href={`/${lng}/administration`}
+              className="text-white/90 underline-offset-2 hover:text-white hover:underline"
+            >
+              Administration
+            </Link>
+            <Link
+              href={`/${lng}/administration/team-management`}
+              className="text-white/90 underline-offset-2 hover:text-white hover:underline"
+            >
+              Équipes rapport (super admin)
+            </Link>
+          </nav>
         </article>
       </Section>
     </main>

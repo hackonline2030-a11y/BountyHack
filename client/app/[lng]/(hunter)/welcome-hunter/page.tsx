@@ -70,7 +70,7 @@ export default async function WelcomeHunterPage({ params }: PageProps) {
     reports: `${prefix}/my-reports`,
     tracks: `${prefix}/tracks`,
     courses: `${prefix}/courses`,
-    teams: `${prefix}/teams`,
+    teams: `${prefix}/hunter-teams`,
     mentors: `${prefix}/mentors`,
     support: `${prefix}/support`,
     settings: `${prefix}/parameters`,

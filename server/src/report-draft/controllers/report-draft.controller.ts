@@ -74,7 +74,7 @@ export class ReportDraftController {
     );
   }
 
-  @Get(':draftId')
+  @Get('draft/:draftId')
   @Auth()
   @ApiOperation({ summary: 'Get one report draft by id' })
   @ApiOkResponse({ description: 'Report draft JSON' })

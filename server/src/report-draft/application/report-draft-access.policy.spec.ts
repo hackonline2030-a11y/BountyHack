@@ -105,4 +105,50 @@ describe('ReportDraftAccessPolicy', () => {
       ),
     ).not.toThrow();
   });
+
+  it('allows quality checker to save hunter draft for review workflow', () => {
+    expect(() =>
+      policy.assertCanSaveDraft(
+        {
+          uid: 'qc-1',
+          email: 'qc@example.com',
+          roleCode: AppRoleCode.QUALITY_CHECKER,
+        },
+        { hunterId: 'hunter-1' },
+      ),
+    ).not.toThrow();
+  });
+
+  it('allows quality checker to save comments on assigned submission', async () => {
+    submissionRepository.findById.mockResolvedValue(minimalSubmission());
+    await expect(
+      policy.assertCanSaveComments(
+        {
+          uid: 'qc-1',
+          email: 'qc@example.com',
+          roleCode: AppRoleCode.QUALITY_CHECKER,
+        },
+        'sub-1',
+        ['qc-1'],
+      ),
+    ).resolves.toBeUndefined();
+  });
+
+  it('allows quality checker to save submission decision', async () => {
+    reportDraftRepository.findById.mockResolvedValue(minimalDraft());
+    await expect(
+      policy.assertCanSaveSubmission(
+        {
+          uid: 'qc-1',
+          email: 'qc@example.com',
+          roleCode: AppRoleCode.QUALITY_CHECKER,
+        },
+        minimalSubmission({
+          decision: 'request-changes',
+          decidedBy: 'qc-1',
+          decidedAt: '2026-05-15T13:00:00.000Z',
+        }),
+      ),
+    ).resolves.toBeUndefined();
+  });
 });
