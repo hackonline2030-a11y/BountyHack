@@ -27,10 +27,18 @@ export type ReportDraftsState = {
   currentDraftId: string | null;
   /** Ids returned by the last `listMyDrafts` call, in gateway order. */
   myDraftIds: string[];
+  /** Ids returned by the last QC list call (`listReviewerSubmissions` or legacy pending list). */
+  pendingSubmissionIds: string[];
+  /** Submission currently open on the QC review board. */
+  currentSubmissionId: string | null;
 
   creation: CreationStatus;
+  /** Hunter wizard: `loadReportDraft`. */
   load: OperationStatus;
+  /** QC review page: `loadSubmissionForReview` (separate from `load` — no shared idle/success). */
+  reviewLoad: OperationStatus;
   list: OperationStatus;
+  reviewList: OperationStatus;
   /** Shared status for every aggregate transition (submit / approve / request / resume / giveUp / reject). */
   transition: OperationStatus;
 };
@@ -53,9 +61,13 @@ export const reportDraftsInitialState: ReportDraftsState = {
   commentsById: {},
   currentDraftId: null,
   myDraftIds: [],
+  pendingSubmissionIds: [],
+  currentSubmissionId: null,
   creation: { status: "idle" },
   load: { status: "idle" },
+  reviewLoad: { status: "idle" },
   list: { status: "idle" },
+  reviewList: { status: "idle" },
   transition: { status: "idle" },
 };
 
@@ -99,6 +111,10 @@ export const reportDraftsSlice = createSlice({
       state.currentDraftId = action.payload;
     },
 
+    setCurrentSubmissionId: (state, action: PayloadAction<string | null>) => {
+      state.currentSubmissionId = action.payload;
+    },
+
     // ──────────────────────────────────────────────────────────────────
     // createReportDraft (status only — data lands via draftUpserted)
     // ──────────────────────────────────────────────────────────────────
@@ -119,14 +135,23 @@ export const reportDraftsSlice = createSlice({
 
     loadStarted: (state) => {
       state.load = { status: "loading" };
-      state.submissionsById = {};
-      state.commentsById = {};
     },
     loadSucceeded: (state) => {
       state.load = { status: "success" };
     },
     loadFailed: (state, action: PayloadAction<{ message: string }>) => {
       state.load = { status: "error", message: action.payload.message };
+    },
+
+    reviewLoadStarted: (state) => {
+      state.reviewLoad = { status: "loading" };
+      state.transition = { status: "idle" };
+    },
+    reviewLoadSucceeded: (state) => {
+      state.reviewLoad = { status: "success" };
+    },
+    reviewLoadFailed: (state, action: PayloadAction<{ message: string }>) => {
+      state.reviewLoad = { status: "error", message: action.payload.message };
     },
 
     // ──────────────────────────────────────────────────────────────────
@@ -148,6 +173,20 @@ export const reportDraftsSlice = createSlice({
     },
     listFailed: (state, action: PayloadAction<{ message: string }>) => {
       state.list = { status: "error", message: action.payload.message };
+    },
+
+    reviewListStarted: (state) => {
+      state.reviewList = { status: "loading" };
+    },
+    reviewListSucceeded: (
+      state,
+      action: PayloadAction<{ submissionIds: string[] }>,
+    ) => {
+      state.pendingSubmissionIds = action.payload.submissionIds;
+      state.reviewList = { status: "success" };
+    },
+    reviewListFailed: (state, action: PayloadAction<{ message: string }>) => {
+      state.reviewList = { status: "error", message: action.payload.message };
     },
 
     // ──────────────────────────────────────────────────────────────────

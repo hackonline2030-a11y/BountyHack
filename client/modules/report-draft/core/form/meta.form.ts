@@ -1,21 +1,5 @@
+import { isSubmitableForWizard } from "@modules/report-draft/core/form/form-gates";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
-
-/**
- * The required-fields rule for the META step. Touching this list is the
- * intended way to make a field mandatory or optional — UI + slice both
- * defer to `MetaForm.isSubmitable`.
- */
-const REQUIRED_FIELDS: ReadonlyArray<keyof ReportDraftDomainModel.MetaFields> = [
-  "reportTitle",
-  "bugType",
-  "scopeSlug",
-  "endpoint",
-  "vulnerablePartCategory",
-  "vulnerablePartName",
-  "payload",
-  "technicalEnvironment",
-  "ipsUsed",
-];
 
 /**
  * Stateless operations on `MetaFields`. Instance-class shape (rather than
@@ -35,7 +19,7 @@ export class MetaForm {
     return { ...state, [key]: value };
   }
 
-  isSubmitable(state: ReportDraftDomainModel.MetaFields): boolean {
-    return REQUIRED_FIELDS.every((key) => state[key].trim().length > 0);
+  isSubmitable(_state: ReportDraftDomainModel.MetaFields): boolean {
+    return isSubmitableForWizard();
   }
 }

@@ -1,4 +1,4 @@
-import { InMemoryReviewerCommentsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.reviewer-comments.gateway-infra";
+import { InMemoryReviewerCommentRepository } from "@modules/report-draft/core/repository-infra/in-memory.reviewer-comment.repository-infra";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 
 /**
@@ -17,12 +17,12 @@ const commentFixture = (
   ...overrides,
 });
 
-describe("InMemoryReviewerCommentsGateway (IReviewerCommentsGateway contract)", () => {
+describe("InMemoryReviewerCommentRepository (IReviewerCommentsGateway contract)", () => {
   // ──────────────────────────────────────────────────────────────────────
   // saveMany / findBySubmissionId round-trip
   // ──────────────────────────────────────────────────────────────────────
   it("saveMany + findBySubmissionId round-trip returns the saved comments", async () => {
-    const repo = new InMemoryReviewerCommentsGateway();
+    const repo = new InMemoryReviewerCommentRepository();
     const comment = commentFixture();
 
     await repo.saveMany([comment]);
@@ -32,13 +32,13 @@ describe("InMemoryReviewerCommentsGateway (IReviewerCommentsGateway contract)", 
   });
 
   it("findBySubmissionId returns an empty array when the submission has no comments", async () => {
-    const repo = new InMemoryReviewerCommentsGateway();
+    const repo = new InMemoryReviewerCommentRepository();
 
     expect(await repo.findBySubmissionId("does-not-exist")).toEqual([]);
   });
 
   it("saveMany([]) is a no-op (empty bundle = no error, no side-effect)", async () => {
-    const repo = new InMemoryReviewerCommentsGateway();
+    const repo = new InMemoryReviewerCommentRepository();
 
     await expect(repo.saveMany([])).resolves.toBeUndefined();
     expect(await repo.findBySubmissionId("submission-1")).toEqual([]);
@@ -48,7 +48,7 @@ describe("InMemoryReviewerCommentsGateway (IReviewerCommentsGateway contract)", 
   // Accumulation across calls (NOT replace)
   // ──────────────────────────────────────────────────────────────────────
   it("saveMany accumulates across calls (does not replace prior comments)", async () => {
-    const repo = new InMemoryReviewerCommentsGateway();
+    const repo = new InMemoryReviewerCommentRepository();
     await repo.saveMany([commentFixture({ id: "c1" })]);
 
     await repo.saveMany([commentFixture({ id: "c2" })]);
@@ -61,7 +61,7 @@ describe("InMemoryReviewerCommentsGateway (IReviewerCommentsGateway contract)", 
   // Isolation — store insulated from caller-side mutations
   // ──────────────────────────────────────────────────────────────────────
   it("saveMany deep-clones each comment — later mutations on the original do not leak", async () => {
-    const repo = new InMemoryReviewerCommentsGateway();
+    const repo = new InMemoryReviewerCommentRepository();
     const comment = commentFixture({ body: "original body" });
 
     await repo.saveMany([comment]);
@@ -72,7 +72,7 @@ describe("InMemoryReviewerCommentsGateway (IReviewerCommentsGateway contract)", 
   });
 
   it("findBySubmissionId returns clones — mutations on the result do not affect the store", async () => {
-    const repo = new InMemoryReviewerCommentsGateway();
+    const repo = new InMemoryReviewerCommentRepository();
     await repo.saveMany([commentFixture({ body: "original body" })]);
 
     const [first] = await repo.findBySubmissionId("submission-1");
@@ -86,7 +86,7 @@ describe("InMemoryReviewerCommentsGateway (IReviewerCommentsGateway contract)", 
   // Filtering & ordering
   // ──────────────────────────────────────────────────────────────────────
   it("findBySubmissionId returns only comments matching the submission id", async () => {
-    const repo = new InMemoryReviewerCommentsGateway();
+    const repo = new InMemoryReviewerCommentRepository();
     await repo.saveMany([
       commentFixture({ id: "c1", submissionId: "sub-A" }),
       commentFixture({ id: "c2", submissionId: "sub-B" }),
@@ -99,7 +99,7 @@ describe("InMemoryReviewerCommentsGateway (IReviewerCommentsGateway contract)", 
   });
 
   it("findBySubmissionId sorts by createdAt ASC (chronological reading order)", async () => {
-    const repo = new InMemoryReviewerCommentsGateway();
+    const repo = new InMemoryReviewerCommentRepository();
     await repo.saveMany([
       commentFixture({ id: "c-newest", createdAt: "2026-05-14T12:00:00.000Z" }),
       commentFixture({ id: "c-oldest", createdAt: "2026-05-14T10:00:00.000Z" }),
@@ -112,7 +112,7 @@ describe("InMemoryReviewerCommentsGateway (IReviewerCommentsGateway contract)", 
   });
 
   it("findBySubmissionId breaks createdAt ties with id ASC (deterministic)", async () => {
-    const repo = new InMemoryReviewerCommentsGateway();
+    const repo = new InMemoryReviewerCommentRepository();
     const sharedTimestamp = "2026-05-14T10:00:00.000Z";
     await repo.saveMany([
       commentFixture({ id: "c-c", createdAt: sharedTimestamp }),

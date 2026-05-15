@@ -1,8 +1,8 @@
 import { StubClockProvider } from "@modules/core/provider/stub.clock-provider";
 import { StubIdProvider } from "@modules/core/provider/stub.id-provider";
-import { InMemoryReportDraftsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.report-drafts.gateway-infra";
-import { InMemoryReviewerCommentsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.reviewer-comments.gateway-infra";
-import { InMemorySubmissionsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.submissions.gateway-infra";
+import { InMemoryReportDraftRepository } from "@modules/report-draft/core/repository-infra/in-memory.report-draft.repository-infra";
+import { InMemoryReviewerCommentRepository } from "@modules/report-draft/core/repository-infra/in-memory.reviewer-comment.repository-infra";
+import { InMemorySubmissionRepository } from "@modules/report-draft/core/repository-infra/in-memory.submission.repository-infra";
 import { Dependencies } from "@store/dependencies";
 import { AppState, createStore } from "@store/redux/store";
 
@@ -15,15 +15,15 @@ import { AppState, createStore } from "@store/redux/store";
  * - `idProvider` → `StubIdProvider()` emits `stub-id-1`, `stub-id-2`, …
  * - `clock`      → `StubClockProvider()` emits `2024-01-01T00:00:00.000Z`,
  *                  `2024-01-01T00:00:01.000Z`, … (one second apart)
- * - All gateways → fresh `InMemory*Gateway` instances (no shared state
- *                  between tests).
+ * - All repositories → fresh `InMemory*Repository` instances (no shared state
+ *                       between tests).
  */
 const createDependencies = (overrides?: Partial<Dependencies>): Dependencies => ({
   idProvider: new StubIdProvider(),
   clock: new StubClockProvider(),
-  reportDraftsGateway: new InMemoryReportDraftsGateway(),
-  submissionsGateway: new InMemorySubmissionsGateway(),
-  reviewerCommentsGateway: new InMemoryReviewerCommentsGateway(),
+  reportDraftRepository: new InMemoryReportDraftRepository(),
+  submissionRepository: new InMemorySubmissionRepository(),
+  reviewerCommentRepository: new InMemoryReviewerCommentRepository(),
   ...overrides,
 });
 

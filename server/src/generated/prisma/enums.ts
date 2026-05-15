@@ -14,3 +14,77 @@ export const TwoFactorMethod = {
 } as const
 
 export type TwoFactorMethod = (typeof TwoFactorMethod)[keyof typeof TwoFactorMethod]
+
+
+export const DraftStep = {
+  META: 'META',
+  DESCRIPTION: 'DESCRIPTION',
+  COLLECTION: 'COLLECTION',
+  EXPLOITATION: 'EXPLOITATION',
+  PROOF_OF_CONCEPT: 'PROOF_OF_CONCEPT',
+  RISKS: 'RISKS',
+  REMEDIATION: 'REMEDIATION',
+  FINAL: 'FINAL'
+} as const
+
+export type DraftStep = (typeof DraftStep)[keyof typeof DraftStep]
+
+
+export const StepStatus = {
+  IN_PROGRESS: 'IN_PROGRESS',
+  AWAITING_REVIEW: 'AWAITING_REVIEW',
+  NEEDS_REVISION: 'NEEDS_REVISION',
+  APPROVED: 'APPROVED'
+} as const
+
+export type StepStatus = (typeof StepStatus)[keyof typeof StepStatus]
+
+
+export const ReportDraftAggregateStatus = {
+  DRAFT: 'DRAFT',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  READY_TO_PROGRAM: 'READY_TO_PROGRAM',
+  SUBMITTED_TO_PROGRAM: 'SUBMITTED_TO_PROGRAM',
+  GIVEN_UP: 'GIVEN_UP',
+  REJECTED: 'REJECTED'
+} as const
+
+export type ReportDraftAggregateStatus = (typeof ReportDraftAggregateStatus)[keyof typeof ReportDraftAggregateStatus]
+
+
+export const ReviewerRole = {
+  HUNTER: 'HUNTER',
+  MENTOR: 'MENTOR',
+  QUALITY_CHECKER: 'QUALITY_CHECKER',
+  SUPER_ADMIN: 'SUPER_ADMIN'
+} as const
+
+export type ReviewerRole = (typeof ReviewerRole)[keyof typeof ReviewerRole]
+
+
+export const SubmissionKind = {
+  HUNTER_TO_REVIEWER: 'HUNTER_TO_REVIEWER',
+  HUNTER_TO_MENTOR: 'HUNTER_TO_MENTOR',
+  MENTOR_TO_QC: 'MENTOR_TO_QC',
+  QC_TO_MENTOR: 'QC_TO_MENTOR',
+  QC_TO_SUPER_ADMIN: 'QC_TO_SUPER_ADMIN'
+} as const
+
+export type SubmissionKind = (typeof SubmissionKind)[keyof typeof SubmissionKind]
+
+
+export const SubmissionDecision = {
+  PENDING: 'PENDING',
+  APPROVE: 'APPROVE',
+  REQUEST_CHANGES: 'REQUEST_CHANGES'
+} as const
+
+export type SubmissionDecision = (typeof SubmissionDecision)[keyof typeof SubmissionDecision]
+
+
+export const ReportStatus = {
+  PENDING: 'PENDING',
+  PUBLISHED: 'PUBLISHED'
+} as const
+
+export type ReportStatus = (typeof ReportStatus)[keyof typeof ReportStatus]

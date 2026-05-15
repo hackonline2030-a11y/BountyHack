@@ -21,7 +21,7 @@ export const approveStep =
     dispatch(reportDraftsSlice.actions.transitionStarted());
 
     try {
-      const draft = await deps.reportDraftsGateway.findById(input.draftId);
+      const draft = await deps.reportDraftRepository.findById(input.draftId);
       if (draft === null) {
         dispatch(
           reportDraftsSlice.actions.transitionFailed({
@@ -31,7 +31,7 @@ export const approveStep =
         return;
       }
 
-      const submission = await deps.submissionsGateway.findById(input.submissionId);
+      const submission = await deps.submissionRepository.findById(input.submissionId);
       if (submission === null) {
         dispatch(
           reportDraftsSlice.actions.transitionFailed({
@@ -47,8 +47,8 @@ export const approveStep =
       });
       aggregate.approveStep({ submission, decidedBy: input.decidedBy });
 
-      await deps.reportDraftsGateway.save(aggregate.state);
-      await deps.submissionsGateway.save(submission);
+      await deps.reportDraftRepository.save(aggregate.state);
+      await deps.submissionRepository.save(submission);
 
       dispatch(reportDraftsSlice.actions.draftUpserted(aggregate.state));
       dispatch(reportDraftsSlice.actions.submissionUpserted(submission));

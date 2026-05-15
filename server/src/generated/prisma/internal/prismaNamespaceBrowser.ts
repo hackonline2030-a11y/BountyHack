@@ -59,7 +59,15 @@ export const ModelName = {
   RefreshToken: 'RefreshToken',
   PasswordResetToken: 'PasswordResetToken',
   TwoFactor: 'TwoFactor',
-  TwoFactorTotp: 'TwoFactorTotp'
+  TwoFactorTotp: 'TwoFactorTotp',
+  ReportDraft: 'ReportDraft',
+  ReportDraftStep: 'ReportDraftStep',
+  ReportDraftAttachment: 'ReportDraftAttachment',
+  Submission: 'Submission',
+  ReviewerComment: 'ReviewerComment',
+  SubmissionAttachmentSnapshot: 'SubmissionAttachmentSnapshot',
+  SubmissionContentSnapshot: 'SubmissionContentSnapshot',
+  Report: 'Report'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -169,12 +177,145 @@ export const TwoFactorTotpScalarFieldEnum = {
 export type TwoFactorTotpScalarFieldEnum = (typeof TwoFactorTotpScalarFieldEnum)[keyof typeof TwoFactorTotpScalarFieldEnum]
 
 
+export const ReportDraftScalarFieldEnum = {
+  id: 'id',
+  hunterId: 'hunterId',
+  version: 'version',
+  aggregateStatus: 'aggregateStatus',
+  pendingReportId: 'pendingReportId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReportDraftScalarFieldEnum = (typeof ReportDraftScalarFieldEnum)[keyof typeof ReportDraftScalarFieldEnum]
+
+
+export const ReportDraftStepScalarFieldEnum = {
+  id: 'id',
+  reportDraftId: 'reportDraftId',
+  step: 'step',
+  payload: 'payload',
+  status: 'status',
+  currentRound: 'currentRound',
+  assignedReviewerRole: 'assignedReviewerRole',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReportDraftStepScalarFieldEnum = (typeof ReportDraftStepScalarFieldEnum)[keyof typeof ReportDraftStepScalarFieldEnum]
+
+
+export const ReportDraftAttachmentScalarFieldEnum = {
+  id: 'id',
+  reportDraftStepId: 'reportDraftStepId',
+  filename: 'filename',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  storageKey: 'storageKey',
+  thumbnailUrl: 'thumbnailUrl',
+  uploadedBy: 'uploadedBy',
+  uploadedAt: 'uploadedAt'
+} as const
+
+export type ReportDraftAttachmentScalarFieldEnum = (typeof ReportDraftAttachmentScalarFieldEnum)[keyof typeof ReportDraftAttachmentScalarFieldEnum]
+
+
+export const SubmissionScalarFieldEnum = {
+  id: 'id',
+  reportDraftStepId: 'reportDraftStepId',
+  reportDraftId: 'reportDraftId',
+  step: 'step',
+  round: 'round',
+  submissionKind: 'submissionKind',
+  payload: 'payload',
+  submittedAt: 'submittedAt',
+  submittedBy: 'submittedBy',
+  reviewerRole: 'reviewerRole',
+  decision: 'decision',
+  decidedAt: 'decidedAt',
+  decidedBy: 'decidedBy'
+} as const
+
+export type SubmissionScalarFieldEnum = (typeof SubmissionScalarFieldEnum)[keyof typeof SubmissionScalarFieldEnum]
+
+
+export const ReviewerCommentScalarFieldEnum = {
+  id: 'id',
+  submissionId: 'submissionId',
+  authorId: 'authorId',
+  authorRole: 'authorRole',
+  anchor: 'anchor',
+  body: 'body',
+  createdAt: 'createdAt',
+  resolvedAt: 'resolvedAt'
+} as const
+
+export type ReviewerCommentScalarFieldEnum = (typeof ReviewerCommentScalarFieldEnum)[keyof typeof ReviewerCommentScalarFieldEnum]
+
+
+export const SubmissionAttachmentSnapshotScalarFieldEnum = {
+  id: 'id',
+  submissionId: 'submissionId',
+  filename: 'filename',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  storageKey: 'storageKey',
+  thumbnailUrl: 'thumbnailUrl',
+  uploadedAt: 'uploadedAt',
+  uploadedBy: 'uploadedBy'
+} as const
+
+export type SubmissionAttachmentSnapshotScalarFieldEnum = (typeof SubmissionAttachmentSnapshotScalarFieldEnum)[keyof typeof SubmissionAttachmentSnapshotScalarFieldEnum]
+
+
+export const SubmissionContentSnapshotScalarFieldEnum = {
+  id: 'id',
+  submissionId: 'submissionId',
+  payload: 'payload',
+  capturedAt: 'capturedAt'
+} as const
+
+export type SubmissionContentSnapshotScalarFieldEnum = (typeof SubmissionContentSnapshotScalarFieldEnum)[keyof typeof SubmissionContentSnapshotScalarFieldEnum]
+
+
+export const ReportScalarFieldEnum = {
+  id: 'id',
+  hunterId: 'hunterId',
+  sourceDraftId: 'sourceDraftId',
+  status: 'status',
+  frozenContent: 'frozenContent',
+  contentSyncedAt: 'contentSyncedAt',
+  promotedBy: 'promotedBy',
+  publishedBy: 'publishedBy',
+  publishedAt: 'publishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReportScalarFieldEnum = (typeof ReportScalarFieldEnum)[keyof typeof ReportScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -191,4 +332,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

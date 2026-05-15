@@ -33,6 +33,8 @@ model User {
   refreshTokens RefreshToken[]
   passwordResetTokens PasswordResetToken[]
   role       Role?   @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  reportDrafts ReportDraft[]
+  reports      Report[]
 
   @@index([roleId])
   @@map("users")
@@ -140,4 +142,216 @@ model TwoFactorTotp {
   twoFactor TwoFactor @relation(fields: [twoFactorId], references: [id], onDelete: Cascade)
 
   @@map("two_factor_totp")
+}
+
+// ─── Report draft workflow (MCD v1 — hunter↔QC first; mentor / super-admin later) ───
+
+enum DraftStep {
+  META
+  DESCRIPTION
+  COLLECTION
+  EXPLOITATION
+  PROOF_OF_CONCEPT
+  RISKS
+  REMEDIATION
+  FINAL
+}
+
+enum StepStatus {
+  IN_PROGRESS
+  AWAITING_REVIEW
+  NEEDS_REVISION
+  APPROVED
+}
+
+enum ReportDraftAggregateStatus {
+  DRAFT
+  UNDER_REVIEW
+  READY_TO_PROGRAM
+  SUBMITTED_TO_PROGRAM
+  GIVEN_UP
+  REJECTED
+}
+
+enum ReviewerRole {
+  HUNTER
+  MENTOR
+  QUALITY_CHECKER
+  SUPER_ADMIN
+}
+
+enum SubmissionKind {
+  HUNTER_TO_REVIEWER
+  HUNTER_TO_MENTOR
+  MENTOR_TO_QC
+  QC_TO_MENTOR
+  QC_TO_SUPER_ADMIN
+}
+
+enum SubmissionDecision {
+  PENDING
+  APPROVE
+  REQUEST_CHANGES
+}
+
+enum ReportStatus {
+  PENDING
+  PUBLISHED
+}
+
+/// Hunter workspace: 8 wizard steps until promotion to a pending Report.
+model ReportDraft {
+  id              String                     @id @default(uuid())
+  hunterId        String                     @map("hunter_id")
+  version         Int                        @default(1)
+  aggregateStatus ReportDraftAggregateStatus @default(DRAFT) @map("aggregate_status")
+  /// Set when super-admin promotes draft → pending report (draft still exists).
+  pendingReportId String?                    @unique @map("pending_report_id")
+  createdAt       DateTime                   @default(now()) @map("created_at")
+  updatedAt       DateTime                   @updatedAt @map("updated_at")
+
+  hunter        User              @relation(fields: [hunterId], references: [id], onDelete: Cascade)
+  pendingReport Report?           @relation("DraftPendingReport", fields: [pendingReportId], references: [id], onDelete: SetNull)
+  steps         ReportDraftStep[]
+  submissions   Submission[]
+
+  @@index([hunterId])
+  @@index([aggregateStatus])
+  @@map("report_drafts")
+}
+
+/// One row per wizard step (8 per draft). Submissions attach here, not on the draft root.
+model ReportDraftStep {
+  id                   String        @id @default(uuid())
+  reportDraftId        String        @map("report_draft_id")
+  step                 DraftStep
+  payload              Json          @default("{}")
+  status               StepStatus    @default(IN_PROGRESS)
+  currentRound         Int           @default(0) @map("current_round")
+  assignedReviewerRole ReviewerRole? @map("assigned_reviewer_role")
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+
+  reportDraft ReportDraft             @relation(fields: [reportDraftId], references: [id], onDelete: Cascade)
+  attachments ReportDraftAttachment[]
+  submissions Submission[]
+
+  @@unique([reportDraftId, step])
+  @@index([reportDraftId])
+  @@map("report_draft_steps")
+}
+
+/// Live binary assets on a step (upload wired later).
+model ReportDraftAttachment {
+  id                String   @id @default(uuid())
+  reportDraftStepId String   @map("report_draft_step_id")
+  filename          String
+  mimeType          String   @map("mime_type")
+  sizeBytes         Int      @map("size_bytes")
+  storageKey        String   @map("storage_key")
+  thumbnailUrl      String?  @map("thumbnail_url")
+  uploadedBy        String   @map("uploaded_by")
+  uploadedAt        DateTime @default(now()) @map("uploaded_at")
+
+  reportDraftStep ReportDraftStep @relation(fields: [reportDraftStepId], references: [id], onDelete: Cascade)
+
+  @@index([reportDraftStepId])
+  @@map("report_draft_attachments")
+}
+
+/// Immutable review round; parent is the step. Denormalized draft/step for list queries.
+model Submission {
+  id                String             @id @default(uuid())
+  reportDraftStepId String             @map("report_draft_step_id")
+  reportDraftId     String             @map("report_draft_id")
+  step              DraftStep
+  round             Int
+  submissionKind    SubmissionKind     @default(HUNTER_TO_REVIEWER) @map("submission_kind")
+  payload           Json
+  submittedAt       DateTime           @default(now()) @map("submitted_at")
+  submittedBy       String             @map("submitted_by")
+  reviewerRole      ReviewerRole       @map("reviewer_role")
+  decision          SubmissionDecision @default(PENDING)
+  decidedAt         DateTime?          @map("decided_at")
+  decidedBy         String?            @map("decided_by")
+
+  reportDraftStep     ReportDraftStep                @relation(fields: [reportDraftStepId], references: [id], onDelete: Cascade)
+  reportDraft         ReportDraft                    @relation(fields: [reportDraftId], references: [id], onDelete: Cascade)
+  reviewerComments    ReviewerComment[]
+  attachmentSnapshots SubmissionAttachmentSnapshot[]
+  contentSnapshots    SubmissionContentSnapshot[]
+
+  @@unique([reportDraftStepId, round, reviewerRole, submissionKind])
+  @@index([reportDraftId])
+  @@index([reviewerRole, decision])
+  @@map("submissions")
+}
+
+model ReviewerComment {
+  id           String       @id @default(uuid())
+  submissionId String       @map("submission_id")
+  authorId     String       @map("author_id")
+  authorRole   ReviewerRole @map("author_role")
+  anchor       Json?
+  body         String
+  createdAt    DateTime     @default(now()) @map("created_at")
+  resolvedAt   DateTime?    @map("resolved_at")
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@map("reviewer_comments")
+}
+
+/// Frozen files at submit time (domain: attachmentsSnapshot).
+model SubmissionAttachmentSnapshot {
+  id           String   @id @default(uuid())
+  submissionId String   @map("submission_id")
+  filename     String
+  mimeType     String   @map("mime_type")
+  sizeBytes    Int      @map("size_bytes")
+  storageKey   String   @map("storage_key")
+  thumbnailUrl String?  @map("thumbnail_url")
+  uploadedAt   DateTime @map("uploaded_at")
+  uploadedBy   String   @map("uploaded_by")
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@map("submission_attachment_snapshots")
+}
+
+/// Optional payload history inside one submission (reserved for later).
+model SubmissionContentSnapshot {
+  id           String   @id @default(uuid())
+  submissionId String   @map("submission_id")
+  payload      Json
+  capturedAt   DateTime @default(now()) @map("captured_at")
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@map("submission_content_snapshots")
+}
+
+/// Promoted artefact after full step validation; super-admin pending → published.
+model Report {
+  id              String       @id @default(uuid())
+  hunterId        String       @map("hunter_id")
+  sourceDraftId   String       @unique @map("source_draft_id")
+  status          ReportStatus @default(PENDING)
+  frozenContent   Json?        @map("frozen_content")
+  contentSyncedAt DateTime?    @map("content_synced_at")
+  promotedBy      String?      @map("promoted_by")
+  publishedBy     String?      @map("published_by")
+  publishedAt     DateTime?    @map("published_at")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  hunter          User         @relation(fields: [hunterId], references: [id], onDelete: Cascade)
+  pendingForDraft ReportDraft? @relation("DraftPendingReport")
+
+  @@index([hunterId])
+  @@index([status])
+  @@map("reports")
 }

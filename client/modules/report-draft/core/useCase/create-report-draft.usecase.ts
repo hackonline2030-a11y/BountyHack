@@ -35,7 +35,7 @@ export const createReportDraft =
         clock: deps.clock,
         hunterId: input.hunterId,
       });
-      await deps.reportDraftsGateway.save(draft);
+      await deps.reportDraftRepository.save(draft);
 
       dispatch(reportDraftsSlice.actions.draftUpserted(draft));
       dispatch(reportDraftsSlice.actions.setCurrentDraftId(draft.id));

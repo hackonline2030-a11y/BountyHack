@@ -33,7 +33,7 @@ export const requestStepRevisions =
     dispatch(reportDraftsSlice.actions.transitionStarted());
 
     try {
-      const draft = await deps.reportDraftsGateway.findById(input.draftId);
+      const draft = await deps.reportDraftRepository.findById(input.draftId);
       if (draft === null) {
         dispatch(
           reportDraftsSlice.actions.transitionFailed({
@@ -43,7 +43,7 @@ export const requestStepRevisions =
         return;
       }
 
-      const submission = await deps.submissionsGateway.findById(input.submissionId);
+      const submission = await deps.submissionRepository.findById(input.submissionId);
       if (submission === null) {
         dispatch(
           reportDraftsSlice.actions.transitionFailed({
@@ -63,9 +63,9 @@ export const requestStepRevisions =
         comments: input.comments,
       });
 
-      await deps.reportDraftsGateway.save(aggregate.state);
-      await deps.submissionsGateway.save(submission);
-      await deps.reviewerCommentsGateway.saveMany(newComments);
+      await deps.reportDraftRepository.save(aggregate.state);
+      await deps.submissionRepository.save(submission);
+      await deps.reviewerCommentRepository.saveMany(newComments);
 
       dispatch(reportDraftsSlice.actions.draftUpserted(aggregate.state));
       dispatch(reportDraftsSlice.actions.submissionUpserted(submission));

@@ -20,7 +20,7 @@ export const loadReportDraft =
     dispatch(reportDraftsSlice.actions.loadStarted());
 
     try {
-      const draft = await deps.reportDraftsGateway.findById(input.draftId);
+      const draft = await deps.reportDraftRepository.findById(input.draftId);
       if (draft === null) {
         dispatch(
           reportDraftsSlice.actions.loadFailed({
@@ -33,10 +33,10 @@ export const loadReportDraft =
       dispatch(reportDraftsSlice.actions.draftUpserted(draft));
       dispatch(reportDraftsSlice.actions.setCurrentDraftId(draft.id));
 
-      const submissions = await deps.submissionsGateway.findByDraftId(draft.id);
+      const submissions = await deps.submissionRepository.findByDraftId(draft.id);
       for (const submission of submissions) {
         dispatch(reportDraftsSlice.actions.submissionUpserted(submission));
-        const comments = await deps.reviewerCommentsGateway.findBySubmissionId(
+        const comments = await deps.reviewerCommentRepository.findBySubmissionId(
           submission.id,
         );
         if (comments.length > 0) {

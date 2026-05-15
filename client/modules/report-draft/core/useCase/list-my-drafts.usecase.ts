@@ -19,7 +19,7 @@ export const listMyDrafts =
     dispatch(reportDraftsSlice.actions.listStarted());
 
     try {
-      const drafts = await deps.reportDraftsGateway.findByHunterId(input.hunterId);
+      const drafts = await deps.reportDraftRepository.findByHunterId(input.hunterId);
       dispatch(reportDraftsSlice.actions.listSucceeded({ drafts }));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

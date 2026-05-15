@@ -1,4 +1,4 @@
-import { InMemoryReportDraftsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.report-drafts.gateway-infra";
+import { InMemoryReportDraftRepository } from "@modules/report-draft/core/repository-infra/in-memory.report-draft.repository-infra";
 import { ReportDraftFactory } from "@modules/report-draft/core/model/report-draft.factory";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { StubIdProvider } from "@modules/core/provider/stub.id-provider";
@@ -25,12 +25,12 @@ const buildDraft = (
     overrides,
   });
 
-describe("InMemoryReportDraftsGateway (IReportDraftsGateway contract)", () => {
+describe("InMemoryReportDraftRepository (IReportDraftsGateway contract)", () => {
   // ──────────────────────────────────────────────────────────────────────
   // save / findById round-trip
   // ──────────────────────────────────────────────────────────────────────
   it("save + findById round-trip returns an equivalent draft", async () => {
-    const repo = new InMemoryReportDraftsGateway();
+    const repo = new InMemoryReportDraftRepository();
     const draft = buildDraft({ id: "draft-1" });
 
     await repo.save(draft);
@@ -40,13 +40,13 @@ describe("InMemoryReportDraftsGateway (IReportDraftsGateway contract)", () => {
   });
 
   it("findById returns null for an unknown id", async () => {
-    const repo = new InMemoryReportDraftsGateway();
+    const repo = new InMemoryReportDraftRepository();
 
     expect(await repo.findById("does-not-exist")).toBeNull();
   });
 
   it("save with the same id overwrites the previous version (post-transition save flow)", async () => {
-    const repo = new InMemoryReportDraftsGateway();
+    const repo = new InMemoryReportDraftRepository();
     await repo.save(buildDraft({ id: "draft-1", version: 0 }));
 
     await repo.save(buildDraft({ id: "draft-1", version: 5, aggregateStatus: "under-review" }));
@@ -60,7 +60,7 @@ describe("InMemoryReportDraftsGateway (IReportDraftsGateway contract)", () => {
   // Isolation — store insulated from caller-side mutations
   // ──────────────────────────────────────────────────────────────────────
   it("save deep-clones the input — later mutations on the original do not leak", async () => {
-    const repo = new InMemoryReportDraftsGateway();
+    const repo = new InMemoryReportDraftRepository();
     const draft = buildDraft({ id: "draft-1", aggregateStatus: "draft" });
 
     await repo.save(draft);
@@ -71,7 +71,7 @@ describe("InMemoryReportDraftsGateway (IReportDraftsGateway contract)", () => {
   });
 
   it("findById returns a clone — mutations on the result do not affect the store", async () => {
-    const repo = new InMemoryReportDraftsGateway();
+    const repo = new InMemoryReportDraftRepository();
     await repo.save(buildDraft({ id: "draft-1", aggregateStatus: "draft" }));
 
     const first = await repo.findById("draft-1");
@@ -85,7 +85,7 @@ describe("InMemoryReportDraftsGateway (IReportDraftsGateway contract)", () => {
   // findByHunterId
   // ──────────────────────────────────────────────────────────────────────
   it("findByHunterId returns only the drafts owned by the given hunter", async () => {
-    const repo = new InMemoryReportDraftsGateway();
+    const repo = new InMemoryReportDraftRepository();
     await repo.save(buildDraft({ id: "d1", hunterId: "u-42" }));
     await repo.save(buildDraft({ id: "d2", hunterId: "u-99" }));
     await repo.save(buildDraft({ id: "d3", hunterId: "u-42" }));
@@ -96,7 +96,7 @@ describe("InMemoryReportDraftsGateway (IReportDraftsGateway contract)", () => {
   });
 
   it("findByHunterId sorts by updatedAt DESC (most recently touched first)", async () => {
-    const repo = new InMemoryReportDraftsGateway();
+    const repo = new InMemoryReportDraftRepository();
     await repo.save(
       buildDraft({ id: "d-oldest", hunterId: "u-42", updatedAt: "2026-05-10T08:00:00.000Z" }),
     );
@@ -113,7 +113,7 @@ describe("InMemoryReportDraftsGateway (IReportDraftsGateway contract)", () => {
   });
 
   it("findByHunterId breaks updatedAt ties with id ASC (deterministic)", async () => {
-    const repo = new InMemoryReportDraftsGateway();
+    const repo = new InMemoryReportDraftRepository();
     const sharedTimestamp = "2026-05-14T08:00:00.000Z";
     await repo.save(buildDraft({ id: "d-c", hunterId: "u-42", updatedAt: sharedTimestamp }));
     await repo.save(buildDraft({ id: "d-a", hunterId: "u-42", updatedAt: sharedTimestamp }));
@@ -125,14 +125,14 @@ describe("InMemoryReportDraftsGateway (IReportDraftsGateway contract)", () => {
   });
 
   it("findByHunterId returns an empty array when no draft belongs to the hunter", async () => {
-    const repo = new InMemoryReportDraftsGateway();
+    const repo = new InMemoryReportDraftRepository();
     await repo.save(buildDraft({ id: "d1", hunterId: "u-99" }));
 
     expect(await repo.findByHunterId("u-42")).toEqual([]);
   });
 
   it("findByHunterId returns clones — mutations on the result do not affect the store", async () => {
-    const repo = new InMemoryReportDraftsGateway();
+    const repo = new InMemoryReportDraftRepository();
     await repo.save(buildDraft({ id: "d1", hunterId: "u-42", aggregateStatus: "draft" }));
 
     const [first] = await repo.findByHunterId("u-42");

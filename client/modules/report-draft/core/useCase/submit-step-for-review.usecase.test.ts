@@ -1,7 +1,8 @@
 import { StubClockProvider } from "@modules/core/provider/stub.clock-provider";
 import { StubIdProvider } from "@modules/core/provider/stub.id-provider";
-import { InMemoryReportDraftsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.report-drafts.gateway-infra";
-import { InMemorySubmissionsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.submissions.gateway-infra";
+import { InMemoryReportDraftRepository } from "@modules/report-draft/core/repository-infra/in-memory.report-draft.repository-infra";
+import { InMemorySubmissionRepository } from "@modules/report-draft/core/repository-infra/in-memory.submission.repository-infra";
+import { MetaFactory } from "@modules/report-draft/core/model/meta.factory";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { ReportDraftFactory } from "@modules/report-draft/core/model/report-draft.factory";
 import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-step-for-review.usecase";
@@ -15,24 +16,24 @@ describe("submitStepForReview use case", () => {
   const SUBMITTED_AT = "2026-04-02T00:00:00.000Z";
 
   const setup = async () => {
-    const reportDraftsGateway = new InMemoryReportDraftsGateway();
-    const submissionsGateway = new InMemorySubmissionsGateway();
+    const reportDraftRepository = new InMemoryReportDraftRepository();
+    const submissionRepository = new InMemorySubmissionRepository();
     const draft = ReportDraftFactory.create({
       idProvider: new StubIdProvider([DRAFT_ID]),
       clock: new StubClockProvider([CREATED_AT]),
       hunterId: HUNTER_ID,
     });
-    await reportDraftsGateway.save(draft);
+    await reportDraftRepository.save(draft);
 
     const store = createTestStore({
       dependencies: {
         idProvider: new StubIdProvider([SUBMISSION_ID]),
         clock: new StubClockProvider([SUBMITTED_AT]),
-        reportDraftsGateway,
-        submissionsGateway,
+        reportDraftRepository,
+        submissionRepository,
       },
     });
-    return { store, reportDraftsGateway, submissionsGateway };
+    return { store, reportDraftRepository, submissionRepository };
   };
 
   it("flips transition to loading then success", async () => {
@@ -87,7 +88,7 @@ describe("submitStepForReview use case", () => {
   });
 
   it("persists the submission in the submissions gateway", async () => {
-    const { store, submissionsGateway } = await setup();
+    const { store, submissionRepository } = await setup();
 
     await store.dispatch(
       submitStepForReview({
@@ -98,7 +99,7 @@ describe("submitStepForReview use case", () => {
       }),
     );
 
-    const persisted = await submissionsGateway.findById(SUBMISSION_ID);
+    const persisted = await submissionRepository.findById(SUBMISSION_ID);
     expect(persisted).not.toBeNull();
     expect(persisted!.reportDraftId).toBe(DRAFT_ID);
     expect(persisted!.step).toBe(ReportDraftDomainModel.ReportDraftStep.META);
@@ -138,6 +139,44 @@ describe("submitStepForReview use case", () => {
       status: "error",
       message: "Draft 'ghost' not found.",
     });
+  });
+
+  it("persists an optional payload before creating the submission snapshot", async () => {
+    const reportDraftRepository = new InMemoryReportDraftRepository();
+    const submissionRepository = new InMemorySubmissionRepository();
+    const draft = ReportDraftFactory.create({
+      idProvider: new StubIdProvider([DRAFT_ID]),
+      clock: new StubClockProvider([CREATED_AT]),
+      hunterId: HUNTER_ID,
+    });
+    await reportDraftRepository.save(draft);
+
+    const store = createTestStore({
+      dependencies: {
+        idProvider: new StubIdProvider([SUBMISSION_ID]),
+        clock: new StubClockProvider([SUBMITTED_AT, SUBMITTED_AT]),
+        reportDraftRepository,
+        submissionRepository,
+      },
+    });
+    const nextMeta = MetaFactory.create({ reportTitle: "Flushed on submit" });
+
+    await store.dispatch(
+      submitStepForReview({
+        draftId: DRAFT_ID,
+        step: ReportDraftDomainModel.ReportDraftStep.META,
+        reviewerRole: "mentor",
+        submittedBy: HUNTER_ID,
+        payload: nextMeta,
+      }),
+    );
+
+    const persisted = await submissionRepository.findById(SUBMISSION_ID);
+    const snap = persisted!.payload as ReturnType<typeof MetaFactory.create>;
+    expect(snap.reportTitle).toBe("Flushed on submit");
+    expect(store.getState().reportDrafts.byId[DRAFT_ID].meta.payload.reportTitle).toBe(
+      "Flushed on submit",
+    );
   });
 
   it("surfaces the aggregate guard error when the step is in an illegal status", async () => {

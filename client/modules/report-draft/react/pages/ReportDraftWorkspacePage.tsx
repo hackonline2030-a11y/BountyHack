@@ -1,6 +1,6 @@
 "use client";
 
-import { type FC, type KeyboardEvent, useCallback, useState } from "react";
+import { type FC, type KeyboardEvent, useCallback, useMemo, useState } from "react";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { reportDraftStepToStateKey } from "@modules/report-draft/core/model/report-draft-step-keys";
 import {
@@ -8,6 +8,7 @@ import {
   ReportDraftPreview,
 } from "@modules/report-draft/react/components/ReportDraftPreview";
 import { ReportDraftStepCommentsPanel } from "@modules/report-draft/react/pages/ReportDraftStepCommentsPanel";
+import { ReportDraftStepRevisionsListPanel } from "@modules/report-draft/react/pages/ReportDraftStepRevisionsListPanel";
 import { ReportDraftWizardPage } from "@modules/report-draft/react/pages/ReportDraftWizardPage";
 import {
   stepStatusLabelFr,
@@ -20,13 +21,19 @@ import { useAppSelector } from "@store/redux/store";
  * reviewer pour l’étape wizard courante). Sous la barre d’onglets : pill
  * d’état de l’étape (machine à états domaine).
  */
-type WorkspaceTab = "form" | "stepPreview" | "cumulativePreview" | "comments";
+type WorkspaceTab =
+  | "form"
+  | "stepPreview"
+  | "cumulativePreview"
+  | "comments"
+  | "revisions";
 
 const TAB_ORDER: readonly WorkspaceTab[] = [
   "form",
   "stepPreview",
   "cumulativePreview",
   "comments",
+  "revisions",
 ] as const;
 
 const TAB_LABELS: Record<WorkspaceTab, string> = {
@@ -34,6 +41,7 @@ const TAB_LABELS: Record<WorkspaceTab, string> = {
   stepPreview: "Aperçu étape",
   cumulativePreview: "Aperçu",
   comments: "Commentaires",
+  revisions: "Liste de mes demandes de révision",
 };
 
 const STEP_LABELS: Record<ReportDraftDomainModel.ReportDraftStep, string> = {
@@ -56,6 +64,17 @@ const WorkspaceStepStatusPill: FC = () => {
   const draft = useAppSelector((s) =>
     draftId ? s.reportDrafts.byId[draftId] : undefined,
   );
+  const submissionsById = useAppSelector((s) => s.reportDrafts.submissionsById);
+
+  const revisionHint = useMemo(() => {
+    if (!draftId) return null;
+    const forStep = Object.values(submissionsById).filter(
+      (s) => s.reportDraftId === draftId && s.step === step,
+    );
+    if (forStep.length === 0) return null;
+    const latest = forStep.reduce((a, b) => (a.round >= b.round ? a : b));
+    return { submissionId: latest.id, round: latest.round };
+  }, [draftId, step, submissionsById]);
 
   if (!draft) return null;
 
@@ -65,11 +84,18 @@ const WorkspaceStepStatusPill: FC = () => {
   const stepLabel = STEP_LABELS[step];
 
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b border-form-border px-1 pb-3">
-      <span className="text-xs font-medium uppercase tracking-wide text-form-text-muted">
-        Étape — {stepLabel}
-      </span>
-      <span className={stepStatusPillClassFr(status)}>{stepStatusLabelFr(status)}</span>
+    <div className="flex flex-col gap-1 border-b border-form-border px-1 pb-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium uppercase tracking-wide text-form-text-muted">
+          Étape — {stepLabel}
+        </span>
+        <span className={stepStatusPillClassFr(status)}>{stepStatusLabelFr(status)}</span>
+      </div>
+      {status === "needs-revision" && revisionHint ? (
+        <p className="font-mono text-xs italic text-form-text-muted">
+          n° {revisionHint.submissionId} — round {revisionHint.round}
+        </p>
+      ) : null}
     </div>
   );
 };
@@ -161,6 +187,16 @@ export const ReportDraftWorkspacePage: FC = () => {
         className="min-h-[120px]"
       >
         <ReportDraftStepCommentsPanel />
+      </div>
+
+      <div
+        role="tabpanel"
+        id={tabPanelId("revisions")}
+        aria-labelledby={tabButtonId("revisions")}
+        hidden={activeTab !== "revisions"}
+        className="min-h-[120px]"
+      >
+        <ReportDraftStepRevisionsListPanel />
       </div>
     </div>
   );

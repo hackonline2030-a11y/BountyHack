@@ -19,7 +19,6 @@ export const DescriptionSection: FC = () => {
   const {
     draft,
     setField,
-    isSubmitable,
     editable,
     canNavigateNext,
     reviewerRole,
@@ -75,7 +74,6 @@ export const DescriptionSection: FC = () => {
         id="desc-attack-vector"
         label="Attack Vector (AV)"
         hint="Comment l'exploit est-il déclenché ?"
-        required
         disabled={lockedOff}
         value={draft.attackVector}
         options={catalogs.attackVector}
@@ -86,7 +84,6 @@ export const DescriptionSection: FC = () => {
         id="desc-privileges-required"
         label="Privileges Required (PR)"
         hint="Privilèges nécessaires sur la cible pour exploiter."
-        required
         disabled={lockedOff}
         value={draft.privilegesRequired}
         options={catalogs.privilegesRequired}
@@ -185,7 +182,7 @@ export const DescriptionSection: FC = () => {
           type="button"
           className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
           onClick={() => void onSaveDraft()}
-          disabled={transitionBusy || !editable || !isSubmitable}
+          disabled={transitionBusy || !editable}
         >
           Enregistrer le brouillon
         </button>
@@ -206,7 +203,7 @@ export const DescriptionSection: FC = () => {
           type="button"
           className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
           onClick={() => void onSubmitForReview()}
-          disabled={transitionBusy || !editable || !isSubmitable}
+          disabled={transitionBusy || !editable}
         >
           Soumettre cette étape pour revue
         </button>
@@ -230,7 +227,6 @@ type MetricFieldProps = {
   id: string;
   label: string;
   hint?: string;
-  required?: boolean;
   disabled?: boolean;
   value: string;
   options: ReadonlyArray<CvssMetricOption>;
@@ -241,7 +237,6 @@ const MetricField: FC<MetricFieldProps> = ({
   id,
   label,
   hint,
-  required,
   disabled = false,
   value,
   options,
@@ -250,14 +245,12 @@ const MetricField: FC<MetricFieldProps> = ({
   <div className="flex flex-col gap-1">
     <label htmlFor={id} className="text-sm font-medium text-form-text-muted">
       {label}
-      {required && <span className="ml-1 text-form-accent-strong">*</span>}
     </label>
     <select
       id={id}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       className={selectClass}
-      required={required}
       disabled={disabled}
     >
       <option value="">— Sélectionner —</option>

@@ -9,6 +9,7 @@ import { reportDraftStepToStateKey } from "@modules/report-draft/core/model/repo
 import { reportDraftSlice } from "@modules/report-draft/core/store/report-draft.slice";
 import { saveStepPayload } from "@modules/report-draft/core/useCase/save-step-payload.usecase";
 import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-step-for-review.usecase";
+import { reviewerRoleFromDraftStep } from "@modules/report-draft/react/wizard/reviewer-role-from-draft";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
@@ -81,6 +82,11 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
   const [reviewerRole, setReviewerRole] =
     useState<ReportDraftDomainModel.ReviewerRole>("mentor");
 
+  useEffect(() => {
+    const fromDraft = reviewerRoleFromDraftStep(draftRow, step);
+    setReviewerRole(fromDraft ?? "mentor");
+  }, [currentDraftId, draftRow, step]);
+
   const form = useMemo(() => longFormFormForStep(step), [step]);
   const [draft, setDraft] = useState<Record<string, string>>(persistedPayload);
 
@@ -92,12 +98,6 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
   const canNavigateNext = stepStatus === "approved";
   const isLast = step === Step.FINAL;
 
-  const hasAnyContent = useMemo(
-    () => Object.values(draft).some((v) => v.trim().length > 0),
-    [draft],
-  );
-  const submitReady = form.isSubmitable(draft);
-
   const onNext = useCallback(() => {
     if (isLast || !canNavigateNext) return;
     const next = (step + 1) as ReportDraftDomainModel.ReportDraftStep;
@@ -105,11 +105,11 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
   }, [dispatch, step, isLast, canNavigateNext]);
 
   const onSaveDraft = useCallback(async () => {
-    if (!currentDraftId || !editable || !hasAnyContent) return;
+    if (!currentDraftId || !editable) return;
     await dispatch(
       saveStepPayload({ draftId: currentDraftId, step, payload: draft }),
     );
-  }, [dispatch, currentDraftId, editable, draft, step, hasAnyContent]);
+  }, [dispatch, currentDraftId, editable, draft, step]);
 
   const submitForReview = useCallback(async () => {
     if (!currentDraftId || !submittedBy) return;
@@ -119,9 +119,10 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
         step,
         reviewerRole,
         submittedBy,
+        payload: draft,
       }),
     );
-  }, [dispatch, currentDraftId, step, reviewerRole, submittedBy]);
+  }, [dispatch, currentDraftId, step, reviewerRole, submittedBy, draft]);
 
   const onBack = useCallback(() => {
     const prev = (step - 1) as ReportDraftDomainModel.ReportDraftStep;
@@ -210,7 +211,7 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
           type="button"
           className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
           onClick={() => void onSaveDraft()}
-          disabled={transitionBusy || !editable || !hasAnyContent}
+          disabled={transitionBusy || !editable}
         >
           Enregistrer le brouillon
         </button>
@@ -233,7 +234,7 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
           type="button"
           className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
           onClick={() => void submitForReview()}
-          disabled={transitionBusy || !editable || !submittedBy || !submitReady}
+          disabled={transitionBusy || !editable || !submittedBy}
         >
           Soumettre cette étape pour revue
         </button>

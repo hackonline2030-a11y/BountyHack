@@ -26,7 +26,7 @@ export const rejectDraft =
     dispatch(reportDraftsSlice.actions.transitionStarted());
 
     try {
-      const draft = await deps.reportDraftsGateway.findById(input.draftId);
+      const draft = await deps.reportDraftRepository.findById(input.draftId);
       if (draft === null) {
         dispatch(
           reportDraftsSlice.actions.transitionFailed({
@@ -42,7 +42,7 @@ export const rejectDraft =
       });
       aggregate.rejectDraft({ byUser: input.byUser, byRole: input.byRole });
 
-      await deps.reportDraftsGateway.save(aggregate.state);
+      await deps.reportDraftRepository.save(aggregate.state);
 
       dispatch(reportDraftsSlice.actions.draftUpserted(aggregate.state));
       dispatch(reportDraftsSlice.actions.transitionSucceeded());

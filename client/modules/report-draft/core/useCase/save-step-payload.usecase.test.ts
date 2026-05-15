@@ -1,6 +1,6 @@
 import { StubClockProvider } from "@modules/core/provider/stub.clock-provider";
 import { StubIdProvider } from "@modules/core/provider/stub.id-provider";
-import { InMemoryReportDraftsGateway } from "@modules/report-draft/core/gateway-infra/in-memory.report-drafts.gateway-infra";
+import { InMemoryReportDraftRepository } from "@modules/report-draft/core/repository-infra/in-memory.report-draft.repository-infra";
 import { MetaFactory } from "@modules/report-draft/core/model/meta.factory";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { ReportDraftFactory } from "@modules/report-draft/core/model/report-draft.factory";
@@ -13,24 +13,24 @@ describe("saveStepPayload use case", () => {
   const SAVED_AT = "2026-05-15T00:00:00.000Z";
 
   const setup = async () => {
-    const reportDraftsGateway = new InMemoryReportDraftsGateway();
+    const reportDraftRepository = new InMemoryReportDraftRepository();
     const draft = ReportDraftFactory.create({
       idProvider: new StubIdProvider([DRAFT_ID]),
       clock: new StubClockProvider(["2026-05-14T00:00:00.000Z"]),
       hunterId: HUNTER_ID,
     });
-    await reportDraftsGateway.save(draft);
+    await reportDraftRepository.save(draft);
     const store = createTestStore({
       dependencies: {
         clock: new StubClockProvider([SAVED_AT]),
-        reportDraftsGateway,
+        reportDraftRepository,
       },
     });
-    return { store, reportDraftsGateway };
+    return { store, reportDraftRepository };
   };
 
   it("persists the new META payload (gateway + slice)", async () => {
-    const { store, reportDraftsGateway } = await setup();
+    const { store, reportDraftRepository } = await setup();
     const nextMeta = MetaFactory.create();
     nextMeta.reportTitle = "My fresh title";
 
@@ -42,7 +42,7 @@ describe("saveStepPayload use case", () => {
       }),
     );
 
-    const persisted = await reportDraftsGateway.findById(DRAFT_ID);
+    const persisted = await reportDraftRepository.findById(DRAFT_ID);
     expect(persisted!.meta.payload.reportTitle).toBe("My fresh title");
     expect(store.getState().reportDrafts.byId[DRAFT_ID].meta.payload.reportTitle).toBe(
       "My fresh title",
@@ -113,10 +113,10 @@ describe("saveStepPayload use case", () => {
   });
 
   it("surfaces the aggregate guard error when the step is locked", async () => {
-    const { store, reportDraftsGateway } = await setup();
-    const draft = (await reportDraftsGateway.findById(DRAFT_ID))!;
+    const { store, reportDraftRepository } = await setup();
+    const draft = (await reportDraftRepository.findById(DRAFT_ID))!;
     draft.meta.status = "approved";
-    await reportDraftsGateway.save(draft);
+    await reportDraftRepository.save(draft);
 
     await store.dispatch(
       saveStepPayload({
