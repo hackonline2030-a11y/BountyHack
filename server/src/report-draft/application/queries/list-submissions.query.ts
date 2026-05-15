@@ -1,0 +1,38 @@
+import { Injectable } from '@nestjs/common';
+import type { Identity } from '../../../auth/domain/models/identity';
+import type {
+  ReviewerRoleWire,
+  SubmissionWire,
+} from '../../models/report-draft-api.types';
+import type { ISubmissionRepository } from '../../ports/submission-repository.interface';
+import { ReportDraftAccessPolicy } from '../report-draft-access.policy';
+
+export type ListSubmissionsInput =
+  | { kind: 'draftId'; draftId: string }
+  | { kind: 'pendingForReviewer'; reviewerRole: ReviewerRoleWire }
+  | { kind: 'forReviewer'; reviewerRole: ReviewerRoleWire };
+
+@Injectable()
+export class ListSubmissionsQuery {
+  constructor(
+    private readonly repository: ISubmissionRepository,
+    private readonly access: ReportDraftAccessPolicy,
+  ) {}
+
+  async execute(
+    identity: Identity,
+    input: ListSubmissionsInput,
+  ): Promise<SubmissionWire[]> {
+    switch (input.kind) {
+      case 'draftId':
+        await this.access.assertDraftOwnedByHunter(identity, input.draftId);
+        return this.repository.findByDraftId(input.draftId);
+      case 'pendingForReviewer':
+        this.access.assertCanQueryReviewerRole(identity, input.reviewerRole);
+        return this.repository.findPendingForReviewerRole(input.reviewerRole);
+      case 'forReviewer':
+        this.access.assertCanQueryReviewerRole(identity, input.reviewerRole);
+        return this.repository.findAllForReviewerRole(input.reviewerRole);
+    }
+  }
+}

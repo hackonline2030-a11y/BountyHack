@@ -83,3 +83,75 @@ describe('report-drafts (slice 1)', () => {
     expect(res.status).toBe(401);
   });
 });
+
+describe('report-drafts/submissions (slice 2)', () => {
+  let testUser: Awaited<ReturnType<typeof AuthHelper.createAndLoginUser>>;
+  const draftId = `e2e-draft-sub-${Date.now()}`;
+  const submissionId = `e2e-sub-${Date.now()}`;
+
+  beforeAll(async () => {
+    testUser = await AuthHelper.createAndLoginUser();
+    const draft = minimalDraft(testUser.uid!, draftId);
+    await request(defaultUrl)
+      .put('/api/report-drafts')
+      .set(AuthHelper.getAuthHeader(testUser.token!))
+      .send(draft);
+  });
+
+  afterAll(async () => {
+    await AuthHelper.deleteUser(testUser.uid!);
+  });
+
+  it('PUT then GET persists a submission linked to draft steps', async () => {
+    const submission = {
+      id: submissionId,
+      reportDraftId: draftId,
+      step: 0,
+      round: 1,
+      payload: { reportTitle: 'E2E submission' },
+      attachmentsSnapshot: [],
+      submittedAt: '2026-05-15T12:30:00.000Z',
+      submittedBy: testUser.uid,
+      reviewerRole: 'quality_checker',
+      decision: 'pending',
+    };
+
+    const putRes = await request(defaultUrl)
+      .put('/api/report-drafts/submissions')
+      .set(AuthHelper.getAuthHeader(testUser.token!))
+      .send(submission);
+
+    expect(putRes.status).toBe(200);
+    expect(putRes.body).toEqual({ ok: true });
+
+    const getRes = await request(defaultUrl)
+      .get(`/api/report-drafts/submissions/${submissionId}`)
+      .set(AuthHelper.getAuthHeader(testUser.token!));
+
+    expect(getRes.status).toBe(200);
+    expect(getRes.body.id).toBe(submissionId);
+    expect(getRes.body.reportDraftId).toBe(draftId);
+    expect(getRes.body.step).toBe(0);
+    expect(getRes.body.decision).toBe('pending');
+
+    const listRes = await request(defaultUrl)
+      .get('/api/report-drafts/submissions')
+      .query({ draftId })
+      .set(AuthHelper.getAuthHeader(testUser.token!));
+
+    expect(listRes.status).toBe(200);
+    expect(
+      listRes.body.some((s: { id: string }) => s.id === submissionId),
+    ).toBe(true);
+  });
+
+  it('GET comments returns array for submission', async () => {
+    const res = await request(defaultUrl)
+      .get('/api/report-drafts/comments')
+      .query({ submissionId })
+      .set(AuthHelper.getAuthHeader(testUser.token!));
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+});
