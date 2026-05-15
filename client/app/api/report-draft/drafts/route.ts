@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { bearerTokenFromSessionOrUnauthorized } from "@/lib/server/bearer-from-session";
+import { fetchNestReportDraft } from "@/lib/server/nest-report-draft-fetch";
 import { requireReportDraftApiSession } from "@/lib/report-draft/api-auth";
-import { getServerDraftStore } from "@/lib/report-draft/server-draft-store";
 import type { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 
 export async function GET(request: NextRequest) {
@@ -12,9 +13,20 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "hunterId query param required" }, { status: 400 });
   }
 
-  const { reportDraftRepository } = getServerDraftStore();
-  const drafts = await reportDraftRepository.findByHunterId(hunterId.trim());
-  return NextResponse.json(drafts);
+  const bearer = await bearerTokenFromSessionOrUnauthorized();
+  if ("unauthorized" in bearer) return bearer.unauthorized;
+
+  const nestRes = await fetchNestReportDraft(
+    `?hunterId=${encodeURIComponent(hunterId.trim())}`,
+    bearer.token,
+    { method: "GET" },
+  );
+
+  const body = await nestRes.text();
+  return new NextResponse(body, {
+    status: nestRes.status,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 
 export async function PUT(request: NextRequest) {
@@ -28,7 +40,18 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { reportDraftRepository } = getServerDraftStore();
-  await reportDraftRepository.save(draft);
-  return NextResponse.json({ ok: true });
+  const bearer = await bearerTokenFromSessionOrUnauthorized();
+  if ("unauthorized" in bearer) return bearer.unauthorized;
+
+  const nestRes = await fetchNestReportDraft("", bearer.token, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(draft),
+  });
+
+  const body = await nestRes.text();
+  return new NextResponse(body, {
+    status: nestRes.status,
+    headers: { "Content-Type": "application/json" },
+  });
 }
