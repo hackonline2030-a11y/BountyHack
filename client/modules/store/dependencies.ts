@@ -3,6 +3,7 @@ import type { IIdProvider } from "@modules/core/provider/id-provider";
 import type { IReportDraftRepository } from "@modules/report-draft/core/repository/report-draft.repository";
 import type { IReviewerCommentRepository } from "@modules/report-draft/core/repository/reviewer-comment.repository";
 import type { ISubmissionRepository } from "@modules/report-draft/core/repository/submission.repository";
+import type { IReportTeamRepository } from "@modules/report-team/core/repository/report-team.repository";
 
 /**
  * DI bag forwarded to Redux thunks as `extraArgument`. Every outbound
@@ -16,4 +17,5 @@ export type Dependencies = {
   reportDraftRepository: IReportDraftRepository;
   submissionRepository: ISubmissionRepository;
   reviewerCommentRepository: IReviewerCommentRepository;
+  reportTeamRepository: IReportTeamRepository;
 };

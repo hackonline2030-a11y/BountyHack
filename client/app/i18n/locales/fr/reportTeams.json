@@ -2,7 +2,7 @@
   "reportTeams": {
     "metaTitle": "Équipes rapport",
     "heading": "Mes équipes rapport",
-    "subheading": "Chaque équipe est identifiée par un identifiant unique. Seul le coordinateur peut valider les affectations ; vous pouvez demander à rejoindre une équipe.",
+    "subheading": "Les équipes sont rattachées à un brouillon de rapport. Demandez au coordinateur de vous affecter, ou rejoignez une équipe existante.",
     "mockBanner": "Maquette front — les données et demandes sont simulées en attendant l’API Nest.",
     "backToDashboard": "Retour au tableau de bord",
     "validity": {
@@ -31,18 +31,28 @@
       "statusRejected": "Refusée",
       "submittedAt": "Demandé le {{date}}"
     },
+    "enroll": {
+      "title": "Demander une affectation équipe rapport",
+      "description": "Votre nom, identifiant et rôle sont transmis au coordinateur. Il vous inclura lors de la création d’une nouvelle équipe.",
+      "submit": "Demander une inscription",
+      "submitting": "Envoi…",
+      "success": "Demande d’inscription envoyée au coordinateur.",
+      "alreadyPending": "Vous avez déjà une demande d’inscription en attente.",
+      "errorGeneric": "Impossible d’envoyer la demande d’inscription."
+    },
     "askJoin": {
       "title": "Demander à rejoindre une équipe",
-      "description": "Saisissez l’identifiant unique de l’équipe rapport. Le coordinateur validera ou refusera votre demande.",
-      "teamIdLabel": "Identifiant d’équipe rapport",
-      "teamIdPlaceholder": "rt-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "description": "Choisissez l’équipe rapport (créée par le coordinateur). Il validera ou refusera votre demande.",
+      "teamLabel": "Équipe rapport",
+      "teamPlaceholder": "Sélectionnez une équipe…",
       "roleLabel": "Rôle demandé dans l’équipe",
       "messageLabel": "Message pour le coordinateur (optionnel)",
       "messagePlaceholder": "Précisez votre disponibilité ou le contexte…",
       "submit": "Envoyer la demande",
       "submitting": "Envoi…",
-      "success": "Demande enregistrée (maquette). Le coordinateur sera notifié.",
-      "errorTeamId": "L’identifiant d’équipe est requis.",
+      "success": "Demande envoyée au coordinateur.",
+      "errorTeamRequired": "Veuillez sélectionner une équipe.",
+      "noTeamsAvailable": "Aucune équipe disponible pour le moment. Le coordinateur doit d’abord créer une équipe pour un brouillon de rapport.",
       "errorGeneric": "Impossible d’envoyer la demande pour le moment."
     },
     "admin": {
@@ -50,7 +60,7 @@
       "heading": "Équipes rapport — administration",
       "subheading": "Super admin : consultation, modification et suppression de toute équipe. L’affectation quotidienne reste du ressort du coordinateur.",
       "table": {
-        "teamId": "ID équipe",
+        "reportDraftId": "ID brouillon rapport",
         "label": "Libellé",
         "validity": "Validité",
         "members": "Membres",
@@ -65,11 +75,38 @@
       "metaTitle": "Coordination des équipes rapport",
       "heading": "Coordination — équipes rapport",
       "subheading": "Validez les demandes d’affectation et gérez la composition des équipes.",
+      "loading": "Chargement des données de coordination…",
       "pendingTitle": "Demandes en attente",
-      "pendingEmpty": "Aucune demande en attente.",
+      "pendingEmpty": "Aucun candidat en attente.",
+      "teamsEmpty": "Aucune équipe rapport créée pour le moment.",
+      "rejecting": "Refus en cours…",
       "approve": "Accepter",
       "reject": "Refuser",
       "teamsTitle": "Équipes rapport",
+      "reportDraftId": "Brouillon rapport",
+      "openReportDraft": "Ouvrir le brouillon de rapport",
+      "applicantsTitle": "Candidats (demandes en attente)",
+      "applicantsDescription": "Cochez les personnes à inclure dans une nouvelle équipe. Vous pouvez répartir les candidats sur plusieurs équipes.",
+      "applicants": {
+        "include": "Inclure",
+        "user": "Utilisateur",
+        "requestedRole": "Rôle demandé",
+        "team": "Équipe demandée",
+        "newTeam": "Nouvelle équipe (affectation coordinateur)",
+        "actions": "Actions"
+      },
+      "create": {
+        "title": "Créer une équipe rapport",
+        "description": "Un brouillon de rapport est créé automatiquement. L’équipe doit comporter un hunter, un quality checker et un mentor.",
+        "labelField": "Titre de l’équipe",
+        "labelPlaceholder": "Ex. Rapport #1042 — XSS module commentaires",
+        "membersField": "Membres sélectionnés",
+        "submit": "Créer l’équipe et le brouillon",
+        "submitting": "Création…",
+        "success": "Équipe et brouillon créés.",
+        "errorLabel": "Le titre est requis.",
+        "errorMembers": "Sélectionnez au moins un membre."
+      },
       "createTeam": "Créer une équipe",
       "addMember": "Ajouter un membre",
       "mockAction": "maquette — aucune API"

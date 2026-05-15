@@ -14,8 +14,8 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Auth } from '../../auth/auth.decorator';
 import { RequestWithIdentity } from '../../auth/adapters/http/request-with-identity';
+import { AuthReportWorkflowParticipant } from '../../shared/rbac/report-workflow-auth.decorator';
 import {
   ApiHttpForbidden,
   ApiHttpInternalServerError,
@@ -40,7 +40,7 @@ export class SubmissionController {
   ) {}
 
   @Put()
-  @Auth()
+  @AuthReportWorkflowParticipant()
   @ApiOperation({ summary: 'Create or update a submission snapshot' })
   @ApiOkResponse({ schema: { example: { ok: true } } })
   @ApiHttpUnauthorized('Missing or invalid bearer token.')
@@ -55,7 +55,7 @@ export class SubmissionController {
   }
 
   @Get()
-  @Auth()
+  @AuthReportWorkflowParticipant()
   @ApiOperation({ summary: 'List submissions (by draft or reviewer role)' })
   @ApiOkResponse({ description: 'Array of submissions' })
   @ApiHttpUnauthorized('Missing or invalid bearer token.')
@@ -66,7 +66,13 @@ export class SubmissionController {
     @Query('draftId') draftId?: string,
     @Query('pendingForReviewer') pendingForReviewer?: string,
     @Query('forReviewer') forReviewer?: string,
+    @Query('mentorPeerForQc') mentorPeerForQc?: string,
   ): Promise<SubmissionWire[]> {
+    if (mentorPeerForQc === 'true' || mentorPeerForQc === '1') {
+      return this.listSubmissions.execute(request.user, {
+        kind: 'mentorPeerForQc',
+      });
+    }
     if (forReviewer) {
       return this.listSubmissions.execute(request.user, {
         kind: 'forReviewer',
@@ -89,7 +95,7 @@ export class SubmissionController {
   }
 
   @Get(':submissionId')
-  @Auth()
+  @AuthReportWorkflowParticipant()
   @ApiOperation({ summary: 'Get one submission by id' })
   @ApiOkResponse({ description: 'Submission JSON' })
   @ApiHttpUnauthorized('Missing or invalid bearer token.')

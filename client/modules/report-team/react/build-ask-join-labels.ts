@@ -9,15 +9,16 @@ export function buildAskJoinLabels(t: TFunction<"reportTeams">) {
     super_admin: t("reportTeams.roles.super_admin"),
   };
   return {
-    teamIdLabel: t("reportTeams.askJoin.teamIdLabel"),
-    teamIdPlaceholder: t("reportTeams.askJoin.teamIdPlaceholder"),
+    teamLabel: t("reportTeams.askJoin.teamLabel"),
+    teamPlaceholder: t("reportTeams.askJoin.teamPlaceholder"),
     roleLabel: t("reportTeams.askJoin.roleLabel"),
     messageLabel: t("reportTeams.askJoin.messageLabel"),
     messagePlaceholder: t("reportTeams.askJoin.messagePlaceholder"),
     submit: t("reportTeams.askJoin.submit"),
     submitting: t("reportTeams.askJoin.submitting"),
     success: t("reportTeams.askJoin.success"),
-    errorTeamId: t("reportTeams.askJoin.errorTeamId"),
+    errorTeamRequired: t("reportTeams.askJoin.errorTeamRequired"),
+    noTeamsAvailable: t("reportTeams.askJoin.noTeamsAvailable"),
     roles,
   };
 }

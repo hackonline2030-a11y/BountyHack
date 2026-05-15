@@ -174,6 +174,15 @@ export namespace ReportDraftDomainModel {
   // ============================================================
   // Agrégat racine
   // ============================================================
+  export interface ReportDraftTeamSummary {
+    label: string;
+    members: ReadonlyArray<{
+      userId: string;
+      displayName: string;
+      role: string;
+    }>;
+  }
+
   export interface ReportDraft {
     id: ReportDraftId;
     hunterId: string;                  // user uid du propriétaire (JWT sub)
@@ -189,6 +198,8 @@ export namespace ReportDraftDomainModel {
     final: StepState<FinalFields>;
     createdAt: string;
     updatedAt: string;
+    /** Titre équipe coordinateur + roster (réponse API) — pas le titre contenu META. */
+    reportTeam?: ReportDraftTeamSummary | null;
     // TODO V2 (dette consciente) : terminationReason / terminatedBy /
     // terminatedByRole / terminatedAt pour audit des given-up et rejected
   }
@@ -206,7 +217,7 @@ export namespace ReportDraftDomainModel {
     submittedAt: string;
     submittedBy: string;                                 // hunter user uid (JWT sub)
     reviewerRole: ReviewerRole;
-    decision: "pending" | "approve" | "request-changes";
+    decision: "pending" | "approve" | "request-changes" | "endorse";
     decidedAt?: string;
     decidedBy?: string;
   }

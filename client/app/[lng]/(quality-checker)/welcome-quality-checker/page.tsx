@@ -55,6 +55,7 @@ export default async function WelcomeQualityCheckerPage({ params }: PageProps) {
     label: t("welcomeQualityChecker.nav.label"),
     emails: t("welcomeQualityChecker.nav.emails"),
     reports: t("welcomeQualityChecker.nav.reports"),
+    teams: t("welcomeQualityChecker.nav.teams"),
     colleagues: t("welcomeQualityChecker.nav.colleagues"),
     support: t("welcomeQualityChecker.nav.support"),
     settings: t("welcomeQualityChecker.nav.settings"),
@@ -68,6 +69,7 @@ export default async function WelcomeQualityCheckerPage({ params }: PageProps) {
   const navHrefs: DashboardNavHrefs = {
     emails: `${prefix}/emails`,
     reports: `${prefix}/submissions`,
+    teams: `${prefix}/qc-teams`,
     colleagues: `${prefix}/colleagues`,
     support: `${prefix}/support`,
     settings: `${prefix}/parameters`,
@@ -130,14 +132,14 @@ export default async function WelcomeQualityCheckerPage({ params }: PageProps) {
         classNames="bg-pattern flex flex-1 flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
       >
         <div className="mx-auto w-full max-w-7xl">
-          <header className="pb-6 sm:pb-8">
-            <h1 className="text-2xl font-bold tracking-tight text-dashboard-heading-on-pattern sm:text-3xl">
+          <div className="dashboard-card mb-6 p-5 sm:mb-8 sm:p-6">
+            <h1 className="text-2xl font-bold tracking-tight text-dashboard-text sm:text-3xl">
               {heading}
             </h1>
-            <p className="mt-1 text-sm text-dashboard-subheading-on-pattern sm:text-base">
+            <p className="mt-1 text-sm text-dashboard-text-muted sm:text-base">
               {t("welcomeQualityChecker.subheading")}
             </p>
-          </header>
+          </div>
 
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
             <DashboardSidebar labels={navLabels} hrefs={navHrefs} />

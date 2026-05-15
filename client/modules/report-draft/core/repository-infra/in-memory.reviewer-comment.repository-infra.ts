@@ -25,6 +25,12 @@ export class InMemoryReviewerCommentRepository implements IReviewerCommentReposi
       })
       .map(clone);
   }
+
+  async findForReviewStep(
+    submissionId: string,
+  ): Promise<ReportDraftDomainModel.ReviewerComment[]> {
+    return this.findBySubmissionId(submissionId);
+  }
 }
 
 function clone<T>(value: T): T {

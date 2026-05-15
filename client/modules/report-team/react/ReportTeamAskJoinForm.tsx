@@ -1,22 +1,29 @@
 "use client";
 
 import { useState, type FC } from "react";
-import type { ReportTeamMemberRole } from "@modules/report-team/model/report-team.types";
+import type {
+  ReportTeam,
+  ReportTeamMemberRole,
+} from "@modules/report-team/model/report-team.types";
+import { requestJoinTeam } from "@modules/report-team/core/useCase/request-join-team.usecase";
+import { useAppDispatch } from "@store/redux/store";
 
 type Labels = {
-  teamIdLabel: string;
-  teamIdPlaceholder: string;
+  teamLabel: string;
+  teamPlaceholder: string;
   roleLabel: string;
   messageLabel: string;
   messagePlaceholder: string;
   submit: string;
   submitting: string;
   success: string;
-  errorTeamId: string;
+  errorTeamRequired: string;
+  noTeamsAvailable: string;
   roles: Record<ReportTeamMemberRole, string>;
 };
 
 type Props = {
+  joinableTeams: ReadonlyArray<ReportTeam>;
   defaultRole: ReportTeamMemberRole;
   roleOptions: ReadonlyArray<ReportTeamMemberRole>;
   labels: Labels;
@@ -28,47 +35,72 @@ const fieldInput =
   "w-full rounded-lg border border-dashboard-card-border bg-white px-3 py-2 text-sm text-dashboard-text shadow-sm focus:border-dashboard-accent focus:outline-none focus:ring-1 focus:ring-dashboard-accent";
 
 export const ReportTeamAskJoinForm: FC<Props> = ({
+  joinableTeams,
   defaultRole,
   roleOptions,
   labels,
 }) => {
-  const [teamId, setTeamId] = useState("");
+  const dispatch = useAppDispatch();
+  const [reportDraftId, setReportDraftId] = useState(
+    () => joinableTeams[0]?.reportDraftId ?? "",
+  );
   const [role, setRole] = useState<ReportTeamMemberRole>(defaultRole);
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [feedback, setFeedback] = useState("");
 
+  if (joinableTeams.length === 0) {
+    return (
+      <p className="text-sm text-dashboard-text-muted">{labels.noTeamsAvailable}</p>
+    );
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!teamId.trim()) {
+    if (!reportDraftId) {
       setStatus("error");
-      setFeedback(labels.errorTeamId);
+      setFeedback(labels.errorTeamRequired);
       return;
     }
     setStatus("loading");
     setFeedback("");
-    await new Promise((r) => setTimeout(r, 400));
-    setStatus("success");
-    setFeedback(labels.success);
-    setTeamId("");
-    setMessage("");
+    try {
+      await dispatch(
+        requestJoinTeam({
+          reportDraftId,
+          requestedRole: role,
+          message: message.trim() || undefined,
+        }),
+      );
+      setStatus("success");
+      setFeedback(labels.success);
+      setMessage("");
+    } catch (error) {
+      setStatus("error");
+      setFeedback(error instanceof Error ? error.message : String(error));
+    }
   }
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
       <div className="flex flex-col gap-1">
-        <label htmlFor="rt-team-id" className={fieldLabel}>
-          {labels.teamIdLabel}
+        <label htmlFor="rt-team" className={fieldLabel}>
+          {labels.teamLabel}
         </label>
-        <input
-          id="rt-team-id"
-          type="text"
-          value={teamId}
-          onChange={(e) => setTeamId(e.target.value)}
-          placeholder={labels.teamIdPlaceholder}
-          className={`${fieldInput} font-mono text-xs`}
+        <select
+          id="rt-team"
+          value={reportDraftId}
+          onChange={(e) => setReportDraftId(e.target.value)}
+          className={fieldInput}
           disabled={status === "loading"}
-        />
+        >
+          <option value="">{labels.teamPlaceholder}</option>
+          {joinableTeams.map((team) => (
+            <option key={team.reportDraftId} value={team.reportDraftId}>
+              {team.label}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="rt-role" className={fieldLabel}>
@@ -112,7 +144,7 @@ export const ReportTeamAskJoinForm: FC<Props> = ({
       ) : null}
       <button
         type="submit"
-        disabled={status === "loading"}
+        disabled={status === "loading" || !reportDraftId}
         className="btn-common-styles btn-primary w-fit disabled:opacity-50"
       >
         {status === "loading" ? labels.submitting : labels.submit}

@@ -29,6 +29,8 @@ export type ReportDraftsState = {
   myDraftIds: string[];
   /** Ids returned by the last QC list call (`listReviewerSubmissions` or legacy pending list). */
   pendingSubmissionIds: string[];
+  /** Mentor advisory threads visible on the QC board (same teams). */
+  mentorPeerSubmissionIds: string[];
   /** Submission currently open on the QC review board. */
   currentSubmissionId: string | null;
 
@@ -39,6 +41,7 @@ export type ReportDraftsState = {
   reviewLoad: OperationStatus;
   list: OperationStatus;
   reviewList: OperationStatus;
+  mentorPeerList: OperationStatus;
   /** Shared status for every aggregate transition (submit / approve / request / resume / giveUp / reject). */
   transition: OperationStatus;
 };
@@ -62,12 +65,14 @@ export const reportDraftsInitialState: ReportDraftsState = {
   currentDraftId: null,
   myDraftIds: [],
   pendingSubmissionIds: [],
+  mentorPeerSubmissionIds: [],
   currentSubmissionId: null,
   creation: { status: "idle" },
   load: { status: "idle" },
   reviewLoad: { status: "idle" },
   list: { status: "idle" },
   reviewList: { status: "idle" },
+  mentorPeerList: { status: "idle" },
   transition: { status: "idle" },
 };
 
@@ -187,6 +192,17 @@ export const reportDraftsSlice = createSlice({
     },
     reviewListFailed: (state, action: PayloadAction<{ message: string }>) => {
       state.reviewList = { status: "error", message: action.payload.message };
+    },
+
+    mentorPeerListSucceeded: (
+      state,
+      action: PayloadAction<{ submissionIds: string[] }>,
+    ) => {
+      state.mentorPeerSubmissionIds = action.payload.submissionIds;
+      state.mentorPeerList = { status: "success" };
+    },
+    mentorPeerListFailed: (state, action: PayloadAction<{ message: string }>) => {
+      state.mentorPeerList = { status: "error", message: action.payload.message };
     },
 
     // ──────────────────────────────────────────────────────────────────

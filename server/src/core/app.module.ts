@@ -18,12 +18,16 @@ import { AppController } from './app.controller';
 import { variables } from '../shared/variables.config';
 import { PrismaModule } from './infrastructure/database/prisma/prisma.module';
 import { ReportDraftModule } from '../report-draft/report-draft.module';
+import { ReportTeamModule } from '../report-team/report-team.module';
 
 const prismaImports =
   variables.database === 'POSTGRESQL_PRISMA' ? [PrismaModule] : [];
 
 const reportDraftImports =
   variables.database === 'POSTGRESQL_PRISMA' ? [ReportDraftModule] : [];
+
+const reportTeamImports =
+  variables.database === 'POSTGRESQL_PRISMA' ? [ReportTeamModule] : [];
 
 const baseImports = [
   PingModule,
@@ -32,6 +36,7 @@ const baseImports = [
   DocumentRenderingModule,
   CommonModule,
   ...reportDraftImports,
+  ...reportTeamImports,
 ];
 
 const mongooseRoot =

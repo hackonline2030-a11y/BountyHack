@@ -39,6 +39,7 @@ describe('SaveReviewerCommentsCommand', () => {
   const access = new ReportDraftAccessPolicy(
     reportDraftRepository,
     submissionRepository,
+    { isMemberOfDraft: jest.fn(), findDraftIdsForMember: jest.fn() } as never,
   );
   const command = new SaveReviewerCommentsCommand(repository, access);
 

@@ -26,10 +26,10 @@ export default async function Home({ params }: PageProps) {
         fluid
         classNames="flex-1 flex flex-col items-center justify-center bg-pattern"
       >
-        <article className="max-w-2xl w-full px-6 py-12 text-center text-white">
-          <h1 className="text-4xl font-bold">{t("home.heroTitle")}</h1>
-          <p className="mt-4 text-lg text-white/90">{t("home.heroLead")}</p>
-          <p className="mt-6 text-sm text-white/80">{t("home.heroHint")}</p>
+        <article className="dashboard-card mx-auto max-w-2xl w-full px-6 py-10 text-center sm:py-12">
+          <h1 className="text-4xl font-bold text-dashboard-text">{t("home.heroTitle")}</h1>
+          <p className="mt-4 text-lg text-dashboard-text-muted">{t("home.heroLead")}</p>
+          <p className="mt-6 text-sm text-dashboard-text-subtle">{t("home.heroHint")}</p>
         </article>
       </Section>
     </main>

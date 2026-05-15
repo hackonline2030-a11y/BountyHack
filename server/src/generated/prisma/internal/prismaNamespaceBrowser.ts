@@ -67,7 +67,10 @@ export const ModelName = {
   ReviewerComment: 'ReviewerComment',
   SubmissionAttachmentSnapshot: 'SubmissionAttachmentSnapshot',
   SubmissionContentSnapshot: 'SubmissionContentSnapshot',
-  Report: 'Report'
+  Report: 'Report',
+  ReportTeam: 'ReportTeam',
+  ReportTeamMember: 'ReportTeamMember',
+  ReportTeamJoinRequest: 'ReportTeamJoinRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -293,6 +296,43 @@ export const ReportScalarFieldEnum = {
 } as const
 
 export type ReportScalarFieldEnum = (typeof ReportScalarFieldEnum)[keyof typeof ReportScalarFieldEnum]
+
+
+export const ReportTeamScalarFieldEnum = {
+  id: 'id',
+  reportDraftId: 'reportDraftId',
+  label: 'label',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReportTeamScalarFieldEnum = (typeof ReportTeamScalarFieldEnum)[keyof typeof ReportTeamScalarFieldEnum]
+
+
+export const ReportTeamMemberScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  role: 'role',
+  joinedAt: 'joinedAt'
+} as const
+
+export type ReportTeamMemberScalarFieldEnum = (typeof ReportTeamMemberScalarFieldEnum)[keyof typeof ReportTeamMemberScalarFieldEnum]
+
+
+export const ReportTeamJoinRequestScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  requestedRole: 'requestedRole',
+  message: 'message',
+  status: 'status',
+  requestedAt: 'requestedAt',
+  decidedAt: 'decidedAt',
+  decidedById: 'decidedById'
+} as const
+
+export type ReportTeamJoinRequestScalarFieldEnum = (typeof ReportTeamJoinRequestScalarFieldEnum)[keyof typeof ReportTeamJoinRequestScalarFieldEnum]
 
 
 export const SortOrder = {

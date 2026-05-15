@@ -35,6 +35,9 @@ model User {
   role       Role?   @relation(fields: [roleId], references: [id], onDelete: SetNull)
   reportDrafts ReportDraft[]
   reports      Report[]
+  reportTeamMembers ReportTeamMember[]
+  reportTeamJoinRequests ReportTeamJoinRequest[] @relation("JoinRequestUser")
+  reportTeamJoinRequestsDecided ReportTeamJoinRequest[] @relation("JoinRequestDecider")
 
   @@index([roleId])
   @@map("users")
@@ -192,6 +195,8 @@ enum SubmissionDecision {
   PENDING
   APPROVE
   REQUEST_CHANGES
+  /// Mentor advisory OK — does not set step to APPROVED (only QC APPROVE does).
+  ENDORSE
 }
 
 enum ReportStatus {
@@ -214,6 +219,7 @@ model ReportDraft {
   pendingReport Report?           @relation("DraftPendingReport", fields: [pendingReportId], references: [id], onDelete: SetNull)
   steps         ReportDraftStep[]
   submissions   Submission[]
+  reportTeam    ReportTeam?
 
   @@index([hunterId])
   @@index([aggregateStatus])
@@ -354,4 +360,70 @@ model Report {
   @@index([hunterId])
   @@index([status])
   @@map("reports")
+}
+
+/// Workflow role on a report team (distinct from global `Role`).
+enum ReportTeamMemberRole {
+  HUNTER
+  QUALITY_CHECKER
+  MENTOR
+}
+
+enum ReportTeamJoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// Squad for one report draft (not org-wide teams).
+model ReportTeam {
+  id            String   @id @default(uuid())
+  reportDraftId String   @unique @map("report_draft_id")
+  label         String
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  reportDraft  ReportDraft             @relation(fields: [reportDraftId], references: [id], onDelete: Cascade)
+  members      ReportTeamMember[]
+  joinRequests ReportTeamJoinRequest[]
+
+  @@index([reportDraftId])
+  @@map("report_draft_teams")
+}
+
+model ReportTeamMember {
+  id       String               @id @default(uuid())
+  teamId   String               @map("team_id")
+  userId   String               @map("user_id")
+  role     ReportTeamMemberRole
+  joinedAt DateTime             @default(now()) @map("joined_at")
+
+  team ReportTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+  @@map("report_team_members")
+}
+
+/// User asks coordinator to join a team (or general pool when teamId is null).
+model ReportTeamJoinRequest {
+  id            String                      @id @default(uuid())
+  teamId        String?                     @map("team_id")
+  userId        String                      @map("user_id")
+  requestedRole ReportTeamMemberRole        @map("requested_role")
+  message       String?
+  status        ReportTeamJoinRequestStatus @default(PENDING)
+  requestedAt   DateTime                    @default(now()) @map("requested_at")
+  decidedAt     DateTime?                   @map("decided_at")
+  decidedById   String?                     @map("decided_by_id")
+
+  team      ReportTeam? @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User       @relation("JoinRequestUser", fields: [userId], references: [id], onDelete: Cascade)
+  decidedBy User?      @relation("JoinRequestDecider", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  @@index([teamId, status])
+  @@index([userId, status])
+  @@map("report_team_join_requests")
 }

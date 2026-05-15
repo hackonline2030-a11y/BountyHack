@@ -34,15 +34,26 @@ export const SubmissionReviewBootstrap: React.FC<Props> = ({
   if (reviewLoad.status === "loading" || reviewLoad.status === "idle" || !isReviewReady) {
     if (reviewLoad.status === "error") {
       return (
-        <div role="alert" className="rounded-md border border-rose-200 bg-rose-50 p-4 text-sm">
-          <p>{reviewLoad.message}</p>
-          <Link href={`/${lng}/submissions`} className="mt-2 inline-block text-form-accent">
-            ← Retour à la liste
-          </Link>
+        <div className="mx-auto w-full max-w-4xl px-4 py-6">
+          <div
+            role="alert"
+            className="rounded-lg border border-rose-200 bg-rose-50 p-5 text-sm text-rose-900 shadow-sm"
+          >
+            <p>{reviewLoad.message}</p>
+            <Link href={`/${lng}/submissions`} className="mt-2 inline-block text-dashboard-accent">
+              ← Retour à la liste
+            </Link>
+          </div>
         </div>
       );
     }
-    return <p className="text-sm text-form-text-muted">Chargement de la soumission…</p>;
+    return (
+      <div className="mx-auto w-full max-w-4xl px-4 py-6">
+        <div className="dashboard-card px-6 py-8">
+          <p className="text-sm text-dashboard-text-muted">Chargement de la soumission…</p>
+        </div>
+      </div>
+    );
   }
 
   return (

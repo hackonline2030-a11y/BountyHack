@@ -22,6 +22,8 @@ import { listReviewerSubmissions } from "@modules/report-draft/core/useCase/list
 import { rejectDraft } from "@modules/report-draft/core/useCase/reject-draft.usecase";
 import { requestStepRevisions } from "@modules/report-draft/core/useCase/request-step-revisions.usecase";
 import type { ReviewerCommentDraft } from "@modules/report-draft/core/model/report-draft.aggregate";
+import { reviewerRoleLabelFr } from "@modules/report-draft/react/review/reviewer-role-label";
+import { ReportDraftTeamContextBanner } from "@modules/report-draft/react/components/ReportDraftTeamContextBanner";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
 type Props = {
@@ -41,7 +43,7 @@ const TAB_ORDER: readonly ReviewTab[] = [
 
 const TAB_LABELS: Record<ReviewTab, string> = {
   form: "Formulaire hunter",
-  comments: "Commentaires QC",
+  comments: "Commentaires (QC + mentor)",
   stepPreview: "Aperçu étape",
   cumulativePreview: "Aperçu rapport",
 };
@@ -55,10 +57,21 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
   const dispatch = useAppDispatch();
   const transition = useAppSelector((s) => s.reportDrafts.transition);
   const submission = useAppSelector((s) => s.reportDrafts.submissionsById[submissionId]);
+  const submissionsById = useAppSelector((s) => s.reportDrafts.submissionsById);
   const draft = useAppSelector((s) =>
     submission ? s.reportDrafts.byId[submission.reportDraftId] : undefined,
   );
   const commentsById = useAppSelector((s) => s.reportDrafts.commentsById);
+
+  const stepPeerSubmissionIds = useMemo(() => {
+    if (!submission) return [];
+    return Object.values(submissionsById)
+      .filter(
+        (s) =>
+          s.reportDraftId === submission.reportDraftId && s.step === submission.step,
+      )
+      .map((s) => s.id);
+  }, [submissionsById, submission]);
 
   const [activeTab, setActiveTab] = useState<ReviewTab>("form");
   const [pendingComments, setPendingComments] = useState<PendingFieldComment[]>([]);
@@ -67,8 +80,11 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
   const [draftBody, setDraftBody] = useState("");
 
   const savedComments = useMemo(
-    () => Object.values(commentsById).filter((c) => c.submissionId === submissionId),
-    [commentsById, submissionId],
+    () =>
+      Object.values(commentsById).filter((c) =>
+        stepPeerSubmissionIds.includes(c.submissionId),
+      ),
+    [commentsById, stepPeerSubmissionIds],
   );
 
   const fields = useMemo(() => {
@@ -174,16 +190,21 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
   }
 
   const reportTitle = draft.meta.payload.reportTitle;
-  const canDecide = submission.decision === "pending";
+  const isQcSubmission =
+    submission.reviewerRole === "quality_checker" ||
+    submission.reviewerRole === "super_admin";
+  const canDecide = submission.decision === "pending" && isQcSubmission;
   const statusLabel = submissionRowStatusLabel(submission, draft);
+  const isMentorPeerView = submission.reviewerRole === "mentor";
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-2 py-4">
+    <div className="mx-auto w-full max-w-4xl px-2 py-4 sm:px-4">
+      <div className="dashboard-card flex flex-col gap-6 p-5 sm:p-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <Link
             href={`/${lng}/submissions`}
-            className="text-sm text-form-accent hover:underline"
+            className="text-sm text-dashboard-accent hover:underline"
           >
             ← Retour à l&apos;historique
           </Link>
@@ -197,6 +218,17 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
           <p className="mt-1 text-xs text-form-text-muted">
             Soumission {submission.id} · {statusLabel}
           </p>
+          {isMentorPeerView ? (
+            <p className="mt-2 rounded-md border border-violet-200 bg-violet-50 px-3 py-2 text-xs text-violet-950">
+              Fil mentor (lecture seule). Validez l&apos;étape depuis votre propre ligne QC
+              « En attente de revue » lorsque le hunter a soumis au quality checker.
+            </p>
+          ) : (
+            <p className="mt-2 rounded-md border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-950">
+              Seul le quality checker peut valider l&apos;étape (bouton Suivant côté hunter).
+              Les retours mentor sur cette étape sont visibles ci-dessous.
+            </p>
+          )}
         </div>
         {!canDecide ? (
           <span className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-800">
@@ -244,6 +276,10 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
         })}
       </div>
 
+      {draft?.reportTeam ? (
+        <ReportDraftTeamContextBanner team={draft.reportTeam} className="mt-2 mb-0" />
+      ) : null}
+
       <div
         role="tabpanel"
         id={tabPanelId("form")}
@@ -266,7 +302,8 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
       >
         <h2 className="text-lg font-semibold text-form-text">Commentaires par champ</h2>
         <p className="mt-1 text-sm text-form-text-muted">
-          « Demander une révision » exige au moins un commentaire (champ ou général).
+          Commentaires QC et mentor sur cette étape. « Demander une révision » exige au moins un
+          commentaire (champ ou général).
         </p>
 
         <ul className="mt-4 flex flex-col gap-4">
@@ -298,9 +335,12 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
                   ) : null}
                 </div>
                 {existing.map((c) => (
-                  <p key={c.id} className="mt-2 whitespace-pre-wrap text-sm text-form-text">
-                    {c.body}
-                  </p>
+                  <div key={c.id} className="mt-2">
+                    <span className="text-xs font-semibold text-form-text-muted">
+                      {reviewerRoleLabelFr(c.authorRole)}
+                    </span>
+                    <p className="whitespace-pre-wrap text-sm text-form-text">{c.body}</p>
+                  </div>
                 ))}
                 {pending ? (
                   <p className="mt-2 whitespace-pre-wrap text-sm text-amber-950">
@@ -344,9 +384,12 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
         <section className="mt-6 rounded-md border border-form-border bg-form-overlay p-3">
           <h3 className="text-sm font-semibold text-form-text">Commentaire général</h3>
           {savedComments.filter(isGeneralReviewComment).map((c) => (
-            <p key={c.id} className="mt-2 whitespace-pre-wrap text-sm text-form-text">
-              {c.body}
-            </p>
+            <div key={c.id} className="mt-2">
+              <span className="text-xs font-semibold text-form-text-muted">
+                {reviewerRoleLabelFr(c.authorRole)}
+              </span>
+              <p className="whitespace-pre-wrap text-sm text-form-text">{c.body}</p>
+            </div>
           ))}
           {canDecide ? (
             <textarea
@@ -389,7 +432,7 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
             disabled={transitionBusy}
             onClick={() => void onApprove()}
           >
-            Valider cette étape
+            Valider l&apos;étape (QC — active Suivant)
           </button>
           <button
             type="button"
@@ -423,6 +466,7 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
           identifiant de soumission / round plus récent).
         </p>
       ) : null}
+      </div>
     </div>
   );
 };

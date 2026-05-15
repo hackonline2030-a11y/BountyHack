@@ -76,7 +76,8 @@ export type SubmissionKind = (typeof SubmissionKind)[keyof typeof SubmissionKind
 export const SubmissionDecision = {
   PENDING: 'PENDING',
   APPROVE: 'APPROVE',
-  REQUEST_CHANGES: 'REQUEST_CHANGES'
+  REQUEST_CHANGES: 'REQUEST_CHANGES',
+  ENDORSE: 'ENDORSE'
 } as const
 
 export type SubmissionDecision = (typeof SubmissionDecision)[keyof typeof SubmissionDecision]
@@ -88,3 +89,21 @@ export const ReportStatus = {
 } as const
 
 export type ReportStatus = (typeof ReportStatus)[keyof typeof ReportStatus]
+
+
+export const ReportTeamMemberRole = {
+  HUNTER: 'HUNTER',
+  QUALITY_CHECKER: 'QUALITY_CHECKER',
+  MENTOR: 'MENTOR'
+} as const
+
+export type ReportTeamMemberRole = (typeof ReportTeamMemberRole)[keyof typeof ReportTeamMemberRole]
+
+
+export const ReportTeamJoinRequestStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type ReportTeamJoinRequestStatus = (typeof ReportTeamJoinRequestStatus)[keyof typeof ReportTeamJoinRequestStatus]

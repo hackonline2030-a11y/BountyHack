@@ -8,25 +8,16 @@ import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
 type Props = {
   reportId: string;
-  /** Currently unused but reserved for future "load-or-create" semantics. */
+  /** JWT `sub` — used to detect draft ownership (hunter back link to my-reports). */
   hunterId: string;
   lng: string;
 };
 
 /**
- * Client-side root of `/report-draft/[reportId]`. Responsibilities:
- * - Dispatch `loadReportDraft({ draftId: reportId })` once on mount and
- *   whenever the route param changes (browser back/forward navigation).
- * - Render the four UI states: loading skeleton, error (with a "back to
- *   my-reports" link), draft-not-in-byId (treated as load error), or the
- *   actual wizard once the slice has the draft.
- *
- * The wizard itself (`ReportDraftWorkspacePage`) stays unchanged for now —
- * we'll migrate its section hooks to the new slice in a follow-up so the
- * data round-trip becomes truly end-to-end.
+ * Client-side root of `/report-draft/[reportId]`. Loads the draft and renders
+ * loading, error with back link, or the workspace (hunter-only “back to list” in the UI).
  */
 export const ReportDraftBootstrap: React.FC<Props> = ({ reportId, hunterId, lng }) => {
-  void hunterId;
   const dispatch = useAppDispatch();
   const load = useAppSelector((s) => s.reportDrafts.load);
   const draft = useAppSelector((s) => s.reportDrafts.byId[reportId]);
@@ -47,7 +38,7 @@ export const ReportDraftBootstrap: React.FC<Props> = ({ reportId, hunterId, lng 
     return <ErrorState message={message} backHref={`/${lng}/my-reports`} />;
   }
 
-  return <ReportDraftWorkspacePage />;
+  return <ReportDraftWorkspacePage viewerUserId={hunterId} />;
 };
 
 const LoadingState: React.FC = () => (

@@ -26,4 +26,12 @@ export class HttpReviewerCommentRepository implements IReviewerCommentRepository
     const res = await fetchBff(url, { credentials: "include", cache: "no-store" });
     return parseJsonResponse(res);
   }
+
+  async findForReviewStep(
+    submissionId: string,
+  ): Promise<ReportDraftDomainModel.ReviewerComment[]> {
+    const url = `/api/report-draft/comments?submissionId=${encodeURIComponent(submissionId)}&forStep=true`;
+    const res = await fetchBff(url, { credentials: "include", cache: "no-store" });
+    return parseJsonResponse(res);
+  }
 }

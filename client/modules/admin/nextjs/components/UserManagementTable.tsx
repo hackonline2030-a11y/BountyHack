@@ -23,19 +23,21 @@ export async function UserManagementTable({ lng, users }: UserManagementTablePro
 
   if (users.length === 0) {
     return (
-      <p className="text-sm text-white/80" role="status">
-        {t("userManagementTable.empty")}
-      </p>
+      <div className="dashboard-card px-6 py-8">
+        <p className="text-center text-sm text-dashboard-text-muted" role="status">
+          {t("userManagementTable.empty")}
+        </p>
+      </div>
     );
   }
 
   return (
-    <div className="w-full overflow-x-auto rounded-md border border-white/10 bg-white/5">
-      <table className="w-full min-w-[480px] text-left text-sm text-white">
+    <div className="dashboard-card w-full overflow-x-auto">
+      <table className="w-full min-w-[480px] text-left text-sm text-dashboard-text">
         <caption className="sr-only">
           {t("userManagementTable.caption")}
         </caption>
-        <thead className="bg-white/10 text-xs uppercase tracking-wide text-white/80">
+        <thead className="border-b border-dashboard-card-border bg-dashboard-accent-soft/40 text-xs uppercase tracking-wide text-dashboard-text-muted">
           <tr>
             <th scope="col" className="px-4 py-2 font-semibold">
               {t("userManagementTable.columns.username")}
@@ -48,13 +50,13 @@ export async function UserManagementTable({ lng, users }: UserManagementTablePro
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/10">
+        <tbody className="divide-y divide-dashboard-divider">
           {users.map((user) => (
-            <tr key={user.uid} className="hover:bg-white/5">
+            <tr key={user.uid} className="hover:bg-dashboard-accent-soft/30">
               <td className="px-4 py-2">{user.username}</td>
               <td className="px-4 py-2">
                 {user.email ?? (
-                  <span className="text-white/50">
+                  <span className="text-dashboard-text-subtle">
                     {t("userManagementTable.values.noEmail")}
                   </span>
                 )}
@@ -63,7 +65,7 @@ export async function UserManagementTable({ lng, users }: UserManagementTablePro
                 {user.roleCode ? (
                   t(`userManagementTable.roles.${user.roleCode}`)
                 ) : (
-                  <span className="text-white/50">
+                  <span className="text-dashboard-text-subtle">
                     {t("userManagementTable.values.noRole")}
                   </span>
                 )}

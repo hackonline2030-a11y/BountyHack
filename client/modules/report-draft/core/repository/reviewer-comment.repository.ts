@@ -11,4 +11,9 @@ export interface IReviewerCommentRepository {
   findBySubmissionId(
     submissionId: string,
   ): Promise<ReportDraftDomainModel.ReviewerComment[]>;
+
+  /** Mentor + QC comments for the same wizard step. */
+  findForReviewStep(
+    submissionId: string,
+  ): Promise<ReportDraftDomainModel.ReviewerComment[]>;
 }

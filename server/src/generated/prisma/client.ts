@@ -126,3 +126,18 @@ export type SubmissionContentSnapshot = Prisma.SubmissionContentSnapshotModel
  * Promoted artefact after full step validation; super-admin pending → published.
  */
 export type Report = Prisma.ReportModel
+/**
+ * Model ReportTeam
+ * Squad for one report draft (not org-wide teams).
+ */
+export type ReportTeam = Prisma.ReportTeamModel
+/**
+ * Model ReportTeamMember
+ * 
+ */
+export type ReportTeamMember = Prisma.ReportTeamMemberModel
+/**
+ * Model ReportTeamJoinRequest
+ * User asks coordinator to join a team (or general pool when teamId is null).
+ */
+export type ReportTeamJoinRequest = Prisma.ReportTeamJoinRequestModel

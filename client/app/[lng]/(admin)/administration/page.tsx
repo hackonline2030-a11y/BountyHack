@@ -43,30 +43,29 @@ export default async function AdministrationPage({ params }: PageProps) {
         classNames="flex min-h-0 flex-1 flex-col items-center justify-start bg-pattern py-10"
       >
         <article className="flex w-full max-w-4xl flex-col items-stretch gap-6 px-5 sm:px-6">
-          <header className="flex flex-col items-center gap-2 text-center">
-            <h1 className="text-3xl font-bold text-white">
+          <header className="dashboard-card px-6 py-8 text-center sm:px-8 sm:py-10">
+            <h1 className="text-3xl font-bold text-dashboard-text">
               {t("administrationPage.heading")}
             </h1>
-            <p className="text-sm text-white/80">
+            <p className="mt-2 text-sm text-dashboard-text-muted">
               {t("administrationPage.subheading")}
             </p>
+            <div className="mt-6 flex justify-center sm:justify-end">
+              <Link
+                href={`/${lng}/administration/register`}
+                className="btn-common-styles btn-primary"
+              >
+                {t("administrationPage.registerLink")}
+              </Link>
+            </div>
           </header>
-
-          <div className="flex justify-end">
-            <Link
-              href={`/${lng}/administration/register`}
-              className="btn-common-styles btn-primary"
-            >
-              {t("administrationPage.registerLink")}
-            </Link>
-          </div>
 
           {result.ok ? (
             <UserManagementTable lng={lng} users={result.items} />
           ) : (
             <p
               role="alert"
-              className="rounded-md border border-red-300/40 bg-red-500/10 px-4 py-3 text-sm text-red-100"
+              className="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"
             >
               {t(`administrationPage.errors.${result.reason}`)}
             </p>

@@ -2,6 +2,10 @@
   "myReports": {
     "metaTitle": "My reports",
     "heading": "My reports",
+    "workspace": {
+      "backToReports": "← Back to my reports",
+      "backToReportsAria": "Go back to the list of my report drafts"
+    },
     "subheading": "Track every vulnerability report you're currently drafting and where it stands in the review pipeline.",
     "actions": {
       "newReport": "New report",
@@ -12,8 +16,7 @@
       "loadingAriaLabel": "Loading your reports",
       "empty": {
         "title": "No report yet",
-        "description": "Start your first vulnerability report — every step is auto-saved as you go.",
-        "cta": "Create my first report"
+        "description": "You have no drafts in this list yet. Assigned report drafts will appear here when they are available."
       },
       "error": {
         "title": "Couldn't load your reports",
@@ -22,6 +25,9 @@
     },
     "card": {
       "untitled": "Untitled report",
+      "untitledTeam": "Unnamed team",
+      "contentTitleSecondary": "Report content title: {{title}}",
+      "teamMembersAria": "Members assigned to this draft",
       "updatedAt": "Updated on {{date}}",
       "stepsProgress": "{{approved}} / {{total}} steps approved",
       "stepsProgressAria": "{{approved}} steps approved out of {{total}}",
@@ -34,6 +40,32 @@
       "submitted-to-program": "Submitted to program",
       "given-up": "Given up",
       "rejected": "Rejected"
+    },
+    "activity": {
+      "endorseBanner": "Mentor endorsement · {{name}} ({{date}})",
+      "commentBanner": "New comment from {{name}} ({{role}}) · {{date}}",
+      "commentPreview": "“{{preview}}”",
+      "unknownReviewer": "Reviewer"
+    },
+    "reviewHistory": {
+      "title": "Review rounds",
+      "subtitle": "Read-only summary of submissions and decisions for your drafts.",
+      "empty": "No submissions recorded yet — send a step for review from the editor.",
+      "colReport": "Report",
+      "colStep": "Step",
+      "colRound": "Round",
+      "colReviewerRole": "Reviewer",
+      "colDecision": "Outcome",
+      "colDate": "Date",
+      "colOpen": "Open",
+      "dateDecided": "Decided",
+      "dateSubmitted": "Submitted",
+      "decision": {
+        "pending": "Awaiting review",
+        "approve": "Step approved",
+        "endorse": "Mentor endorsement",
+        "request-changes": "Revisions requested"
+      }
     }
   }
 }

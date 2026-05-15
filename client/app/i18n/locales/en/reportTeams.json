@@ -2,7 +2,7 @@
   "reportTeams": {
     "metaTitle": "Report teams",
     "heading": "My report teams",
-    "subheading": "Each team has a unique identifier. Only the coordinator can approve assignments; you may request to join a team.",
+    "subheading": "Teams are tied to a report draft. Ask the coordinator to assign you to a team, or request to join an existing one.",
     "mockBanner": "Front-end mockup — data and requests are simulated until the Nest API is available.",
     "backToDashboard": "Back to dashboard",
     "validity": {
@@ -31,18 +31,28 @@
       "statusRejected": "Rejected",
       "submittedAt": "Requested on {{date}}"
     },
+    "enroll": {
+      "title": "Request assignment to a report team",
+      "description": "Your name, user id, and role are sent to the coordinator. They will include you when creating a new team.",
+      "submit": "Request enrollment",
+      "submitting": "Sending…",
+      "success": "Enrollment request sent to the coordinator.",
+      "alreadyPending": "You already have a pending enrollment request.",
+      "errorGeneric": "Could not send the enrollment request."
+    },
     "askJoin": {
       "title": "Request to join a team",
-      "description": "Enter the unique report team ID. The coordinator will approve or decline your request.",
-      "teamIdLabel": "Report team ID",
-      "teamIdPlaceholder": "rt-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "description": "Pick the report team (created by the coordinator). They will approve or decline your request.",
+      "teamLabel": "Report team",
+      "teamPlaceholder": "Select a team…",
       "roleLabel": "Requested role on the team",
       "messageLabel": "Message to the coordinator (optional)",
       "messagePlaceholder": "Availability, context…",
       "submit": "Send request",
       "submitting": "Sending…",
-      "success": "Request recorded (mockup). The coordinator will be notified.",
-      "errorTeamId": "Team ID is required.",
+      "success": "Request sent to the coordinator.",
+      "errorTeamRequired": "Please select a team.",
+      "noTeamsAvailable": "No teams available yet. The coordinator must create a team for a report draft first.",
       "errorGeneric": "Could not send the request."
     },
     "admin": {
@@ -50,7 +60,7 @@
       "heading": "Report teams — administration",
       "subheading": "Super admin: view, edit, and delete any team. Day-to-day assignments remain with the coordinator.",
       "table": {
-        "teamId": "Team ID",
+        "reportDraftId": "Report draft ID",
         "label": "Label",
         "validity": "Validity",
         "members": "Members",
@@ -65,11 +75,38 @@
       "metaTitle": "Report team coordination",
       "heading": "Coordination — report teams",
       "subheading": "Approve assignment requests and manage team composition.",
+      "loading": "Loading coordination data…",
       "pendingTitle": "Pending requests",
-      "pendingEmpty": "No pending requests.",
+      "pendingEmpty": "No pending applicants.",
+      "teamsEmpty": "No report teams created yet.",
+      "rejecting": "Rejecting…",
       "approve": "Approve",
       "reject": "Reject",
       "teamsTitle": "Report teams",
+      "reportDraftId": "Report draft",
+      "openReportDraft": "Open report draft",
+      "applicantsTitle": "Applicants (pending requests)",
+      "applicantsDescription": "Check people to include in a new team. You can spread candidates across several teams.",
+      "applicants": {
+        "include": "Include",
+        "user": "User",
+        "requestedRole": "Requested role",
+        "team": "Requested team",
+        "newTeam": "New team (coordinator assigns)",
+        "actions": "Actions"
+      },
+      "create": {
+        "title": "Create a report team",
+        "description": "A report draft is created automatically. The team must include one hunter, one quality checker, and one mentor.",
+        "labelField": "Team title",
+        "labelPlaceholder": "e.g. Report #1042 — XSS comments module",
+        "membersField": "Selected members",
+        "submit": "Create team and draft",
+        "submitting": "Creating…",
+        "success": "Team and draft created.",
+        "errorLabel": "Title is required.",
+        "errorMembers": "Select at least one member."
+      },
       "createTeam": "Create team",
       "addMember": "Add member",
       "mockAction": "mockup — no API yet"

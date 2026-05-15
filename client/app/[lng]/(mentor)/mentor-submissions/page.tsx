@@ -4,17 +4,17 @@ import { AppRoleCode } from "@/lib/app-role-code";
 import { verifySessionForRoles } from "@/lib/dal/session";
 import { isSupportedLanguage } from "@modules/auth/core/model/locale.policy";
 import { Section } from "@modules/app/nextjs/components/sections/Section";
-import { QualityCheckerSubmissionsPage } from "@modules/report-draft/react/pages/QualityCheckerSubmissionsPage";
+import { MentorSubmissionsPage } from "@modules/report-draft/react/pages/MentorSubmissionsPage";
 
 type PageProps = {
   params: Promise<{ lng: string }>;
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: "Soumissions à revoir" };
+  return { title: "Revues mentor" };
 }
 
-export default async function QcSubmissionsListPage({ params }: PageProps) {
+export default async function MentorSubmissionsListPage({ params }: PageProps) {
   const { lng } = await params;
   if (!isSupportedLanguage(lng)) {
     notFound();
@@ -24,7 +24,7 @@ export default async function QcSubmissionsListPage({ params }: PageProps) {
   return (
     <main className="flex w-full min-h-[calc(100vh-(var(--header-height)+var(--footer-height)))] flex-col">
       <Section fluid classNames="flex min-h-0 flex-1 flex-col bg-pattern py-6">
-        <QualityCheckerSubmissionsPage lng={lng} />
+        <MentorSubmissionsPage lng={lng} />
       </Section>
     </main>
   );

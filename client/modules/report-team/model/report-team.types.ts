@@ -17,6 +17,7 @@ export type ReportTeamMember = {
 
 export type ReportTeam = {
   id: string;
+  reportDraftId: string;
   label: string;
   validity: ReportTeamValidity;
   members: ReportTeamMember[];
@@ -25,9 +26,13 @@ export type ReportTeam = {
 
 export type ReportTeamJoinRequest = {
   id: string;
-  teamId: string;
+  teamId?: string;
+  reportDraftId?: string;
   teamLabel: string;
+  userId?: string;
+  requesterDisplayName?: string;
   requestedRole: ReportTeamMemberRole;
+  message?: string;
   status: MembershipRequestStatus;
   requestedAt: string;
 };

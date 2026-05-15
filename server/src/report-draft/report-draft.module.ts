@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { ReportTeamModule } from '../report-team/report-team.module';
+import { I_REPORT_TEAM_REPOSITORY } from '../report-team/ports/report-team-repository.interface';
+import type { IReportTeamRepository } from '../report-team/ports/report-team-repository.interface';
 import { ReportDraftController } from './controllers/report-draft.controller';
 import { SubmissionController } from './controllers/submission.controller';
 import { ReviewerCommentController } from './controllers/reviewer-comment.controller';
@@ -17,10 +20,11 @@ import { GetSubmissionByIdQuery } from './application/queries/get-submission-by-
 import { ListSubmissionsQuery } from './application/queries/list-submissions.query';
 import { SaveReviewerCommentsCommand } from './application/commands/save-reviewer-comments.command';
 import { ListReviewerCommentsQuery } from './application/queries/list-reviewer-comments.query';
+import { ListReviewerCommentsForStepQuery } from './application/queries/list-reviewer-comments-for-step.query';
 import { ReportDraftAccessPolicy } from './application/report-draft-access.policy';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, ReportTeamModule],
   controllers: [
     ReportDraftController,
     SubmissionController,
@@ -41,12 +45,21 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
     },
     {
       provide: ReportDraftAccessPolicy,
-      inject: [I_REPORT_DRAFT_REPOSITORY, I_SUBMISSION_REPOSITORY],
+      inject: [
+        I_REPORT_DRAFT_REPOSITORY,
+        I_SUBMISSION_REPOSITORY,
+        I_REPORT_TEAM_REPOSITORY,
+      ],
       useFactory: (
         reportDraftRepository: PrismaReportDraftRepository,
         submissionRepository: PrismaSubmissionRepository,
+        reportTeamRepository: IReportTeamRepository,
       ) =>
-        new ReportDraftAccessPolicy(reportDraftRepository, submissionRepository),
+        new ReportDraftAccessPolicy(
+          reportDraftRepository,
+          submissionRepository,
+          reportTeamRepository,
+        ),
     },
     {
       provide: SaveReportDraftCommand,
@@ -88,11 +101,17 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
     },
     {
       provide: ListSubmissionsQuery,
-      inject: [I_SUBMISSION_REPOSITORY, ReportDraftAccessPolicy],
+      inject: [
+        I_SUBMISSION_REPOSITORY,
+        ReportDraftAccessPolicy,
+        I_REPORT_TEAM_REPOSITORY,
+      ],
       useFactory: (
         repository: PrismaSubmissionRepository,
         access: ReportDraftAccessPolicy,
-      ) => new ListSubmissionsQuery(repository, access),
+        reportTeamRepository: IReportTeamRepository,
+      ) =>
+        new ListSubmissionsQuery(repository, access, reportTeamRepository),
     },
     {
       provide: SaveReviewerCommentsCommand,
@@ -109,6 +128,24 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
         repository: PrismaReviewerCommentRepository,
         access: ReportDraftAccessPolicy,
       ) => new ListReviewerCommentsQuery(repository, access),
+    },
+    {
+      provide: ListReviewerCommentsForStepQuery,
+      inject: [
+        I_REVIEWER_COMMENT_REPOSITORY,
+        I_SUBMISSION_REPOSITORY,
+        ReportDraftAccessPolicy,
+      ],
+      useFactory: (
+        commentRepository: PrismaReviewerCommentRepository,
+        submissionRepository: PrismaSubmissionRepository,
+        access: ReportDraftAccessPolicy,
+      ) =>
+        new ListReviewerCommentsForStepQuery(
+          commentRepository,
+          submissionRepository,
+          access,
+        ),
     },
   ],
 })

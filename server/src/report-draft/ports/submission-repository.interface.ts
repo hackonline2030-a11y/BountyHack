@@ -10,6 +10,10 @@ export interface ISubmissionRepository {
   findAllForReviewerRole(
     reviewerRole: ReviewerRoleWire,
   ): Promise<SubmissionWire[]>;
+
+  findMentorSubmissionsForDraftIds(
+    draftIds: readonly string[],
+  ): Promise<SubmissionWire[]>;
 }
 
 export const I_SUBMISSION_REPOSITORY = Symbol('I_SUBMISSION_REPOSITORY');

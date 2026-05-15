@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { AppRoleCode } from '../../../shared/rbac/app-role.code';
 import { SaveReportDraftCommand } from './save-report-draft.command';
 import { ReportDraftAccessPolicy } from '../report-draft-access.policy';
@@ -45,20 +45,27 @@ describe('SaveReportDraftCommand', () => {
     findByDraftId: jest.fn(),
     findPendingForReviewerRole: jest.fn(),
     findAllForReviewerRole: jest.fn(),
+    findMentorSubmissionsForDraftIds: jest.fn(),
   };
   const access = new ReportDraftAccessPolicy(
     reportDraftRepository,
     submissionRepository,
+    { isMemberOfDraft: jest.fn(), findDraftIdsForMember: jest.fn() } as never,
   );
   const command = new SaveReportDraftCommand(reportDraftRepository, access);
 
   beforeEach(() => {
     jest.clearAllMocks();
+    reportDraftRepository.findById.mockResolvedValue(minimalDraft());
   });
 
-  it('persists when hunterId matches identity', async () => {
+  it('persists when hunter updates an existing draft', async () => {
     await command.execute(
-      { uid: 'hunter-1', email: 'h@example.com' },
+      {
+        uid: 'hunter-1',
+        email: 'h@example.com',
+        roleCode: AppRoleCode.HUNTER,
+      },
       minimalDraft(),
     );
     expect(reportDraftRepository.save).toHaveBeenCalledWith(
@@ -66,7 +73,51 @@ describe('SaveReportDraftCommand', () => {
     );
   });
 
+  it('rejects save when no report draft row exists yet', async () => {
+    reportDraftRepository.findById.mockResolvedValue(null);
+    await expect(
+      command.execute(
+        {
+          uid: 'hunter-1',
+          email: 'h@example.com',
+          roleCode: AppRoleCode.HUNTER,
+        },
+        minimalDraft({ id: 'brand-new-draft' }),
+      ),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(reportDraftRepository.save).not.toHaveBeenCalled();
+  });
+
+  it('does not persist read-only reportTeam enrichment from the client', async () => {
+    await command.execute(
+      {
+        uid: 'hunter-1',
+        email: 'h@example.com',
+        roleCode: AppRoleCode.HUNTER,
+      },
+      minimalDraft({
+        reportTeam: {
+          label: 'Coord label',
+          members: [{ userId: 'u1', displayName: 'A', role: 'hunter' }],
+        },
+      }),
+    );
+    const arg = reportDraftRepository.save.mock.calls[0]?.[0];
+    expect(arg).not.toHaveProperty('reportTeam');
+  });
+
   it('allows quality checker to persist hunter draft after review', async () => {
+    reportDraftRepository.findById.mockResolvedValue(
+      minimalDraft({
+        meta: {
+          payload: {},
+          attachments: [],
+          status: 'needs-revision',
+          currentRound: 1,
+          assignedReviewerRole: 'quality_checker',
+        },
+      }),
+    );
     await command.execute(
       {
         uid: 'qc-1',

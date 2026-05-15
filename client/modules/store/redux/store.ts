@@ -4,12 +4,14 @@ import { combineReducers, configureStore, createListenerMiddleware } from "@redu
 import { Dependencies } from "@store/dependencies";
 import { reportDraftReducer } from "@modules/report-draft/core/store/report-draft.slice";
 import { reportDraftsReducer } from "@modules/report-draft/core/store/report-drafts.slice";
+import { reportTeamsReducer } from "@modules/report-team/core/store/report-teams.slice";
 import { registerReportDraftStepListener } from "@modules/report-draft/core/store/report-draft-step.listener";
 import { registerReportDraftFetcherListeners } from "@modules/report-draft/core/store/report-draft-fetcher.listener";
 
 const reducers = combineReducers({
   reportDraft: reportDraftReducer,
   reportDrafts: reportDraftsReducer,
+  reportTeams: reportTeamsReducer,
 });
 
 export type AppStore = ReturnType<typeof createStore>;

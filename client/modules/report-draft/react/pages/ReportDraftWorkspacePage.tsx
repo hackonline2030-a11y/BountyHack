@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import { type FC, type KeyboardEvent, useCallback, useMemo, useState } from "react";
+import { useT } from "next-i18next/client";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { reportDraftStepToStateKey } from "@modules/report-draft/core/model/report-draft-step-keys";
 import {
@@ -14,6 +17,8 @@ import {
   stepStatusLabelFr,
   stepStatusPillClassFr,
 } from "@modules/report-draft/react/wizard/step-status-fr";
+import { ReportDraftTeamContextBanner } from "@modules/report-draft/react/components/ReportDraftTeamContextBanner";
+import { HunterReviewActivityBanner } from "@modules/report-draft/react/components/HunterReviewActivityBanner";
 import { useAppSelector } from "@store/redux/store";
 
 /**
@@ -100,7 +105,25 @@ const WorkspaceStepStatusPill: FC = () => {
   );
 };
 
-export const ReportDraftWorkspacePage: FC = () => {
+const WorkspaceTeamBanner: FC = () => {
+  const draftId = useAppSelector((s) => s.reportDrafts.currentDraftId);
+  const draft = useAppSelector((s) => (draftId ? s.reportDrafts.byId[draftId] : undefined));
+  if (!draft?.reportTeam) return null;
+  return <ReportDraftTeamContextBanner team={draft.reportTeam} className="mt-2 mb-0" />;
+};
+
+export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
+  viewerUserId,
+}) => {
+  const params = useParams<{ lng?: string }>();
+  const lng = typeof params?.lng === "string" && params.lng.trim() !== "" ? params.lng : "fr";
+  const { t } = useT(["myReports"]);
+  const currentDraftId = useAppSelector((s) => s.reportDrafts.currentDraftId);
+  const draft = useAppSelector((s) =>
+    currentDraftId ? s.reportDrafts.byId[currentDraftId] : undefined,
+  );
+  const showHunterBack = Boolean(draft && draft.hunterId === viewerUserId);
+  const reportsListHref = useMemo(() => `/${lng}/my-reports`, [lng]);
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("form");
 
   const onTabKeyDown = useCallback(
@@ -120,6 +143,17 @@ export const ReportDraftWorkspacePage: FC = () => {
 
   return (
     <div className="mx-auto my-6 flex w-full max-w-4xl flex-col gap-6 rounded-lg border border-black/10 bg-form-surface px-4 py-6 shadow-xl sm:my-10 sm:px-6 sm:py-8">
+      {showHunterBack ? (
+        <div className="-mb-2">
+          <Link
+            href={reportsListHref}
+            className="inline-flex text-sm font-medium text-form-accent transition hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent focus-visible:ring-offset-2"
+            aria-label={t("myReports.workspace.backToReportsAria")}
+          >
+            {t("myReports.workspace.backToReports")}
+          </Link>
+        </div>
+      ) : null}
       <div
         role="tablist"
         aria-label="Espace de rédaction du rapport"
@@ -149,6 +183,10 @@ export const ReportDraftWorkspacePage: FC = () => {
           );
         })}
       </div>
+
+      <WorkspaceTeamBanner />
+
+      <HunterReviewActivityBanner />
 
       <WorkspaceStepStatusPill />
 
