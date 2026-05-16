@@ -1,3 +1,4 @@
+import './bootstrap-env';
 import "reflect-metadata";
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -92,6 +93,9 @@ async function bootstrap() {
   console.log("\x1b[36m *************************************** \n 🌞 API - Version 1.0.0 \n 🏡 Architecture : hexagonale \n *************************************** ");
   const databaseAlternativeByCurrent: Record<string, string> = {
     'IN-MEMORY': 'MONGODB',
+    MONGODB: 'POSTGRESQL_PRISMA',
+    POSTGRESQL_PRISMA: 'MYSQL_PRISMA',
+    MYSQL_PRISMA: 'POSTGRESQL_PRISMA',
   };
   const databaseAlternativeValue = databaseAlternativeByCurrent[variables.database];
   const databaseAlternative = databaseAlternativeValue
