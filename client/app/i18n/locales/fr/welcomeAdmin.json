@@ -1,0 +1,48 @@
+{
+  "welcomeAdmin": {
+    "metaTitle": "Tableau de bord Lead Bug Bounty",
+    "heading": "Bienvenue",
+    "headingWithUsername": "Bienvenue, {{username}}",
+    "subheading": "Lead Bug Bounty — point central du dispositif, assuré par le porteur du projet via son entreprise.",
+    "nav": {
+      "label": "Navigation du tableau de bord",
+      "users": "Utilisateurs",
+      "register": "Inscription",
+      "teams": "Équipes rapport",
+      "settings": "Paramètres"
+    },
+    "mission": {
+      "title": "Votre rôle de Lead Bug Bounty",
+      "intro": "Ce rôle constitue le point central du dispositif. Il ne peut pas être délégué et engage la responsabilité légale complète de l’entreprise.",
+      "items": {
+        "ywhAccount": "Détention et gestion du compte YesWeHack",
+        "ywhRelations": "Relation officielle avec YesWeHack et les programmes Bug Bounty",
+        "finalValidation": "Validation finale des vulnérabilités avant soumission",
+        "submission": "Soumission des rapports sur la plateforme",
+        "legalFinancial": "Gestion juridique, fiscale et financière des primes",
+        "arbitration": "Arbitrage des priorités, des périmètres et des conflits"
+      },
+      "boundary": "Vous êtes le seul interlocuteur habilité à engager l’entreprise vis-à-vis de YesWeHack et des programmes."
+    },
+    "cards": {
+      "users": {
+        "title": "Gestion des utilisateurs",
+        "subtitle": "Comptes et rôles applicatifs",
+        "body": "Consultez les comptes enregistrés et leurs rôles dans l’application.",
+        "cta": "Ouvrir l’administration"
+      },
+      "register": {
+        "title": "Inscrire un utilisateur",
+        "subtitle": "Création de compte réservée au Lead",
+        "body": "Créez un compte pour un hunter, mentor, contrôle qualité ou autre rôle du dispositif.",
+        "cta": "Nouvelle inscription"
+      },
+      "teams": {
+        "title": "Équipes rapport",
+        "subtitle": "Supervision des équipes",
+        "body": "Créez et gérez les équipes rapport (composition, coordinateur, affectations).",
+        "cta": "Gérer les équipes"
+      }
+    }
+  }
+}

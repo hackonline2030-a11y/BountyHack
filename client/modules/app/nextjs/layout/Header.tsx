@@ -66,7 +66,7 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
   const roleLabelFromRoleCode = (roleCode: string | null): string | null => {
     if (!roleCode) return null;
     const labels: Record<string, string> = {
-      SUPER_ADMIN: "Super admin",
+      SUPER_ADMIN: "Lead Bug Bounty",
       USER: "User",
       HUNTER: "Hunter",
       MENTOR: "Mentor",

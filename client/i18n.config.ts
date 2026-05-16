@@ -15,6 +15,7 @@ const i18nConfig: I18nConfig = {
     'welcomeQualityChecker',
     'welcomeMentor',
     'welcomeCoordinator',
+    'welcomeAdmin',
     'reportTeams',
     'parameters',
     'legal',

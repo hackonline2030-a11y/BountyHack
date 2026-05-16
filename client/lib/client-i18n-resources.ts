@@ -9,6 +9,7 @@ import enParameters from "@/app/i18n/locales/en/parameters.json";
 import enPasswordReset from "@/app/i18n/locales/en/passwordReset.json";
 import enRegister from "@/app/i18n/locales/en/register.json";
 import enReportTeams from "@/app/i18n/locales/en/reportTeams.json";
+import enWelcomeAdmin from "@/app/i18n/locales/en/welcomeAdmin.json";
 import enWelcomeCoordinator from "@/app/i18n/locales/en/welcomeCoordinator.json";
 import enWelcomeHunter from "@/app/i18n/locales/en/welcomeHunter.json";
 import enWelcomeMentor from "@/app/i18n/locales/en/welcomeMentor.json";
@@ -23,6 +24,7 @@ import frParameters from "@/app/i18n/locales/fr/parameters.json";
 import frPasswordReset from "@/app/i18n/locales/fr/passwordReset.json";
 import frRegister from "@/app/i18n/locales/fr/register.json";
 import frReportTeams from "@/app/i18n/locales/fr/reportTeams.json";
+import frWelcomeAdmin from "@/app/i18n/locales/fr/welcomeAdmin.json";
 import frWelcomeCoordinator from "@/app/i18n/locales/fr/welcomeCoordinator.json";
 import frWelcomeHunter from "@/app/i18n/locales/fr/welcomeHunter.json";
 import frWelcomeMentor from "@/app/i18n/locales/fr/welcomeMentor.json";
@@ -43,6 +45,7 @@ export const clientI18nNamespaces = [
   "welcomeQualityChecker",
   "welcomeMentor",
   "welcomeCoordinator",
+  "welcomeAdmin",
   "reportTeams",
   "parameters",
   "legal",
@@ -63,6 +66,7 @@ export const clientI18nResources = {
     welcomeQualityChecker: enWelcomeQualityChecker,
     welcomeMentor: enWelcomeMentor,
     welcomeCoordinator: enWelcomeCoordinator,
+    welcomeAdmin: enWelcomeAdmin,
     reportTeams: enReportTeams,
     parameters: enParameters,
     legal: enLegal,
@@ -79,6 +83,7 @@ export const clientI18nResources = {
     welcomeQualityChecker: frWelcomeQualityChecker,
     welcomeMentor: frWelcomeMentor,
     welcomeCoordinator: frWelcomeCoordinator,
+    welcomeAdmin: frWelcomeAdmin,
     reportTeams: frReportTeams,
     parameters: frParameters,
     legal: frLegal,

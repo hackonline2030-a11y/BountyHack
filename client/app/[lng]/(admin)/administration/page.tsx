@@ -50,7 +50,7 @@ export default async function AdministrationPage({ params }: PageProps) {
             <p className="mt-2 text-sm text-dashboard-text-muted">
               {t("administrationPage.subheading")}
             </p>
-            <div className="mt-6 flex justify-center sm:justify-end">
+            <div className="mt-6 flex justify-center">
               <Link
                 href={`/${lng}/administration/register`}
                 className="btn-common-styles btn-primary"
