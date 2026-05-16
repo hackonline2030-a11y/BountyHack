@@ -1,7 +1,7 @@
 {
-  "title": "BugBountyApp — Next.js template",
-  "description": "Auth-first Next.js starter with TypeScript, Prisma, and a modular layout — ready to extend.",
-  "tagline": "Ship features faster with a clear structure.",
+  "title": "BugBountyApp",
+  "description": "Bug bounty platform for web applications. Prepare and submit vulnerability reports with educational support for programs like YesWeHack and HackerOne.",
+  "tagline": "Report vulnerabilities with structure and guidance.",
   "home": {
     "metaTitle": "Home",
     "heroTitle": "BugBountyApp",
