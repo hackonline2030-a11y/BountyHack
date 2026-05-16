@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { mkdir, writeFile } from 'fs/promises';
 import * as path from 'path';
-import { variables } from '../../../shared/variables.config';
 import {
   IPdfStorage,
   SavePdfResult,
@@ -15,13 +14,13 @@ export class LocalPdfStorageAdapter implements IPdfStorage {
     await mkdir(this.outputDir, { recursive: true });
     const safeTemplateName =
       (templateName || '').replace(/[^a-zA-Z0-9_-]/g, '') || 'default';
-    const fileName = `cv-${safeTemplateName}-${Date.now()}.pdf`;
+    const fileName = `report-${safeTemplateName}-${Date.now()}.pdf`;
     const pdfFilePath = path.resolve(this.outputDir, fileName);
     await writeFile(pdfFilePath, pdfBuffer);
 
     return {
       fileName,
-      publicUrl: `http://localhost:${variables.port}/pdfs/${fileName}`,
+      publicUrl: `/pdfs/${fileName}`,
     };
   }
 }

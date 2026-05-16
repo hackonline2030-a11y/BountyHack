@@ -1,0 +1,111 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../../core/infrastructure/database/prisma/prisma.service';
+import type { IReportDraftRepository } from '../../ports/report-draft-repository.interface';
+import type { ReportDraftWire } from '../../models/report-draft-api.types';
+import {
+  ReportDraftPrismaMapper,
+  type ReportDraftWithSteps,
+} from './report-draft-prisma.mapper';
+
+const STEP_INCLUDE = {
+  attachments: true,
+} as const;
+
+const TEAM_INCLUDE = {
+  members: { include: { user: true } },
+} as const;
+
+@Injectable()
+export class PrismaReportDraftRepository implements IReportDraftRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async save(draft: ReportDraftWire): Promise<void> {
+    const header = ReportDraftPrismaMapper.draftHeaderFromWire(draft);
+    const stepRows = ReportDraftPrismaMapper.stepRowsFromWire(draft);
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.reportDraft.upsert({
+        where: { id: header.id },
+        create: {
+          ...header,
+          pendingReportId: null,
+        },
+        update: {
+          hunterId: header.hunterId,
+          version: header.version,
+          aggregateStatus: header.aggregateStatus,
+          updatedAt: header.updatedAt,
+        },
+      });
+
+      for (const stepInput of stepRows) {
+        const stepRow = await tx.reportDraftStep.upsert({
+          where: {
+            reportDraftId_step: {
+              reportDraftId: header.id,
+              step: stepInput.step,
+            },
+          },
+          create: {
+            reportDraftId: header.id,
+            step: stepInput.step,
+            payload: stepInput.payload,
+            status: stepInput.status,
+            currentRound: stepInput.currentRound,
+            assignedReviewerRole: stepInput.assignedReviewerRole,
+          },
+          update: {
+            payload: stepInput.payload,
+            status: stepInput.status,
+            currentRound: stepInput.currentRound,
+            assignedReviewerRole: stepInput.assignedReviewerRole,
+          },
+        });
+
+        await tx.reportDraftAttachment.deleteMany({
+          where: { reportDraftStepId: stepRow.id },
+        });
+
+        if (stepInput.attachments.length > 0) {
+          await tx.reportDraftAttachment.createMany({
+            data: stepInput.attachments.map((attachment) =>
+              ReportDraftPrismaMapper.attachmentCreateInput(stepRow.id, attachment),
+            ),
+          });
+        }
+      }
+    });
+  }
+
+  async findById(id: string): Promise<ReportDraftWire | null> {
+    const row = await this.prisma.reportDraft.findUnique({
+      where: { id },
+      include: {
+        steps: {
+          include: STEP_INCLUDE,
+        },
+        reportTeam: { include: TEAM_INCLUDE },
+      },
+    });
+    if (!row) {
+      return null;
+    }
+    return ReportDraftPrismaMapper.toDomain(row as ReportDraftWithSteps);
+  }
+
+  async findByHunterId(hunterId: string): Promise<ReportDraftWire[]> {
+    const rows = await this.prisma.reportDraft.findMany({
+      where: { hunterId },
+      include: {
+        steps: {
+          include: STEP_INCLUDE,
+        },
+        reportTeam: { include: TEAM_INCLUDE },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+    return rows.map((row) =>
+      ReportDraftPrismaMapper.toDomain(row as ReportDraftWithSteps),
+    );
+  }
+}

@@ -2,15 +2,15 @@ import {
   Body,
   Controller,
   Get,
-  HttpException,
-  HttpStatus,
   Post,
   Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -20,16 +20,20 @@ import {
   ApiHttpUnauthorized,
 } from '../../core/dto/api-http-responses';
 import { ApiValidationBadRequest } from '../../core/dto/http-validation-error.dto';
-import { RequestWithUser } from '../../auth/model/request-with-user';
+import { RequestWithIdentity } from '../../auth/adapters/http/request-with-identity';
 import { Auth } from '../../auth/auth.decorator';
+import { AuthRoles } from '../../auth/rbac/roles.decorator';
+import { AppRoleCode } from '../../shared/rbac/app-role.code';
 
 import { AddUsername } from '../commands/add-username';
 import {
   CreateUserProfileBodyDto,
+  UserAdminSummaryListResponseDto,
   UserProfileResponseDto,
 } from '../dto/user.dto';
 import { GetUserByIdQuery } from '../queries/get-user-by-id';
-import { DecodedToken } from '../../auth/model/decoded-token.model';
+import { ListUsersAdminSummariesQuery } from '../queries/list-users-admin-summaries.query';
+import { Identity } from '../../auth/domain/models/identity';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -37,7 +41,8 @@ import { DecodedToken } from '../../auth/model/decoded-token.model';
 export class UsersController {
   constructor(
     private readonly addUsername: AddUsername,
-    private readonly getUserByIdQuery: GetUserByIdQuery
+    private readonly getUserByIdQuery: GetUserByIdQuery,
+    private readonly listUsersAdminSummariesQuery: ListUsersAdminSummariesQuery,
   ) {}
 
   @Post()
@@ -52,15 +57,14 @@ export class UsersController {
   @ApiHttpUnauthorized('Missing or invalid bearer token.')
   @ApiHttpInternalServerError('Unexpected server error while creating profile.')
   async create(
-    @Req() request: RequestWithUser,
+    @Req() request: RequestWithIdentity,
     @Body() body: CreateUserProfileBodyDto
   ) {
-
-    const decodedToken: DecodedToken = await this.generateDecodedToken(request);
+    const identity = this.getAuthenticatedIdentity(request);
 
     try {
       const data = {
-        uid: decodedToken.user_id,
+        uid: identity.uid,
         username: body.username,
       };
 
@@ -85,36 +89,76 @@ export class UsersController {
   @ApiHttpUnauthorized('Missing or invalid bearer token.')
   @ApiHttpInternalServerError('Unexpected server error while loading profile.')
   async getCurrentUser(
-    @Req() request: RequestWithUser
+    @Req() request: RequestWithIdentity
   ): Promise<UserProfileResponseDto> {
-    const decodedToken: DecodedToken = await this.generateDecodedToken(request);
+    const identity = this.getAuthenticatedIdentity(request);
 
     try {
-      const record = await this.getUserByIdQuery.execute(decodedToken.user_id);
-      return plainToInstance(UserProfileResponseDto, record, {
-        excludeExtraneousValues: true,
-      });
+      const record = await this.getUserByIdQuery.execute(identity.uid);
+      return plainToInstance(
+        UserProfileResponseDto,
+        {
+          ...record,
+          roleCode: identity.roleCode ?? null,
+        },
+        {
+          excludeExtraneousValues: true,
+        },
+      );
     } catch (error) {
       console.error('Error getting user data:', error);
       throw error;
     }
   }
 
-  private async generateDecodedToken(
-    request: RequestWithUser
-  ): Promise<DecodedToken> {
-    const token = request.headers.authorization.split('Bearer ')[1];
-    const jwt = require('jsonwebtoken');
-    const decodedToken = jwt.decode(token) as DecodedToken | null;
-
-    if (!decodedToken?.user_id) {
-      throw new HttpException(
-        'Utilisateur non authentifié',
-        HttpStatus.UNAUTHORIZED
+  /**
+   * Admin-only listing of every account for the user-management table.
+   *
+   * Defence in depth — *all three* of these must pass before any row is emitted:
+   *  1. {@link AuthRoles} runs {@link PassportJwtAuthGuard} (valid Bearer JWT) **then**
+   *     {@link RolesGuard} (`identity.roleCode === SUPER_ADMIN`, freshly loaded from
+   *     Postgres on every request through the JWT strategy).
+   *  2. The repository projects only the four allowed columns — no `passwordHash`,
+   *     no refresh-token relations, no 2FA material can leak by accident.
+   *  3. The DTO is rebuilt via `plainToInstance(..., { excludeExtraneousValues: true })`,
+   *     so any field that was not `@Expose()`d is stripped before serialisation.
+   */
+  @Get()
+  @AuthRoles(AppRoleCode.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'List all users (admin)',
+    description:
+      'Returns every user as an admin-facing summary (uid, username, email, roleCode). ' +
+      'Requires a valid Bearer JWT whose `roleCode` is `SUPER_ADMIN`.',
+  })
+  @ApiOkResponse({
+    description: 'User summaries returned.',
+    type: UserAdminSummaryListResponseDto,
+  })
+  @ApiHttpUnauthorized('Missing or invalid bearer token.')
+  @ApiForbiddenResponse({
+    description: 'Authenticated user is not `SUPER_ADMIN`.',
+  })
+  @ApiHttpInternalServerError('Unexpected server error while listing users.')
+  async list(): Promise<UserAdminSummaryListResponseDto> {
+    try {
+      const summaries = await this.listUsersAdminSummariesQuery.execute();
+      return plainToInstance(
+        UserAdminSummaryListResponseDto,
+        { items: summaries },
+        { excludeExtraneousValues: true },
       );
+    } catch (error) {
+      console.error('Error listing users:', error);
+      throw error;
     }
+  }
 
-    return decodedToken;
+  private getAuthenticatedIdentity(request: RequestWithIdentity): Identity {
+    if (!request.user?.uid) {
+      throw new UnauthorizedException('Utilisateur non authentifie');
+    }
+    return request.user;
   }
 
 }

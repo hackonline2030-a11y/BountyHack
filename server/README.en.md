@@ -4,10 +4,33 @@ NestJS API (auth, users, health) — [Nx](https://nx.dev) workspace.
 
 *French version: [README.md](./README.md)*
 
+## Installation
+
+Create **`server/.env`** from the template (from the **monorepo root**):
+
+```bash
+# at the repository root (if not done yet)
+cp server/.env.example server/.env
+```
+
+Equivalent if you are already inside **`server/`**:
+
+```sh
+cp .env.example .env
+```
+
+Then edit **`server/.env`** following **`.env.example`** (secrets, `DATABASE_NAME`, `DATABASE_URL`, CORS, etc.).
+
+## CI (GitHub Actions)
+
+Workflow at monorepo root: **[`../.github/workflows/server-ci.yml`](../.github/workflows/server-ci.yml)** — on **push / PR** to **`feature/test-ci`** only (`server/**` paths), plus **`workflow_dispatch`**. Steps: `pnpm install --frozen-lockfile`, **`nx run web-api:lint`**, **`pnpm run test`**, **`pnpm run build`**, **Gitleaks** (action uses `continue-on-error: true`). No Docker or image registry, no Trivy or SonarCloud.
+
+---
+
 ## Prerequisites
 
-- **Node.js** 20+ and **pnpm**
-- **Docker** and Docker Compose (only if you follow the Docker workflow below)
+- **Node.js** 24+ and **pnpm** (see `server/package.json` → `engines`)
+- **Docker** and Docker Compose (**optional**, for **local dev** only — not the production target)
 
 ### Nx Workspace: IDE and Console Logic
 
@@ -65,32 +88,52 @@ Both use the same Nx workspace source of truth.
 
 **`AUTH_TYPE`** and **`DATABASE_NAME`** work together. Important rule:
 
-- If you use **`DATABASE_NAME=MONGODB`**, you should normally set **`AUTH_TYPE=JWT`** unless you already have a **working Firebase setup** (Firebase Admin on the API, credentials, **user accounts in Firebase Authentication** managed in Firebase / the console). Without that, **`AUTH_TYPE=FIREBASE`** does **not** give you a standard email/password sign-up and sign-in flow backed by Mongo: **`POST /api/auth/register`** and **`POST /api/auth/login`** are not enabled, and users are not created in Mongo for that flow.
-- **`AUTH_TYPE=JWT`** with Mongo: users (email, password hash, profile) are stored in the Mongo database from **`DATABASE_URL`**.
+- The auth architecture is extensible through `AUTH_TYPE`, but the active implementation is **`PASSPORT_JWT`**.
+- Database options remain multiple via `DATABASE_NAME` (`MONGODB`, `POSTGRESQL_PRISMA`, `IN-MEMORY`).
+- With **`DATABASE_NAME=MONGODB`**, users (email, password hash, profile) are stored in the Mongo database from **`DATABASE_URL`**.
+- **2FA (schema and upcoming features)** evolves only under **`DATABASE_NAME=POSTGRESQL_PRISMA`** (Prisma migrations on PostgreSQL). There is no parallel extension on Mongo or in-memory for 2FA for now ; see **`src/auth/README.md`**.
 
 See the comments in **`.env.example`** as well.
+
+#### `AUTH_TYPE` configuration and `auth-env.ts`
+
+Authentication configuration is centralized in **`src/auth/config/auth-env.ts`**.
+
+- This file reads and normalizes environment variables (`AUTH_TYPE`, `DATABASE_NAME`).
+- It centralizes auth/database configuration choices to avoid scattered checks across Nest modules.
+
+Supported value for **`AUTH_TYPE`**:
+
+- `PASSPORT_JWT`: Passport/Nest JWT flow (`passport-jwt`).
+
+Recommendation: any new authentication-configuration condition should go through **`auth-env.ts`** instead of direct `process.env.AUTH_TYPE` checks.
 
 ---
 
 ## Getting started
 
-Pick **one** path: run everything with Docker, or Node on your machine with MongoDB installed separately.
+Pick **one** path: **Docker locally** (API and optional Postgres + watch), or **Node on the host** with a reachable database (**PostgreSQL + Prisma**, MongoDB, … per **`DATABASE_NAME`**). **Production** is intended as **Node on a server without Docker** (see [`../README.md`](../README.md)). The monorepo does **not** define a server image build/push to **GitHub Container Registry (GHCR)** or any other registry; `server/docker/` is **local / lab** only.
+
+### PostgreSQL and Prisma
+
+**`DATABASE_NAME=POSTGRESQL_PRISMA`** for the Prisma-backed `users` flow. Run from **`server/`** after `pnpm install` at the monorepo root.
+
+| Context | Commands |
+|--------|----------|
+| **Docker — API in watch** (`web-api-watch` + Postgres) | `pnpm docker:watch`, then `pnpm docker:prisma:generate`, `pnpm docker:prisma:deploy`, then data: `pnpm docker:prisma:seed`. Same as `./docker/start.sh watch-up` from **`server/docker/`**. |
+| **Host — Postgres on `localhost`** | `pnpm prisma generate`, `pnpm prisma migrate deploy`, then `pnpm prisma:seed`. If `DATABASE_URL` still uses `@postgres`, use `pnpm prisma:migrate:deploy:docker` and `pnpm prisma:seed:docker`. See **`prisma/README.md`**. |
+
+Details: [`docker/README.md`](docker/README.md#prisma-migrations-et-démo) and **`.env.example`**. Demo login: `demo-user@example.local` / `password123`.
 
 ### 1. With Docker
 
-Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.dev.yaml`.
+Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.dev.yaml`. Full guide: [`docker/README.md`](docker/README.md).
 
-**MongoDB + mongo-express** are started **only** when `DATABASE_NAME=MONGODB` in the repo **`.env`** (default in `.env.example`). With `FIREBASE`, `IN-MEMORY`, etc., those containers are not started, so you avoid running an empty Mongo stack.
+**PostgreSQL + pgweb** start when **`DATABASE_NAME=POSTGRESQL_PRISMA`**. **MongoDB + mongo-express** start when **`DATABASE_NAME=MONGODB`**. With `IN-MEMORY`, those database containers are not started. Compose **profiles** (`mongodb`, `pg`) keep these sets separate.
 
-1. From the **repository root**, copy environment variables and adjust secrets:
+1. Environment file: follow **[Installation](#installation)** above (`server/.env` from `server/.env.example`). Set `DATABASE_NAME` (`MONGODB`, `POSTGRESQL_PRISMA`, `IN-MEMORY`, …), plus `JWT_SECRET`, CORS, etc.
 
-   ```sh
-   cp .env.example .env
-   ```
-
-   Set `DATABASE_NAME` according to your backend (`MONGODB`, `FIREBASE`, `IN-MEMORY`, …), plus `JWT_SECRET`, CORS, etc.
-
-   **`DATABASE_URL`:** `.env.example` keeps **`localhost`** as the default (`nx serve` or Mongo on the host). **Only when** you run the **API in Docker** with the compose Mongo stack (`DATABASE_NAME=MONGODB`), set the value to `DATABASE_URL=mongodb://mongodb:27017/quizapp` so the container reaches the `mongodb` service on the compose network. If you **do not** use Docker for the API, keep the `localhost` value.
+   **`DATABASE_URL`:** `.env.example` defaults to **PostgreSQL** (e.g. `postgres://…@postgres:5432/…` when the API runs in Docker). **API in Docker** + **`pg`** profile: host **`postgres`** on the compose network (not `localhost` from the api container). **API on the host** (`nx serve`) + Postgres in Docker: URL to **`localhost`** / **`127.0.0.1`** and **`POSTGRES_HOST_PORT`**. For **Mongo**, see `.env.example`; in Docker, host **`mongodb`** (e.g. `mongodb://mongodb:27017/bugbountyapp`).
 
 2. Start:
 
@@ -100,28 +143,29 @@ Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.
 
    Same entry point: `./docker/start` (wrapper).
 
-   **Stop:** `./docker/start.sh down` — stops **everything** (classic API, **api-watch**, Mongo, mongo-express), removes the network and orphans (`--remove-orphans`). Previously, `down` without the `watch` profile could leave `web-api-watch` running and the network “still in use”. Volumes (Mongo, `web_api_node_modules`, …): `./docker/start.sh down -v`.
+   **Stop:** `./docker/start.sh down` — stops **everything** (classic API, **api-watch**, Mongo, mongo-express, Postgres, pgweb, depending on enabled profiles), removes the network and orphans (`--remove-orphans`). Previously, `down` without the `watch` profile could leave `web-api-watch` running and the network “still in use”. Volumes (Mongo, Postgres, `web_api_node_modules`, …): `./docker/start.sh down -v`.
 
    **Fast API cycle (no image rebuild):**
    - `./docker/start.sh api-restart` (or `./docker/start.sh restart-api`): restarts API without rebuilding the image.
-   - `./docker/start.sh api-stop` (or `./docker/start.sh stop-api`): stops API (and its Mongo dependency when enabled).
-   - If `DATABASE_NAME=MONGODB`, the script automatically applies the Mongo profile and manages `mongodb` + `api`.
-   - Otherwise, only `api` operations are executed.
-   - After `./docker/start.sh` (`up`), the script directly follows live API logs in the terminal (`logs -f api`).
+   - `./docker/start.sh api-stop` (or `./docker/start.sh stop-api`): stops the API and, depending on **`DATABASE_NAME`**, the matching Docker DB stack (**MongoDB** when `MONGODB`, **Postgres + pgweb** when **`POSTGRESQL_PRISMA`**).
+   - If `DATABASE_NAME=MONGODB`, the script applies profile **`mongodb`** and targets `mongodb` + `api`.
+   - If `DATABASE_NAME=POSTGRESQL_PRISMA`, the script applies profile **`pg`** and orchestrates **`postgres`**, **`pgweb`**, and **`api`** depending on the command (`api-restart` only brings up **`postgres`** + **`api`** — see `start.sh`).
+   - Otherwise (`IN-MEMORY`, …), only **`api`** is affected (no compose DB containers).
+   - After `./docker/start.sh` (`up`), the script tails API logs in the terminal (`logs -f api`).
      - Exit live tail: `Ctrl+C` (containers keep running).
-     - Disable this behavior: `QUIZZAM_FOLLOW_API_LOGS=0 ./docker/start.sh`.
+     - Disable this behavior: `API_FOLLOW_LOGS=0 ./docker/start.sh`.
 
    **Watch mode (dev inside container, no rebuild on each change):**
    - `./docker/start.sh watch-up` (alias `dev-up`): starts `api-watch` with source bind mount (repo -> `/usr/src/app`) and Nest/Nx watcher inside the container.
    - Container `node_modules` use a **Docker volume** (separate from the host): on **startup**, `pnpm install` runs so the tree matches the mounted `package.json` / `pnpm-lock.yaml`. The repo ships **`.npmrc`** (`confirm-modules-purge=false`) so pnpm does not prompt in a non-TTY session (otherwise the install can stop before packages are written). After you add or change a dependency on the host, **commit the lockfile**, then **restart** watch — you do not need to remove the volume every time.
    - If the deps volume looks broken: `watch-stop` then `docker volume rm web-api-dev_web_api_node_modules` (or the name from `docker volume ls | grep web-api`), then `watch-up`.
    - Code edits on the host are automatically reflected in the container (hot reload).
-   - `./docker/start.sh watch-stop` (alias `dev-stop`): stops watch mode.
+   - `./docker/start.sh watch-stop` (alias `dev-stop`): stops watch mode (and Mongo or Postgres + pgweb when that profile is active, same idea as `watch-up`).
    - `api-watch` runs **root** only for `pnpm install` (the `node_modules` named volume is root-owned by default) then **Nx** as user **`node`**. TTY: `docker exec -it web-api-watch sh` (root) or `docker exec -it -u node web-api-watch sh` for a `node` shell.
    - In watch mode, `api-watch` logs are tailed live at the end of the command.
 
    **Demo user import (Mongo):**
-   - `./docker/start.sh dump-users`: imports `docker/dump/user.json` into `quizapp.users` with `--jsonArray --drop` (collection is replaced before import).
+   - `./docker/start.sh dump-users`: imports `docker/dump/user.json` into `bugbountyapp.users` with `--jsonArray --drop` (collection is replaced before import).
    - Demo login credentials:
      - **email**: `demo-user@example.local`
      - **password**: `password123`
@@ -131,15 +175,21 @@ Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.
    ```
    - Copy the output into `passwordHash` in `docker/dump/user.json` (hash changes every run because salt is random).
 
-   The script reads `.env` and adds `--profile mongodb` only when `DATABASE_NAME=MONGODB` (including for `down`, so the right services are targeted).
+   The script reads **`server/.env`** and adds **`--profile mongodb`** or **`--profile pg`** only when `DATABASE_NAME` is **`MONGODB`** or **`POSTGRESQL_PRISMA`** (including for `down`, so the right services stop).
 
-   **Without** the script (Mongo mode):
+   **Without** the script — **Mongo**:
 
    ```sh
    docker compose -f docker/compose.dev.yaml --profile mongodb up --build -d
    ```
 
-   **Without** Mongo (e.g. Firebase / in-memory):
+   **Without** the script — **Postgres**:
+
+   ```sh
+   docker compose -f docker/compose.dev.yaml --profile pg up --build -d
+   ```
+
+   **Without** a Compose DB (e.g. in-memory):
 
    ```sh
    docker compose -f docker/compose.dev.yaml up --build -d
@@ -149,54 +199,48 @@ Always builds and runs the **API** from `docker/Dockerfile` via `docker/compose.
 
    | Service | URL |
    | ------- | --- |
-   | API (REST prefix) | `http://localhost:3003/api` (default host port; override with `API_HOST_PORT`) |
+   | API (REST prefix) | `http://localhost:3003/api` (default host port **3003**; override with **`API_HOST_PORT`** in `server/.env`, read by `compose.dev.yaml`) |
    | OpenAPI (Swagger UI) | `http://localhost:3003/api/docs` (same host port) |
-   | mongo-express | only if `DATABASE_NAME=MONGODB` — `http://localhost:8086` |
-   | MongoDB (from host) | only if `DATABASE_NAME=MONGODB` — `mongodb://localhost:27017` / database `quizapp` |
+   | mongo-express | if **`DATABASE_NAME=MONGODB`** — `http://localhost:8086` |
+   | pgweb | if **`pg`** profile (`POSTGRESQL_PRISMA`) — `http://localhost:8087` (override **`PGWEB_HOST_PORT`**) |
+   | MongoDB (from host) | if **`DATABASE_NAME=MONGODB`** — `mongodb://localhost:27017` / database `bugbountyapp` |
+   | PostgreSQL (from host) | if **`pg`** profile — `localhost:5432` (override **`POSTGRES_HOST_PORT`**) |
 
    **mongo-express:** in dev, the UI does not ask for a password (`ME_CONFIG_BASICAUTH=false` in `compose.dev.yaml`). Without that, the image often defaults to HTTP Basic **admin** / **pass** for the web UI — only use that on a trusted local machine.
 
-With the Mongo profile, ensure ports **27017**, **3003** (or `API_HOST_PORT`), and **8086** are free.
+With the **Mongo** profile, ensure ports **27017**, **3003** (or **`API_HOST_PORT`**), and **8086** are free. With the **Postgres** profile, ensure **5432** (or **`POSTGRES_HOST_PORT`**), **8087** (or **`PGWEB_HOST_PORT`**), and the API port are free.
 
 **Logs (Mongo mode):** `cd docker && docker compose -f compose.dev.yaml --profile mongodb logs -f`
 
+**Logs (Postgres mode):** `cd docker && docker compose -f compose.dev.yaml --profile pg logs -f`
+
 **Logs (API only):** `cd docker && docker compose -f compose.dev.yaml logs -f`
-
-**Firebase:** Compose does not provision Firebase. If `DATABASE_NAME=FIREBASE` (or you rely on Firebase for auth/data), create a project in the [Firebase console](https://console.firebase.google.com/), add credentials, and configure `.env` (mount or supply `FIREBASE_KEY_PATH` in the container if needed). This is separate from the optional Mongo services above.
-
----
 
 ### 2. Manual setup (Node on the host)
 
-Use this when you prefer **not** to run the API in Docker. You still need a **MongoDB** instance the app can reach (local install, or Mongo only in Docker if you prefer).
+Without the **API** container. Provide a database reachable from your machine (Postgres and/or Mongo per **`DATABASE_NAME`**).
 
-1. Install dependencies from the **repository root**:
+1. **Dependencies** (repository root):
 
    ```sh
    pnpm install
    ```
 
-2. Configure `.env`:
+2. **`server/.env`** (see **[Installation](#installation)**).
 
-   ```sh
-   cp .env.example .env
-   ```
+   **PostgreSQL + Prisma:** `DATABASE_NAME=POSTGRESQL_PRISMA`, **`DATABASE_URL`** with host **`localhost`** (or `127.0.0.1`). Then apply the schema — **[PostgreSQL and Prisma](#postgresql-and-prisma)** (`prisma generate`, `migrate deploy`, optional seed).
 
-   Keep the default **`DATABASE_URL`** with **`localhost`** (leave the `mongodb://mongodb…` line **commented** — that line is only for the API **inside** Docker). Point to your Mongo instance, typically:
+   **MongoDB:** `DATABASE_URL=mongodb://localhost:27017/bugbountyapp` (`mongodb://mongodb…` in `.env.example` is for the API **in Docker** only).
 
-   ```env
-   DATABASE_URL=mongodb://localhost:27017/quizapp
-   ```
+   Set `JWT_SECRET`, `PORT`, `CORS_ORIGIN`, etc.
 
-   Set `JWT_SECRET`, `PORT`, `CORS_ORIGIN`, etc. as needed.
-
-3. Run the API in dev (watch mode):
+3. **Dev API:**
 
    ```sh
    npx nx serve web-api
    ```
 
-The app listens on `PORT` from `.env` (see `.env.example`; default **3000** unless you change it).
+   Listens on **`PORT`** from `.env` (default **3000**; align e2e if the Docker API uses **3003** on the host).
 
 ---
 
@@ -216,7 +260,7 @@ npx nx show project web-api
 
 Specs under `e2e/` call the base URL from **`HOST`** and **`PORT`** (see `e2e/src/constants.ts` and `e2e/src/support/test-setup.ts`), default **`http://localhost:3000`**.
 
-- **API already running** (often Docker with host port **`3003`**, from `API_HOST_PORT` in `docker/`) : do **not** start a second `npx nx serve` on the **same** port. Point tests at the container, e.g. `PORT=3003` (and `AUTH_TYPE=JWT` if needed) then `pnpm exec nx run e2e:e2e` — no extra process bound to that port.
+- **API already running** (often Docker with host port **`3003`**, from `API_HOST_PORT` in `docker/`) : do **not** start a second `npx nx serve` on the **same** port. Point tests at the container, e.g. `PORT=3003` (and `AUTH_TYPE=PASSPORT_JWT` if needed) then `pnpm exec nx run e2e:e2e` — no extra process bound to that port.
 - For a **local** `nx serve` **while** Docker watch uses 3003, use a **different** free port (e.g. `3000` or `3010` in your `.env`) and the **same** `PORT` when running e2e.
 
 ---

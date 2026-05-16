@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { I_CV_REPOSITORY } from '../document-rendering/application/ports/cv-repository.port';
+import { I_REPORT_REPOSITORY } from '../document-rendering/application/ports/report-repository.port';
 
 describe('AppController', () => {
   let controller: AppController;
@@ -19,11 +19,12 @@ describe('AppController', () => {
           },
         },
         {
-          provide: I_CV_REPOSITORY,
+          provide: I_REPORT_REPOSITORY,
           useValue: {
-            listCvVersions: jest.fn().mockResolvedValue(['v1']),
-            listCvLocales: jest.fn().mockResolvedValue(['fr']),
-            getCvTemplateData: jest.fn().mockResolvedValue({}),
+            listReportStyles: jest.fn().mockResolvedValue(['report-final']),
+            listReportVersions: jest.fn().mockResolvedValue(['v1']),
+            listReportLocales: jest.fn().mockResolvedValue(['fr']),
+            getReportTemplateData: jest.fn().mockResolvedValue({}),
           },
         },
       ],
@@ -52,6 +53,8 @@ describe('AppController', () => {
       dashboardBtnText: 'Dashboard',
       docsUrl: '/api/docs',
       dashboardUrl: '/api/dashboard',
+      totpSetupUrl: '/api/dashboard/totp',
+      totpSetupBtnText: 'Demo : activer le TOTP',
     });
   });
 });

@@ -1,21 +1,49 @@
 {
-  "title": "Clean App — Next.js template",
+  "title": "BugBountyApp — Next.js template",
   "description": "Auth-first Next.js starter with TypeScript, Prisma, and a modular layout — ready to extend.",
   "tagline": "Ship features faster with a clear structure.",
   "home": {
     "metaTitle": "Home",
-    "heroTitle": "Next.js Clean Architectured Template",
-    "heroLead": "Reusable starter with registration and login flows already wired.",
-    "heroHint": "Use the header navigation to access authentication pages and start adapting the template to your project."
+    "heroTitle": "BugBountyApp",
+    "heroLead": "Bug bounty platform for web applications.",
+    "heroHint": "Prepare to integrate real bug bounty programs (YesWeHack, HackerOne, etc.) with our educational support.",
+    "demoNotice": "This is a demonstration site. Please do not enter personal data — use fictional information instead, as the site is still under construction."
+  },
+  "loading": {
+    "pageTitle": "Loading",
+    "pageHint": "Preparing this page…"
+  },
+  "notFound": {
+    "kicker": "404",
+    "title": "Page not found",
+    "description": "The page you requested does not exist or is no longer available.",
+    "ctaHome": "Back to home"
+  },
+  "routeError": {
+    "kicker": "Error",
+    "title": "This page could not be shown",
+    "description": "Something went wrong while loading this content. You can try again or return home.",
+    "retry": "Try again",
+    "digestLabel": "Reference",
+    "devMessage": "Detail (dev)"
   },
   "header": {
-    "brand": "CleanApp",
+    "brand": "BugBountyApp",
     "home": "Home",
+    "dashboard": "Dashboard",
+    "admin": "Admin",
     "login": "Log in",
+    "logout": "Log out",
+    "logoutPending": "Signing out…",
     "register": "Register"
   },
   "footer": {
-    "copyright": "© {{year}} CleanApp",
-    "credit": "Built with Next.js"
+    "copyright": "© 2026 BugBountyApp",
+    "privacy": "Privacy policy",
+    "notice": "Legal notice",
+    "credits": "Credits"
+  },
+  "errors": {
+    "network": "Network error. Please try again."
   }
 }

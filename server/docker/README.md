@@ -1,6 +1,13 @@
 # Docker — API Bug Bounty (backend)
 
-Ce dossier regroupe **`Dockerfile`**, **`compose.dev.yaml`** (développement) et **`compose.prod.yml`** (déploiement type VPS). Les commandes sont à lancer depuis la machine hôte ; tous les exemples **`docker compose`** supposent que vous êtes dans **`server/docker/`** (racine du projet compose dev : même répertoire que `start.sh`).
+**Usage prévu : développement local (optionnel).** La production cible du monorepo est **sans conteneur** ni registre d’images (voir [`../../README.md`](../../README.md)). Il n’existe **pas** de flux projet vers **GitHub Container Registry (GHCR)** ni vers un autre registre pour publier l’API : pas de `docker build -t ghcr.io/…` attendu ni de déploiement par image serveur. Ce dossier regroupe **`Dockerfile`**, **`compose.dev.yaml`** (dev) et **`compose.lab.yml`** (exemple de stack lab / local).
+
+Les commandes sont à lancer depuis la machine hôte ; tous les exemples **`docker compose`** supposent que vous êtes dans **`server/docker/`** (racine du projet compose dev : même répertoire que `start.sh`).
+
+**`start.sh`** lit **`DATABASE_NAME`** dans **`server/.env`** et active :
+- le profil **`pg`** si **`POSTGRESQL_PRISMA`** (Postgres + pgweb) ;
+- le profil **`mongodb`** si **`MONGODB`** (Mongo + mongo-express) ;
+- sinon pas de conteneur de base Docker pour ce mode.
 
 Documentation générale du backend : [`../README.md`](../README.md).
 
@@ -23,12 +30,20 @@ Documentation générale du backend : [`../README.md`](../README.md).
 
    Si `docker compose` échoue mais `docker-compose` (V1 standalone) existe, le script **`start.sh`** bascule dessus automatiquement.
 
-3. **Droits utilisateur** : éviter `sudo` sur chaque commande :
+3. **Droits utilisateur** : Avertissement.
+
+Eviter de faire ceci si vous voulez rester en sécurité ou faîte-le si vous êtes sûr de vous sur votre machine (cela permet de ne pas devoir s'authentifier):
 
    ```bash
    sudo usermod -aG docker "$USER"
    # puis fermer/réouvrir la session (ou logout/login).
    ```
+   Cela permet l'escalade de privilège si quelqu'un sait accéder à votre session. Il faut s'interdire de faire cela en prod ou sur un outil partagé. C'est moins dangereux sur sa machine mais reste un abaissement important des sécurités.
+   Vous devrez alors vous authentifier sur chaque commande docker (sur wsl ou linux cela revient à faire `sudo` + entrer mot de passe avant les commandes docker)
+
+   Une autre manière de cumuler comfort et sécurité est mise en avant, à vous de voir si elle est sécure : 
+
+   [Mode rootless de docker](https://docs.docker.com/engine/security/rootless/)
 
 4. **Compose** doit pouvoir construire une image : aucun lien obligatoire avec le frontend du monorepo pour l’API (contexte de build : dossier **`server/`**).
 
@@ -126,7 +141,7 @@ Possible si vous utilisez uniquement **`docker compose -f compose.dev.yaml ...`*
 | Fichier | Rôle |
 |--------|------|
 | **`server/.env`** | Variables de l’API (lu par `compose.dev.yaml` via `env_file: ../.env`). À créer depuis [`../.env.example`](../.env.example). |
-| **`server/docker/.env`** (prod) | Pour **`compose.prod.yml`** : fichier attendu à côté du compose sur le VPS (voir en-tête de `compose.prod.yml`). |
+| **`server/docker/.env`** (stack `compose.lab.yml`) | Pour **`compose.lab.yml`** (local / lab uniquement) : fichier attendu à côté du compose sur la machine qui exécute Docker (voir en-tête de `compose.lab.yml`). |
 
 **Point critique avec Mongo en Docker (dev)** : depuis le conteneur `api`, l’hôte Mongo s’appelle le **nom du service Compose** (`mongodb`), pas `localhost`. Si `DATABASE_URL` pointe encore vers `mongodb://localhost:27017`, l’API **dans** Docker ne joindra pas Mongo — utiliser une URL du type `mongodb://mongodb:27017/…` comme indiqué dans `.env.example`.
 
@@ -138,9 +153,94 @@ Possible si vous utilisez uniquement **`docker compose -f compose.dev.yaml ...`*
 |--------|-----------------|
 | *(aucun)* | Service **`api`** uniquement (image build `target: production`). |
 | **`mongodb`** | **`mongodb`** + **`mongo-express`** + permet d’aligner **`api`** sur une stack avec base locale. Activé automatiquement par **`start.sh`** si **`DATABASE_NAME=MONGODB`** dans `server/.env`. |
+| **`pg`** | **`postgres`** (PostgreSQL 18, image officielle **Alpine**) + **`pgweb`**. Activé par **`start.sh`** si **`DATABASE_NAME=POSTGRESQL_PRISMA`**, ou à la main : **`--profile pg`**. Par défaut : Postgres sur l’hôte **`5432`**, pgweb sur **`8087`** (mongo-express : **`8086`**). |
 | **`watch`** | **`api-watch`** (code monté depuis l’hôte, `pnpm install` + `nx serve` dans le conteneur, reload). Jamais utilisé seul comme « prod » ; destiné au dev Docker. |
 
 Projet Compose : nom **`web-api-dev`**.
+
+---
+
+## PostgreSQL (Postgres + pgweb)
+
+Le profil **`pg`** s’active lorsque **`DATABASE_NAME=POSTGRESQL_PRISMA`** dans **`server/.env`** (Postgres + pgweb + API selon la commande). **MongoDB** est une alternative (profil **`mongodb`**). Les services **Postgres** ci‑dessous servent notamment à :
+
+- lancer une base **PostgreSQL** avec **`start.sh`** ou le compose ;
+- monter **uniquement Postgres + pgweb** sans API (**voir ci‑dessous**).
+
+Variables optionnelles (fichier d’environnement ou shell) : **`POSTGRES_USER`** (défaut `bugbountyapp`), **`POSTGRES_PASSWORD`** (défaut `bugbountyapp` en dev), **`POSTGRES_DB`** (défaut `bugbountyapp`), **`POSTGRES_HOST_PORT`** (défaut `5432`), **`PGWEB_HOST_PORT`** (défaut **`8087`** pour éviter le chevauchement avec mongo-express sur **`8086`**).
+
+### Prisma, migrations et démo
+
+Schéma et migrations : dossier **`server/prisma/`** (monté dans **`web-api-watch`** vers **`/usr/src/app`** — aucun volume Prisma supplémentaire). Commandes à lancer depuis **`server/`** :
+
+| Script | Effet |
+|--------|--------|
+| **`pnpm docker:prisma:generate`** | `prisma generate` dans le conteneur **`web-api-watch`** (profils **`watch`** + **`pg`** actifs). |
+| **`pnpm docker:prisma:deploy`** | `prisma migrate deploy` (schéma uniquement ; les données sont dans **`pnpm docker:prisma:seed`**). |
+| **`pnpm docker:prisma:migrate:dev`** | `prisma migrate dev` (interactif). |
+| **`pnpm docker:prisma:seed`** | `prisma db seed` (rôles + démo optionnelle via `prisma/seed-runner.mjs`). |
+
+Prérequis : **`web-api-watch`** et **`postgres`** déjà démarrés (ex. **`pnpm docker:watch`** à la racine **`server/`**).
+
+**Prisma sur la machine hôte** (base joignable en `localhost`) : `pnpm prisma generate`, `pnpm prisma migrate deploy`, `pnpm prisma:seed`. Si **`DATABASE_URL`** dans **`server/.env`** cible encore le service Docker **`postgres`**, préférer **`pnpm prisma:migrate:deploy:docker`** et **`pnpm prisma:seed:docker`** (scripts **`server/docker/*.cjs`** qui réécrivent l’URL vers **`127.0.0.1`** / **`POSTGRES_HOST_PORT`**).
+
+Vue d’ensemble : [`../README.md`](../README.md#postgresql-et-prisma).
+
+### Postgres seul (sans conteneur `api`) — `compose.dev.yaml`
+
+Toujours depuis **`server/docker/`** : activez le profil **`pg`** et **ne listez que les services** **`postgres`** et **`pgweb`** — Compose ne démarre pas **`api`**.
+
+```bash
+docker compose -f compose.dev.yaml --profile pg up -d postgres pgweb
+
+docker compose -f compose.dev.yaml --profile pg ps
+docker compose -f compose.dev.yaml --profile pg logs -f postgres
+
+docker compose -f compose.dev.yaml --profile pg down
+docker compose -f compose.dev.yaml --profile pg down -v
+```
+
+- **pgweb** : `http://localhost:8087` par défaut (ou **`PGWEB_HOST_PORT`**).
+- **Connexion depuis l’hôte** : `localhost:5432` (ou **`POSTGRES_HOST_PORT`**).
+
+### Développement — Postgres en plus de la stack API (`compose.dev.yaml`)
+
+Exemples (API + Mongo **ou** API seule + Postgres) :
+
+```bash
+# API + Mongo (profil mongodb) + Postgres + pgweb
+docker compose -f compose.dev.yaml --profile mongodb --profile pg up -d --build
+
+# API seule + Postgres + pgweb (sans Mongo)
+docker compose -f compose.dev.yaml --profile pg up -d --build
+```
+
+Depuis un conteneur sur le même réseau Compose, l’hôte Postgres est le **nom de service** **`postgres`** :  
+`postgres://bugbountyapp:bugbountyapp@postgres:5432/bugbountyapp` (adapter user / mot de passe / base si vous surchargez les variables).
+
+Pour **tout arrêter** quand vous avez démarré Postgres, incluez le profil dans **`down`** :
+
+```bash
+docker compose -f compose.dev.yaml --profile watch --profile mongodb --profile pg down --remove-orphans
+```
+
+(ajustez **`mongodb`** / **`watch`** selon ce que vous aviez lancé.)
+
+### Stack exemple (`compose.lab.yml`) — Postgres optionnel
+
+Par défaut, ce compose démarre **`app`** + **`mongo`** uniquement. Pour ajouter **PostgreSQL** sur le même réseau Docker (sans l’exposer sur l’hôte) :
+
+```bash
+docker compose -f compose.lab.yml --env-file .env --profile pg up -d --build
+```
+
+Définir au minimum **`POSTGRES_PASSWORD`** dans le `.env` à côté du compose (et les autres **`POSTGRES_*`** si besoin). Aujourd’hui, le service **`app`** pointe encore vers Mongo via **`DATABASE_URL`** dans le fichier d’exemple : brancher l’API sur Postgres suppose une évolution applicative et une **`DATABASE_URL`** adaptée.
+
+### Faut-il extraire Mongo dans un `compose.mongo.yaml` séparé ?
+
+**En général, non**, tant que la stack **dev** reste un tout cohérent : un seul **`compose.dev.yaml`** évite d’avoir à chaîner plusieurs `-f` à chaque commande et documente un seul fichier « référence ».
+
+**Cela devient pertinent** si plusieurs dépôts ou scripts ne consomment **que** la base, ou si vous voulez des cycles de vie très différents (bases partagées, versions figées). Dans ce cas, préférez souvent la directive **`include:`** de Compose pour inclure un fragment commun, plutôt que de dupliquer des services.
 
 ---
 
@@ -150,23 +250,22 @@ Projet Compose : nom **`web-api-dev`**.
 
 ### Ce que fait le script automatiquement
 
-- Lit **`DATABASE_NAME`** dans **`server/../.env`** (donc **`server/.env`**). Si aucun fichier : valeur par défaut **MONGODB** (pour le script uniquement ; mieux vaut toujours avoir un `.env` explicite).
-- Ajoute **`--profile mongodb`** si **`DATABASE_NAME=MONGODB`**.
-- **`down`** active toujours le profil **`watch`** (+ **`mongodb`** si besoin) pour que **`api-watch`** soit bien arrêté et que le réseau compose ne reste pas bloqué.
+- Lit **`DATABASE_NAME`** dans **`server/../.env`** (donc **`server/.env`**). Si aucun fichier : valeur par défaut **POSTGRESQL_PRISMA** (pour le script uniquement ; mieux vaut toujours avoir un `.env` explicite, comme **`.env.example`**).
+- Ajoute **`--profile mongodb`** si **`DATABASE_NAME=MONGODB`**, ou **`--profile pg`** si **`DATABASE_NAME=POSTGRESQL_PRISMA`**.
+- **`down`** active les profils **`watch`**, **`mongodb`** et **`pg`** pour que tout service (dont **`api-watch`**) soit bien arrêté et que le réseau compose ne reste pas bloqué.
 
 ### Variables optionnelles reconnues par le script
 
 | Variable | Effet |
 |----------|--------|
-| **`API_HOST_PORT`** | Port sur l’**hôte** mappé vers le port **3000** du conteneur API (défaut **3003**). |
-| **`QUIZZAM_HOST_PORT`** | Alias historique de **`API_HOST_PORT`** si celle-ci est vide. |
-| **`API_FOLLOW_LOGS`** / **`QUIZZAM_FOLLOW_API_LOGS`** | Après `./start.sh up` : suivre ou non les logs API en direct (`1`/`true` par défaut ; **`0`** pour désactiver). |
+| **`API_HOST_PORT`** | Port sur l’**hôte** mappé vers le port **3000** du conteneur API (défaut **3003** ; lu depuis **`server/.env`** par `compose.dev.yaml`). |
+| **`API_FOLLOW_LOGS`** | Après `./start.sh up` : suivre ou non les logs API en direct (`1`/`true` par défaut ; **`0`** pour désactiver). |
 
 ### Commands détaillées
 
 | Commande | Rôle |
 |----------|------|
-| **`./start.sh`** ou **`./start.sh up`** | Build (si nécessaire) et démarre la stack : **`api`** seul, ou **`mongodb`** + **`mongo-express`** + **`api`** si `DATABASE_NAME=MONGODB`. Vérifie Mongo (ping) si Mongo est actif, affiche un récap d’URLs, puis peut enchaîner un **`logs -f api`** selon **`API_FOLLOW_LOGS`**. |
+| **`./start.sh`** ou **`./start.sh up`** | Build (si nécessaire) et démarre la stack : **`api`** seul, ou **`mongodb`** + **`mongo-express`** + **`api`** si `DATABASE_NAME=MONGODB`, ou **`postgres`** + **`pgweb`** + **`api`** si `DATABASE_NAME=POSTGRESQL_PRISMA`. Vérifie la base (ping) si un profil DB est actif, affiche un récap d’URLs, puis peut enchaîner un **`logs -f api`** selon **`API_FOLLOW_LOGS`**. |
 | **`./start.sh stop`** | Stoppe tous les services de la stack **dev** (**`api`**, **`api-watch`**, **`mongodb`**, **`mongo-express`** si présents). Ne supprime **pas** réseaux ni volumes : redémarrage rapide ensuite. |
 | **`./start.sh down`** | **`docker compose … down --remove-orphans`** avec profils **`watch`** (+ **`mongodb`** si applicable). Coupe tout proprement, supprime le réseau projet. |
 | **`./start.sh down -v`** | Comme **`down`**, mais supprime aussi les **volumes nommés** (données Mongo **`mongo_data`**, volume **`web_api_node_modules`** du watch, etc.). |
@@ -175,7 +274,7 @@ Projet Compose : nom **`web-api-dev`**.
 | **`./start.sh logs`** | **`compose logs -f api`** uniquement (**Ctrl+C** stoppe la suite des logs sans arrêter les conteneurs). |
 | **`./start.sh watch-up`** ou **`./start.sh dev-up`** | Démarre le mode **hot reload** (service **`api-watch`**) : même port que l’API classique, donc **`api`** est d’abord arrêté. Détails et implications dans la section **« Hot reload : `watch-up` / `api-watch` »** ci‑dessous. |
 | **`./start.sh watch-stop`** ou **`./start.sh dev-stop`** | Arrête **`api-watch`** (+ Mongo + mongo-express si mode Mongo actif dans le script). |
-| **`./start.sh dump-users`** | Échoue si pas **`DATABASE_NAME=MONGODB`**. Lance **`mongodb`** si besoin puis **`mongoimport`** dans la base **`quizapp`**, collection **`users`**, fichier **`docker/dump/user.json`**, **`--drop --jsonArray`**. |
+| **`./start.sh dump-users`** | Échoue si pas **`DATABASE_NAME=MONGODB`**. Lance **`mongodb`** si besoin puis **`mongoimport`** dans la base **`bugbountyapp`**, collection **`users`**, fichier **`docker/dump/user.json`**, **`--drop --jsonArray`**. |
 
 **URLs typiques** (avec ports par défaut) :
 
@@ -235,7 +334,7 @@ docker exec -it web-api-mongodb sh
 - Si **`sh`** n’existait pas dans une image très minimaliste : **`docker exec -it <conteneur> /bin/sh`** même principe. Les images utilisées ici (**Node Alpine**, **`node:24`**) fournissent **`sh`**.
 - Quitter le shell : **`exit`** ou Ctrl+D.
 
-Shell dans la stack **prod** : utilise le **`container_name`** défini dans `compose.prod.yml` (ex. **`web-api-prod`**) une fois **`docker compose … up`** lancé.
+Shell dans la stack **`compose.lab.yml`** (lab) : utilise le **`container_name`** défini dans ce fichier (ex. **`web-api-lab`**) une fois **`docker compose … up`** lancé.
 
 ---
 
@@ -251,7 +350,7 @@ Toujours **`cd server/docker`** d’abord.
 docker compose -f compose.dev.yaml --profile mongodb up -d --build
 ```
 
-**Sans Mongo** (ex. **`IN-MEMORY`**, **`FIREBASE`** côté config, sans conteneurs Mongo) :
+**Sans Mongo** (ex. **`IN-MEMORY`** côté config, sans conteneurs Mongo) :
 
 ```bash
 docker compose -f compose.dev.yaml up -d --build
@@ -321,20 +420,20 @@ Assurez-vous que la base existe et que **`web-api-mongodb`** tourne (nom du cont
 
 ```bash
 docker compose -f compose.dev.yaml --profile mongodb up -d mongodb
-docker exec -i web-api-mongodb mongoimport --db quizapp --collection users --jsonArray --drop < dump/user.json
+docker exec -i web-api-mongodb mongoimport --db bugbountyapp --collection users --jsonArray --drop < dump/user.json
 ```
 
 (le chemin **`dump/user.json`** est relatif à **`server/docker/`**.)
 
-### Production (**`compose.prod.yml`**)
+### Stack exemple **`compose.lab.yml`** (local / lab)
 
 Depuis **`server/docker/`**, avec un fichier **`.env`** à côté du compose contenant **`JWT_SECRET`**, **`MONGO_ROOT_PASSWORD`**, etc. :
 
 ```bash
-docker compose -f compose.prod.yml --env-file .env up -d
+docker compose -f compose.lab.yml --env-file .env up -d --build
 ```
 
-Voir les commentaires en tête de **`compose.prod.yml`** (image **`ghcr.io/…`**, variables, absence d’exposition de Mongo sur l’hôte).
+Voir les commentaires en tête de **`compose.lab.yml`** (build de l’image **`app`** depuis **`docker/Dockerfile`**, variables d’environnement, absence d’exposition de Mongo sur l’hôte). Ce n’est **pas** le chemin de déploiement prod du monorepo (voir README racine).
 
 ---
 
@@ -347,5 +446,6 @@ Voir les commentaires en tête de **`compose.prod.yml`** (image **`ghcr.io/…`*
 ## Références
 
 - Compose dev : `compose.dev.yaml`
-- Compose prod : `compose.prod.yml`
+- Compose lab (exemple stack conteneurisée, pas déploiement prod du projet) : `compose.lab.yml`
+- Postgres (profil **`pg`**, y compris sans API : `docker compose … --profile pg up -d postgres pgweb`) : `compose.dev.yaml` et `compose.lab.yml`
 - Script : `start.sh` • raccourci : `start`

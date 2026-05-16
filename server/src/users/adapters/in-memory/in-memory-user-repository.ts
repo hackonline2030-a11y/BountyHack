@@ -1,9 +1,9 @@
 import { Injectable, Optional } from '@nestjs/common';
 import { IUserRepository } from '../../ports/user-repository.interface';
-import { UserRecord } from '../../models';
+import { UserAdminSummary, UserRecord } from '../../models';
 import { CreateUserProfilePayload } from '../../payloads';
 import { User } from '../../entities/user.entity';
-import { JwtInMemoryRegistry } from '../../../auth/infra/jwt-in-memory-registry';
+import { JwtInMemoryRegistry } from '../../../auth/adapters/passport-jwt/repositories/in-memory/jwt-in-memory-registry';
 
 @Injectable()
 export class InMemoryUserRepository implements IUserRepository {
@@ -20,8 +20,8 @@ export class InMemoryUserRepository implements IUserRepository {
     }
   }
 
-  async addUsername(user: CreateUserProfilePayload): Promise<void> {
-    return;
+  async addUsername(_user: CreateUserProfilePayload): Promise<void> {
+    void _user;
   }
 
   async findById(id: string): Promise<UserRecord | null> {
@@ -30,5 +30,14 @@ export class InMemoryUserRepository implements IUserRepository {
       return fromJwt;
     }
     return { uid: id, username: 'test-user' };
+  }
+
+  /**
+   * Admin listing is only wired against Postgres-Prisma in the current iteration.
+   * The in-memory adapter (used in tests) returns an empty list so the contract
+   * stays honourable without leaking ad-hoc test data through this surface.
+   */
+  async listAdminSummaries(): Promise<UserAdminSummary[]> {
+    return [];
   }
 }

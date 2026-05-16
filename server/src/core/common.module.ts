@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { RandomIDGenerator } from './adapters/random-id-generator';
+import { RandomIDGenerator } from './infrastructure/id-generator/random-id-generator';
 import { AppService } from './app.service';
 import { I_ID_GENERATOR } from './ports/id-generator.interface';
 

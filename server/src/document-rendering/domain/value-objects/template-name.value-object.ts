@@ -1,4 +1,4 @@
-import { InvalidCvTemplateError } from '../errors/invalid-cv-template.error';
+import { InvalidReportTemplateError } from '../errors/invalid-report-template.error';
 
 export class TemplateName {
   private constructor(private readonly value: string) {}
@@ -6,11 +6,11 @@ export class TemplateName {
   static create(raw: string): TemplateName {
     const normalized = (raw || '').trim();
     if (!normalized) {
-      throw new InvalidCvTemplateError('CvTemplate requires a template name.');
+      throw new InvalidReportTemplateError('ReportTemplate requires a template name.');
     }
     if (!/^[a-zA-Z0-9_-]+$/.test(normalized)) {
-      throw new InvalidCvTemplateError(
-        `CvTemplate templateName '${normalized}' is invalid.`,
+      throw new InvalidReportTemplateError(
+        `ReportTemplate templateName '${normalized}' is invalid.`,
       );
     }
     return new TemplateName(normalized);

@@ -1,21 +1,49 @@
 {
-  "title": "Clean App — modèle Next.js",
+  "title": "BugBountyApp — modèle Next.js",
   "description": "Base Next.js orientée authentification : TypeScript, Prisma et architecture modulaire — prête à être étendue.",
   "tagline": "Livrez plus vite avec une structure claire.",
   "home": {
     "metaTitle": "Accueil",
-    "heroTitle": "Modèle Next.js - Clean architecture",
-    "heroLead": "Base réutilisable avec inscription et connexion.",
-    "heroHint": "Utilisez la navigation du header pour accéder aux pages d’authentification et adapter le modèle à votre projet."
+    "heroTitle": "BugBountyApp",
+    "heroLead": "Plateforme de bug bounty pour les applications web.",
+    "heroHint": "Préparez-vous à intégrer de véritable programmes de bug bounty (YesWeHack, HackerOne, etc.) avec notre accompagnement pédagogique.",
+    "demoNotice": "Ceci est un site de démonstration. Merci de ne pas y laisser de données personnelles : préférez l’usage de données fictives car le site est en cours de construction."
+  },
+  "loading": {
+    "pageTitle": "Chargement",
+    "pageHint": "Préparation de la page…"
+  },
+  "notFound": {
+    "kicker": "Erreur 404",
+    "title": "Page introuvable",
+    "description": "La page demandée n’existe pas ou n’est plus disponible.",
+    "ctaHome": "Retour à l’accueil"
+  },
+  "routeError": {
+    "kicker": "Erreur",
+    "title": "Impossible d’afficher cette page",
+    "description": "Un incident technique empêche l’affichage du contenu. Vous pouvez réessayer ou revenir à l’accueil.",
+    "retry": "Réessayer",
+    "digestLabel": "Référence",
+    "devMessage": "Détail (dev)"
   },
   "header": {
-    "brand": "CleanApp",
+    "brand": "BugBountyApp",
     "home": "Accueil",
+    "dashboard": "Tableau de bord",
+    "admin": "Admin",
     "login": "Connexion",
+    "logout": "Déconnexion",
+    "logoutPending": "Déconnexion…",
     "register": "Inscription"
   },
   "footer": {
-    "copyright": "© {{year}} CleanApp",
-    "credit": "Construit avec Next.js"
+    "copyright": "© 2026 BugBountyApp",
+    "privacy": "Politique de confidentialite",
+    "notice": "Mentions legales",
+    "credits": "Credits"
+  },
+  "errors": {
+    "network": "Erreur réseau. Veuillez réessayer."
   }
 }

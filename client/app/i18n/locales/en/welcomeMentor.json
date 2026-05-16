@@ -1,0 +1,68 @@
+{
+  "welcomeMentor": {
+    "metaTitle": "Mentor dashboard",
+    "heading": "Welcome",
+    "headingWithUsername": "Welcome, {{username}}",
+    "subheading": "Methodological and technical support for researchers — no YesWeHack account or platform submission access.",
+    "nav": {
+      "label": "Dashboard navigation",
+      "emails": "Emails",
+      "reports": "Cases to support",
+      "teams": "Report teams",
+      "colleagues": "Colleagues",
+      "support": "Support",
+      "settings": "Settings"
+    },
+    "mission": {
+      "title": "Your mentor role",
+      "intro": "Mentors support participants on methodological and technical aspects, with a progressive skills-building approach.",
+      "items": {
+        "methodology": "Teaching bug bounty methodologies",
+        "juniors": "Technical support for junior researchers",
+        "impact": "Assessing relevance and impact of findings",
+        "security": "Helping understand security mechanisms",
+        "review": "Technical review before the reporting phase"
+      },
+      "boundary": "You do not have access to the YesWeHack account and do not take part in platform submission."
+    },
+    "cards": {
+      "reports": {
+        "title": "Cases to support",
+        "subtitle": "{{n}} active cases",
+        "empty": "No cases awaiting support.",
+        "stepLabel": "Step {{current}}/{{total}}",
+        "submittedAgo": "Submitted {{value}} ago",
+        "cta": "View cases"
+      },
+      "teams": {
+        "title": "Report teams",
+        "subtitle": "Join a team via the coordinator",
+        "description": "Report teams are assembled by the coordinator (at least hunter, quality checker, mentor). You may request to join.",
+        "cta": "My teams & requests",
+        "askCta": "Request assignment"
+      },
+      "messages": {
+        "title": "Recent messages",
+        "empty": "No messages.",
+        "cta": "View all messages",
+        "ago": "{{value}} ago",
+        "unread": "Unread"
+      },
+      "news": {
+        "title": "Learning news",
+        "tagAnnouncement": "Announcement",
+        "tagInfo": "Info",
+        "tagUpdate": "Update",
+        "cta": "View all news"
+      },
+      "agenda": {
+        "title": "Agenda",
+        "subtitle": "Coaching sessions",
+        "empty": "No upcoming events.",
+        "locationRemote": "Remote",
+        "locationOnsite": "On-site",
+        "cta": "View agenda"
+      }
+    }
+  }
+}

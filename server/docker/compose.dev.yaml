@@ -1,14 +1,14 @@
 # Dev local dans Docker : API + services optionnels selon DATABASE_NAME (voir README).
 # MongoDB + mongo-express : profil « mongodb » (démarrés seulement si DATABASE_NAME=MONGODB).
-# Prérequis : .env à la racine du projet. Port API hôte : API_HOST_PORT (défaut 3003 ; QUIZZAM_HOST_PORT
-# est encore accepté pour compatibilité).
+# PostgreSQL + pgweb : profil « pg » (même fichier que l’API ; standalone sans API : voir README).
+# Prérequis : server/.env. Port API sur l’hôte : API_HOST_PORT (défaut 3003).
 #
 # api-watch : le volume « web_api_node_modules » isole node_modules (évite mélange hôte ↔ Linux conteneur).
 # À chaque démarrage, « pnpm install » est exécuté pour resynchroniser avec le package.json / pnpm-lock.yaml
 # montés depuis l’hôte. Le fichier .npmrc à la racine définit confirm-modules-purge=false (sinon pnpm demande une
 # confirmation sans TTY et l’installation peut échouer ou laisser node_modules incomplet).
 #
-# Avec le script : ./start.sh (détecte DATABASE_NAME dans .env)
+# Avec le script : ./start.sh (MONGODB → mongodb, POSTGRESQL_PRISMA → pg, MYSQL_PRISMA → mysql)
 # À la main (Mongo) : docker compose -f compose.dev.yaml --profile mongodb up --build -d
 # DATABASE_URL dans .env : voir .env.example (localhost vs hôte « mongodb » du réseau compose).
 name: web-api-dev
@@ -23,7 +23,7 @@ services:
       - "27017:27017"
     restart: unless-stopped
     environment:
-      MONGO_INITDB_DATABASE: quizapp
+      MONGO_INITDB_DATABASE: bugbountyapp
     volumes:
       - mongo_data:/data/db
 
@@ -43,6 +43,78 @@ services:
     depends_on:
       - mongodb
 
+  postgres:
+    profiles:
+      - pg
+    image: postgres:18-alpine
+    container_name: web-api-postgres
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bugbountyapp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bugbountyapp}
+      POSTGRES_DB: ${POSTGRES_DB:-bugbountyapp}
+    # Postgres 18+ : monter le volume sur /var/lib/postgresql (pas …/data) — voir docker-library/postgres #1259
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  pgweb:
+    profiles:
+      - pg
+    image: sosedoff/pgweb:latest
+    container_name: web-api-pgweb
+    restart: unless-stopped
+    ports:
+      - "${PGWEB_HOST_PORT:-8087}:8081"
+    environment:
+      PGWEB_DATABASE_URL: postgres://${POSTGRES_USER:-bugbountyapp}:${POSTGRES_PASSWORD:-bugbountyapp}@postgres:5432/${POSTGRES_DB:-bugbountyapp}?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  mysql:
+    profiles:
+      - mysql
+    image: mysql:8.4
+    container_name: web-api-mysql
+    restart: unless-stopped
+    ports:
+      - "${MYSQL_HOST_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-bugbountyapp}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-bugbountyapp}
+      MYSQL_USER: ${MYSQL_USER:-bugbountyapp}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-bugbountyapp}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  adminer:
+    profiles:
+      - mysql
+    image: adminer:latest
+    container_name: web-api-adminer
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_HOST_PORT:-8088}:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+    depends_on:
+      mysql:
+        condition: service_healthy
+
   api:
     container_name: web-api
     build:
@@ -50,15 +122,20 @@ services:
       dockerfile: docker/Dockerfile
       target: production
     ports:
-      - "${API_HOST_PORT:-${QUIZZAM_HOST_PORT:-3003}}:3000"
+      - "${API_HOST_PORT:-3003}:3000"
     env_file:
       - ../.env
     environment:
       PORT: "3000"
       NODE_ENV: production
       # Même valeur que le port hôte dans la section « ports » ci-dessus (pour les logs de l’app).
-      API_HOST_PORT: ${API_HOST_PORT:-${QUIZZAM_HOST_PORT:-3003}}
-    # Pas de depends_on mongodb : le profil mongodb peut être désactivé (FIREBASE / IN-MEMORY).
+      API_HOST_PORT: ${API_HOST_PORT:-3003}
+    # Dev : même contenu que le dépôt hôte (dashboard rapport + assets templates) — évite un rebuild à chaque changement.
+    # L’image inclut aussi ces dossiers (Dockerfile) pour les environnements sans montage.
+    volumes:
+      - ../src/document-rendering/data:/usr/src/app/src/document-rendering/data:ro
+      - ../templates:/usr/src/app/templates:ro
+    # Pas de depends_on mongodb : le profil mongodb peut être désactivé (IN-MEMORY).
 
   api-watch:
     profiles:
@@ -75,13 +152,13 @@ services:
     stdin_open: true
     tty: true
     ports:
-      - "${API_HOST_PORT:-${QUIZZAM_HOST_PORT:-3003}}:3000"
+      - "${API_HOST_PORT:-3003}:3000"
     env_file:
       - ../.env
     environment:
       PORT: "3000"
       NODE_ENV: development
-      API_HOST_PORT: ${API_HOST_PORT:-${QUIZZAM_HOST_PORT:-3003}}
+      API_HOST_PORT: ${API_HOST_PORT:-3003}
       CHOKIDAR_USEPOLLING: "true"
       # Même principe que le Dockerfile : évite le daemon Nx (socket) dans le conteneur.
       NX_DAEMON: "false"
@@ -104,6 +181,31 @@ services:
       exec runuser -u node -g node -- sh -c 'cd /usr/src/app && export NX_DAEMON=false NX_ISOLATE_PLUGINS=false NX_SOCKET_DIR=/tmp/nx && exec node ./node_modules/nx/bin/nx.js serve web-api'"
     # Service de dev : code monté depuis l'hôte + watcher Nest/Nx dans le conteneur.
 
+  redis:
+    profiles:
+      - redis
+    image: redis:7-alpine
+    container_name: web-api-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+
+  redisinsight:
+    profiles:
+      - redis
+    image: redis/redisinsight:latest
+    container_name: web-api-redisinsight
+    restart: unless-stopped
+    ports:
+      - "${REDIS_INSIGHT_HOST_PORT:-5540}:5540"
+    volumes:
+      - redisinsight_data:/data
+    depends_on:
+      - redis
+
 volumes:
   mongo_data:
+  postgres_data:
+  mysql_data:
   web_api_node_modules:
+  redisinsight_data:

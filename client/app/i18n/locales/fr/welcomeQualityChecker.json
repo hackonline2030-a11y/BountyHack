@@ -1,0 +1,71 @@
+{
+  "welcomeQualityChecker": {
+    "metaTitle": "Bienvenue sur votre tableau de bord",
+    "heading": "Bienvenue",
+    "headingWithUsername": "Bienvenue, {{username}}",
+    "subheading": "Voici un aperçu de vos rapports à vérifier et de vos échanges.",
+    "nav": {
+      "label": "Navigation du tableau de bord",
+      "emails": "Emails",
+      "reports": "Mes rapports",
+      "teams": "Mes équipes",
+      "colleagues": "Mes collègues",
+      "support": "Support",
+      "settings": "Paramètres"
+    },
+    "cards": {
+      "reports": {
+        "title": "Rapports à vérifier",
+        "subtitle": "{{n}} rapports en attente",
+        "empty": "Aucun rapport en attente — bon travail !",
+        "stepLabel": "Étape {{current}}/{{total}}",
+        "submittedAgo": "Soumis il y a {{value}}",
+        "priorityHigh": "Haute",
+        "priorityMedium": "Moyenne",
+        "priorityLow": "Basse",
+        "cta": "Voir tous les rapports"
+      },
+      "colleagues": {
+        "title": "Mes collègues",
+        "subtitle": "{{n}} collègues actifs",
+        "empty": "Aucun collègue à afficher pour le moment.",
+        "roleMentor": "Mentor",
+        "roleQualityChecker": "Quality Checker",
+        "roleLead": "Lead",
+        "statusOnline": "En ligne",
+        "statusAway": "Absent",
+        "statusOffline": "Hors ligne",
+        "cta": "Voir tous mes collègues"
+      },
+      "messages": {
+        "title": "Mes derniers messages",
+        "empty": "Aucun nouveau message pour le moment.",
+        "cta": "Voir tous mes messages",
+        "ago": "il y a {{value}}",
+        "unread": "Message non lu"
+      },
+      "news": {
+        "title": "Actualité pédagogique",
+        "tagAnnouncement": "Annonce",
+        "tagInfo": "Information",
+        "tagUpdate": "Mise à jour",
+        "cta": "Voir toute l'actualité"
+      },
+      "chat": {
+        "title": "Chat — salons qualité",
+        "subtitle": "{{n}} salons actifs",
+        "members": "{{n}} membres",
+        "unreadAria": "{{n}} messages non lus",
+        "cta": "Ouvrir le chat"
+      },
+      "agenda": {
+        "title": "Agenda",
+        "subtitle": "Prochaines sessions",
+        "empty": "Aucun événement prévu.",
+        "locationRemote": "À distance",
+        "locationOnsite": "Sur site",
+        "cta": "Voir tout mon agenda"
+      }
+    }
+  }
+}

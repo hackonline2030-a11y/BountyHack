@@ -12,7 +12,7 @@ This project includes third-party resources and tools used in both the client an
 
 ### Data and Document Rendering
 
-- CV rendering templates and sample CV datasets are maintained in `server/src/document-rendering/data/`.
+- Report rendering templates and sample report datasets are maintained in `server/src/document-rendering/data/`.
 - Demo profile content is intentionally fictitious and used for presentation/testing purposes.
 
 ### Open-Source Dependencies

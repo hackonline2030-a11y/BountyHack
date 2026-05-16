@@ -1,0 +1,63 @@
+{
+  "welcomeHunter": {
+    "metaTitle": "Welcome to your dashboard",
+    "heading": "Welcome",
+    "headingWithUsername": "Welcome, {{username}}",
+    "subheading": "A quick overview of your learning path and activity.",
+    "nav": {
+      "label": "Dashboard navigation",
+      "emails": "Emails",
+      "reports": "My reports",
+      "tracks": "My tracks",
+      "courses": "My courses",
+      "teams": "My teams",
+      "mentors": "My mentors",
+      "support": "Support",
+      "settings": "Settings"
+    },
+    "cards": {
+      "currentTrack": {
+        "title": "Current track",
+        "progressLabel": "{{percent}}% completed",
+        "remainingLabel": "{{n}} modules left",
+        "nextLabel": "Next module",
+        "cta": "Resume track"
+      },
+      "badges": {
+        "title": "My badges",
+        "subtitle": "{{n}} badges unlocked",
+        "empty": "No badge yet — keep going through your courses to earn some.",
+        "cta": "See all my badges"
+      },
+      "messages": {
+        "title": "Latest messages",
+        "empty": "No new messages for now.",
+        "cta": "See all my messages",
+        "ago": "{{value}} ago",
+        "unread": "Unread message"
+      },
+      "news": {
+        "title": "Learning updates",
+        "tagAnnouncement": "Announcement",
+        "tagInfo": "Info",
+        "tagUpdate": "Update",
+        "cta": "See all updates"
+      },
+      "chat": {
+        "title": "Chat — rooms",
+        "subtitle": "{{n}} active rooms",
+        "members": "{{n}} members",
+        "unreadAria": "{{n}} unread messages",
+        "cta": "Open chat"
+      },
+      "agenda": {
+        "title": "Agenda",
+        "subtitle": "Upcoming sessions",
+        "empty": "Nothing scheduled.",
+        "locationRemote": "Remote",
+        "locationOnsite": "On site",
+        "cta": "See my full agenda"
+      }
+    }
+  }
+}

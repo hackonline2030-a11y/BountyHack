@@ -1,4 +1,4 @@
-# Next.js + Prisma (client workspace)
+# Next.js (client workspace)
 # See https://help.github.com/articles/ignoring-files/
 
 # Dependencies
@@ -28,12 +28,17 @@ analyze/
 
 # Testing
 /coverage
+/playwright-report/
+/test-results/
+/blob-report/
 
 # Vercel
 .vercel
 
 # Env (.env.example can stay tracked)
 .env*
+.env.local
+.env.production
 !.env.example
 
 # Debug logs
@@ -46,16 +51,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Prisma — generated client (your output path)
-/generated/prisma/
-
-# Prisma — local dev DB files (adjust if you commit a seed DB)
-/prisma/**/*.db*
-/prisma/**/*.db-journal
-
 # Tooling caches
 .turbo
 .eslintcache
 
 # Misc
 *.pem
+
+.cursor

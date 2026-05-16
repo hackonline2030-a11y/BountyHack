@@ -1,42 +1,152 @@
-import { AuthGuard } from './auth.guard';
-import { AuthRepository } from './ports/auth.repository';
-import { FirebaseAuthRepository } from './infra/firebase-auth.repository';
-import { JwtAuthRepository } from './infra/jwt-auth.repository';
 import { forwardRef, Module } from '@nestjs/common';
-import { isFirebaseAuthEnabled } from './config/firebase-env';
-import { OptionalFirebaseModule } from './infra/optional-firebase.module';
-import { JwtAuthController } from './controllers/jwt-auth.controller';
-import { JwtCredentialsService } from './application/jwt-credentials.service';
-import { JwtInMemoryRegistry } from './infra/jwt-in-memory-registry';
-import { UserModule } from '../users/user.module';
-import { variables } from '../shared/variables.config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { PassportModule } from '@nestjs/passport';
 
-const jwtMongoImports =
-  !isFirebaseAuthEnabled() && variables.database === 'MONGODB'
-    ? [forwardRef(() => UserModule)]
+import { DATABASE_MODES, isPrismaSqlMode } from '../shared/database-mode';
+import { variables } from '../shared/variables.config';
+import { UserModule } from '../users/user.module';
+
+import { AuthRepository } from './ports/auth.repository';
+import { REFRESH_TOKEN_REPOSITORY } from './ports/refresh-token.repository';
+import { PASSWORD_RESET_REPOSITORY } from './ports/password-reset.repository';
+import { TRANSACTIONAL_MAIL_PORT } from './ports/transactional-mail.port';
+import { PassportJwtAuthRepository } from './adapters/passport-jwt/passport-jwt-auth.repository';
+import { PassportJwtLocalStrategy } from './adapters/passport-jwt/strategies/local/passport-jwt-local.strategy';
+import { PassportJwtStrategy } from './adapters/passport-jwt/strategies/passport-jwt.strategy';
+import { PassportJwtTokenService } from './adapters/passport-jwt/services/passport-jwt-token.service';
+import { InMemoryPassportJwtRepository } from './adapters/passport-jwt/repositories/in-memory/in-memory-passport-jwt.repository';
+import { JwtInMemoryRegistry } from './adapters/passport-jwt/repositories/in-memory/jwt-in-memory-registry';
+import { InMemoryRefreshTokenRepository } from './adapters/passport-jwt/repositories/in-memory/in-memory-refresh-token.repository';
+import { MongoPassportJwtRepository } from './adapters/passport-jwt/repositories/mongo/mongo-passport-jwt.repository';
+import { MongoRefreshTokenRepository } from './adapters/passport-jwt/repositories/mongo/mongo-refresh-token.repository';
+import { MongoRefreshToken } from './adapters/passport-jwt/repositories/mongo/mongo-refresh-token';
+import { PostgrePrismaPassportJwtRepository } from './adapters/passport-jwt/repositories/postgre/postgre-prisma-passport-jwt.repository';
+import { PrismaRefreshTokenRepository } from './adapters/passport-jwt/repositories/postgre/prisma-refresh-token.repository';
+import { PrismaPasswordResetRepository } from './adapters/postgre/prisma-password-reset.repository';
+import { createTransactionalMailPort } from './adapters/transactional-mail/transactional-mail.factory';
+
+import { RegisterWithPasswordCommand } from './application/commands/register-with-password.command';
+import { LogoutSessionCommand } from './application/commands/logout-session.command';
+import { CompletePasswordResetCommand } from './application/commands/complete-password-reset.command';
+import { RequestPasswordResetCommand } from './application/commands/request-password-reset.command';
+import { LoginWithPasswordCommand } from './application/commands/login-with-password.command';
+import { GetUserByUidQuery } from './application/queries/get-user-by-uid.query';
+import { GetUserFromTokenQuery } from './application/queries/get-user-from-token.query';
+import { RefreshAccessTokenQuery } from './application/queries/get-refresh-access-token.query';
+
+import { PassportJwtAuthController } from './controllers/passport-jwt-auth.controller';
+import { PasswordResetController } from './controllers/password-reset.controller';
+import { TotpSignInDemoController } from './controllers/totp-sign-in-demo.controller';
+import { TotpEnrollmentController } from './controllers/totp-enrollment.controller';
+import { PassportJwtAuthGuard } from './adapters/passport-jwt/guards/passport-jwt-auth.guard';
+import { RolesGuard } from './rbac/roles.guard';
+import { TotpSignInDemoService } from './application/demo/totp-sign-in-demo.service';
+import { TotpEnrollmentService } from './application/totp-enrollment.service';
+
+const usesPersistedJwtStore =
+  variables.database === DATABASE_MODES.MONGODB || isPrismaSqlMode();
+
+const mongoRefreshImports =
+  variables.database === DATABASE_MODES.MONGODB
+    ? [
+        MongooseModule.forFeature([
+          {
+            name: MongoRefreshToken.CollectionName,
+            schema: MongoRefreshToken.Schema,
+          },
+        ]),
+      ]
     : [];
 
+function resolveRefreshTokenRepositoryClass() {
+  switch (variables.database) {
+    case DATABASE_MODES.POSTGRESQL_PRISMA:
+    case DATABASE_MODES.MYSQL_PRISMA:
+      return PrismaRefreshTokenRepository;
+    case DATABASE_MODES.MONGODB:
+      return MongoRefreshTokenRepository;
+    case DATABASE_MODES.IN_MEMORY:
+    default:
+      return InMemoryRefreshTokenRepository;
+  }
+}
+
+const authImports = [
+  PassportModule,
+  ...(usesPersistedJwtStore ? [forwardRef(() => UserModule)] : []),
+  ...mongoRefreshImports,
+];
+
+const authControllers = [
+  PassportJwtAuthController,
+  ...(isPrismaSqlMode()
+    ? [TotpSignInDemoController, TotpEnrollmentController, PasswordResetController]
+    : []),
+];
+
+const prismaTotpProviders = isPrismaSqlMode()
+  ? [TotpSignInDemoService, TotpEnrollmentService]
+  : [];
+
+const prismaPasswordResetProviders = isPrismaSqlMode()
+    ? [
+        PrismaPasswordResetRepository,
+        {
+          provide: PASSWORD_RESET_REPOSITORY,
+          useExisting: PrismaPasswordResetRepository,
+        },
+        {
+          provide: TRANSACTIONAL_MAIL_PORT,
+          useFactory: () => createTransactionalMailPort(),
+        },
+        RequestPasswordResetCommand,
+        CompletePasswordResetCommand,
+      ]
+    : [];
+
+const coreProviders = [
+  ...prismaTotpProviders,
+  ...prismaPasswordResetProviders,
+  {
+    provide: AuthRepository,
+    useClass: PassportJwtAuthRepository,
+  },
+  {
+    provide: REFRESH_TOKEN_REPOSITORY,
+    useClass: resolveRefreshTokenRepositoryClass(),
+  },
+  PassportJwtAuthRepository,
+  PassportJwtTokenService,
+  PrismaRefreshTokenRepository,
+  MongoRefreshTokenRepository,
+  InMemoryRefreshTokenRepository,
+  InMemoryPassportJwtRepository,
+  MongoPassportJwtRepository,
+  PostgrePrismaPassportJwtRepository,
+  RegisterWithPasswordCommand,
+  LoginWithPasswordCommand,
+  GetUserByUidQuery,
+  GetUserFromTokenQuery,
+  RefreshAccessTokenQuery,
+  LogoutSessionCommand,
+  JwtInMemoryRegistry,
+  PassportJwtLocalStrategy,
+  PassportJwtStrategy,
+  PassportJwtAuthGuard,
+  RolesGuard,
+];
+
+const authExports = [
+  AuthRepository,
+  JwtInMemoryRegistry,
+  /** For `@Auth()` / `PassportJwtAuthGuard` on feature modules (e.g. async PDF enqueue). */
+  PassportJwtAuthGuard,
+];
+
 @Module({
-  imports: [OptionalFirebaseModule.register(), ...jwtMongoImports],
-  controllers: isFirebaseAuthEnabled() ? [] : [JwtAuthController],
-  providers: [
-    AuthGuard,
-    {
-      provide: AuthRepository,
-      useClass: isFirebaseAuthEnabled()
-        ? FirebaseAuthRepository
-        : JwtAuthRepository,
-    },
-    FirebaseAuthRepository,
-    JwtAuthRepository,
-    ...(isFirebaseAuthEnabled()
-      ? []
-      : [JwtInMemoryRegistry, JwtCredentialsService]),
-  ],
-  exports: [
-    AuthGuard,
-    AuthRepository,
-    ...(isFirebaseAuthEnabled() ? [] : [JwtInMemoryRegistry]),
-  ],
+  imports: authImports,
+  controllers: authControllers,
+  providers: coreProviders,
+  exports: authExports,
 })
 export class AuthModule {}

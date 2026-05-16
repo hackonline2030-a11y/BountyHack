@@ -1,0 +1,71 @@
+{
+  "myReports": {
+    "metaTitle": "Mes rapports",
+    "heading": "Mes rapports",
+    "workspace": {
+      "backToReports": "← Retour à mes rapports",
+      "backToReportsAria": "Retour à la liste de mes brouillons"
+    },
+    "subheading": "Retrouvez ici tous vos rapports de vulnérabilité en cours de rédaction et leur état d'avancement.",
+    "actions": {
+      "newReport": "Nouveau rapport",
+      "creating": "Création en cours…",
+      "retry": "Réessayer"
+    },
+    "list": {
+      "loadingAriaLabel": "Chargement de vos rapports",
+      "empty": {
+        "title": "Aucun rapport pour le moment",
+        "description": "Vous n’avez aucun brouillon dans cette liste pour l’instant. Les brouillons auxquels vous êtes assigné apparaîtront ici."
+      },
+      "error": {
+        "title": "Impossible de charger vos rapports",
+        "description": "Une erreur est survenue lors du chargement. {{message}}"
+      }
+    },
+    "card": {
+      "untitled": "Rapport sans titre",
+      "untitledTeam": "Équipe sans nom",
+      "contentTitleSecondary": "Titre rapport (contenu) : {{title}}",
+      "teamMembersAria": "Membres assignés au brouillon",
+      "updatedAt": "Mis à jour le {{date}}",
+      "stepsProgress": "{{approved}} / {{total}} étapes validées",
+      "stepsProgressAria": "{{approved}} étapes validées sur {{total}}",
+      "open": "Ouvrir"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "under-review": "En relecture",
+      "ready-to-program": "Prêt à soumettre",
+      "submitted-to-program": "Soumis au programme",
+      "given-up": "Abandonné",
+      "rejected": "Rejeté"
+    },
+    "activity": {
+      "endorseBanner": "Avis favorable du mentor · {{name}} ({{date}})",
+      "commentBanner": "Nouveau commentaire de {{name}} ({{role}}) · {{date}}",
+      "commentPreview": "« {{preview}} »",
+      "unknownReviewer": "Relecteur"
+    },
+    "reviewHistory": {
+      "title": "Historique des soumissions",
+      "subtitle": "Vue en lecture seule : état des revues pour vos brouillons.",
+      "empty": "Aucune soumission enregistrée — envoyez une étape pour revue depuis l’éditeur.",
+      "colReport": "Rapport",
+      "colStep": "Étape",
+      "colRound": "Round",
+      "colReviewerRole": "Rôle revieweur",
+      "colDecision": "Résultat",
+      "colDate": "Date",
+      "colOpen": "Ouvrir",
+      "dateDecided": "Décision",
+      "dateSubmitted": "Envoi",
+      "decision": {
+        "pending": "En attente de revue",
+        "approve": "Étape validée",
+        "endorse": "Avis mentor favorable",
+        "request-changes": "Révisions demandées"
+      }
+    }
+  }
+}

@@ -13,11 +13,25 @@ Merci de suivre les règles décidé sur le fichier des conventions :
 Documentation détaillée :
 
 - [`CONVENTIONS.md`](CONVENTIONS.md) — branches, messages de commit, scopes monorepo
-- [`client/README.md`](client/README.md)
-- [`server/README.md`](server/README.md)
-- Docker backend (installation, **`start.sh`**, équivalents `docker compose`, **Windows et WSL2**) : [`server/docker/README.md`](server/docker/README.md)
+- [`client/README.md`](client/README.md) — CI : [`.github/workflows/client-ci.yml`](.github/workflows/client-ci.yml)
+- [`server/README.md`](server/README.md) — CI : [`.github/workflows/server-ci.yml`](.github/workflows/server-ci.yml)
+- Docker **optionnel** (dev local uniquement : **`start.sh`**, `docker compose`, Windows / WSL2) : [`server/docker/README.md`](server/docker/README.md) — **pas** la cible de déploiement production du projet (voir section ci-dessous).
+
+## Installation
+
+- **Backend (NestJS)** : section **Installation** dans [`server/README.md`](server/README.md) — persistance **Postgres + Prisma** : section **Démarrage** → **PostgreSQL et Prisma** (Docker watch vs local).
+- **Frontend (Next.js)** : section **Installation** dans [`client/README.md`](client/README.md)
 
 Si tu développes sous **Windows**, pour lancer l’API avec les scripts bash (depuis **`server/`** : `./docker/start.sh`), privilégie **WSL2 + Docker Desktop** (intégration WSL activée) et suis ce guide : évite les incohérences avec PowerShell pur et les chemins sous **`C:\`** seuls pour le mode watch Docker.
+
+## Mise en garde — assistants (Cursor, Claude, etc.) et fichiers `.env`
+
+Les outils d’IA qui analysent le dépôt ou le chat peuvent **inclure dans leur contexte** le contenu de fichiers locaux (indexation, lecture à la demande, pièce jointe). Un fichier **`.env`** réel contient des **secrets** : considère qu’il peut être **exposé** à ces services selon ta configuration et tes usages (ouverture du fichier, mention `@`, copier-coller dans une conversation).
+
+- **Ne pas** coller le contenu d’un `.env` dans une discussion avec un assistant.
+- Pour documenter ou configurer : t’appuyer sur les **`*.env.example`** du dépôt (noms de variables, pas les valeurs secrètes).
+- Ce projet limite l’exposition via **`.cursorignore`** et une règle Cursor (voir **`.cursor/rules/no-dotenv-read.mdc`**) : cela **réduit** le risque d’inclusion automatique, **sans garantie absolue**. La sécurité des secrets reste ta responsabilité (fichiers ignorés par Git, gestion des accès, pas de commit de secrets).
+- Même ignoré par git ou les fichier ignore propre (et même en configurant son LLM), il restait possible selon certains utilisateur pour ce dernier d'accéder aux secrets du .env. Face à ce constat restons-en conscient en modifiant les clés API souvent par exemple ou en trouvant un système d'usage en isolation du LLM (à approfondir).
 
 ---
 
@@ -27,8 +41,8 @@ Si tu développes sous **Windows**, pour lancer l’API avec les scripts bash (d
 
 Sur une branche donnée (`main` ou une `release/*`), le commit est **unique**, mais tu peux (et en général tu dois) :
 
-- **compiler et publier le front** depuis `client/` vers sa cible (ex. Vercel, Cloudflare, hébergement Node + `next start`, autre),
-- **compiler et publier l’API** depuis `server/` vers sa cible (ex. VM + Docker, Kubernetes, PaaS avec conteneur),
+- **compiler et publier le front** depuis `client/` vers sa cible (ex. CDN + `next start`, hébergement Node, autre),
+- **compiler et publier l’API** depuis `server/` vers sa cible (ex. **VPS : Node + systemd + reverse-proxy**, PaaS managé, autre) **sans obligation de conteneur**,
 
 sans mélanger les deux dans un seul artefact. Chaque pipeline ne prend que le dossier et les fichiers dont il a besoin.
 
@@ -44,21 +58,13 @@ Une fois séparés, le front appelle l’API via une **URL HTTPS** dédiée au b
 
 ---
 
-## Image Docker et GitHub Container Registry (GHCR) : **uniquement le serveur**
+## Production : **sans Docker** (cible du projet)
 
-L’image Docker de **production** prévue pour cette API est construite à partir du dossier **`server/`** (voir [`server/docker/Dockerfile`](server/docker/Dockerfile)). Elle embarque le build Nx (`dist/`, assets nécessaires au runtime) et exécute **`node dist/main.js`**.
+Le déploiement visé est **classique** : build (`pnpm build` / `nx build`), transfert des artefacts sur le serveur (rsync, CI SSH, etc.), processus **Node** sous **systemd** (ou équivalent), **reverse-proxy** (nginx, Caddy) pour HTTPS et le routage.
 
-En pratique pour GHCR :
+**Pas d’image Docker « officielle » du serveur** et **pas de GitHub Container Registry (GHCR)** dans le périmètre du projet : l’API **n’est pas** livrée par *pull* d’image depuis un registre, et il n’y a **pas** de workflow ou de convention de build/push vers `ghcr.io/…` pour le backend. Le [`server/docker/Dockerfile`](server/docker/Dockerfile) sert uniquement à **reproduire un runtime** en **local ou lab** (éventuel `docker build` sur ta machine, éventuellement avec `compose.lab.yml`) ; ce n’est **ni** l’artefact de déploiement production **ni** une chaîne de publication vers un registre.
 
-1. **Contexte de build** : répertoire **`server/`** (le `docker-compose` du backend utilise déjà `context: ..` depuis `server/docker/`, soit la racine **`server/`**). Le Dockerfile attend le `package.json`, le `pnpm-lock.yaml` et les sources de l’API à cet endroit — pas le dossier `client/`.
-2. **Exemple depuis la racine du monorepo** :
-   ```bash
-   docker build -f server/docker/Dockerfile -t ghcr.io/<org>/<image-api>:<tag> server/
-   ```
-3. **Nom d’image** : par convention `ghcr.io/<org-ou-user>/<nom-image-api>:<tag>` ; le tag peut suivre la version release ou le SHA du commit.
-4. **Une image = l’API** : le client Next.js n’a pas à être copié dans cette image ; son déploiement est un flux **à part** (autre workflow, autre registre si tu conteneurises aussi le front plus tard).
-
-Résumé : **le monorepo vit dans un seul repo Git ; le registre GHCR que tu crées pour cette image ne concerne que le binaire / conteneur du backend**, isolé du frontend.
+**Docker / `server/docker/`** restent utiles **en local** (API + Postgres + watch, WSL, etc.) — voir [`server/docker/README.md`](server/docker/README.md).
 
 ---
 

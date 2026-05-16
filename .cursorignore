@@ -1,0 +1,13 @@
+# Fichiers sensibles — hors index / contexte Cursor (évite @-mention et inclusion automatique).
+# Les gabarits *.env.example restent suivis : ne pas ajouter de motif trop large du type .env.*
+.env
+**/.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
+.env.staging
+
+!/localdocs/**

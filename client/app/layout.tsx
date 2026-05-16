@@ -1,36 +1,30 @@
 import type { Metadata, Viewport } from "next";
-import type { Resource } from "i18next";
 import { Rubik } from "next/font/google";
 import { headers } from "next/headers";
 import { I18nProvider } from "next-i18next/client";
 import { getT, initServerI18next } from "next-i18next/server";
 import i18nConfig from "@/i18n.config";
-import enCommon from "@/app/i18n/locales/en/common.json";
-import enConnexion from "@/app/i18n/locales/en/connexion.json";
-import frCommon from "@/app/i18n/locales/fr/common.json";
-import frConnexion from "@/app/i18n/locales/fr/connexion.json";
+import {
+  clientI18nNamespaces,
+  clientI18nResources,
+} from "@/lib/client-i18n-resources";
 import "@/app/globals.css";
-import { ThemeProvider } from "@modules/app/react/ThemeProvider";
-import { Header } from "@modules/app/react/layout/Header";
-import { Footer } from "@modules/app/react/layout/Footer";
+import { ThemeProvider } from "@/modules/app/nextjs/ThemeProvider";
+import { AppWrapper } from "@/modules/app/nextjs/appWrapper";
+import { Header } from "@/modules/app/nextjs/layout/Header";
+import { Footer } from "@/modules/app/nextjs/layout/Footer";
 
 initServerI18next(i18nConfig);
 
-/** Bundled for client `I18nProvider` so every namespace (e.g. `connexion`) hydrates reliably. */
-const clientI18nResources = {
-  en: { common: enCommon, connexion: enConnexion },
-  fr: { common: frCommon, connexion: frConnexion },
-} satisfies Resource;
-
 const LANG_HEADER = "x-i18next-current-language";
 
-const siteName = "Clean App — Next.js template";
+const siteName = "BugBountyApp — Next.js template";
 const siteDescription =
   "Auth-first Next.js starter: TypeScript, Prisma, modular architecture, and tests — ready to extend.";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
-  "http://localhost:3000";
+  "http://localhost:3001";
 
 const rubik = Rubik({
   subsets: ["latin"],
@@ -57,7 +51,7 @@ export const metadata: Metadata = {
     template: `%s | ${siteName}`,
   },
   description: siteDescription,
-  applicationName: "Clean App",
+  applicationName: "BugBountyApp",
   manifest: "/manifest.webmanifest",
   robots: { index: true, follow: true },
   openGraph: {
@@ -76,7 +70,7 @@ export default async function RootLayout({
 }) {
   const lang =
     (await headers()).get(LANG_HEADER) ?? i18nConfig.fallbackLng ?? "en";
-  await getT(["common", "connexion"], { lng: lang });
+  await getT([...clientI18nNamespaces], { lng: lang });
 
   return (
     <html
@@ -96,9 +90,11 @@ export default async function RootLayout({
             supportedLngs={i18nConfig.supportedLngs}
             fallbackLng={i18nConfig.fallbackLng}
           >
-            <Header />
-            {children}
-            <Footer />
+            <AppWrapper>
+              <Header />
+              {children}
+              <Footer />
+            </AppWrapper>
           </I18nProvider>
         </ThemeProvider>
       </body>

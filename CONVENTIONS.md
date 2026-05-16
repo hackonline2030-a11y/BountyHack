@@ -1,6 +1,66 @@
 # Conventions — branches et commits (BountyHack)
 
+## Sommaire (ultra-rapide)
+
+- [TL;DR — Merge Policy](#tldr--merge-policy) — Quand utiliser `--no-ff` en 4 lignes.
+- [Branches (rôles, sommairement)](#branches-rôles-sommairement) — Quelle branche pour quel type de travail.
+- [Merges — `git merge` vs `git merge --no-ff`](#merges--git-merge-vs-git-merge---no-ff) — Règle d’équipe + cas d’usage.
+- [Commits — Conventional Commits](#commits--conventional-commits) — Format standard des messages.
+- [Scope dans ce dépôt](#scope-dans-ce-dépôt) — Choisir `(client)`, `(server)` ou `(app)` correctement.
+
+## TL;DR — Merge Policy
+
+- **`--no-ff`** pour les merges de **features / lots significatifs** via PR.
+- **Merge classique** possible pour les **petits changements** (docs/chore/fix mineur).
+- Utiliser `--no-ff` quand on veut une **traçabilité claire** et un **revert par bloc**.
+- Rester pragmatique : historique lisible > règle rigide.
+
 Ce document décrit le **nommage des branches** et les **Conventional Commits** pour ce monorepo. Le dépôt partage une historique commune (`main`, branches `release/*`, `develop` / `srv/dev`, etc.), avec des livrables indépendants en production.
+
+## Pas de commit direct sur `main` ni sur `develop`
+
+- **On ne pousse pas de travail directement sur `main`** : tout passe par une **branche dédiée** (`feature/…`, `fix/…`, etc.) puis une **pull request** (revue) avant merge.
+- **On ne pousse pas non plus directement sur `develop`** : même principe — intégration via branche + PR.
+
+**Exception (rare)** : commit **direct** sur `main` ou `develop` **uniquement** pour des changements **mineurs** et **très maîtrisés**, sans effet de bord sur le build ni sur l’équipe — en pratique **aucune modification de dépendances** (pas de `package.json` / `pnpm-lock.yaml` / `requirements`, pas de script d’install, pas de conteneur), typiquement une coquille dans un `.md`, amélioration de la doc (commit en doc(readme):xxx), un commentaire, un correctif de doc d’une ligne. Dès qu’il y a du code applicatif, une config, ou le moindre doute : **branche + PR**.
+
+## Si la branche n'est pas partagé, rebaser souvent sur `develop` ou sur `main`
+
+(sur **ma** branche : git rebase main ou develop)
+
+Rappel sur le fonctionnement du **rebase** et les cas limites : [**Introduction au Git Rebase** (DataCamp, FR)](https://www.datacamp.com/fr/tutorial/git-rebase).
+
+Dans la mesure du possible, **mettre à jour régulièrement** ta branche de travail par **rebase** pour limiter les conflits au moment de la PR et rester aligné avec le flux du dépôt :
+
+- Branche **issue de `develop`** (travail d’intégration vers la suite du cycle) : après `git fetch`, rebaser sur **`develop`**  
+  `git rebase develop`  
+  (ou `git rebase origin/develop` si tu ne trackes que le distant.)
+- Branche **issue de `main`** (correctif ciblé, hotfix, branche alignée dès le départ sur `main`) : rebaser sur **`main`**  
+  `git rebase main`  
+  (même idée : `git fetch` puis rebase sur la branche de base choisie.)
+
+### Push forcé, conflits, branches partagées
+
+Un **rebase réécrit l’historique** de ta branche. Dès que tu as **déjà poussé** cette branche sur le remote, le prochain push des commits « rejoués » exige en général un **`git push --force-with-lease`** (et non un simple `git push`). C’est vrai en particulier si un rebase t’a fait **résoudre des conflits** : l’état local ne correspond plus à l’historique distant.
+
+- **Branche perso / feature seule** : rebase + `--force-with-lease` est l’usage courant.
+- **Branche partagée** (plusieurs personnes travaillent sur la même branche) : le rebase + push forcé peut **écraser** le travail d’autres commits déjà poussés → **à utiliser avec précaution** ; prévenir l’équipe, ou préférer un **`git merge develop`** / **`git merge main`** pour intégrer la base sans réécrire l’historique commun.
+
+Si l’équipe préfère éviter le rebase sur les branches collaboratives, **`merge`** depuis `develop` / `main` reste acceptable ; l’important est de **rafraîchir souvent** pour ne pas livrer une PR avec des mois de retard sur la base.
+
+## Git worktrees (plusieurs dossiers, un seul dépôt)
+
+Tutoriel (FR) : [**Git Worktrees : pratique et exemples**](https://www.datacamp.com/fr/tutorial/git-worktree-tutorial).
+
+**Intérêt** : attacher **plusieurs répertoires de travail** au **même** dépôt Git (même `.git` partagé), chacun sur une **branche différente**, **sans** `git stash` ni clonage complet.
+
+- **Changer de contexte** : une worktree sur `feature/client-…` pour le dev, une autre sur `develop` pour reproduire un bug ou tester une intégration, une troisième pour un **hotfix** depuis `main` — tu ne perds pas l’état non commité de la première.
+- **CI / build** : lancer un `pnpm build` ou des tests sur une branche dans un dossier, tout en continuant à coder une autre branche ailleurs.
+- **Revue** : `git worktree add ../bountyhack-review <branche-pr>` pour ouvrir la branche d’une PR dans un second dossier (diff, exécution locale) sans mélanger avec ton travail courant.
+- **Monorepo** : utile quand tu dois enchaîner vite entre une tâche **`client/`** et une tâche **`server/`** sur des branches distinctes.
+- **Assistant (LLM / IDE)** : en plaçant plusieurs worktrees sous **un même dossier parent** (ex. `bugbountyapp-main/`, `bugbountyapp-feature-xyz/`), tu peux ouvrir ce parent en workspace et laisser l’outil **parcourir ou comparer plusieurs branches** en parallèle (chemins distincts, pas un seul `HEAD` qui change à chaque checkout).
+
+Les worktrees ne remplacent pas les règles ci‑dessus (PR, scopes, rebase) : ils **organisent** juste le **travail local** sur plusieurs branches en parallèle.
 
 ## Branches (rôles, sommairement)
 
@@ -18,6 +78,29 @@ Ce document décrit le **nommage des branches** et les **Conventional Commits** 
 
 Les noms utilisent le **kebab-case** ; le détail du changement vit dans les commits et la PR.
 
+## Merges — `git merge` vs `git merge --no-ff`
+
+Référence : [Difference Between Git Merge and Git Merge --no-ff](https://hackr.io/blog/difference-between-git-merge-and-git-merge-no-ff)
+
+### Règle d’équipe
+
+Nous utilisons **`--no-ff` dans certains merges**, pas systématiquement.  
+Objectif : garder un historique lisible quand une branche représente un vrai lot de travail, sans alourdir inutilement le graphe Git.
+
+### Quand utiliser `--no-ff`
+
+- Merge d’une **feature branch** ou d’un **lot métier significatif** via PR.
+- Quand on veut **préserver explicitement le contexte** de la branche (discussion PR, commits associés).
+- Quand on veut pouvoir **revert d’un bloc** (un commit de merge unique) si besoin.
+
+### Quand éviter `--no-ff` (merge classique possible)
+
+- Petits correctifs isolés, changements triviaux, docs/chore mineurs.
+- Branches très courtes avec 1 commit clair, sans enjeu de traçabilité particulier.
+- Merges techniques de synchronisation où un historique linéaire est préférable.
+
+En pratique : **préférer `--no-ff` pour les merges structurants**, et rester pragmatique sur les petits changements.
+
 ## Commits — [Conventional Commits](https://www.conventionalcommits.org/)
 
 Les messages suivent le préfixe **`type(scope optionnel): description`** (souvent en anglais pour l’outil, description claire en une ligne).
@@ -32,14 +115,26 @@ Les messages suivent le préfixe **`type(scope optionnel): description`** (souve
 
 ### Scope dans ce dépôt
 
-Le scope reflète le **dossier / périmètre** touché (pas un sous-domaine libre) :
+Le **scope** est la partie entre parenthèses dans **`type(scope): description`**. Il doit être **précis**, pas un libellé vague.
+
+**Travail sous `client/` ou `server/`** — forme attendue du commit :
+
+```text
+<type>(client-<dossier-ou-zone>): …
+<type>(server-<dossier-ou-zone>): …
+```
+
+client ou server sont omis si ça les concerne tous les deux (ou remplacé explicitement par `app`)
+
+`<dossier-ou-zone>` = sous-partie du monorepo en **kebab-case** (module, dossier fonctionnel, couche concernée), pas seulement le mot **`client`** ou **`server`** tout seul.
+
 
 | Scope dans le message | Quand l’utiliser |
 |------------------------|-------------------|
-| **`(client)`** | Changements centrés sur **`client/`** → par ex. `feat(client): add login form`, `fix(client): correct i18n hydration`, `refactor(client): extract auth hooks`. Idem pour **`fix`**, **`refactor`**, **`perf`**, **`test`**, **`chore`** si le cœur du diff est le front. |
-| **`(server)`** | Changements centrés sur **`server/`** → par ex. `feat(server): expose PDF export route`, `fix(server): Mongo connection retry`. |
-| **`(app)`** | **Uniquement** travail **transversal** : racine du repo (README, `.gitignore`, CI), ou modification coordonnée **`client/` + `server/`**, ou conventions qui englobent tout le monorepo. → par ex. `feat(app): add shared release workflow`, `chore(app): bump root tooling`. **Ne pas** mettre **`(app)`** pour un changement qui concerne **un seul** dossier : dans ce cas **`(client)`** ou **`(server)`**. |
+| **`client-<…>`** | Changements centrés sur **`client/`** → par ex. `feat(client-auth): add login form`, `fix(client-i18n): correct hydration`, `refactor(client-layout): extract header`. Même logique pour **`fix`**, **`refactor`**, **`perf`**, **`test`**, **`chore`** selon le cœur du diff. |
+| **`server-<…>`** | Changements centrés sur **`server/`** → par ex. `feat(server-pdf): expose PDF export route`, `fix(server-mongo): connection retry`, `chore(server-deps): bump nest minor`. |
+| **`app`** | **Uniquement** travail **transversal** (racine du repo, CI, ou **`client/` + `server/`** coordonnés). **Ne pas** ajouter de suffixe du type **`app-client`** ou **`app-server`** : ce n’est **pas** une zone `client-…` / `server-…` à détailler — rester sur **`feat(app): …`**, **`chore(app): …`**, **`docs(app): …`**, etc. **Ne pas** utiliser **`app`** si le changement ne touche qu’un seul des deux dossiers : dans ce cas **`client-<…>`** ou **`server-<…>`**. |
 
-Les branches **`feature/app-…`**, **`fix/app-…`**, **`refactor/app-…`** vont typiquement avec des commits **`…(app): …`** ; pour une branche **`feature/client-…`**, les commits utilisent **`…(client): …`** (et pareil **`server`**).
+Les branches **`feature/app-…`** s’alignent avec des commits **`…(app): …`** ; une branche **`feature/client-auth-…`** va avec des scopes du type **`client-auth`**, **`client-i18n`**, etc.
 
-Exemple : `feat(server): add JWT refresh cookie` — **`feat`** est le type Conventional Commit ; la branche peut être **`feature/server-jwt-refresh`**.
+Exemple : `feat(server-auth): add JWT refresh cookie` — la branche peut être **`feature/server-auth-jwt-refresh`**.

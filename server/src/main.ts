@@ -8,6 +8,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import type { Application } from 'express';
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
+import cookieParser from 'cookie-parser';
 import * as express from 'express';
 import { HttpExceptionBodyDto } from './core/dto/http-exception-body.dto';
 import { HttpValidationErrorDto } from './core/dto/http-validation-error.dto';
@@ -17,6 +18,8 @@ import { getHttpCorsOrigin, isCorsOpenToAll } from './shared/cors.util';
 async function bootstrap() {
 
   const app = await NestFactory.create<NestExpressApplication>(MainModule);
+
+  app.use(cookieParser());
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -88,8 +91,6 @@ async function bootstrap() {
   await app.listen(variables.port);
   console.log("\x1b[36m *************************************** \n 🌞 API - Version 1.0.0 \n 🏡 Architecture : hexagonale \n *************************************** ");
   const databaseAlternativeByCurrent: Record<string, string> = {
-    MONGODB: 'FIREBASE',
-    FIREBASE: 'MONGODB',
     'IN-MEMORY': 'MONGODB',
   };
   const databaseAlternativeValue = databaseAlternativeByCurrent[variables.database];
@@ -102,19 +103,31 @@ async function bootstrap() {
   Logger.log(
     `🔧 e2e tests are in \x1b[38;5;226m${join(__dirname, '..', 'e2e/src/server')}\x1b[0m`,
   );
-  const authType = (process.env.AUTH_TYPE ?? 'FIREBASE').toUpperCase();
+  const authType = (process.env.AUTH_TYPE ?? 'PASSPORT_JWT').toUpperCase();
+  const authTypeMessages: Record<string, string> = {
+    PASSPORT_JWT: 'Auth provider configured: JWT via Passport (AUTH_TYPE=PASSPORT_JWT).',
+  };
   const authTypeMessage =
-    authType === 'JWT'
-      ? 'Run tests with adequate auth provider: JWT (because AUTH_TYPE=JWT). It will be FIREBASE if AUTH_TYPE=FIREBASE.'
-      : authType === 'FIREBASE'
-        ? 'Run tests with adequate auth provider: FIREBASE (because AUTH_TYPE=FIREBASE). It will be JWT if AUTH_TYPE=JWT.'
-        : `Run tests with adequate auth provider: unknown AUTH_TYPE=${authType}. Use AUTH_TYPE=JWT or AUTH_TYPE=FIREBASE.`;
+    authTypeMessages[authType] ??
+    `Auth provider configured: unknown AUTH_TYPE=${authType}.`;
   Logger.log(
     `🔧 ${authTypeMessage}`,
   );
   Logger.log(
     `📄 Internal api views are in \x1b[35m${join(__dirname, '..', 'views')}\x1b[0m`
-  )
+  );
+  if (variables.database === 'POSTGRESQL_PRISMA') {
+    const pgwebHostPort = process.env.PGWEB_HOST_PORT?.trim() || '8087';
+    Logger.log(
+      `🧭 pgweb (UI SQL depuis la machine hôte) : http://localhost:${pgwebHostPort}/ — slug d’accès : / — surcharger le port : PGWEB_HOST_PORT dans .env (défaut 8087)`,
+    );
+  }
+  if (variables.database === 'MYSQL_PRISMA') {
+    const adminerPort = process.env.ADMINER_HOST_PORT?.trim() || '8088';
+    Logger.log(
+      `🧭 Adminer (UI SQL MySQL sur l’hôte) : http://localhost:${adminerPort}/ — service : mysql — port : ADMINER_HOST_PORT dans .env (défaut 8088)`,
+    );
+  }
 }
 
 bootstrap();

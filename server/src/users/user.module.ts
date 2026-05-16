@@ -3,6 +3,7 @@ import { AuthModule } from '../auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongoUser } from './adapters/mongo/mongo-user';
 import { MongoUserRepository } from './adapters/mongo/mongo-user-repository';
+import { PrismaUserRepository } from './adapters/postgre-prisma/prisma-user-repository';
 
 import {
   I_USER_REPOSITORY,
@@ -11,18 +12,20 @@ import {
 import { UsersController } from './controllers/users.controller';
 import { AddUsername } from './commands/add-username';
 import { CommonModule } from '../core/common.module';
+import { DATABASE_MODES } from '../shared/database-mode';
 import { variables } from '../shared/variables.config';
-import { FirebaseUserRepository } from './adapters/firebase/firebase-user-repository';
 import { GetUserByIdQuery } from './queries/get-user-by-id';
+import { ListUsersAdminSummariesQuery } from './queries/list-users-admin-summaries.query';
 import { InMemoryUserRepository } from './adapters/in-memory/in-memory-user-repository';
 
 function resolveUserRepositoryClass() {
   switch (variables.database) {
-    case 'MONGODB':
+    case DATABASE_MODES.MONGODB:
       return MongoUserRepository;
-    case 'FIREBASE':
-      return FirebaseUserRepository;
-    case 'IN-MEMORY':
+    case DATABASE_MODES.POSTGRESQL_PRISMA:
+    case DATABASE_MODES.MYSQL_PRISMA:
+      return PrismaUserRepository;
+    case DATABASE_MODES.IN_MEMORY:
       return InMemoryUserRepository;
     default:
       return InMemoryUserRepository;
@@ -30,7 +33,7 @@ function resolveUserRepositoryClass() {
 }
 
 const mongoFeatureImports =
-  variables.database === 'MONGODB'
+  variables.database === DATABASE_MODES.MONGODB
     ? [
         MongooseModule.forFeature([
           {
@@ -45,11 +48,7 @@ const inMemoryAuthImports =
   variables.database === 'IN-MEMORY' ? [forwardRef(() => AuthModule)] : [];
 
 @Module({
-  imports: [
-    CommonModule,
-    ...mongoFeatureImports,
-    ...inMemoryAuthImports,
-  ],
+  imports: [CommonModule, ...mongoFeatureImports, ...inMemoryAuthImports],
   controllers: [UsersController],
   providers: [
     {
@@ -68,6 +67,13 @@ const inMemoryAuthImports =
       inject: [I_USER_REPOSITORY],
       useFactory: (repository) => {
         return new GetUserByIdQuery(repository);
+      },
+    },
+    {
+      provide: ListUsersAdminSummariesQuery,
+      inject: [I_USER_REPOSITORY],
+      useFactory: (repository: IUserRepository) => {
+        return new ListUsersAdminSummariesQuery(repository);
       },
     },
   ],

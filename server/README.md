@@ -3,11 +3,34 @@
 API NestJS (auth, users, ping) — workspace [Nx](https://nx.dev).
 
 *English version : [Go to english version](./README.en.md)*
-    
+
+## Installation
+
+Crée le fichier **`server/.env`** à partir du modèle (tu peux rester à la **racine du monorepo**) :
+
+```bash
+# à la racine du dépôt (si pas encore fait)
+cp server/.env.example server/.env
+```
+
+Équivalent si tu es déjà dans le dossier **`server/`** :
+
+```sh
+cp .env.example .env
+```
+
+Puis édite **`server/.env`** en suivant les commentaires de **`.env.example`** (secrets, `DATABASE_NAME`, `DATABASE_URL`, CORS, etc.).
+
+## CI (GitHub Actions)
+
+Workflow à la racine du monorepo : **[`../.github/workflows/server-ci.yml`](../.github/workflows/server-ci.yml)** — sur **push / PR** vers **`feature/test-ci`** uniquement (chemins `server/**`), plus **`workflow_dispatch`**. Étapes : `pnpm install --frozen-lockfile`, **`nx run web-api:lint`**, tests unitaires **`pnpm run test`**, **`pnpm run build`**, **Gitleaks** (action en `continue-on-error: true`). Pas de conteneur ni registre d’images, pas de Trivy ni SonarCloud.
+
+---
+
 ## Prérequis
 
-- **Node.js** 20+ et **pnpm**
-- **Docker** et Docker Compose (uniquement si tu suis la procédure Docker ci-dessous)
+- **Node.js** 24+ et **pnpm** (voir `server/package.json` → `engines`)
+- **Docker** et Docker Compose (**optionnel**, uniquement pour le **dev local** décrit ci-dessous — pas la cible prod)
 
 ### Workspace Nx : logique IDE et logique console
 
@@ -65,16 +88,96 @@ Les deux utilisent la même source de vérité Nx du workspace.
 
 Les variables **`AUTH_TYPE`** et **`DATABASE_NAME`** se combinent. Point important :
 
-- Si tu utilises **`DATABASE_NAME=MONGODB`**, fixe en général **`AUTH_TYPE=JWT`**, sauf si tu as déjà un **projet Firebase** opérationnel (Firebase Admin sur l’API, identifiants, **comptes dans Firebase Authentication** gérés côté Firebase / console). Sans ce socle, **`AUTH_TYPE=FIREBASE`** ne te permet pas un parcours inscription / connexion email–mot de passe classique vers Mongo : les routes **`POST /api/auth/register`** et **`POST /api/auth/login`** ne sont pas exposées, et les utilisateurs ne sont pas créés dans Mongo comme pour le flux JWT.
-- **`AUTH_TYPE=JWT`** avec Mongo : les utilisateurs (email, hash de mot de passe, profil) sont stockés dans la base Mongo définie par **`DATABASE_URL`**.
+- L'architecture auth est extensible via `AUTH_TYPE`, mais l'implémentation active est **`PASSPORT_JWT`**.
+- Les options de base de donnees restent multiples via `DATABASE_NAME` (`MONGODB`, `POSTGRESQL_PRISMA`, `IN-MEMORY`).
+- Avec **`DATABASE_NAME=MONGODB`**, les utilisateurs (email, hash de mot de passe, profil) sont stockés dans la base Mongo définie par **`DATABASE_URL`**.
+- **2FA (schema et prochaines fonctionnalites)** : le projet ne fait evoluer cette couche que sous **`DATABASE_NAME=POSTGRESQL_PRISMA`** (migrations Prisma sur la base PostgreSQL). Pas d'extension parallele sur Mongo ou in-memory pour la 2FA pour l'instant ; voir **`src/auth/README.md`**.
 
 Voir aussi les commentaires dans **`.env.example`**.
+
+#### Configuration `AUTH_TYPE` et fichier `auth-env.ts`
+
+La configuration d'authentification est centralisee dans **`src/auth/config/auth-env.ts`**.
+
+- Ce fichier lit et normalise les variables d'environnement (`AUTH_TYPE`, `DATABASE_NAME`).
+- Il centralise les choix de configuration auth/database pour eviter des checks disperses dans les modules Nest.
+
+Valeur prise en charge pour **`AUTH_TYPE`** :
+
+- `PASSPORT_JWT` : flux JWT via Passport/Nest (`passport-jwt`).
+
+Recommandation : toute nouvelle condition liee a la configuration d'authentification doit passer par **`auth-env.ts`** plutot que des checks directs sur `process.env.AUTH_TYPE`.
 
 ---
 
 ## Démarrage
 
-Choisis **un** parcours : tout lancer avec Docker, ou Node sur ta machine avec MongoDB installé à part.
+Choisis **un** parcours : **Docker en local** (API et optionnellement Postgres + watch), ou **Node sur l’hôte** avec une base joignable (**PostgreSQL + Prisma**, MongoDB, etc. selon **`DATABASE_NAME`**). La **production** visée est **Node sur serveur sans Docker** (voir [`../README.md`](../README.md)). Le monorepo **ne prévoit pas** de build/push d’image serveur vers **GitHub Container Registry (GHCR)** ni vers un autre registre : `server/docker/` reste **local / lab** uniquement.
+
+### API locale + DB Docker (recommandé en dev)
+
+Pour itérer vite sur l'API, tu peux faire tourner :
+
+- l'API NestJS en local sur ta machine (hot reload plus rapide, debug IDE plus simple),
+- la base PostgreSQL dans Docker,
+- pgweb dans Docker pour visualiser les tables.
+
+Depuis `server/` :
+
+1. Démarrer uniquement PostgreSQL + pgweb :
+
+   ```sh
+   pnpm run docker:postgre
+   ```
+
+2. Configurer `server/.env` pour exécuter l'API **hors Docker** :
+
+   - `DATABASE_NAME=POSTGRESQL_PRISMA`
+   - `DATABASE_URL=postgres://bugbountyapp:bugbountyapp@localhost:5432/bugbountyapp`
+
+   Important : en mode API locale, utilise `localhost` (pas `postgres`, qui est le hostname interne Docker).
+
+3. Appliquer Prisma depuis l'hôte :
+
+   ```sh
+   pnpm run prisma:generate
+   pnpm run prisma:migrate:deploy
+   ```
+
+4. Lancer l'API en local :
+
+   ```sh
+   pnpm run start
+   ```
+
+5. Ouvrir pgweb :
+
+   - `http://localhost:8087` (ou `PGWEB_HOST_PORT` si surchargé dans `.env`).
+
+Arrêt de la stack PostgreSQL seule :
+
+```sh
+pnpm run docker:postgre:stop
+```
+
+Ou teardown complet (profil pg) :
+
+```sh
+pnpm run docker:postgre:down
+```
+
+### PostgreSQL et Prisma
+
+Persistance **`users`** avec **Prisma** : **`DATABASE_NAME=POSTGRESQL_PRISMA`**. Commandes depuis **`server/`** (après `pnpm install` à la racine du monorepo).
+
+| Contexte | Commandes |
+|----------|-----------|
+| **Docker — API en watch** (`web-api-watch` + Postgres) | `pnpm docker:watch`, puis `pnpm docker:prisma:generate`, `pnpm docker:prisma:deploy`, puis données : `pnpm docker:prisma:seed` (rôles + démo optionnelle). Équivalent : `./docker/start.sh watch-up` depuis **`server/docker/`**. |
+| **Node sur l’hôte — Postgres sur `localhost`** | `pnpm prisma generate`, `pnpm prisma migrate deploy`, puis `pnpm prisma:seed`. Si `DATABASE_URL` contient encore `@postgres` : `pnpm prisma:migrate:deploy:docker` puis `pnpm prisma:seed:docker`. Voir **`prisma/README.md`** (migrations = schéma ; seed = données). |
+
+Plus de détail : [`docker/README.md`](docker/README.md#prisma-migrations-et-démo), **`.env.example`**.
+
+**Démo login** : `demo-user@example.local` / `password123` (Postgres seed ou import Mongo).
 
 ### 1. Avec Docker
 
@@ -82,18 +185,11 @@ Guide détaillé (installation Docker, `start.sh`, équivalents `docker compose`
 
 Construit et exécute toujours l’**API** à partir de `docker/Dockerfile`, via `docker/compose.dev.yaml`.
 
-**MongoDB + mongo-express** ne sont démarrés **que** si `DATABASE_NAME=MONGODB` dans `.env` à la racine du dépôt (valeur par défaut dans `.env.example`). Avec `FIREBASE`, `IN-MEMORY`, etc., ces conteneurs Mongo ne démarrent pas (Raison: inutile de lancer une stack Mongo vide).
-Nous utilisons les profiles dans compose pour réaliser cette séparation.
+**PostgreSQL + pgweb** sont démarrés si **`DATABASE_NAME=POSTGRESQL_PRISMA`** dans **`server/.env`** (voir `.env.example`). **MongoDB + mongo-express** le sont si `DATABASE_NAME=MONGODB`. Avec `IN-MEMORY`, les services de base Docker concernés ne sont pas lancés. Les **profils** Compose (`mongodb`, `pg`) séparent ces jeux de conteneurs.
 
-1. Depuis la **racine du dépôt**, copie les variables d’environnement et ajuste les secrets :
+1. Fichier d’environnement : comme indiqué en **[Installation](#installation)** (`server/.env` depuis `server/.env.example`). Renseigne `DATABASE_NAME` selon ton backend (`MONGODB`, `POSTGRESQL_PRISMA`, `IN-MEMORY`, …), ainsi que `JWT_SECRET`, CORS, etc.
 
-   ```sh
-   cp .env.example .env
-   ```
-
-   Renseigne `DATABASE_NAME` selon ton backend (`MONGODB`, `FIREBASE`, `IN-MEMORY`, …), ainsi que `JWT_SECRET`, CORS, etc.
-
-   **`DATABASE_URL` :** `.env.example` laisse **`localhost`** actif par défaut (`nx serve` ou Mongo sur l’hôte). **Uniquement** si tu lances l’**API dans Docker** avec la stack Mongo du compose (`DATABASE_NAME=MONGODB`), change la valeur en `DATABASE_URL=mongodb://mongodb:27017/quizapp` pour que le conteneur joigne le service `mongodb` sur le réseau compose. Si tu **n’utilises pas** Docker pour l’API, garde la version avec `localhost`.
+   **`DATABASE_URL` :** `.env.example` part sur **PostgreSQL** (ex. `postgres://…@postgres:5432/…` pour l’API dans Docker). **API dans Docker** + profil **pg** : hôte **`postgres`** sur le réseau Compose (pas `localhost` depuis le conteneur). **API sur l’hôte** (`nx serve`) + Postgres dans Docker : URL vers **`localhost`** (ou `127.0.0.1`) et le port **`POSTGRES_HOST_PORT`**. Pour **Mongo** : voir `.env.example` ; dans Docker, hôte **`mongodb`** (ex. `mongodb://mongodb:27017/bugbountyapp`).
 
 2. Lancement :
 
@@ -103,46 +199,50 @@ Nous utilisons les profiles dans compose pour réaliser cette séparation.
 
    Raccourci équivalent : `./docker/start` (même script).
 
-   **Arrêt :** `./docker/start.sh down` — arrête **tout** (API classique, **api-watch**, Mongo, mongo-express), supprime le réseau et les orphelins (`--remove-orphans`). Avant, un `down` sans le profil `watch` pouvait laisser `web-api-watch` actif et le réseau « in use ». Volumes (Mongo, `web_api_node_modules`, …) : `./docker/start.sh down -v`.
+   **Arrêt :** `./docker/start.sh down` — arrête **tout** (API classique, **api-watch**, Mongo, mongo-express, Postgres, pgweb selon les profils utilisés), supprime le réseau et les orphelins (`--remove-orphans`). Avant, un `down` sans le profil `watch` pouvait laisser `web-api-watch` actif et le réseau « in use ». Volumes (Mongo, Postgres, `web_api_node_modules`, …) : `./docker/start.sh down -v`.
 
    **Cycle rapide API (sans rebuild image) :**
    - `./docker/start.sh api-restart` (ou `./docker/start.sh restart-api`) : redémarre l’API sans reconstruire l’image.
-   - `./docker/start.sh api-stop` (ou `./docker/start.sh stop-api`) : arrête l’API (et sa dépendance Mongo si activée).
-   - Si `DATABASE_NAME=MONGODB`, le script applique automatiquement le profil Mongo et gère `mongodb` + `api`.
-   - Sinon, seules les opérations sur `api` sont exécutées.
+   - `./docker/start.sh api-stop` (ou `./docker/start.sh stop-api`) : arrête l’API et, selon **`DATABASE_NAME`**, la base Docker associée (**MongoDB** si `MONGODB`, **Postgres + pgweb** si **`POSTGRESQL_PRISMA`**).
+   - Si `DATABASE_NAME=MONGODB`, le script applique le profil **`mongodb`** et cible `mongodb` + `api`.
+   - Si `DATABASE_NAME=POSTGRESQL_PRISMA`, le script applique le profil **`pg`** et enchaîne **`postgres`**, **`pgweb`** et **`api`** selon la commande (`api-restart` ne relance que **`postgres`** + **`api`** — voir `start.sh`).
+   - Sinon (`IN-MEMORY`, …), seules les opérations sur **`api`** sont concernées (pas de conteneur de base du compose).
    - Après `./docker/start.sh` (`up`), le script suit directement les logs API en live dans le terminal (`logs -f api`).
      - Quitter l’affichage live : `Ctrl+C` (les conteneurs continuent de tourner).
-     - Désactiver ce comportement : `QUIZZAM_FOLLOW_API_LOGS=0 ./docker/start.sh`.
+     - Désactiver ce comportement : `API_FOLLOW_LOGS=0 ./docker/start.sh`.
 
    **Mode watch (dev inside container, sans rebuild à chaque changement) :**
    - `./docker/start.sh watch-up` (alias `dev-up`) : démarre `api-watch` avec bind mount du code (dépôt -> `/usr/src/app`) et watcher Nest/Nx dans le conteneur.
    - Les `node_modules` du conteneur sont dans un **volume Docker** (séparés de l’hôte) : au **démarrage**, un `pnpm install` est lancé pour se caler sur le `package.json` / `pnpm-lock.yaml` montés depuis l’hôte. Le dépôt inclut **`.npmrc`** (`confirm-modules-purge=false`) pour éviter le prompt interactif de pnpm sans TTY (sinon l’install peut s’arrêter avant d’avoir écrit les paquets). Après un changement de dépendance sur l’hôte, **commite le lockfile**, puis **redémarre** le watch — inutile de supprimer le volume à chaque fois.
    - Si le volume de deps semble corrompu : `watch-stop` puis `docker volume rm web-api-dev_web_api_node_modules` (ou le nom listé par `docker volume ls | grep web-api`), puis `watch-up`.
    - Les modifications de code sur l’hôte sont prises en compte automatiquement dans le conteneur (hot reload).
-   - `./docker/start.sh watch-stop` (alias `dev-stop`) : stoppe le mode watch.
+   - `./docker/start.sh watch-stop` (alias `dev-stop`) : stoppe le mode watch (et Mongo ou Postgres + pgweb si le profil correspondant est actif dans le script, comme pour `watch-up`).
    - Le service `api-watch` tourne d’abord en **root** le temps du `pnpm install` (le volume `node_modules` appartient à root par défaut) puis **Nx** en utilisateur **`node`**. TTY : `docker exec -it web-api-watch sh` (root) ou `docker exec -it -u node web-api-watch sh` pour un shell en `node`.
    - En mode watch, les logs `api-watch` sont suivis en live à la fin de la commande.
 
    **Import utilisateurs de démo (Mongo) :**
-   - `./docker/start.sh dump-users` : importe `docker/dump/user.json` dans `quizapp.users` avec `--jsonArray --drop` (écrase la collection avant import).
-   - Identifiants de démo à utiliser dans l'écran de connexion :
-     - **email** : `demo-user@example.local`
-     - **mot de passe** : `password123`
+   - `./docker/start.sh dump-users` : importe `docker/dump/user.json` dans `bugbountyapp.users` avec `--jsonArray --drop` (écrase la collection avant import). Compte de démo : voir **[PostgreSQL et Prisma](#postgresql-et-prisma)** ci-dessus.
    - Pour créer un autre utilisateur de dump, génère `passwordHash` avec la même logique que l'API (scrypt, format `salt:hash`) :
    ```sh
    node -e 'const crypto=require("crypto"); const salt=crypto.randomBytes(16).toString("hex"); const hash=crypto.scryptSync("password123",salt,64).toString("hex"); console.log(salt+":"+hash);'
    ```
    - Copie la sortie dans le champ `passwordHash` de `docker/dump/user.json` (le hash change à chaque exécution car le sel est aléatoire).
 
-   Le script lit `.env` et n’ajoute `--profile mongodb` que lorsque `DATABASE_NAME=MONGODB` (y compris pour `down`, pour cibler les bons services).
+   Le script lit **`server/.env`** et n’ajoute **`--profile mongodb`** ou **`--profile pg`** que lorsque `DATABASE_NAME` vaut **`MONGODB`** ou **`POSTGRESQL_PRISMA`** (y compris pour `down`, pour arrêter les bons services).
 
-   **Sans** le script (mode Mongo) :
+   **Sans** le script — **Mongo** :
 
    ```sh
    docker compose -f docker/compose.dev.yaml --profile mongodb up --build -d
    ```
 
-   **Sans** Mongo (ex. Firebase / en mémoire) :
+   **Sans** le script — **Postgres** :
+
+   ```sh
+   docker compose -f docker/compose.dev.yaml --profile pg up --build -d
+   ```
+
+   **Sans** base Docker Compose (ex. en mémoire) :
 
    ```sh
    docker compose -f docker/compose.dev.yaml up --build -d
@@ -152,54 +252,48 @@ Nous utilisons les profiles dans compose pour réaliser cette séparation.
 
    | Service            | URL |
    | ------------------ | --- |
-   | API (préfixe REST) | `http://localhost:3003/api` (port hôte par défaut ; surcharge avec `API_HOST_PORT`) |
+   | API (préfixe REST) | `http://localhost:3003/api` (port hôte par défaut **3003** ; surcharge avec **`API_HOST_PORT`** dans `server/.env`, utilisé par `compose.dev.yaml`) |
    | OpenAPI (Swagger UI) | `http://localhost:3003/api/docs` (même port hôte) |
    | mongo-express      | uniquement si `DATABASE_NAME=MONGODB` — `http://localhost:8086` |
-   | MongoDB (depuis l’hôte) | uniquement si `DATABASE_NAME=MONGODB` — `mongodb://localhost:27017` / base `quizapp` |
+   | pgweb              | si profil **pg** (`POSTGRESQL_PRISMA`) — `http://localhost:8087` (surcharge **`PGWEB_HOST_PORT`**) |
+   | MongoDB (depuis l’hôte) | uniquement si `DATABASE_NAME=MONGODB` — `mongodb://localhost:27017` / base `bugbountyapp` |
+   | PostgreSQL (depuis l’hôte) | si profil **pg** — `localhost:5432` (surcharge **`POSTGRES_HOST_PORT`**) |
 
    **mongo-express :** l’UI ne demande pas de mot de passe en dev (`ME_CONFIG_BASICAUTH=false` dans `compose.dev.yaml`). Sans cette option, l’image utilise souvent l’ancien couple **admin** / **pass** pour l’auth HTTP de l’interface — à éviter hors machine locale.
 
-En mode profil Mongo, vérifie que les ports **27017**, **3003** (ou `API_HOST_PORT`) et **8086** sont libres.
+En mode profil **Mongo**, vérifie que les ports **27017**, **3003** (ou **`API_HOST_PORT`**) et **8086** sont libres. En mode profil **Postgres**, vérifie **5432** (ou **`POSTGRES_HOST_PORT`**), **8087** (ou **`PGWEB_HOST_PORT`**) et le port API.
 
 **Journaux (mode Mongo) :** `cd docker && docker compose -f compose.dev.yaml --profile mongodb logs -f`
 
+**Journaux (mode Postgres) :** `cd docker && docker compose -f compose.dev.yaml --profile pg logs -f`
+
 **Journaux (API seule) :** `cd docker && docker compose -f compose.dev.yaml logs -f`
-
-**Firebase :** Compose ne provisionne pas Firebase. Si `DATABASE_NAME=FIREBASE` (ou si tu t’appuies sur Firebase pour l’auth / les données), crée un projet dans la [console Firebase](https://console.firebase.google.com/), ajoute les identifiants et configure `.env` (montage ou fourniture de `FIREBASE_KEY_PATH` dans le conteneur si besoin). C’est indépendant des services Mongo optionnels ci-dessus.
-
----
 
 ### 2. Installation manuelle (Node sur l’hôte)
 
-À utiliser si tu préfères **ne pas** faire tourner l’API dans Docker. Il te faut tout de même une instance **MongoDB** joignable par l’app (installation locale, ou Mongo seul dans Docker si tu préfères).
+Sans conteneur **API**. Installe une base joignable depuis ta machine (**Postgres** et/ou **Mongo** selon `DATABASE_NAME`).
 
-1. Installe les dépendances depuis la **racine du dépôt** :
+1. **Dépendances** (racine du dépôt) :
 
    ```sh
    pnpm install
    ```
 
-2. Configure `.env` :
+2. **`server/.env`** (voir **[Installation](#installation)**).
 
-   ```sh
-   cp .env.example .env
-   ```
+   **PostgreSQL + Prisma** : `DATABASE_NAME=POSTGRESQL_PRISMA`, **`DATABASE_URL`** avec hôte **`localhost`** (ou `127.0.0.1`) vers ton Postgres. Puis applique le schéma : voir **[PostgreSQL et Prisma](#postgresql-et-prisma)** (`prisma generate`, `migrate deploy`, seed optionnel).
 
-   Garde le **`DATABASE_URL`** par défaut avec **`localhost`** (la ligne `mongodb://mongodb…` reste **commentée** : elle sert uniquement à l’API **dans** Docker). Pointe vers ton instance Mongo, typiquement :
+   **MongoDB** : `DATABASE_URL=mongodb://localhost:27017/bugbountyapp` (les lignes `mongodb://mongodb…` du `.env.example` sont pour l’API **dans** Docker uniquement).
 
-   ```env
-   DATABASE_URL=mongodb://localhost:27017/quizapp
-   ```
+   Dans tous les cas : `JWT_SECRET`, `PORT`, `CORS_ORIGIN`, etc.
 
-   Renseigne `JWT_SECRET`, `PORT`, `CORS_ORIGIN`, etc. selon tes besoins.
-
-3. Lance l’API en dev (rechargement à chaud) :
+3. **API en dev** :
 
    ```sh
    npx nx serve web-api
    ```
 
-L’app écoute sur le `PORT` défini dans `.env` (voir `.env.example` ; défaut **3000** si tu ne changes rien).
+   Port : **`PORT`** dans `.env` (défaut **3000** ; aligne les e2e si tu compares avec l’API Docker sur **3003**).
 
 ---
 
@@ -219,15 +313,16 @@ npx nx show project web-api
 
 Les specs sous `e2e/` envoient les requêtes vers l’URL dérivée de **`HOST`** et **`PORT`** (voir `e2e/src/constants.ts` et `e2e/src/support/test-setup.ts`), par défaut **`http://localhost:3000`**.
 
-- L’**API en cours d’exécution** (souvent Docker : mappage hôte **`3003`**, via `API_HOST_PORT` dans le script `docker/`) : ne lance **pas** un second `npx nx serve` sur le **même** port. Pour cibler le conteneur, exporte le port hôte : par exemple `PORT=3003` (et `AUTH_TYPE=JWT` si besoin) puis `pnpm exec nx run e2e:e2e` — sans autre processus sur ce port.
+- L’**API en cours d’exécution** (souvent Docker : mappage hôte **`3003`**, via `API_HOST_PORT` dans le script `docker/`) : ne lance **pas** un second `npx nx serve` sur le **même** port. Pour cibler le conteneur, exporte le port hôte : par exemple `PORT=3003` (et `AUTH_TYPE=PASSPORT_JWT` si besoin) puis `pnpm exec nx run e2e:e2e` — sans autre processus sur ce port.
 - Pour un **`nx serve` local** en parallèle de Docker sur 3003, utilise un **autre** port libre (p.ex. `3000` ou `3010` dans ton `.env`) et la **même** valeur de `PORT` quand tu lances l’e2e.
 
 ---
 
 ## Documentation API
 
-- **Swagger (OpenAPI)** : interface interactive sur `/api/docs` (voir le tableau *URLs* ci-dessus selon ton port).
+- **Swagger (OpenAPI)** : interface interactive sur `/api/docs` (voir le tableau *URLs* ci-dessus selon ton port). Les routes **`auth/password-reset/*`** y figurent avec corps de requête, schémas de réponse et codes d’erreur lorsque **`DATABASE_NAME=POSTGRESQL_PRISMA`**.
 - **Notes HTTP** : [docs/api.md](./docs/api.md).
+- **Décisions d’architecture (ADR)** : [../docs/adr/architecture_server_adr.md](../docs/adr/architecture_server_adr.md) — inclut une section **Réinitialisation de mot de passe** (couches, périmètre Prisma, sécurité, Swagger).
 
 ---
 
@@ -235,3 +330,102 @@ Les specs sous `e2e/` envoient les requêtes vers l’URL dérivée de **`HOST`*
 
 - [Documentation Nx — Node](https://nx.dev/nx-api/node)
 - [Nx et CI](https://nx.dev/ci/intro/ci-with-nx)
+
+---
+
+## Test auth Bruno/Postman (PASSPORT_JWT + IN-MEMORY)
+
+Section dédiée pour vérifier rapidement le flow auth sans dépendance DB.
+
+### 1) Configuration `.env`
+
+Dans `server/.env` :
+
+- `AUTH_TYPE=PASSPORT_JWT`
+- `DATABASE_NAME=IN-MEMORY`
+- `JWT_SECRET=mon-lapin-caillousky-dans-la-serre`
+
+### 2) Lancer l'API
+
+Depuis `server/` :
+
+```sh
+pnpm run start
+```
+
+Base URL par défaut :
+
+- `http://localhost:3000`
+
+### 3) Register (Bruno/Postman)
+
+- Méthode : `POST`
+- URL : `http://localhost:3000/api/auth/register`
+- Headers :
+  - `Content-Type: application/json`
+- Body :
+
+```json
+{
+  "username": "john-test-20260508",
+  "email": "john.test.20260508@example.com",
+  "password": "StrongPassword123!"
+}
+```
+
+Réponse attendue (exemple) :
+
+```json
+{
+  "token": "<jwt>",
+  "user": {
+    "email": "john.test.20260508@example.com",
+    "uid": "abd4481a-6064-4d17-b57d-71e3e1ecccf1",
+    "username": "john-test-20260508"
+  },
+  "require2FA": false
+}
+```
+
+### 4) Login (Bruno/Postman)
+
+- Méthode : `POST`
+- URL : `http://localhost:3000/api/auth/login`
+- Headers :
+  - `Content-Type: application/json`
+- Body :
+
+```json
+{
+  "email": "john.test.20260508@example.com",
+  "password": "StrongPassword123!"
+}
+```
+
+### 5) Vérifier le JWT dans jwt.io
+
+- Colle le token retourné par `login` dans [jwt.io](https://jwt.io/).
+- Utilise ce secret :
+
+```text
+mon-lapin-caillousky-dans-la-serre
+```
+
+- Vérifie que la signature est valide et que le payload contient notamment :
+  - `user_id`
+  - `email`
+  - `sub`
+  - `iat`, `exp`
+
+Exemple visuel de configuration jwt.io :
+
+![JWT example for local testing](docs/jwt_example.png)
+
+### 6) Test d'une route protégée (optionnel)
+
+- Méthode : `GET`
+- URL : `http://localhost:3000/api/users/me`
+- Header :
+  - `Authorization: Bearer <token>`
+
+Si tout est correct, la route répond sans `401`.
