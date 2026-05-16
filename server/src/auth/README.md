@@ -138,8 +138,6 @@ Expose uniquement lorsque **`DATABASE_NAME=POSTGRESQL_PRISMA`** (`PasswordResetC
 - **`JWT_REFRESH_COOKIE_NAME`** (voir `config/auth-env.ts`) : nom du cookie (defaut `refresh_token`).
 - CORS Nest : **`credentials: true`** des que l’origine n’est pas `*` — le client Next utilise deja **`credentials: 'include'`** dans `client/lib/auth-api.ts` ; helper **`postAuthRefresh()`** pour `POST …/auth/refresh`.
 
-Les endpoints **demo TOTP** (`totp-sign-in/complete`) reutilisent la meme persistence refresh **sans** recopier encore la mise en cookie httpOnly dedie dans ce README (JSON interne utilise `AuthenticatedSession` avec refresh attache jusqu’a alignement UX si besoin).
-
 ---
 
 ## Schema 2FA (Prisma / Postgres uniquement pour la suite)
@@ -154,7 +152,7 @@ Le modele de donnees suit l'article [Designing Two-Factor Authentication That Sc
 - **Enum `TwoFactorMethod`**: valeur `APP` (authentificateur TOTP comme dans l'article). Pour du passkey / WebAuthn plus tard : ajouter une valeur a l'enum **et** une table dediee credentiels ; pas de table passkey tant que la fonctionnalite n'existe pas.
 - **DDL canonique**: `prisma/schema.prisma` + migration `prisma/migrations/20260508191300_two_factor_totp/migration.sql`. Appliquer avec `pnpm exec prisma migrate deploy` (et `prisma generate` si besoin). Le `PrismaService` continue de garantir au demarrage la table `users` + la colonne `two_factor_enabled` pour un dev rapide ; les tables `two_factor` / `two_factor_totp` viennent des migrations.
 - **Mongo**: le champ optionnel `twoFactorEnabled` sur `MongoUser` reste un alignement documentaire seulement ; pas d'evolution 2FA prevue de ce cote pour l'instant.
-- **Secrets en base (`two_factor_totp.secret`)** : en production le module d’enrollment persiste un **chiffrement** (AES-256-GCM, cle derivee via **scrypt** a partir de **`TOTP_ENCRYPTION_KEY`**, prefixe stocke **`v1:`**). Les anciennes lignes **sans** ce prefixe sont encore lues en clair (compat demopage sign-in).
+- **Secrets en base (`two_factor_totp.secret`)** : en production le module d’enrollment persiste un **chiffrement** (AES-256-GCM, cle derivee via **scrypt** a partir de **`TOTP_ENCRYPTION_KEY`**, prefixe stocke **`v1:`**). Les anciennes lignes **sans** ce prefixe sont encore lues en clair (migration progressive).
 
 ### Activation TOTP avec JWT (parcours « Enable OTP »)
 
@@ -174,19 +172,9 @@ Quand `users.two_factor_enabled = 1` (Postgres Prisma), le login mot de passe se
 
 Pour les comptes sans TOTP (`two_factor_enabled = 0`), le login reste inchangé (email + password uniquement).
 
-Fichiers principaux : `application/totp-enrollment.service.ts`, `adapters/totp/totp-secret-seal.ts`, `controllers/totp-enrollment.controller.ts`.
+Fichiers principaux : `application/totp-enrollment.service.ts`, `application/totp-config.ts`, `adapters/totp/totp-secret-seal.ts`, `controllers/totp-enrollment.controller.ts`.
 
-**Page demo dashboard (EJS)** pour enchainer login + start + confirm : `GET /api/dashboard/totp` (bouton aussi sur la page d’accueil `/api`).
-
-### Page de démo (EJS) — liaison TOTP après mot de passe
-
-Sous **`DATABASE_NAME=POSTGRESQL_PRISMA`** uniquement (flux proche [Logto — authenticator + Node](https://blog.logto.io/support-authenticator-app-verification-for-your-nodejs-app)) :
-
-- **Page** : `GET /api/demo/totp-sign-in` (selon `GLOBAL_PREFIX`, par defaut prefix `api`).
-- **1 — QR** : `POST /api/demo/totp-sign-in/step` corps comme `POST /api/auth/login` (`email`, `password`). Reponses **403** JSON : `missing_totp` + `secretQrCode` (data URL), ou `totp_verification_required` si le TOTP est **deja lie** (`verified=true`).
-- **2 — Binder** : `POST /api/demo/totp-sign-in/verify` corps `email`, `password`, `code` (TOTP). Passe `two_factor.verified` a true et `users.two_factor_enabled` a `1`.
-- **3 — Connexion** : `POST /api/demo/totp-sign-in/complete` meme corps ; renvoie le meme JSON que `POST /api/auth/login` (JWT) si mot de passe + TOTP sont valides.
-- Issuer QR : **`TOTP_ISSUER`** (defaut `BugBountyApp`). **`TOTP_EPOCH_TOLERANCE`** pour `verify()` (defaut `30` secondes).
+Variables : **`TOTP_ISSUER`** (defaut `BugBountyApp`), **`TOTP_EPOCH_TOLERANCE`** pour `verify()` (defaut `30` secondes).
 
 ## Regle d'architecture
 

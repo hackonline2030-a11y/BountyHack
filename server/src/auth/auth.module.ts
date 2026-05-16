@@ -36,11 +36,9 @@ import { RefreshAccessTokenQuery } from './application/queries/get-refresh-acces
 
 import { PassportJwtAuthController } from './controllers/passport-jwt-auth.controller';
 import { PasswordResetController } from './controllers/password-reset.controller';
-import { TotpSignInDemoController } from './controllers/totp-sign-in-demo.controller';
 import { TotpEnrollmentController } from './controllers/totp-enrollment.controller';
 import { PassportJwtAuthGuard } from './adapters/passport-jwt/guards/passport-jwt-auth.guard';
 import { RolesGuard } from './rbac/roles.guard';
-import { TotpSignInDemoService } from './application/demo/totp-sign-in-demo.service';
 import { TotpEnrollmentService } from './application/totp-enrollment.service';
 
 const usesPersistedJwtStore =
@@ -80,13 +78,11 @@ const authImports = [
 const authControllers = [
   PassportJwtAuthController,
   ...(isPrismaSqlMode()
-    ? [TotpSignInDemoController, TotpEnrollmentController, PasswordResetController]
+    ? [TotpEnrollmentController, PasswordResetController]
     : []),
 ];
 
-const prismaTotpProviders = isPrismaSqlMode()
-  ? [TotpSignInDemoService, TotpEnrollmentService]
-  : [];
+const prismaTotpProviders = isPrismaSqlMode() ? [TotpEnrollmentService] : [];
 
 const prismaPasswordResetProviders = isPrismaSqlMode()
     ? [

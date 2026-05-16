@@ -18,7 +18,7 @@ import type {
 import { Identity } from '../../../../domain/models/identity';
 import { verifyPassword, hashPassword } from '../../../utils/password.util';
 import { openTotpSecretFromStorage } from '../../../../adapters/totp/totp-secret-seal';
-import { TOTP_DEMO } from '../../../../application/demo/totp-crypto';
+import { TOTP_CONFIG } from '../../../../application/totp-config';
 import { PassportJwtTokenService } from '../../services/passport-jwt-token.service';
 import {
   PassportJwtLoginInput,
@@ -178,10 +178,10 @@ export class PostgrePrismaPassportJwtRepository
         secret: secretPlain,
         token: code,
         strategy: 'totp',
-        algorithm: TOTP_DEMO.algorithm,
-        digits: TOTP_DEMO.digits,
-        period: TOTP_DEMO.period,
-        epochTolerance: TOTP_DEMO.epochToleranceSeconds,
+        algorithm: TOTP_CONFIG.algorithm,
+        digits: TOTP_CONFIG.digits,
+        period: TOTP_CONFIG.period,
+        epochTolerance: TOTP_CONFIG.epochToleranceSeconds,
       });
       if (!result.valid) {
         throw new UnauthorizedException('Invalid TOTP code');
