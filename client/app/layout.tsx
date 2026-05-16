@@ -53,7 +53,12 @@ export const metadata: Metadata = {
   description: siteDescription,
   applicationName: "BugBountyApp",
   manifest: "/manifest.webmanifest",
-  robots: { index: true, follow: true },
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: { index: false, follow: false, noimageindex: true },
+  },
   openGraph: {
     title: siteName,
     description: siteDescription,
