@@ -1,0 +1,48 @@
+{
+  "welcomeAdmin": {
+    "metaTitle": "Lead Bug Bounty dashboard",
+    "heading": "Welcome",
+    "headingWithUsername": "Welcome, {{username}}",
+    "subheading": "Lead Bug Bounty — central point of the program, held by the project owner through their company.",
+    "nav": {
+      "label": "Dashboard navigation",
+      "users": "Users",
+      "register": "Registration",
+      "teams": "Report teams",
+      "settings": "Settings"
+    },
+    "mission": {
+      "title": "Your role as Lead Bug Bounty",
+      "intro": "This role is the central point of the program. It cannot be delegated and carries the company’s full legal responsibility.",
+      "items": {
+        "ywhAccount": "Ownership and management of the YesWeHack account",
+        "ywhRelations": "Official relationship with YesWeHack and Bug Bounty programs",
+        "finalValidation": "Final validation of vulnerabilities before submission",
+        "submission": "Submission of reports on the platform",
+        "legalFinancial": "Legal, tax, and financial management of bounties",
+        "arbitration": "Arbitration of priorities, scope, and conflicts"
+      },
+      "boundary": "You are the only party authorized to commit the company toward YesWeHack and the programs."
+    },
+    "cards": {
+      "users": {
+        "title": "User management",
+        "subtitle": "Accounts and application roles",
+        "body": "Review registered accounts and their roles in the application.",
+        "cta": "Open administration"
+      },
+      "register": {
+        "title": "Register a user",
+        "subtitle": "Account creation — Lead only",
+        "body": "Create an account for a hunter, mentor, quality checker, or another role in the program.",
+        "cta": "New registration"
+      },
+      "teams": {
+        "title": "Report teams",
+        "subtitle": "Team oversight",
+        "body": "Create and manage report teams (composition, coordinator, assignments).",
+        "cta": "Manage teams"
+      }
+    }
+  }
+}

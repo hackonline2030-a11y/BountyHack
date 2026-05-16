@@ -1,7 +1,7 @@
 {
-  "title": "BugBountyApp — modèle Next.js",
-  "description": "Base Next.js orientée authentification : TypeScript, Prisma et architecture modulaire — prête à être étendue.",
-  "tagline": "Livrez plus vite avec une structure claire.",
+  "title": "BugBountyApp",
+  "description": "Plateforme de bug bounty pour les applications web. Préparez et soumettez des rapports de vulnérabilités avec un accompagnement pédagogique (YesWeHack, HackerOne, etc.).",
+  "tagline": "Rapportez les vulnérabilités avec méthode et accompagnement.",
   "home": {
     "metaTitle": "Accueil",
     "heroTitle": "BugBountyApp",

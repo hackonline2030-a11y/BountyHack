@@ -23,7 +23,7 @@
     },
     "roles": {
       "USER": "Utilisateur",
-      "SUPER_ADMIN": "Super administrateur",
+      "SUPER_ADMIN": "Lead Bug Bounty",
       "HUNTER": "Chercheur (junior / bug bounty)",
       "MENTOR": "Mentor",
       "QUALITY_CHECKER": "Contrôle qualité",

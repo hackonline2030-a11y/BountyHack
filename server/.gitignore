@@ -58,7 +58,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .pnp.*
 
 # Project — secrets & generated / local-only assets
-templates/assets/
+templates/**/assets/**
 templates/real-me.png
 # PDFs générés : ignorer tout le contenu sous pdfs/, mais garder le dossier versionné (pdfs/.gitkeep)
 pdfs/**
@@ -66,3 +66,6 @@ pdfs/**
 
 # Client Prisma généré (décommenter si vous ne versionnez pas `src/generated/prisma`)
 # src/generated/prisma/
+# Données de démo PDF (report.json, etc.) : local uniquement, dossier versionné via .gitkeep
+src/document-rendering/data/report-final/**
+!src/document-rendering/data/report-final/.gitkeep

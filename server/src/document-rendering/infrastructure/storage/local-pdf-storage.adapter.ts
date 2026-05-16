@@ -20,6 +20,7 @@ export class LocalPdfStorageAdapter implements IPdfStorage {
 
     return {
       fileName,
+      /** Path reference only — not exposed via express.static until auth download exists. */
       publicUrl: `/pdfs/${fileName}`,
     };
   }

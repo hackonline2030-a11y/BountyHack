@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "BugBountyApp — Next.js template",
+    name: "BugBountyApp",
     short_name: "BugBountyApp",
     description:
-      "Auth-first Next.js starter with TypeScript, Prisma, and modular architecture.",
+      "Bug bounty platform for web applications — draft and submit vulnerability reports with guided support.",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

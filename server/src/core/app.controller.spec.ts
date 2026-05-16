@@ -53,8 +53,6 @@ describe('AppController', () => {
       dashboardBtnText: 'Dashboard',
       docsUrl: '/api/docs',
       dashboardUrl: '/api/dashboard',
-      totpSetupUrl: '/api/dashboard/totp',
-      totpSetupBtnText: 'Demo : activer le TOTP',
     });
   });
 });

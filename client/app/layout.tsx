@@ -18,9 +18,9 @@ initServerI18next(i18nConfig);
 
 const LANG_HEADER = "x-i18next-current-language";
 
-const siteName = "BugBountyApp — Next.js template";
+const siteName = "BugBountyApp";
 const siteDescription =
-  "Auth-first Next.js starter: TypeScript, Prisma, modular architecture, and tests — ready to extend.";
+  "Bug bounty platform for web applications. Prepare and submit vulnerability reports with educational support for programs like YesWeHack and HackerOne.";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
@@ -53,7 +53,12 @@ export const metadata: Metadata = {
   description: siteDescription,
   applicationName: "BugBountyApp",
   manifest: "/manifest.webmanifest",
-  robots: { index: true, follow: true },
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: { index: false, follow: false, noimageindex: true },
+  },
   openGraph: {
     title: siteName,
     description: siteDescription,

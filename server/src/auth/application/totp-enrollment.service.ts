@@ -14,7 +14,7 @@ import {
   sealTotpSecretForStorage,
   openTotpSecretFromStorage,
 } from '../adapters/totp/totp-secret-seal';
-import { TOTP_DEMO } from './demo/totp-crypto';
+import { TOTP_CONFIG } from './totp-config';
 
 export type TotpEnrollmentStartResult = {
   /** Secret Base32 (saisie manuelle — transmettre seulement en HTTPS prod). */
@@ -88,9 +88,9 @@ export class TotpEnrollmentService {
       issuer,
       label,
       secret,
-      algorithm: TOTP_DEMO.algorithm,
-      digits: TOTP_DEMO.digits,
-      period: TOTP_DEMO.period,
+      algorithm: TOTP_CONFIG.algorithm,
+      digits: TOTP_CONFIG.digits,
+      period: TOTP_CONFIG.period,
     });
 
     const secretQrCode = await QRCode.toDataURL(otpauthUri);
@@ -132,10 +132,10 @@ export class TotpEnrollmentService {
       secret: secretPlain,
       token,
       strategy: 'totp',
-      algorithm: TOTP_DEMO.algorithm,
-      digits: TOTP_DEMO.digits,
-      period: TOTP_DEMO.period,
-      epochTolerance: TOTP_DEMO.epochToleranceSeconds,
+      algorithm: TOTP_CONFIG.algorithm,
+      digits: TOTP_CONFIG.digits,
+      period: TOTP_CONFIG.period,
+      epochTolerance: TOTP_CONFIG.epochToleranceSeconds,
     });
 
     if (!result.valid) {
@@ -197,10 +197,10 @@ export class TotpEnrollmentService {
       secret: secretPlain,
       token,
       strategy: 'totp',
-      algorithm: TOTP_DEMO.algorithm,
-      digits: TOTP_DEMO.digits,
-      period: TOTP_DEMO.period,
-      epochTolerance: TOTP_DEMO.epochToleranceSeconds,
+      algorithm: TOTP_CONFIG.algorithm,
+      digits: TOTP_CONFIG.digits,
+      period: TOTP_CONFIG.period,
+      epochTolerance: TOTP_CONFIG.epochToleranceSeconds,
     });
 
     if (!result.valid) {

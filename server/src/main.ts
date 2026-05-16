@@ -1,3 +1,4 @@
+import './bootstrap-env';
 import "reflect-metadata";
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -35,12 +36,12 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('ejs');
 
-  // Serve generated PDFs (written under process.cwd()/pdfs, e.g. from PdfService.htmlToPdf)
+  // Generated PDFs (process.cwd()/pdfs) — write-only on disk; no public HTTP static mount.
+  // Download will go through an authenticated route later (see document-rendering).
   const pdfsDir = join(process.cwd(), 'pdfs');
   if (!existsSync(pdfsDir)) {
     mkdirSync(pdfsDir, { recursive: true });
   }
-  app.use('/pdfs', express.static(pdfsDir));
   app.use('/template-assets', express.static(join(process.cwd(), 'templates')));
 
   app.setGlobalPrefix(variables.globalPrefix);
@@ -92,6 +93,9 @@ async function bootstrap() {
   console.log("\x1b[36m *************************************** \n 🌞 API - Version 1.0.0 \n 🏡 Architecture : hexagonale \n *************************************** ");
   const databaseAlternativeByCurrent: Record<string, string> = {
     'IN-MEMORY': 'MONGODB',
+    MONGODB: 'POSTGRESQL_PRISMA',
+    POSTGRESQL_PRISMA: 'MYSQL_PRISMA',
+    MYSQL_PRISMA: 'POSTGRESQL_PRISMA',
   };
   const databaseAlternativeValue = databaseAlternativeByCurrent[variables.database];
   const databaseAlternative = databaseAlternativeValue

@@ -7,13 +7,28 @@ import { getWelcomeUser } from "@/lib/dal/welcome-user";
 import { verifySessionForRoles } from "@/lib/dal/session";
 import { AppRoleCode } from "@/lib/app-role-code";
 import { isSupportedLanguage } from "@modules/auth/core/model/locale.policy";
+import { DashboardCard } from "../../(mentor)/welcome-mentor/_components/DashboardCard";
+import {
+  AdminDashboardSidebar,
+  type AdminNavHrefs,
+  type AdminNavLabels,
+} from "./_components/AdminDashboardSidebar";
 
 type PageProps = { params: Promise<{ lng: string }> };
 
+const MISSION_KEYS = [
+  "ywhAccount",
+  "ywhRelations",
+  "finalValidation",
+  "submission",
+  "legalFinancial",
+  "arbitration",
+] as const;
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { lng } = await params;
-  const { t } = await getT("welcomeHunter", { lng });
-  return { title: t("welcomeHunter.metaTitle") };
+  const { t } = await getT("welcomeAdmin", { lng });
+  return { title: t("welcomeAdmin.metaTitle") };
 }
 
 export default async function WelcomeAdminPage({ params }: PageProps) {
@@ -23,37 +38,105 @@ export default async function WelcomeAdminPage({ params }: PageProps) {
   }
   await verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN]);
   const { displayName } = await getWelcomeUser(lng);
-  const { t } = await getT("welcomeHunter", { lng });
+  const { t } = await getT("welcomeAdmin", { lng });
+  const prefix = `/${lng}`;
+
   const heading =
     displayName !== null
-      ? t("welcomeHunter.headingWithUsername", { username: displayName })
-      : t("welcomeHunter.heading");
+      ? t("welcomeAdmin.headingWithUsername", { username: displayName })
+      : t("welcomeAdmin.heading");
+
+  const navLabels: AdminNavLabels = {
+    label: t("welcomeAdmin.nav.label"),
+    users: t("welcomeAdmin.nav.users"),
+    register: t("welcomeAdmin.nav.register"),
+    teams: t("welcomeAdmin.nav.teams"),
+    settings: t("welcomeAdmin.nav.settings"),
+  };
+
+  const navHrefs: AdminNavHrefs = {
+    users: `${prefix}/administration`,
+    register: `${prefix}/administration/register`,
+    teams: `${prefix}/administration/team-management`,
+    settings: `${prefix}/parameters`,
+  };
 
   return (
     <main className="flex w-full min-h-[calc(100vh-(var(--header-height)+var(--footer-height)))] flex-col">
       <Section
         fluid
-        classNames="flex min-h-0 flex-1 flex-col items-center justify-center bg-pattern px-4 py-8"
+        classNames="bg-pattern flex flex-1 flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
       >
-        <article className="dashboard-card flex w-full max-w-md flex-col items-center gap-6 p-8 sm:p-10">
-          <h1 className="text-center text-3xl font-bold text-dashboard-text">
-            {heading}
-          </h1>
-          <nav className="flex flex-col items-center gap-3 text-sm">
-            <Link
-              href={`/${lng}/administration`}
-              className="text-dashboard-accent underline-offset-2 hover:underline"
-            >
-              Administration
-            </Link>
-            <Link
-              href={`/${lng}/administration/team-management`}
-              className="text-dashboard-accent underline-offset-2 hover:underline"
-            >
-              Équipes rapport (super admin)
-            </Link>
-          </nav>
-        </article>
+        <div className="mx-auto w-full max-w-5xl">
+          <div className="dashboard-card mb-6 p-5 sm:mb-8 sm:p-6">
+            <h1 className="text-2xl font-bold tracking-tight text-dashboard-text sm:text-3xl">
+              {heading}
+            </h1>
+            <p className="mt-1 text-sm text-dashboard-text-muted sm:text-base">
+              {t("welcomeAdmin.subheading")}
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
+            <AdminDashboardSidebar labels={navLabels} hrefs={navHrefs} />
+
+            <div className="flex min-w-0 flex-1 flex-col gap-4 sm:gap-5">
+              <DashboardCard titleId="card-mission" title={t("welcomeAdmin.mission.title")}>
+                <p className="text-sm text-dashboard-text">{t("welcomeAdmin.mission.intro")}</p>
+                <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm text-dashboard-text-muted">
+                  {MISSION_KEYS.map((key) => (
+                    <li key={key}>{t(`welcomeAdmin.mission.items.${key}`)}</li>
+                  ))}
+                </ul>
+                <p className="mt-4 rounded-lg border border-dashboard-divider bg-dashboard-accent-soft/50 px-3 py-2 text-xs text-dashboard-text-muted">
+                  {t("welcomeAdmin.mission.boundary")}
+                </p>
+              </DashboardCard>
+
+              <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
+                <DashboardCard
+                  titleId="card-users"
+                  title={t("welcomeAdmin.cards.users.title")}
+                  subtitle={t("welcomeAdmin.cards.users.subtitle")}
+                >
+                  <p className="text-sm text-dashboard-text-muted">
+                    {t("welcomeAdmin.cards.users.body")}
+                  </p>
+                  <Link href={navHrefs.users} className="dashboard-card-cta mt-auto pt-4">
+                    {t("welcomeAdmin.cards.users.cta")} →
+                  </Link>
+                </DashboardCard>
+
+                <DashboardCard
+                  titleId="card-register"
+                  title={t("welcomeAdmin.cards.register.title")}
+                  subtitle={t("welcomeAdmin.cards.register.subtitle")}
+                >
+                  <p className="text-sm text-dashboard-text-muted">
+                    {t("welcomeAdmin.cards.register.body")}
+                  </p>
+                  <Link href={navHrefs.register} className="dashboard-card-cta mt-auto pt-4">
+                    {t("welcomeAdmin.cards.register.cta")} →
+                  </Link>
+                </DashboardCard>
+
+                <DashboardCard
+                  titleId="card-teams"
+                  title={t("welcomeAdmin.cards.teams.title")}
+                  subtitle={t("welcomeAdmin.cards.teams.subtitle")}
+                  className="sm:col-span-2"
+                >
+                  <p className="text-sm text-dashboard-text-muted">
+                    {t("welcomeAdmin.cards.teams.body")}
+                  </p>
+                  <Link href={navHrefs.teams} className="dashboard-card-cta mt-auto pt-4">
+                    {t("welcomeAdmin.cards.teams.cta")} →
+                  </Link>
+                </DashboardCard>
+              </div>
+            </div>
+          </div>
+        </div>
       </Section>
     </main>
   );
