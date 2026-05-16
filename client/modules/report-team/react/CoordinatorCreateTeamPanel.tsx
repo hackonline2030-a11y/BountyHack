@@ -9,7 +9,7 @@ import type {
   ReportTeamMemberRole,
 } from "@modules/report-team/model/report-team.types";
 import { ReportTeamValidityBadge } from "@modules/report-team/react/ReportTeamValidityBadge";
-import { computeTeamValidityFromRoles } from "@modules/report-team/react/team-validity";
+import { computeTeamValidityFromRoles } from "@modules/report-team/core/validity";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
 type SelectedMember = {

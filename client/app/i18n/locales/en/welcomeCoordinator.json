@@ -18,7 +18,7 @@
       },
       "rules": {
         "title": "Valid team rules",
-        "body": "A report team must include at least one hunter, one quality checker, and one mentor. A unique team ID is required."
+        "body": "A report team must include at least one hunter and either a mentor or a quality checker. You may add more members as needed. A unique team ID is required."
       }
     }
   }

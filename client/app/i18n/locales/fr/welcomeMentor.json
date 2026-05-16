@@ -37,7 +37,7 @@
       "teams": {
         "title": "Équipes rapport",
         "subtitle": "Rejoindre une équipe via le coordinateur",
-        "description": "Les équipes rapport sont constituées par le coordinateur (hunter, quality checker, mentor minimum). Vous pouvez demander à être affecté.",
+        "description": "Les équipes rapport sont constituées par le coordinateur (hunter + mentor ou quality checker). Vous pouvez demander à être affecté.",
         "cta": "Mes équipes & demandes",
         "askCta": "Demander une affectation"
       },

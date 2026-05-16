@@ -18,7 +18,7 @@
       },
       "rules": {
         "title": "Règles d’équipe valide",
-        "body": "Une équipe rapport doit comporter au moins un hunter, un quality checker et un mentor. Identifiant d’équipe unique obligatoire."
+        "body": "Une équipe rapport doit comporter au moins un hunter et un mentor ou un quality checker. Vous pouvez ajouter d’autres membres librement. Identifiant d’équipe unique obligatoire."
       }
     }
   }
