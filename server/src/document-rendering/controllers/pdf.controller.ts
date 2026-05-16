@@ -82,7 +82,7 @@ export class PdfController {
   @ApiOperation({
     summary: 'Generate report PDF file',
     description:
-      'Generates a PDF from the report template for the given content version and returns a public URL.',
+      'Generates a PDF on disk and returns a storage path reference (`/pdfs/...`). Files are not served publicly until a secured download endpoint exists.',
   })
   @ApiQuery({
     name: 'style',
@@ -103,7 +103,8 @@ export class PdfController {
     example: 'fr',
   })
   @ApiOkResponse({
-    description: 'Report PDF URL returned.',
+    description:
+      'Report PDF storage path returned (not publicly downloadable yet).',
     schema: {
       type: 'object',
       properties: {
