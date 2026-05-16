@@ -1,8 +1,0 @@
-{
-    "welcomeDashboard": {
-        "metaTitle": "Bienvenue sur votre tableau de bord",
-        "heading": "Bienvenue",
-        "headingWithUsername": "Bienvenue, {{username}}"
-    }
-}
-  

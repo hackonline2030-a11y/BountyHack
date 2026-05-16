@@ -7,17 +7,39 @@ import { useElementHeightCssVar } from "@/modules/app/nextjs/hooks/useElementHei
 import { LangLinks } from "@/modules/app/nextjs/layout/LangLinks";
 import { logoutFromBrowser } from "@modules/auth/core/browser-logout.factory";
 import {
-  isAdministrationRegisterPath,
+  isAdministrationPath,
   isAuthHeaderLoginHighlightPath,
-  isParametersPath,
   localePrefixFromPathname,
 } from "@/lib/locale-path";
+import { SESSION_REFRESHED_EVENT } from "@/lib/session-refresh";
+
+/** `/{lng}/welcome-…` segment for the signed-in role, or `null` when there is no dashboard route. */
+function welcomeDashboardPathFromRoleCode(roleCode: string | null): string | null {
+  if (!roleCode) return null;
+  switch (roleCode) {
+    case "SUPER_ADMIN":
+      return "welcome-admin";
+    case "HUNTER":
+      return "welcome-hunter";
+    case "MENTOR":
+      return "welcome-mentor";
+    case "QUALITY_CHECKER":
+      return "welcome-quality-checker";
+    case "COORDINATOR":
+      return "welcome-coordinator";
+    default:
+      return null;
+  }
+}
 
 export const Header: React.FC<{ className?: string }> = ({ className = "" }) => {
   const { t } = useT("common");
   const router = useRouter();
   const pathname = usePathname();
-  const [showParametersLink, setShowParametersLink] = useState(false);
+  // Reflects /api/session/status. Drives both the username/role display
+  // and the Logout-vs-Login switch (Parameters now lives in the in-app
+  // dashboard sidebar — not the header).
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [logoutBusy, setLogoutBusy] = useState(false);
   const [currentUsername, setCurrentUsername] = useState<string | null>(null);
   const [currentRoleLabel, setCurrentRoleLabel] = useState<string | null>(null);
@@ -30,13 +52,16 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
 
   const prefix = localePrefixFromPathname(pathname);
   const localeHome = prefix;
-  const parametersHref = `${prefix}/parameters`;
-  const adminHref = `${prefix}/administration/register`;
+  const adminHref = `${prefix}/administration`;
   const loginHref = `${prefix}/login`;
   const isLoginActive = isAuthHeaderLoginHighlightPath(pathname);
-  const isParametersActive = isParametersPath(pathname);
-  const isAdminActive = isAdministrationRegisterPath(pathname);
+  const isAdminActive = isAdministrationPath(pathname);
   const isSuperAdmin = currentRoleCode === "SUPER_ADMIN";
+  const dashboardSegment = welcomeDashboardPathFromRoleCode(currentRoleCode);
+  const dashboardHref =
+    isAuthenticated && dashboardSegment ? `${prefix}/${dashboardSegment}` : null;
+  const isDashboardActive =
+    !!dashboardHref && (pathname === dashboardHref || pathname.startsWith(`${dashboardHref}/`));
 
   const roleLabelFromRoleCode = (roleCode: string | null): string | null => {
     if (!roleCode) return null;
@@ -54,7 +79,7 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
 
   useEffect(() => {
     let cancelled = false;
-    async function loadSessionStatus() {
+    async function loadSessionStatus(): Promise<void> {
       try {
         const res = await fetch("/api/session/status", {
           method: "GET",
@@ -83,14 +108,14 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
             ? roleRaw.trim()
             : null;
         if (!cancelled) {
-          setShowParametersLink(authenticated);
+          setIsAuthenticated(authenticated);
           setCurrentUsername(authenticated ? username : null);
           setCurrentRoleLabel(authenticated ? roleLabelFromRoleCode(roleCode) : null);
           setCurrentRoleCode(authenticated ? roleCode : null);
         }
       } catch {
         if (!cancelled) {
-          setShowParametersLink(false);
+          setIsAuthenticated(false);
           setCurrentUsername(null);
           setCurrentRoleLabel(null);
           setCurrentRoleCode(null);
@@ -98,8 +123,15 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
       }
     }
     void loadSessionStatus();
+
+    const onSessionRefreshed = () => {
+      void loadSessionStatus();
+    };
+    window.addEventListener(SESSION_REFRESHED_EVENT, onSessionRefreshed);
+
     return () => {
       cancelled = true;
+      window.removeEventListener(SESSION_REFRESHED_EVENT, onSessionRefreshed);
     };
   }, [pathname]);
 
@@ -107,7 +139,7 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
     setLogoutBusy(true);
     try {
       await logoutFromBrowser();
-      setShowParametersLink(false);
+      setIsAuthenticated(false);
       setCurrentUsername(null);
       setCurrentRoleLabel(null);
       setCurrentRoleCode(null);
@@ -126,67 +158,57 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
       <nav
         className={`header-container flex items-center justify-between gap-4 ${className}`.trim()}
       >
-        <Link
-          href={localeHome}
-          className="text-lg font-bold tracking-tight text-black hover:text-black/70"
-        >
-          {t("header.brand")}
-          {currentUsername ? (
-            <span className="ml-2 text-sm font-medium tracking-normal text-black/70">
-              {currentUsername}
-              {currentRoleLabel ? ` (${currentRoleLabel})` : ""}
-            </span>
-          ) : null}
-        </Link>
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex flex-col items-start gap-0.5">
           <Link
             href={localeHome}
-            className="rounded-md px-3 py-2 text-sm font-medium text-black/70 transition hover:bg-black/5 hover:text-black focus:outline-none focus:ring-2 focus:ring-black/20"
+            className="text-lg font-bold tracking-tight text-black hover:text-black/70"
           >
+            {t("header.brand")}
+          </Link>
+          {currentUsername ? (
+            <span className="text-sm font-medium text-black/70">
+              {currentUsername}
+              {currentRoleLabel ? ` - ${currentRoleLabel}` : ""}
+            </span>
+          ) : null}
+        </div>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link href={localeHome} className="header-nav-link">
             {t("header.home")}
           </Link>
-          <LangLinks />
-          {showParametersLink ? (
+          {dashboardHref ? (
             <Link
-              href={parametersHref}
-              className={`rounded-md px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-black/20 ${
-                isParametersActive
-                  ? "bg-black text-white"
-                  : "text-black/70 hover:bg-black/5 hover:text-black"
-              }`}
+              href={dashboardHref}
+              aria-current={isDashboardActive ? "page" : undefined}
+              className={`header-nav-link${isDashboardActive ? " header-nav-link--active" : ""}`}
             >
-              {t("header.parameters")}
+              {t("header.dashboard")}
             </Link>
           ) : null}
+          <LangLinks />
           {isSuperAdmin ? (
             <Link
               href={adminHref}
-              className={`rounded-md px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-black/20 ${
-                isAdminActive
-                  ? "bg-black text-white"
-                  : "text-black/70 hover:bg-black/5 hover:text-black"
-              }`}
+              aria-current={isAdminActive ? "page" : undefined}
+              className={`header-nav-link${isAdminActive ? " header-nav-link--active" : ""}`}
             >
               {t("header.admin")}
             </Link>
           ) : null}
-          {showParametersLink ? (
+          {isAuthenticated ? (
             <button
               type="button"
               onClick={() => void handleLogout()}
               disabled={logoutBusy}
-              className="rounded-md px-3 py-2 text-sm font-medium text-black/70 transition hover:bg-black/5 hover:text-black focus:outline-none focus:ring-2 focus:ring-black/20 disabled:cursor-not-allowed disabled:opacity-50"
+              className="header-nav-link"
             >
               {logoutBusy ? t("header.logoutPending") : t("header.logout")}
             </button>
           ) : (
             <Link
               href={loginHref}
-              className={`rounded-md px-3 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-black/20 ${
-                isLoginActive
-                  ? "bg-black text-white"
-                  : "text-black/70 hover:bg-black/5 hover:text-black"
-              }`}
+              aria-current={isLoginActive ? "page" : undefined}
+              className={`header-nav-link${isLoginActive ? " header-nav-link--active" : ""}`}
             >
               {t("header.login")}
             </Link>

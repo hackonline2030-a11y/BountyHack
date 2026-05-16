@@ -192,6 +192,7 @@ export type TwoFactorTotpOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   twoFactor?: Prisma.TwoFactorOrderByWithRelationInput
+  _relevance?: Prisma.TwoFactorTotpOrderByRelevanceInput
 }
 
 export type TwoFactorTotpWhereUniqueInput = Prisma.AtLeast<{
@@ -286,6 +287,12 @@ export type TwoFactorTotpUncheckedUpdateManyInput = {
 export type TwoFactorTotpNullableScalarRelationFilter = {
   is?: Prisma.TwoFactorTotpWhereInput | null
   isNot?: Prisma.TwoFactorTotpWhereInput | null
+}
+
+export type TwoFactorTotpOrderByRelevanceInput = {
+  fields: Prisma.TwoFactorTotpOrderByRelevanceFieldEnum | Prisma.TwoFactorTotpOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type TwoFactorTotpCountOrderByAggregateInput = {
@@ -399,23 +406,7 @@ export type TwoFactorTotpSelect<ExtArgs extends runtime.Types.Extensions.Interna
   twoFactor?: boolean | Prisma.TwoFactorDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["twoFactorTotp"]>
 
-export type TwoFactorTotpSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  twoFactorId?: boolean
-  secret?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
-  twoFactor?: boolean | Prisma.TwoFactorDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["twoFactorTotp"]>
 
-export type TwoFactorTotpSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  twoFactorId?: boolean
-  secret?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
-  twoFactor?: boolean | Prisma.TwoFactorDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["twoFactorTotp"]>
 
 export type TwoFactorTotpSelectScalar = {
   id?: boolean
@@ -427,12 +418,6 @@ export type TwoFactorTotpSelectScalar = {
 
 export type TwoFactorTotpOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "twoFactorId" | "secret" | "createdAt" | "updatedAt", ExtArgs["result"]["twoFactorTotp"]>
 export type TwoFactorTotpInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  twoFactor?: boolean | Prisma.TwoFactorDefaultArgs<ExtArgs>
-}
-export type TwoFactorTotpIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  twoFactor?: boolean | Prisma.TwoFactorDefaultArgs<ExtArgs>
-}
-export type TwoFactorTotpIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   twoFactor?: boolean | Prisma.TwoFactorDefaultArgs<ExtArgs>
 }
 
@@ -565,30 +550,6 @@ export interface TwoFactorTotpDelegate<ExtArgs extends runtime.Types.Extensions.
   createMany<T extends TwoFactorTotpCreateManyArgs>(args?: Prisma.SelectSubset<T, TwoFactorTotpCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many TwoFactorTotps and returns the data saved in the database.
-   * @param {TwoFactorTotpCreateManyAndReturnArgs} args - Arguments to create many TwoFactorTotps.
-   * @example
-   * // Create many TwoFactorTotps
-   * const twoFactorTotp = await prisma.twoFactorTotp.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many TwoFactorTotps and only return the `id`
-   * const twoFactorTotpWithIdOnly = await prisma.twoFactorTotp.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends TwoFactorTotpCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, TwoFactorTotpCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TwoFactorTotpPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a TwoFactorTotp.
    * @param {TwoFactorTotpDeleteArgs} args - Arguments to delete one TwoFactorTotp.
    * @example
@@ -651,36 +612,6 @@ export interface TwoFactorTotpDelegate<ExtArgs extends runtime.Types.Extensions.
    * 
    */
   updateMany<T extends TwoFactorTotpUpdateManyArgs>(args: Prisma.SelectSubset<T, TwoFactorTotpUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more TwoFactorTotps and returns the data updated in the database.
-   * @param {TwoFactorTotpUpdateManyAndReturnArgs} args - Arguments to update many TwoFactorTotps.
-   * @example
-   * // Update many TwoFactorTotps
-   * const twoFactorTotp = await prisma.twoFactorTotp.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more TwoFactorTotps and only return the `id`
-   * const twoFactorTotpWithIdOnly = await prisma.twoFactorTotp.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends TwoFactorTotpUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, TwoFactorTotpUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TwoFactorTotpPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one TwoFactorTotp.
@@ -1114,29 +1045,6 @@ export type TwoFactorTotpCreateManyArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 /**
- * TwoFactorTotp createManyAndReturn
- */
-export type TwoFactorTotpCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the TwoFactorTotp
-   */
-  select?: Prisma.TwoFactorTotpSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the TwoFactorTotp
-   */
-  omit?: Prisma.TwoFactorTotpOmit<ExtArgs> | null
-  /**
-   * The data used to create many TwoFactorTotps.
-   */
-  data: Prisma.TwoFactorTotpCreateManyInput | Prisma.TwoFactorTotpCreateManyInput[]
-  skipDuplicates?: boolean
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.TwoFactorTotpIncludeCreateManyAndReturn<ExtArgs> | null
-}
-
-/**
  * TwoFactorTotp update
  */
 export type TwoFactorTotpUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1178,36 +1086,6 @@ export type TwoFactorTotpUpdateManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many TwoFactorTotps to update.
    */
   limit?: number
-}
-
-/**
- * TwoFactorTotp updateManyAndReturn
- */
-export type TwoFactorTotpUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the TwoFactorTotp
-   */
-  select?: Prisma.TwoFactorTotpSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the TwoFactorTotp
-   */
-  omit?: Prisma.TwoFactorTotpOmit<ExtArgs> | null
-  /**
-   * The data used to update TwoFactorTotps.
-   */
-  data: Prisma.XOR<Prisma.TwoFactorTotpUpdateManyMutationInput, Prisma.TwoFactorTotpUncheckedUpdateManyInput>
-  /**
-   * Filter which TwoFactorTotps to update
-   */
-  where?: Prisma.TwoFactorTotpWhereInput
-  /**
-   * Limit how many TwoFactorTotps to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.TwoFactorTotpIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

@@ -37,7 +37,7 @@ function noPseudoLogAndReturn(): WelcomeUserDto {
  * Call **`verifySession(lng)`** in the page first (same pattern as other authenticated routes).
  * Username for the UI comes only from the API response (no JWT/email fallback).
  */
-export const getWelcomeDashboardUser = cache(
+export const getWelcomeUser = cache(
   async (lng: string): Promise<WelcomeUserDto> => {
     const token = (await cookies()).get(ACCESS_TOKEN_COOKIE_NAME)?.value?.trim();
     if (!token) {

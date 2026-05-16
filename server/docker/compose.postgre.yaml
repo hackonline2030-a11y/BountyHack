@@ -1,0 +1,42 @@
+# PostgreSQL + pgweb — stack autonome (sans l’API).
+# Depuis server/docker/ :
+#   docker compose -f compose.postgre.yaml up -d
+#   docker compose -f compose.postgre.yaml down
+#
+# Volume nommé (données persistantes). Variables optionnelles : POSTGRES_* / ports — voir README.md § PostgreSQL.
+name: web-api-postgres
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: web-api-postgres
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-quizapp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-quizapp}
+      POSTGRES_DB: ${POSTGRES_DB:-quizapp}
+    volumes:
+      - postgres__data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  pgweb:
+    image: sosedoff/pgweb:latest
+    container_name: web-api-pgweb
+    restart: unless-stopped
+    ports:
+      - "${PGWEB_HOST_PORT:-8081}:8081"
+    environment:
+      PGWEB_DATABASE_URL: postgres://${POSTGRES_USER:-quizapp}:${POSTGRES_PASSWORD:-quizapp}@postgres:5432/${POSTGRES_DB:-quizapp}?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres__data:

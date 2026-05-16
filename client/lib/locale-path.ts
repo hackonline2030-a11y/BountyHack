@@ -22,12 +22,17 @@ export function isPasswordResetPath(pathname: string): boolean {
   return /^\/(en|fr)\/password-reset$/.test(pathname);
 }
 
-/** User settings at `/{lng}/parameters` (session gated on the page). */
-export function isParametersPath(pathname: string): boolean {
-  return /^\/(en|fr)\/parameters$/.test(pathname);
-}
-
 /** Super-admin registers new users at `/{lng}/administration/register` (session + `SUPER_ADMIN` only). */
 export function isAdministrationRegisterPath(pathname: string): boolean {
   return /^\/(en|fr)\/administration\/register$/.test(pathname);
+}
+
+/**
+ * Matches any admin surface under `/{lng}/administration` — currently the
+ * user-management table (`/administration`) and the register form
+ * (`/administration/register`). Used by the header to keep the “Admin”
+ * link highlighted while the user navigates inside the section.
+ */
+export function isAdministrationPath(pathname: string): boolean {
+  return /^\/(en|fr)\/administration(?:\/.*)?$/.test(pathname);
 }

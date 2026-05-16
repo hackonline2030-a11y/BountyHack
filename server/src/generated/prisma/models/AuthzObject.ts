@@ -199,6 +199,7 @@ export type AuthzObjectOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   permissions?: Prisma.PermissionOrderByRelationAggregateInput
+  _relevance?: Prisma.AuthzObjectOrderByRelevanceInput
 }
 
 export type AuthzObjectWhereUniqueInput = Prisma.AtLeast<{
@@ -262,6 +263,12 @@ export type AuthzObjectUpdateManyMutationInput = {
 export type AuthzObjectUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type AuthzObjectOrderByRelevanceInput = {
+  fields: Prisma.AuthzObjectOrderByRelevanceFieldEnum | Prisma.AuthzObjectOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type AuthzObjectCountOrderByAggregateInput = {
@@ -378,15 +385,7 @@ export type AuthzObjectSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   _count?: boolean | Prisma.AuthzObjectCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["authzObject"]>
 
-export type AuthzObjectSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  name?: boolean
-}, ExtArgs["result"]["authzObject"]>
 
-export type AuthzObjectSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  name?: boolean
-}, ExtArgs["result"]["authzObject"]>
 
 export type AuthzObjectSelectScalar = {
   id?: boolean
@@ -398,8 +397,6 @@ export type AuthzObjectInclude<ExtArgs extends runtime.Types.Extensions.Internal
   permissions?: boolean | Prisma.AuthzObject$permissionsArgs<ExtArgs>
   _count?: boolean | Prisma.AuthzObjectCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type AuthzObjectIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type AuthzObjectIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $AuthzObjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AuthzObject"
@@ -527,30 +524,6 @@ export interface AuthzObjectDelegate<ExtArgs extends runtime.Types.Extensions.In
   createMany<T extends AuthzObjectCreateManyArgs>(args?: Prisma.SelectSubset<T, AuthzObjectCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many AuthzObjects and returns the data saved in the database.
-   * @param {AuthzObjectCreateManyAndReturnArgs} args - Arguments to create many AuthzObjects.
-   * @example
-   * // Create many AuthzObjects
-   * const authzObject = await prisma.authzObject.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many AuthzObjects and only return the `id`
-   * const authzObjectWithIdOnly = await prisma.authzObject.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends AuthzObjectCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, AuthzObjectCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthzObjectPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a AuthzObject.
    * @param {AuthzObjectDeleteArgs} args - Arguments to delete one AuthzObject.
    * @example
@@ -613,36 +586,6 @@ export interface AuthzObjectDelegate<ExtArgs extends runtime.Types.Extensions.In
    * 
    */
   updateMany<T extends AuthzObjectUpdateManyArgs>(args: Prisma.SelectSubset<T, AuthzObjectUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more AuthzObjects and returns the data updated in the database.
-   * @param {AuthzObjectUpdateManyAndReturnArgs} args - Arguments to update many AuthzObjects.
-   * @example
-   * // Update many AuthzObjects
-   * const authzObject = await prisma.authzObject.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more AuthzObjects and only return the `id`
-   * const authzObjectWithIdOnly = await prisma.authzObject.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends AuthzObjectUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, AuthzObjectUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthzObjectPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one AuthzObject.
@@ -1073,25 +1016,6 @@ export type AuthzObjectCreateManyArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
- * AuthzObject createManyAndReturn
- */
-export type AuthzObjectCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the AuthzObject
-   */
-  select?: Prisma.AuthzObjectSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the AuthzObject
-   */
-  omit?: Prisma.AuthzObjectOmit<ExtArgs> | null
-  /**
-   * The data used to create many AuthzObjects.
-   */
-  data: Prisma.AuthzObjectCreateManyInput | Prisma.AuthzObjectCreateManyInput[]
-  skipDuplicates?: boolean
-}
-
-/**
  * AuthzObject update
  */
 export type AuthzObjectUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1121,32 +1045,6 @@ export type AuthzObjectUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inter
  * AuthzObject updateMany
  */
 export type AuthzObjectUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * The data used to update AuthzObjects.
-   */
-  data: Prisma.XOR<Prisma.AuthzObjectUpdateManyMutationInput, Prisma.AuthzObjectUncheckedUpdateManyInput>
-  /**
-   * Filter which AuthzObjects to update
-   */
-  where?: Prisma.AuthzObjectWhereInput
-  /**
-   * Limit how many AuthzObjects to update.
-   */
-  limit?: number
-}
-
-/**
- * AuthzObject updateManyAndReturn
- */
-export type AuthzObjectUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the AuthzObject
-   */
-  select?: Prisma.AuthzObjectSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the AuthzObject
-   */
-  omit?: Prisma.AuthzObjectOmit<ExtArgs> | null
   /**
    * The data used to update AuthzObjects.
    */

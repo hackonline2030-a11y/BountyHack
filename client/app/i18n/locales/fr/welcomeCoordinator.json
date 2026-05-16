@@ -1,0 +1,25 @@
+{
+  "welcomeCoordinator": {
+    "metaTitle": "Tableau de bord coordinateur",
+    "heading": "Bienvenue",
+    "headingWithUsername": "Bienvenue, {{username}}",
+    "subheading": "Vous gérez les équipes rapport : affectations, demandes en attente et composition des équipes.",
+    "cards": {
+      "pending": {
+        "title": "Demandes en attente",
+        "subtitle": "{{n}} à traiter",
+        "empty": "Aucune demande en attente.",
+        "cta": "Ouvrir la coordination"
+      },
+      "teams": {
+        "title": "Équipes rapport",
+        "subtitle": "{{n}} équipes",
+        "cta": "Gérer les équipes"
+      },
+      "rules": {
+        "title": "Règles d’équipe valide",
+        "body": "Une équipe rapport doit comporter au moins un hunter, un quality checker et un mentor. Identifiant d’équipe unique obligatoire."
+      }
+    }
+  }
+}

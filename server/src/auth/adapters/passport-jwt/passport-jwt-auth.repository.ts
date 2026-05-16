@@ -120,6 +120,7 @@ export class PassportJwtAuthRepository implements AuthRepository {
       case 'MONGODB':
         return this.mongoRepo;
       case 'POSTGRESQL_PRISMA':
+      case 'MYSQL_PRISMA':
         return this.postgrePrismaRepo;
       case 'IN-MEMORY':
         return this.inMemoryRepo;

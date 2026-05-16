@@ -3,10 +3,15 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
+const databaseName = (process.env.DATABASE_NAME ?? "POSTGRESQL_PRISMA")
+  .trim()
+  .toUpperCase();
+const useMysql = databaseName === "MYSQL_PRISMA";
+
 export default defineConfig({
-  schema: "prisma/schema.prisma",
+  schema: useMysql ? "prisma/schema.mysql.prisma" : "prisma/schema.prisma",
   migrations: {
-    path: "prisma/migrations",
+    path: useMysql ? "prisma/migrations-mysql" : "prisma/migrations",
     seed: "node prisma/seed-runner.mjs",
   },
   datasource: {

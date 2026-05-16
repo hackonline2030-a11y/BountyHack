@@ -8,7 +8,7 @@
 # montés depuis l’hôte. Le fichier .npmrc à la racine définit confirm-modules-purge=false (sinon pnpm demande une
 # confirmation sans TTY et l’installation peut échouer ou laisser node_modules incomplet).
 #
-# Avec le script : ./start.sh (MONGODB → profil mongodb, POSTGRESQL_PRISMA → profil pg)
+# Avec le script : ./start.sh (MONGODB → mongodb, POSTGRESQL_PRISMA → pg, MYSQL_PRISMA → mysql)
 # À la main (Mongo) : docker compose -f compose.dev.yaml --profile mongodb up --build -d
 # DATABASE_URL dans .env : voir .env.example (localhost vs hôte « mongodb » du réseau compose).
 name: web-api-dev
@@ -79,6 +79,42 @@ services:
       postgres:
         condition: service_healthy
 
+  mysql:
+    profiles:
+      - mysql
+    image: mysql:8.4
+    container_name: web-api-mysql
+    restart: unless-stopped
+    ports:
+      - "${MYSQL_HOST_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-bugbountyapp}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-bugbountyapp}
+      MYSQL_USER: ${MYSQL_USER:-bugbountyapp}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-bugbountyapp}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  adminer:
+    profiles:
+      - mysql
+    image: adminer:latest
+    container_name: web-api-adminer
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_HOST_PORT:-8088}:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+    depends_on:
+      mysql:
+        condition: service_healthy
+
   api:
     container_name: web-api
     build:
@@ -94,7 +130,7 @@ services:
       NODE_ENV: production
       # Même valeur que le port hôte dans la section « ports » ci-dessus (pour les logs de l’app).
       API_HOST_PORT: ${API_HOST_PORT:-3003}
-    # Dev : même contenu que le dépôt hôte (dashboard CV + assets templates) — évite un rebuild à chaque changement.
+    # Dev : même contenu que le dépôt hôte (dashboard rapport + assets templates) — évite un rebuild à chaque changement.
     # L’image inclut aussi ces dossiers (Dockerfile) pour les environnements sans montage.
     volumes:
       - ../src/document-rendering/data:/usr/src/app/src/document-rendering/data:ro
@@ -145,7 +181,31 @@ services:
       exec runuser -u node -g node -- sh -c 'cd /usr/src/app && export NX_DAEMON=false NX_ISOLATE_PLUGINS=false NX_SOCKET_DIR=/tmp/nx && exec node ./node_modules/nx/bin/nx.js serve web-api'"
     # Service de dev : code monté depuis l'hôte + watcher Nest/Nx dans le conteneur.
 
+  redis:
+    profiles:
+      - redis
+    image: redis:7-alpine
+    container_name: web-api-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+
+  redisinsight:
+    profiles:
+      - redis
+    image: redis/redisinsight:latest
+    container_name: web-api-redisinsight
+    restart: unless-stopped
+    ports:
+      - "${REDIS_INSIGHT_HOST_PORT:-5540}:5540"
+    volumes:
+      - redisinsight_data:/data
+    depends_on:
+      - redis
+
 volumes:
   mongo_data:
   postgres_data:
+  mysql_data:
   web_api_node_modules:
+  redisinsight_data:

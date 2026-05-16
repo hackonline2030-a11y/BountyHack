@@ -17,6 +17,63 @@
   /* Base background (you can adjust later if needed) */
   --background: #f6f6f6;
 
+  /* -----------------------------------------------------------------------
+     Form palette – semantic tokens consumed by the report-draft sections
+     (MetaSection, DescriptionSection, …). Use the role, not the hue.
+
+     Light theme: the form lives on a white card (`bg-form-surface`) that
+     floats above the violet `.bg-pattern`. Every text/bg pairing is
+     contrast-checked against the surface — no pure black, no pure white:
+       - text on white card     ≥ 7:1   (WCAG AAA, normal text)
+       - placeholder on white   ≥ 7.6:1 (slate-600 #475569)
+       - input border on white  ≥ 4.9:1 (slate-500 #64748b, WCAG 1.4.11)
+       - white text on accent   = 5.74:1 (emerald-700, WCAG AA)
+     `--form-text` is aliased to `--gray-950` (hsl(0,0%,17%) ≈ #2b2b2b) so
+     we keep one canonical near-black across the app instead of inventing
+     a new token; per the design rule, never use #000 or #fff for text.
+     ----------------------------------------------------------------------- */
+  --form-surface: #ffffff;
+  --form-border: #64748b;                            /* slate-500 — visible, 4.99:1 on white */
+  --form-border-strong: #334155;                     /* slate-700 — focus / strong emphasis */
+  --form-text: var(--gray-950);                      /* near-black, AAA on white */
+  --form-text-muted: #334155;                        /* slate-700 — AAA on white (~10.4:1) */
+  --form-text-hint: #475569;                         /* slate-600 — AAA on white (~7.6:1)  */
+  --form-placeholder: #475569;                       /* slate-600 — AAA on white (~7.6:1)  */
+  --form-overlay: #f1f5f9;                           /* slate-100 — ghost-button hover bg   */
+  --form-accent: #047857;                            /* emerald-700 — AA white text (5.74:1) */
+  --form-accent-hover: #065f46;                      /* emerald-800 — AAA white text (7.56:1) */
+  --form-accent-strong: #064e3b;                     /* emerald-900 — required-asterisk     */
+  --form-accent-disabled: color-mix(in srgb, #047857 40%, transparent);
+
+  /* Form host card — used to lift the form off the bg-pattern. */
+  --form-card-bg: #ffffff;
+  --form-card-border: rgb(0 0 0 / 0.06);
+  --form-card-shadow: 0 10px 25px rgb(0 0 0 / 0.10),
+                      0 4px 10px rgb(0 0 0 / 0.06);
+
+  /* -----------------------------------------------------------------------
+     Dashboard palette – semantic tokens for the welcome dashboard
+     (light theme floating on the violet `.bg-pattern`).
+     Change a single variable here to retheme every tile / nav / pill.
+     ----------------------------------------------------------------------- */
+  --dashboard-card-bg: #ffffff;
+  --dashboard-card-border: rgb(0 0 0 / 0.06);
+  --dashboard-card-shadow: 0 1px 3px rgb(0 0 0 / 0.08),
+                           0 1px 2px rgb(0 0 0 / 0.04);
+  --dashboard-text: var(--gray-950);
+  --dashboard-text-muted: hsl(0, 0%, 38%);
+  --dashboard-text-subtle: var(--gray-400);
+  --dashboard-divider: rgb(0 0 0 / 0.06);
+  --dashboard-accent: #7c3aed;       /* violet-600 */
+  --dashboard-accent-hover: #6d28d9; /* violet-700 */
+  --dashboard-accent-soft: #f5f3ff;  /* violet-50  */
+  --dashboard-accent-on: #ffffff;                       /* readable text on accent bg */
+  --dashboard-heading-on-pattern: #ffffff;
+  --dashboard-subheading-on-pattern: rgb(255 255 255 / 0.85);
+  --dashboard-focus-ring: var(--dashboard-accent);
+
+
+
   /* Typography – Rubik family and weights from style guide */
   --font-rubik: "Rubik", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
@@ -47,6 +104,37 @@
 --color-gray-950: var(--gray-950);
 --color-gray-400: var(--gray-400);
 --button-hover-color: var(--gray-400);
+--cta-btn-color: var(--violet-600);
+
+/* Form palette → border-form-border, bg-form-surface, text-form-text, … */
+--color-form-surface: var(--form-surface);
+--color-form-border: var(--form-border);
+--color-form-border-strong: var(--form-border-strong);
+--color-form-text: var(--form-text);
+--color-form-text-muted: var(--form-text-muted);
+--color-form-text-hint: var(--form-text-hint);
+--color-form-placeholder: var(--form-placeholder);
+--color-form-overlay: var(--form-overlay);
+--color-form-accent: var(--form-accent);
+--color-form-accent-hover: var(--form-accent-hover);
+--color-form-accent-strong: var(--form-accent-strong);
+--color-form-accent-disabled: var(--form-accent-disabled);
+--color-form-card-bg: var(--form-card-bg);
+--color-form-card-border: var(--form-card-border);
+
+/* Dashboard palette → bg-dashboard-card-bg, text-dashboard-text, border-dashboard-card-border, … */
+--color-dashboard-card-bg: var(--dashboard-card-bg);
+--color-dashboard-card-border: var(--dashboard-card-border);
+--color-dashboard-text: var(--dashboard-text);
+--color-dashboard-text-muted: var(--dashboard-text-muted);
+--color-dashboard-text-subtle: var(--dashboard-text-subtle);
+--color-dashboard-divider: var(--dashboard-divider);
+--color-dashboard-accent: var(--dashboard-accent);
+--color-dashboard-accent-hover: var(--dashboard-accent-hover);
+--color-dashboard-accent-soft: var(--dashboard-accent-soft);
+--color-dashboard-accent-on: var(--dashboard-accent-on);
+--color-dashboard-heading-on-pattern: var(--dashboard-heading-on-pattern);
+--color-dashboard-subheading-on-pattern: var(--dashboard-subheading-on-pattern);
 /* Body font size → text-body */
 --text-body: var(--font-size-body);
 
@@ -86,16 +174,18 @@
   @apply text-base font-bold font-body transition-all duration-300 motion-reduce:duration-0 ease-in-out;
 }
 
-/* Primary CTA – pink background, white text, rounded */
+/* Primary CTA – near-black / near-white pairing for WCAG AAA contrast
+   (slate-900 #0f172a on slate-50 #f8fafc ≈ 17.85:1; AAA threshold is 7:1).
+   Avoids pure #000 / #fff per the design guideline. */
 .btn-primary {
   @apply rounded-full shadow-md cursor-pointer;
-  @apply px-15 py-4 bg-pink-500 text-white opacity-100;
+  @apply px-15 py-4 bg-slate-900 text-slate-50;
 }
 .btn-primary:hover {
-  @apply opacity-60;
+  @apply bg-slate-800;
 }
 .btn-primary:focus-visible {
-  @apply ring-2 ring-offset-2 ring-pink-500 outline-none;
+  @apply ring-2 ring-offset-2 ring-slate-900 outline-none;
 }
 
 /* Secondary CTA – white bg, no colored border, dark text */
@@ -110,19 +200,160 @@
   @apply ring-2 ring-offset-2 ring-blue-500 outline-none;
 }
 
-/* Background pattern – plain CSS so background-size: cover is not overridden by Tailwind shorthand */
-.bg-pattern {
-  background-image: url(/patterns/pattern-bg-mobile.png);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+/* -----------------------------------------------------------------------------
+   CTA buttons – styles migrated from CtaButton.tsx as @apply rules.
+   Lives alongside the .btn-* set above for now; the two will be reconciled later.
+   ----------------------------------------------------------------------------- */
 
+/* Common styles for every CTA button (mirror of .btn-common-styles).
+   NOTE: source TSX used `text-md` which is not a Tailwind utility — replaced
+   with `text-base` (same as .btn-common-styles). */
+.cta-btn-common {
+  @apply text-base font-bold transition-all duration-300 motion-reduce:duration-0 ease-in-out;
 }
-@media (min-width: 640px) {
-  .bg-pattern {
-    background-image: url(/patterns/pattern-bg-desktop.png);
-    background-size: cover;
+
+/* Primary CTA – pink background, white text, rounded */
+.cta-btn-primary {
+  @apply px-15 py-6 bg-pink-500 opacity-100 text-white shadow-md rounded-full cursor-pointer;
+}
+.cta-btn-primary:hover {
+  @apply opacity-60;
+}
+
+/* Secondary CTA – white bg, dark text, rounded.
+   NOTE: source TSX had `hover:text-grayish-blue`; no such color is defined in
+   @theme, so the hover was already a no-op at runtime. Dropped here to keep
+   behavior identical; revisit when reconciling with .btn-secondary (whose hover
+   is `text-blue-500`). */
+.cta-btn-secondary {
+  @apply px-15 py-6 bg-white text-black shadow-sm rounded-full cursor-pointer;
+}
+
+/* Tertiary CTA – red bg, white text */
+.cta-btn-tertiary {
+  @apply px-8 py-6 bg-red-500 text-white cursor-pointer;
+}
+.cta-btn-tertiary:hover {
+  @apply bg-red-600;
+}
+
+/* -----------------------------------------------------------------------------
+   Action buttons – compact form/panel buttons (e.g. TotpEnrollmentPanel).
+   Distinct from the marketing `btn-*` / `cta-btn-*` families: `rounded-lg`
+   instead of `rounded-full`, dense `px-4 py-2.5` padding.
+   ----------------------------------------------------------------------------- */
+
+/* Shared base for every variant. Variant rules carry color, hover, font weight
+   and the `disabled:opacity-60` modifier (omitted on --neutral to faithfully
+   mirror the original TSX, which intentionally or not left it off the cancel
+   button). */
+.action-btn {
+  @apply rounded-lg px-4 py-2.5 text-sm shadow-sm transition disabled:cursor-not-allowed;
+}
+
+/* Primary action – violet solid */
+.action-btn--primary {
+  @apply bg-violet-600 text-white font-semibold disabled:opacity-60;
+}
+.action-btn--primary:hover {
+  @apply bg-violet-700;
+}
+
+/* Secondary action – violet outline on white */
+.action-btn--secondary {
+  @apply border border-violet-600 bg-white text-violet-700 font-semibold disabled:opacity-60;
+}
+.action-btn--secondary:hover {
+  @apply bg-violet-50;
+}
+
+/* Destructive action – rose solid */
+.action-btn--danger {
+  @apply bg-rose-600 text-white font-semibold disabled:opacity-60;
+}
+.action-btn--danger:hover {
+  @apply bg-rose-700;
+}
+
+/* Neutral / dismiss action – slate outline on white */
+.action-btn--neutral {
+  @apply border border-slate-200 bg-white text-slate-700 font-medium;
+}
+.action-btn--neutral:hover {
+  @apply bg-slate-50;
+}
+
+/* -----------------------------------------------------------------------------
+   Header navigation links – text-only links with an animated underline that
+   grows from the left on hover/focus, and stays pinned for active routes.
+   The line is rendered by ::after so it doesn't take part in the text flow.
+   ----------------------------------------------------------------------------- */
+.header-nav-link {
+  @apply relative inline-block cursor-pointer px-1 py-2 text-sm font-medium text-black/70 no-underline transition-colors;
+}
+.header-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+  height: 2px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 250ms ease-in-out;
+  pointer-events: none;
+}
+.header-nav-link:hover,
+.header-nav-link:focus-visible {
+  @apply text-black;
+}
+.header-nav-link:hover::after,
+.header-nav-link:focus-visible::after {
+  transform: scaleX(1);
+}
+.header-nav-link:focus-visible {
+  @apply rounded-sm outline outline-2 outline-offset-4 outline-black/40;
+}
+
+/* Active route – same look as hovered, but pinned. */
+.header-nav-link--active {
+  @apply text-black;
+}
+.header-nav-link--active::after {
+  transform: scaleX(1);
+}
+
+/* Logout (and other action buttons styled as nav links) honour `disabled`. */
+.header-nav-link:disabled {
+  @apply cursor-not-allowed opacity-50;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header-nav-link::after {
+    transition: none;
   }
+}
+
+/* Background pattern – the SVG is a tileable 200×200 motif, so we *repeat*
+   it at a fixed natural size instead of stretching / covering. With `cover`
+   the SVG renderer scales a single tile to the whole viewport, producing
+   the giant-motif zoom effect on desktop. */
+.bg-pattern {
+  background-image: url(/patterns/pattern-bg.svg);
+  background-repeat: repeat;
+  background-size: 320px 320px;
+  background-position: top left;
+}
+
+/* Floating white card used to host the report-draft form (and any other
+   surface that needs to sit on top of `.bg-pattern` without inheriting
+   the dark / violet context). */
+.form-card {
+  background-color: var(--form-card-bg);
+  border: 1px solid var(--form-card-border);
+  box-shadow: var(--form-card-shadow);
 }
 
 /* Infos Card – vertical separator on the right, 80% height (omit on last card via last:after:hidden) */
@@ -139,6 +370,54 @@
     bottom: 10%;
     width: 1px;
     background-color: hsl(0, 0%, 58%); /* --gray-400 from design system */
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Welcome dashboard – tile / nav / cta primitives.
+   All colors come from the `--dashboard-*` tokens declared in `:root`, so the
+   palette is reskinnable from a single place.
+   ----------------------------------------------------------------------------- */
+
+/* White tile floating on the bg-pattern. Used for nav + every card.
+   Uses @apply (like .dashboard-nav-link and .dashboard-card-cta below) so
+   the color tokens go through the same Tailwind pipeline as utilities.
+   `box-shadow` stays raw because the design uses a layered multi-shadow
+   that isn't worth a one-off theme token. */
+.dashboard-card {
+  @apply rounded-xl border border-dashboard-card-border bg-dashboard-card-bg text-dashboard-text;
+  box-shadow: var(--dashboard-card-shadow, 0 1px 3px rgb(0 0 0 / 0.08));
+}
+
+/* Sidebar nav row: pill on mobile (horizontal scroll), full-width on desktop. */
+.dashboard-nav-link {
+  @apply flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-dashboard-text transition-colors;
+}
+.dashboard-nav-link:hover {
+  @apply bg-dashboard-accent-soft text-dashboard-accent-hover;
+}
+.dashboard-nav-link:focus-visible {
+  @apply outline-2 outline-offset-2 outline-dashboard-accent;
+}
+.dashboard-nav-link--active {
+  @apply bg-dashboard-accent-soft text-dashboard-accent;
+}
+
+/* "See all →" link inside a card footer. */
+.dashboard-card-cta {
+  @apply inline-flex items-center gap-1 text-sm font-medium text-dashboard-accent transition-colors;
+}
+.dashboard-card-cta:hover {
+  @apply text-dashboard-accent-hover underline;
+}
+.dashboard-card-cta:focus-visible {
+  @apply rounded-sm outline-2 outline-offset-2 outline-dashboard-accent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-nav-link,
+  .dashboard-card-cta {
+    transition: none;
   }
 }
 

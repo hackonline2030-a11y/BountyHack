@@ -1,0 +1,71 @@
+{
+  "welcomeQualityChecker": {
+    "metaTitle": "Welcome to your dashboard",
+    "heading": "Welcome",
+    "headingWithUsername": "Welcome, {{username}}",
+    "subheading": "A quick overview of the reports you need to review and your conversations.",
+    "nav": {
+      "label": "Dashboard navigation",
+      "emails": "Emails",
+      "reports": "My reports",
+      "teams": "My teams",
+      "colleagues": "My colleagues",
+      "support": "Support",
+      "settings": "Settings"
+    },
+    "cards": {
+      "reports": {
+        "title": "Reports to review",
+        "subtitle": "{{n}} reports pending",
+        "empty": "No reports pending — great job!",
+        "stepLabel": "Step {{current}}/{{total}}",
+        "submittedAgo": "Submitted {{value}} ago",
+        "priorityHigh": "High",
+        "priorityMedium": "Medium",
+        "priorityLow": "Low",
+        "cta": "See all reports"
+      },
+      "colleagues": {
+        "title": "My colleagues",
+        "subtitle": "{{n}} active colleagues",
+        "empty": "No colleagues to show right now.",
+        "roleMentor": "Mentor",
+        "roleQualityChecker": "Quality Checker",
+        "roleLead": "Lead",
+        "statusOnline": "Online",
+        "statusAway": "Away",
+        "statusOffline": "Offline",
+        "cta": "See all my colleagues"
+      },
+      "messages": {
+        "title": "Latest messages",
+        "empty": "No new messages for now.",
+        "cta": "See all my messages",
+        "ago": "{{value}} ago",
+        "unread": "Unread message"
+      },
+      "news": {
+        "title": "Learning updates",
+        "tagAnnouncement": "Announcement",
+        "tagInfo": "Info",
+        "tagUpdate": "Update",
+        "cta": "See all updates"
+      },
+      "chat": {
+        "title": "Chat — quality rooms",
+        "subtitle": "{{n}} active rooms",
+        "members": "{{n}} members",
+        "unreadAria": "{{n}} unread messages",
+        "cta": "Open chat"
+      },
+      "agenda": {
+        "title": "Agenda",
+        "subtitle": "Upcoming sessions",
+        "empty": "Nothing scheduled.",
+        "locationRemote": "Remote",
+        "locationOnsite": "On site",
+        "cta": "See my full agenda"
+      }
+    }
+  }
+}

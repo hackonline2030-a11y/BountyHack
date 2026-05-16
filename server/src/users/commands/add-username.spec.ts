@@ -6,6 +6,7 @@ describe('AddUsername', () => {
     const repository: jest.Mocked<IUserRepository> = {
       addUsername: jest.fn(),
       findById: jest.fn(),
+      listAdminSummaries: jest.fn(),
     };
     const useCase = new AddUsername(repository);
 

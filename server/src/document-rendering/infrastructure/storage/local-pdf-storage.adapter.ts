@@ -14,7 +14,7 @@ export class LocalPdfStorageAdapter implements IPdfStorage {
     await mkdir(this.outputDir, { recursive: true });
     const safeTemplateName =
       (templateName || '').replace(/[^a-zA-Z0-9_-]/g, '') || 'default';
-    const fileName = `cv-${safeTemplateName}-${Date.now()}.pdf`;
+    const fileName = `report-${safeTemplateName}-${Date.now()}.pdf`;
     const pdfFilePath = path.resolve(this.outputDir, fileName);
     await writeFile(pdfFilePath, pdfBuffer);
 

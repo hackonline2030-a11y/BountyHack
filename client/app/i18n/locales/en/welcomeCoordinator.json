@@ -1,0 +1,25 @@
+{
+  "welcomeCoordinator": {
+    "metaTitle": "Coordinator dashboard",
+    "heading": "Welcome",
+    "headingWithUsername": "Welcome, {{username}}",
+    "subheading": "You manage report teams: assignments, pending requests, and team composition.",
+    "cards": {
+      "pending": {
+        "title": "Pending requests",
+        "subtitle": "{{n}} to process",
+        "empty": "No pending requests.",
+        "cta": "Open coordination"
+      },
+      "teams": {
+        "title": "Report teams",
+        "subtitle": "{{n}} teams",
+        "cta": "Manage teams"
+      },
+      "rules": {
+        "title": "Valid team rules",
+        "body": "A report team must include at least one hunter, one quality checker, and one mentor. A unique team ID is required."
+      }
+    }
+  }
+}

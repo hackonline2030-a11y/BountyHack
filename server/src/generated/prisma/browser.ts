@@ -62,3 +62,58 @@ export type TwoFactor = Prisma.TwoFactorModel
  * TOTP-specific secret storage (encrypt at rest in application code, see article).
  */
 export type TwoFactorTotp = Prisma.TwoFactorTotpModel
+/**
+ * Model ReportDraft
+ * Hunter workspace: 8 wizard steps until promotion to a pending Report.
+ */
+export type ReportDraft = Prisma.ReportDraftModel
+/**
+ * Model ReportDraftStep
+ * One row per wizard step (8 per draft). Submissions attach here, not on the draft root.
+ */
+export type ReportDraftStep = Prisma.ReportDraftStepModel
+/**
+ * Model ReportDraftAttachment
+ * Live binary assets on a step (upload wired later).
+ */
+export type ReportDraftAttachment = Prisma.ReportDraftAttachmentModel
+/**
+ * Model Submission
+ * Immutable review round; parent is the step. Denormalized draft/step for list queries.
+ */
+export type Submission = Prisma.SubmissionModel
+/**
+ * Model ReviewerComment
+ * 
+ */
+export type ReviewerComment = Prisma.ReviewerCommentModel
+/**
+ * Model SubmissionAttachmentSnapshot
+ * Frozen files at submit time (domain: attachmentsSnapshot).
+ */
+export type SubmissionAttachmentSnapshot = Prisma.SubmissionAttachmentSnapshotModel
+/**
+ * Model SubmissionContentSnapshot
+ * Optional payload history inside one submission (reserved for later).
+ */
+export type SubmissionContentSnapshot = Prisma.SubmissionContentSnapshotModel
+/**
+ * Model Report
+ * Promoted artefact after full step validation; super-admin pending → published.
+ */
+export type Report = Prisma.ReportModel
+/**
+ * Model ReportTeam
+ * Squad for one report draft (not org-wide teams).
+ */
+export type ReportTeam = Prisma.ReportTeamModel
+/**
+ * Model ReportTeamMember
+ * 
+ */
+export type ReportTeamMember = Prisma.ReportTeamMemberModel
+/**
+ * Model ReportTeamJoinRequest
+ * User asks coordinator to join a team (or general pool when teamId is null).
+ */
+export type ReportTeamJoinRequest = Prisma.ReportTeamJoinRequestModel
