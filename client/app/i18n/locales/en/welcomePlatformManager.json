@@ -1,0 +1,49 @@
+{
+  "welcomePlatformManager": {
+    "metaTitle": "Tools & content dashboard",
+    "heading": "Welcome",
+    "headingWithUsername": "Welcome, {{username}}",
+    "subheading": "Learning tools & pedagogical content lead — structure and maintain the project’s learning environment.",
+    "nav": {
+      "label": "Dashboard navigation",
+      "settings": "Settings",
+      "credits": "Visual credits"
+    },
+    "mission": {
+      "title": "Your role",
+      "intro": "This role structures and maintains the project’s learning and knowledge-sharing environment.",
+      "items": {
+        "pedagogicalSite": "Management of the internal learning site",
+        "methodologicalResources": "Provision of methodological resources",
+        "internalDocs": "Centralization of internal documents and write-ups",
+        "collaborativeTools": "Administration of collaborative tools",
+        "feedbackCapitalization": "Capitalization of lessons learned"
+      },
+      "boundary": "This role ensures the project’s sustainability and consistency."
+    },
+    "cards": {
+      "comingSoon": "Coming soon",
+      "pedagogicalSite": {
+        "title": "Internal learning site",
+        "subtitle": "Learning space",
+        "body": "Manage tracks, modules, and content visible to participants."
+      },
+      "resources": {
+        "title": "Resources & write-ups",
+        "subtitle": "Methodology and knowledge base",
+        "body": "Library of guides, templates, and internal reports."
+      },
+      "tools": {
+        "title": "Collaborative tools",
+        "subtitle": "Administration",
+        "body": "Configure and monitor shared workspaces for the program."
+      },
+      "settings": {
+        "title": "Account settings",
+        "subtitle": "Profile and security",
+        "body": "Manage your profile, password, and two-factor authentication.",
+        "cta": "Open settings"
+      }
+    }
+  }
+}

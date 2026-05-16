@@ -39,4 +39,5 @@ export const APP_LOGIN_ALLOWED_ROLES: readonly AppRoleCode[] = [
   AppRoleCode.MENTOR,
   AppRoleCode.QUALITY_CHECKER,
   AppRoleCode.COORDINATOR,
+  AppRoleCode.QUALITY_CONTENT,
 ];
