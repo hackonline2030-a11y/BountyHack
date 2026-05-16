@@ -55,6 +55,8 @@ type Props = {
   roleOptions: ReadonlyArray<ReportTeamMemberRole>;
   askJoinLabels: ReturnType<typeof buildAskJoinLabels>;
   showMockBanner?: boolean;
+  /** Hunters open the draft from here; reviewers use the review queue after a revision request. */
+  showOpenReportDraftLink?: boolean;
 };
 
 export const ReportTeamsMemberPage: FC<Props> = ({
@@ -66,6 +68,7 @@ export const ReportTeamsMemberPage: FC<Props> = ({
   roleOptions,
   askJoinLabels,
   showMockBanner = false,
+  showOpenReportDraftLink = false,
 }) => {
   const pathname = usePathname();
   const prefix = localePrefixFromPathname(pathname);
@@ -143,12 +146,14 @@ export const ReportTeamsMemberPage: FC<Props> = ({
                       {copy.updatedLabel}:{" "}
                       {dateFormatter.format(new Date(team.updatedAt))}
                     </p>
-                    <Link
-                      href={`${prefix}/report-draft/${team.reportDraftId}`}
-                      className="dashboard-card-cta mt-3 inline-block text-sm"
-                    >
-                      {copy.openReportDraft} →
-                    </Link>
+                    {showOpenReportDraftLink ? (
+                      <Link
+                        href={`${prefix}/report-draft/${team.reportDraftId}`}
+                        className="dashboard-card-cta mt-3 inline-block text-sm"
+                      >
+                        {copy.openReportDraft} →
+                      </Link>
+                    ) : null}
                   </li>
                 ))}
               </ul>

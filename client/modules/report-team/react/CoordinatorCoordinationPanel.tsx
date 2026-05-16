@@ -7,14 +7,8 @@ import type { ReportTeamMemberRole } from "@modules/report-team/model/report-tea
 import { CoordinatorCreateTeamPanel } from "@modules/report-team/react/CoordinatorCreateTeamPanel";
 import { ReportTeamValidityBadge } from "@modules/report-team/react/ReportTeamValidityBadge";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { localePrefixFromPathname } from "@/lib/locale-path";
-
 export const CoordinatorCoordinationPanel: FC = () => {
   const dispatch = useAppDispatch();
-  const pathname = usePathname();
-  const prefix = localePrefixFromPathname(pathname);
   const { t } = useT("reportTeams");
   const { allTeams, pendingJoinRequests, loadStatus, loadError, mutationError } =
     useAppSelector((s) => s.reportTeams);
@@ -108,12 +102,6 @@ export const CoordinatorCoordinationPanel: FC = () => {
                         .map((m) => `${m.displayName} (${roleLabels[m.role]})`)
                         .join(" · ")}
                 </p>
-                <Link
-                  href={`${prefix}/report-draft/${team.reportDraftId}`}
-                  className="dashboard-card-cta mt-3 inline-block text-sm"
-                >
-                  {t("reportTeams.coordinator.openReportDraft")} →
-                </Link>
               </li>
             ))}
           </ul>

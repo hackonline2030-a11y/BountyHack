@@ -61,6 +61,7 @@ export const ReportTeamsMemberBootstrap: FC<Props> = ({
       roleOptions={roleOptions}
       askJoinLabels={buildAskJoinLabels(t)}
       showMockBanner={false}
+      showOpenReportDraftLink={defaultRole === "hunter"}
     />
   );
 };

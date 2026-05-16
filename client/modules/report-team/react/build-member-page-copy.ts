@@ -38,7 +38,7 @@ export function buildMemberPageCopy(
     enrollErrorGeneric: t("reportTeams.enroll.errorGeneric"),
     askTitle: t("reportTeams.askJoin.title"),
     askDescription: t("reportTeams.askJoin.description"),
-    openReportDraft: t("reportTeams.coordinator.openReportDraft"),
+    openReportDraft: t("reportTeams.myTeams.openReportDraft"),
     roleLabels,
     backHref: options?.backHref,
     backLabel: options?.backLabel,

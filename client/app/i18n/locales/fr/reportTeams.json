@@ -21,7 +21,8 @@
       "empty": "Vous n’êtes affecté à aucune équipe rapport pour le moment.",
       "teamId": "ID équipe",
       "members": "Membres",
-      "updated": "Mise à jour"
+      "updated": "Mise à jour",
+      "openReportDraft": "Ouvrir le brouillon de rapport"
     },
     "requests": {
       "title": "Mes demandes",

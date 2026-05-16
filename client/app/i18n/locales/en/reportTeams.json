@@ -21,7 +21,8 @@
       "empty": "You are not assigned to any report team yet.",
       "teamId": "Team ID",
       "members": "Members",
-      "updated": "Updated"
+      "updated": "Updated",
+      "openReportDraft": "Open report draft"
     },
     "requests": {
       "title": "My requests",
