@@ -16,6 +16,7 @@ const i18nConfig: I18nConfig = {
     'welcomeMentor',
     'welcomeCoordinator',
     'welcomeAdmin',
+    'welcomePlatformManager',
     'reportTeams',
     'parameters',
     'legal',
