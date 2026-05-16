@@ -106,21 +106,18 @@ mysql -u bugbountyapp -p -h 127.0.0.1 bugbountyapp -t -e "SELECT * FROM users LI
 
 **Prérequis :** migrations appliquées, rôles en base (`pnpm run prisma:seed` avec `SEED_DEMO_USER=false` en prod).
 
-Sur le VPS :
+Sur le VPS (le mot de passe **n’est pas** dans `.env` : saisie masquée par le script) :
 
 ```bash
 cd ~/bugbountyapp/server
 
-# Mot de passe choisi pour Lead (ne pas committer ; éviter -h history si possible)
-read -s SUPER_ADMIN_PASSWORD
-export SUPER_ADMIN_PASSWORD
-
 pnpm run create-super-admin -- \
   --username "Lead" \
   --email "hackonline2030@gmail.com"
-
-unset SUPER_ADMIN_PASSWORD
+# → « Mot de passe super-admin : » puis confirmation (rien n’est affiché)
 ```
+
+Seul `server/.env` contient `DATABASE_URL` / secrets serveur. **Ne pas** ajouter `SUPER_ADMIN_PASSWORD` dans `.env`.
 
 Vérification :
 
