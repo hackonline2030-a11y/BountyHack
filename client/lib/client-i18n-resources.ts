@@ -13,6 +13,7 @@ import enWelcomeAdmin from "@/app/i18n/locales/en/welcomeAdmin.json";
 import enWelcomeCoordinator from "@/app/i18n/locales/en/welcomeCoordinator.json";
 import enWelcomeHunter from "@/app/i18n/locales/en/welcomeHunter.json";
 import enWelcomeMentor from "@/app/i18n/locales/en/welcomeMentor.json";
+import enWelcomePlatformManager from "@/app/i18n/locales/en/welcomePlatformManager.json";
 import enWelcomeQualityChecker from "@/app/i18n/locales/en/welcomeQualityChecker.json";
 import frAdministration from "@/app/i18n/locales/fr/administration.json";
 import frCommon from "@/app/i18n/locales/fr/common.json";
@@ -46,6 +47,7 @@ export const clientI18nNamespaces = [
   "welcomeMentor",
   "welcomeCoordinator",
   "welcomeAdmin",
+  "welcomePlatformManager",
   "reportTeams",
   "parameters",
   "legal",
@@ -84,6 +86,7 @@ export const clientI18nResources = {
     welcomeMentor: frWelcomeMentor,
     welcomeCoordinator: frWelcomeCoordinator,
     welcomeAdmin: frWelcomeAdmin,
+    welcomePlatformManager: frWelcomePlatformManager,
     reportTeams: frReportTeams,
     parameters: frParameters,
     legal: frLegal,

@@ -27,6 +27,8 @@ function welcomeDashboardPathFromRoleCode(roleCode: string | null): string | nul
       return "welcome-quality-checker";
     case "COORDINATOR":
       return "welcome-coordinator";
+    case "QUALITY_CONTENT":
+      return "welcome-platform-manager";
     default:
       return null;
   }
@@ -72,7 +74,7 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
       MENTOR: "Mentor",
       QUALITY_CHECKER: "Quality checker",
       COORDINATOR: "Coordinator",
-      QUALITY_CONTENT: "Quality content",
+      QUALITY_CONTENT: "Tools & content lead",
     };
     return labels[roleCode] ?? roleCode.toLowerCase().replace(/_/g, " ");
   };
