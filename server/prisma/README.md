@@ -25,9 +25,24 @@ Si `prisma migrate deploy` émet une erreur de **checksum sur une ancienne migra
 
 ```bash
 cd bugbountyapp/server
+# DATABASE_NAME=POSTGRESQL_PRISMA (défaut dans prisma.config.ts)
 pnpm prisma:generate
 pnpm prisma:migrate:deploy
 pnpm prisma:seed
 ```
 
-Production : décider si vous exécutez `roles.sql` une fois après déploiement, et **`SEED_DEMO_USER=false`** (recommandé) pour éviter tout compte démo.
+## Flux conseillé (dev MySQL)
+
+```bash
+cd bugbountyapp/server
+# Dans .env : DATABASE_NAME=MYSQL_PRISMA et DATABASE_URL=mysql://...
+pnpm docker:mysql:up   # optionnel — MySQL + Adminer
+pnpm prisma:generate:mysql
+pnpm prisma:migrate:deploy:mysql
+pnpm prisma:seed       # utilise roles.mysql.sql / demo.mysql.sql
+```
+
+Migrations MySQL : `prisma/migrations-mysql/` (schéma : `schema.mysql.prisma`).  
+**Ne pas** mélanger les dossiers `migrations/` (Postgres) et `migrations-mysql/` sur la même base.
+
+Production : décider si vous exécutez les seeds SQL une fois après déploiement, et **`SEED_DEMO_USER=false`** (recommandé) pour éviter tout compte démo.

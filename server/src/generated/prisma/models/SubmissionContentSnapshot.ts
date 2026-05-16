@@ -179,6 +179,7 @@ export type SubmissionContentSnapshotOrderByWithRelationInput = {
   payload?: Prisma.SortOrder
   capturedAt?: Prisma.SortOrder
   submission?: Prisma.SubmissionOrderByWithRelationInput
+  _relevance?: Prisma.SubmissionContentSnapshotOrderByRelevanceInput
 }
 
 export type SubmissionContentSnapshotWhereUniqueInput = Prisma.AtLeast<{
@@ -268,6 +269,12 @@ export type SubmissionContentSnapshotListRelationFilter = {
 
 export type SubmissionContentSnapshotOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type SubmissionContentSnapshotOrderByRelevanceInput = {
+  fields: Prisma.SubmissionContentSnapshotOrderByRelevanceFieldEnum | Prisma.SubmissionContentSnapshotOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type SubmissionContentSnapshotCountOrderByAggregateInput = {
@@ -413,21 +420,7 @@ export type SubmissionContentSnapshotSelect<ExtArgs extends runtime.Types.Extens
   submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["submissionContentSnapshot"]>
 
-export type SubmissionContentSnapshotSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  submissionId?: boolean
-  payload?: boolean
-  capturedAt?: boolean
-  submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["submissionContentSnapshot"]>
 
-export type SubmissionContentSnapshotSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  submissionId?: boolean
-  payload?: boolean
-  capturedAt?: boolean
-  submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["submissionContentSnapshot"]>
 
 export type SubmissionContentSnapshotSelectScalar = {
   id?: boolean
@@ -438,12 +431,6 @@ export type SubmissionContentSnapshotSelectScalar = {
 
 export type SubmissionContentSnapshotOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "submissionId" | "payload" | "capturedAt", ExtArgs["result"]["submissionContentSnapshot"]>
 export type SubmissionContentSnapshotInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
-}
-export type SubmissionContentSnapshotIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
-}
-export type SubmissionContentSnapshotIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
 }
 
@@ -575,30 +562,6 @@ export interface SubmissionContentSnapshotDelegate<ExtArgs extends runtime.Types
   createMany<T extends SubmissionContentSnapshotCreateManyArgs>(args?: Prisma.SelectSubset<T, SubmissionContentSnapshotCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many SubmissionContentSnapshots and returns the data saved in the database.
-   * @param {SubmissionContentSnapshotCreateManyAndReturnArgs} args - Arguments to create many SubmissionContentSnapshots.
-   * @example
-   * // Create many SubmissionContentSnapshots
-   * const submissionContentSnapshot = await prisma.submissionContentSnapshot.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many SubmissionContentSnapshots and only return the `id`
-   * const submissionContentSnapshotWithIdOnly = await prisma.submissionContentSnapshot.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends SubmissionContentSnapshotCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, SubmissionContentSnapshotCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionContentSnapshotPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a SubmissionContentSnapshot.
    * @param {SubmissionContentSnapshotDeleteArgs} args - Arguments to delete one SubmissionContentSnapshot.
    * @example
@@ -661,36 +624,6 @@ export interface SubmissionContentSnapshotDelegate<ExtArgs extends runtime.Types
    * 
    */
   updateMany<T extends SubmissionContentSnapshotUpdateManyArgs>(args: Prisma.SelectSubset<T, SubmissionContentSnapshotUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more SubmissionContentSnapshots and returns the data updated in the database.
-   * @param {SubmissionContentSnapshotUpdateManyAndReturnArgs} args - Arguments to update many SubmissionContentSnapshots.
-   * @example
-   * // Update many SubmissionContentSnapshots
-   * const submissionContentSnapshot = await prisma.submissionContentSnapshot.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more SubmissionContentSnapshots and only return the `id`
-   * const submissionContentSnapshotWithIdOnly = await prisma.submissionContentSnapshot.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends SubmissionContentSnapshotUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, SubmissionContentSnapshotUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionContentSnapshotPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one SubmissionContentSnapshot.
@@ -1123,29 +1056,6 @@ export type SubmissionContentSnapshotCreateManyArgs<ExtArgs extends runtime.Type
 }
 
 /**
- * SubmissionContentSnapshot createManyAndReturn
- */
-export type SubmissionContentSnapshotCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the SubmissionContentSnapshot
-   */
-  select?: Prisma.SubmissionContentSnapshotSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the SubmissionContentSnapshot
-   */
-  omit?: Prisma.SubmissionContentSnapshotOmit<ExtArgs> | null
-  /**
-   * The data used to create many SubmissionContentSnapshots.
-   */
-  data: Prisma.SubmissionContentSnapshotCreateManyInput | Prisma.SubmissionContentSnapshotCreateManyInput[]
-  skipDuplicates?: boolean
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.SubmissionContentSnapshotIncludeCreateManyAndReturn<ExtArgs> | null
-}
-
-/**
  * SubmissionContentSnapshot update
  */
 export type SubmissionContentSnapshotUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1187,36 +1097,6 @@ export type SubmissionContentSnapshotUpdateManyArgs<ExtArgs extends runtime.Type
    * Limit how many SubmissionContentSnapshots to update.
    */
   limit?: number
-}
-
-/**
- * SubmissionContentSnapshot updateManyAndReturn
- */
-export type SubmissionContentSnapshotUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the SubmissionContentSnapshot
-   */
-  select?: Prisma.SubmissionContentSnapshotSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the SubmissionContentSnapshot
-   */
-  omit?: Prisma.SubmissionContentSnapshotOmit<ExtArgs> | null
-  /**
-   * The data used to update SubmissionContentSnapshots.
-   */
-  data: Prisma.XOR<Prisma.SubmissionContentSnapshotUpdateManyMutationInput, Prisma.SubmissionContentSnapshotUncheckedUpdateManyInput>
-  /**
-   * Filter which SubmissionContentSnapshots to update
-   */
-  where?: Prisma.SubmissionContentSnapshotWhereInput
-  /**
-   * Limit how many SubmissionContentSnapshots to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.SubmissionContentSnapshotIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

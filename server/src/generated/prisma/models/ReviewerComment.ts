@@ -215,6 +215,7 @@ export type ReviewerCommentOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   resolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   submission?: Prisma.SubmissionOrderByWithRelationInput
+  _relevance?: Prisma.ReviewerCommentOrderByRelevanceInput
 }
 
 export type ReviewerCommentWhereUniqueInput = Prisma.AtLeast<{
@@ -344,6 +345,12 @@ export type ReviewerCommentListRelationFilter = {
 
 export type ReviewerCommentOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type ReviewerCommentOrderByRelevanceInput = {
+  fields: Prisma.ReviewerCommentOrderByRelevanceFieldEnum | Prisma.ReviewerCommentOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type ReviewerCommentCountOrderByAggregateInput = {
@@ -533,29 +540,7 @@ export type ReviewerCommentSelect<ExtArgs extends runtime.Types.Extensions.Inter
   submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reviewerComment"]>
 
-export type ReviewerCommentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  submissionId?: boolean
-  authorId?: boolean
-  authorRole?: boolean
-  anchor?: boolean
-  body?: boolean
-  createdAt?: boolean
-  resolvedAt?: boolean
-  submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["reviewerComment"]>
 
-export type ReviewerCommentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  submissionId?: boolean
-  authorId?: boolean
-  authorRole?: boolean
-  anchor?: boolean
-  body?: boolean
-  createdAt?: boolean
-  resolvedAt?: boolean
-  submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["reviewerComment"]>
 
 export type ReviewerCommentSelectScalar = {
   id?: boolean
@@ -570,12 +555,6 @@ export type ReviewerCommentSelectScalar = {
 
 export type ReviewerCommentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "submissionId" | "authorId" | "authorRole" | "anchor" | "body" | "createdAt" | "resolvedAt", ExtArgs["result"]["reviewerComment"]>
 export type ReviewerCommentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
-}
-export type ReviewerCommentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
-}
-export type ReviewerCommentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
 }
 
@@ -711,30 +690,6 @@ export interface ReviewerCommentDelegate<ExtArgs extends runtime.Types.Extension
   createMany<T extends ReviewerCommentCreateManyArgs>(args?: Prisma.SelectSubset<T, ReviewerCommentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many ReviewerComments and returns the data saved in the database.
-   * @param {ReviewerCommentCreateManyAndReturnArgs} args - Arguments to create many ReviewerComments.
-   * @example
-   * // Create many ReviewerComments
-   * const reviewerComment = await prisma.reviewerComment.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many ReviewerComments and only return the `id`
-   * const reviewerCommentWithIdOnly = await prisma.reviewerComment.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends ReviewerCommentCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ReviewerCommentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewerCommentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a ReviewerComment.
    * @param {ReviewerCommentDeleteArgs} args - Arguments to delete one ReviewerComment.
    * @example
@@ -797,36 +752,6 @@ export interface ReviewerCommentDelegate<ExtArgs extends runtime.Types.Extension
    * 
    */
   updateMany<T extends ReviewerCommentUpdateManyArgs>(args: Prisma.SelectSubset<T, ReviewerCommentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more ReviewerComments and returns the data updated in the database.
-   * @param {ReviewerCommentUpdateManyAndReturnArgs} args - Arguments to update many ReviewerComments.
-   * @example
-   * // Update many ReviewerComments
-   * const reviewerComment = await prisma.reviewerComment.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more ReviewerComments and only return the `id`
-   * const reviewerCommentWithIdOnly = await prisma.reviewerComment.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends ReviewerCommentUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ReviewerCommentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewerCommentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ReviewerComment.
@@ -1263,29 +1188,6 @@ export type ReviewerCommentCreateManyArgs<ExtArgs extends runtime.Types.Extensio
 }
 
 /**
- * ReviewerComment createManyAndReturn
- */
-export type ReviewerCommentCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ReviewerComment
-   */
-  select?: Prisma.ReviewerCommentSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the ReviewerComment
-   */
-  omit?: Prisma.ReviewerCommentOmit<ExtArgs> | null
-  /**
-   * The data used to create many ReviewerComments.
-   */
-  data: Prisma.ReviewerCommentCreateManyInput | Prisma.ReviewerCommentCreateManyInput[]
-  skipDuplicates?: boolean
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ReviewerCommentIncludeCreateManyAndReturn<ExtArgs> | null
-}
-
-/**
  * ReviewerComment update
  */
 export type ReviewerCommentUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1327,36 +1229,6 @@ export type ReviewerCommentUpdateManyArgs<ExtArgs extends runtime.Types.Extensio
    * Limit how many ReviewerComments to update.
    */
   limit?: number
-}
-
-/**
- * ReviewerComment updateManyAndReturn
- */
-export type ReviewerCommentUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ReviewerComment
-   */
-  select?: Prisma.ReviewerCommentSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the ReviewerComment
-   */
-  omit?: Prisma.ReviewerCommentOmit<ExtArgs> | null
-  /**
-   * The data used to update ReviewerComments.
-   */
-  data: Prisma.XOR<Prisma.ReviewerCommentUpdateManyMutationInput, Prisma.ReviewerCommentUncheckedUpdateManyInput>
-  /**
-   * Filter which ReviewerComments to update
-   */
-  where?: Prisma.ReviewerCommentWhereInput
-  /**
-   * Limit how many ReviewerComments to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ReviewerCommentIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

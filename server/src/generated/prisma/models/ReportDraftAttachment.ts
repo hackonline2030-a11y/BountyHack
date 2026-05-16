@@ -262,6 +262,7 @@ export type ReportDraftAttachmentOrderByWithRelationInput = {
   uploadedBy?: Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
   reportDraftStep?: Prisma.ReportDraftStepOrderByWithRelationInput
+  _relevance?: Prisma.ReportDraftAttachmentOrderByRelevanceInput
 }
 
 export type ReportDraftAttachmentWhereUniqueInput = Prisma.AtLeast<{
@@ -403,6 +404,12 @@ export type ReportDraftAttachmentListRelationFilter = {
 
 export type ReportDraftAttachmentOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type ReportDraftAttachmentOrderByRelevanceInput = {
+  fields: Prisma.ReportDraftAttachmentOrderByRelevanceFieldEnum | Prisma.ReportDraftAttachmentOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type ReportDraftAttachmentCountOrderByAggregateInput = {
@@ -613,31 +620,7 @@ export type ReportDraftAttachmentSelect<ExtArgs extends runtime.Types.Extensions
   reportDraftStep?: boolean | Prisma.ReportDraftStepDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reportDraftAttachment"]>
 
-export type ReportDraftAttachmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  reportDraftStepId?: boolean
-  filename?: boolean
-  mimeType?: boolean
-  sizeBytes?: boolean
-  storageKey?: boolean
-  thumbnailUrl?: boolean
-  uploadedBy?: boolean
-  uploadedAt?: boolean
-  reportDraftStep?: boolean | Prisma.ReportDraftStepDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["reportDraftAttachment"]>
 
-export type ReportDraftAttachmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  reportDraftStepId?: boolean
-  filename?: boolean
-  mimeType?: boolean
-  sizeBytes?: boolean
-  storageKey?: boolean
-  thumbnailUrl?: boolean
-  uploadedBy?: boolean
-  uploadedAt?: boolean
-  reportDraftStep?: boolean | Prisma.ReportDraftStepDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["reportDraftAttachment"]>
 
 export type ReportDraftAttachmentSelectScalar = {
   id?: boolean
@@ -653,12 +636,6 @@ export type ReportDraftAttachmentSelectScalar = {
 
 export type ReportDraftAttachmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "reportDraftStepId" | "filename" | "mimeType" | "sizeBytes" | "storageKey" | "thumbnailUrl" | "uploadedBy" | "uploadedAt", ExtArgs["result"]["reportDraftAttachment"]>
 export type ReportDraftAttachmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  reportDraftStep?: boolean | Prisma.ReportDraftStepDefaultArgs<ExtArgs>
-}
-export type ReportDraftAttachmentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  reportDraftStep?: boolean | Prisma.ReportDraftStepDefaultArgs<ExtArgs>
-}
-export type ReportDraftAttachmentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   reportDraftStep?: boolean | Prisma.ReportDraftStepDefaultArgs<ExtArgs>
 }
 
@@ -795,30 +772,6 @@ export interface ReportDraftAttachmentDelegate<ExtArgs extends runtime.Types.Ext
   createMany<T extends ReportDraftAttachmentCreateManyArgs>(args?: Prisma.SelectSubset<T, ReportDraftAttachmentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many ReportDraftAttachments and returns the data saved in the database.
-   * @param {ReportDraftAttachmentCreateManyAndReturnArgs} args - Arguments to create many ReportDraftAttachments.
-   * @example
-   * // Create many ReportDraftAttachments
-   * const reportDraftAttachment = await prisma.reportDraftAttachment.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many ReportDraftAttachments and only return the `id`
-   * const reportDraftAttachmentWithIdOnly = await prisma.reportDraftAttachment.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends ReportDraftAttachmentCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ReportDraftAttachmentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportDraftAttachmentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a ReportDraftAttachment.
    * @param {ReportDraftAttachmentDeleteArgs} args - Arguments to delete one ReportDraftAttachment.
    * @example
@@ -881,36 +834,6 @@ export interface ReportDraftAttachmentDelegate<ExtArgs extends runtime.Types.Ext
    * 
    */
   updateMany<T extends ReportDraftAttachmentUpdateManyArgs>(args: Prisma.SelectSubset<T, ReportDraftAttachmentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more ReportDraftAttachments and returns the data updated in the database.
-   * @param {ReportDraftAttachmentUpdateManyAndReturnArgs} args - Arguments to update many ReportDraftAttachments.
-   * @example
-   * // Update many ReportDraftAttachments
-   * const reportDraftAttachment = await prisma.reportDraftAttachment.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more ReportDraftAttachments and only return the `id`
-   * const reportDraftAttachmentWithIdOnly = await prisma.reportDraftAttachment.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends ReportDraftAttachmentUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ReportDraftAttachmentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportDraftAttachmentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ReportDraftAttachment.
@@ -1348,29 +1271,6 @@ export type ReportDraftAttachmentCreateManyArgs<ExtArgs extends runtime.Types.Ex
 }
 
 /**
- * ReportDraftAttachment createManyAndReturn
- */
-export type ReportDraftAttachmentCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ReportDraftAttachment
-   */
-  select?: Prisma.ReportDraftAttachmentSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the ReportDraftAttachment
-   */
-  omit?: Prisma.ReportDraftAttachmentOmit<ExtArgs> | null
-  /**
-   * The data used to create many ReportDraftAttachments.
-   */
-  data: Prisma.ReportDraftAttachmentCreateManyInput | Prisma.ReportDraftAttachmentCreateManyInput[]
-  skipDuplicates?: boolean
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ReportDraftAttachmentIncludeCreateManyAndReturn<ExtArgs> | null
-}
-
-/**
  * ReportDraftAttachment update
  */
 export type ReportDraftAttachmentUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1412,36 +1312,6 @@ export type ReportDraftAttachmentUpdateManyArgs<ExtArgs extends runtime.Types.Ex
    * Limit how many ReportDraftAttachments to update.
    */
   limit?: number
-}
-
-/**
- * ReportDraftAttachment updateManyAndReturn
- */
-export type ReportDraftAttachmentUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ReportDraftAttachment
-   */
-  select?: Prisma.ReportDraftAttachmentSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the ReportDraftAttachment
-   */
-  omit?: Prisma.ReportDraftAttachmentOmit<ExtArgs> | null
-  /**
-   * The data used to update ReportDraftAttachments.
-   */
-  data: Prisma.XOR<Prisma.ReportDraftAttachmentUpdateManyMutationInput, Prisma.ReportDraftAttachmentUncheckedUpdateManyInput>
-  /**
-   * Filter which ReportDraftAttachments to update
-   */
-  where?: Prisma.ReportDraftAttachmentWhereInput
-  /**
-   * Limit how many ReportDraftAttachments to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ReportDraftAttachmentIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

@@ -302,6 +302,7 @@ export type SubmissionOrderByWithRelationInput = {
   reviewerComments?: Prisma.ReviewerCommentOrderByRelationAggregateInput
   attachmentSnapshots?: Prisma.SubmissionAttachmentSnapshotOrderByRelationAggregateInput
   contentSnapshots?: Prisma.SubmissionContentSnapshotOrderByRelationAggregateInput
+  _relevance?: Prisma.SubmissionOrderByRelevanceInput
 }
 
 export type SubmissionWhereUniqueInput = Prisma.AtLeast<{
@@ -499,6 +500,12 @@ export type SubmissionListRelationFilter = {
 
 export type SubmissionOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type SubmissionOrderByRelevanceInput = {
+  fields: Prisma.SubmissionOrderByRelevanceFieldEnum | Prisma.SubmissionOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type SubmissionReportDraftStepIdRoundReviewerRoleSubmissionKindCompoundUniqueInput = {
@@ -1319,41 +1326,7 @@ export type SubmissionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   _count?: boolean | Prisma.SubmissionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["submission"]>
 
-export type SubmissionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  reportDraftStepId?: boolean
-  reportDraftId?: boolean
-  step?: boolean
-  round?: boolean
-  submissionKind?: boolean
-  payload?: boolean
-  submittedAt?: boolean
-  submittedBy?: boolean
-  reviewerRole?: boolean
-  decision?: boolean
-  decidedAt?: boolean
-  decidedBy?: boolean
-  reportDraftStep?: boolean | Prisma.ReportDraftStepDefaultArgs<ExtArgs>
-  reportDraft?: boolean | Prisma.ReportDraftDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["submission"]>
 
-export type SubmissionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  reportDraftStepId?: boolean
-  reportDraftId?: boolean
-  step?: boolean
-  round?: boolean
-  submissionKind?: boolean
-  payload?: boolean
-  submittedAt?: boolean
-  submittedBy?: boolean
-  reviewerRole?: boolean
-  decision?: boolean
-  decidedAt?: boolean
-  decidedBy?: boolean
-  reportDraftStep?: boolean | Prisma.ReportDraftStepDefaultArgs<ExtArgs>
-  reportDraft?: boolean | Prisma.ReportDraftDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["submission"]>
 
 export type SubmissionSelectScalar = {
   id?: boolean
@@ -1379,14 +1352,6 @@ export type SubmissionInclude<ExtArgs extends runtime.Types.Extensions.InternalA
   attachmentSnapshots?: boolean | Prisma.Submission$attachmentSnapshotsArgs<ExtArgs>
   contentSnapshots?: boolean | Prisma.Submission$contentSnapshotsArgs<ExtArgs>
   _count?: boolean | Prisma.SubmissionCountOutputTypeDefaultArgs<ExtArgs>
-}
-export type SubmissionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  reportDraftStep?: boolean | Prisma.ReportDraftStepDefaultArgs<ExtArgs>
-  reportDraft?: boolean | Prisma.ReportDraftDefaultArgs<ExtArgs>
-}
-export type SubmissionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  reportDraftStep?: boolean | Prisma.ReportDraftStepDefaultArgs<ExtArgs>
-  reportDraft?: boolean | Prisma.ReportDraftDefaultArgs<ExtArgs>
 }
 
 export type $SubmissionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1530,30 +1495,6 @@ export interface SubmissionDelegate<ExtArgs extends runtime.Types.Extensions.Int
   createMany<T extends SubmissionCreateManyArgs>(args?: Prisma.SelectSubset<T, SubmissionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many Submissions and returns the data saved in the database.
-   * @param {SubmissionCreateManyAndReturnArgs} args - Arguments to create many Submissions.
-   * @example
-   * // Create many Submissions
-   * const submission = await prisma.submission.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many Submissions and only return the `id`
-   * const submissionWithIdOnly = await prisma.submission.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends SubmissionCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, SubmissionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a Submission.
    * @param {SubmissionDeleteArgs} args - Arguments to delete one Submission.
    * @example
@@ -1616,36 +1557,6 @@ export interface SubmissionDelegate<ExtArgs extends runtime.Types.Extensions.Int
    * 
    */
   updateMany<T extends SubmissionUpdateManyArgs>(args: Prisma.SelectSubset<T, SubmissionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more Submissions and returns the data updated in the database.
-   * @param {SubmissionUpdateManyAndReturnArgs} args - Arguments to update many Submissions.
-   * @example
-   * // Update many Submissions
-   * const submission = await prisma.submission.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more Submissions and only return the `id`
-   * const submissionWithIdOnly = await prisma.submission.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends SubmissionUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, SubmissionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Submission.
@@ -2091,29 +2002,6 @@ export type SubmissionCreateManyArgs<ExtArgs extends runtime.Types.Extensions.In
 }
 
 /**
- * Submission createManyAndReturn
- */
-export type SubmissionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Submission
-   */
-  select?: Prisma.SubmissionSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the Submission
-   */
-  omit?: Prisma.SubmissionOmit<ExtArgs> | null
-  /**
-   * The data used to create many Submissions.
-   */
-  data: Prisma.SubmissionCreateManyInput | Prisma.SubmissionCreateManyInput[]
-  skipDuplicates?: boolean
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.SubmissionIncludeCreateManyAndReturn<ExtArgs> | null
-}
-
-/**
  * Submission update
  */
 export type SubmissionUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2155,36 +2043,6 @@ export type SubmissionUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many Submissions to update.
    */
   limit?: number
-}
-
-/**
- * Submission updateManyAndReturn
- */
-export type SubmissionUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Submission
-   */
-  select?: Prisma.SubmissionSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the Submission
-   */
-  omit?: Prisma.SubmissionOmit<ExtArgs> | null
-  /**
-   * The data used to update Submissions.
-   */
-  data: Prisma.XOR<Prisma.SubmissionUpdateManyMutationInput, Prisma.SubmissionUncheckedUpdateManyInput>
-  /**
-   * Filter which Submissions to update
-   */
-  where?: Prisma.SubmissionWhereInput
-  /**
-   * Limit how many Submissions to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.SubmissionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

@@ -6,11 +6,31 @@
     "metaTitle": "Home",
     "heroTitle": "BugBountyApp",
     "heroLead": "Bug bounty platform for web applications.",
-    "heroHint": "Prepare to integrate real bug bounty programs (YesWeHack, HackerOne, etc.) with our educational support."
+    "heroHint": "Prepare to integrate real bug bounty programs (YesWeHack, HackerOne, etc.) with our educational support.",
+    "demoNotice": "This is a demonstration site. Please do not enter personal data — use fictional information instead, as the site is still under construction."
+  },
+  "loading": {
+    "pageTitle": "Loading",
+    "pageHint": "Preparing this page…"
+  },
+  "notFound": {
+    "kicker": "404",
+    "title": "Page not found",
+    "description": "The page you requested does not exist or is no longer available.",
+    "ctaHome": "Back to home"
+  },
+  "routeError": {
+    "kicker": "Error",
+    "title": "This page could not be shown",
+    "description": "Something went wrong while loading this content. You can try again or return home.",
+    "retry": "Try again",
+    "digestLabel": "Reference",
+    "devMessage": "Detail (dev)"
   },
   "header": {
     "brand": "BugBountyApp",
     "home": "Home",
+    "dashboard": "Dashboard",
     "admin": "Admin",
     "login": "Log in",
     "logout": "Log out",

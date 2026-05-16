@@ -2,6 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
+import { DATABASE_MODES, isPrismaSqlMode } from '../shared/database-mode';
 import { variables } from '../shared/variables.config';
 import { UserModule } from '../users/user.module';
 
@@ -43,11 +44,10 @@ import { TotpSignInDemoService } from './application/demo/totp-sign-in-demo.serv
 import { TotpEnrollmentService } from './application/totp-enrollment.service';
 
 const usesPersistedJwtStore =
-  variables.database === 'MONGODB' ||
-  variables.database === 'POSTGRESQL_PRISMA';
+  variables.database === DATABASE_MODES.MONGODB || isPrismaSqlMode();
 
 const mongoRefreshImports =
-  variables.database === 'MONGODB'
+  variables.database === DATABASE_MODES.MONGODB
     ? [
         MongooseModule.forFeature([
           {
@@ -60,11 +60,12 @@ const mongoRefreshImports =
 
 function resolveRefreshTokenRepositoryClass() {
   switch (variables.database) {
-    case 'POSTGRESQL_PRISMA':
+    case DATABASE_MODES.POSTGRESQL_PRISMA:
+    case DATABASE_MODES.MYSQL_PRISMA:
       return PrismaRefreshTokenRepository;
-    case 'MONGODB':
+    case DATABASE_MODES.MONGODB:
       return MongoRefreshTokenRepository;
-    case 'IN-MEMORY':
+    case DATABASE_MODES.IN_MEMORY:
     default:
       return InMemoryRefreshTokenRepository;
   }
@@ -78,18 +79,16 @@ const authImports = [
 
 const authControllers = [
   PassportJwtAuthController,
-  ...(variables.database === 'POSTGRESQL_PRISMA'
+  ...(isPrismaSqlMode()
     ? [TotpSignInDemoController, TotpEnrollmentController, PasswordResetController]
     : []),
 ];
 
-const prismaTotpProviders =
-  variables.database === 'POSTGRESQL_PRISMA'
-    ? [TotpSignInDemoService, TotpEnrollmentService]
-    : [];
+const prismaTotpProviders = isPrismaSqlMode()
+  ? [TotpSignInDemoService, TotpEnrollmentService]
+  : [];
 
-const prismaPasswordResetProviders =
-  variables.database === 'POSTGRESQL_PRISMA'
+const prismaPasswordResetProviders = isPrismaSqlMode()
     ? [
         PrismaPasswordResetRepository,
         {

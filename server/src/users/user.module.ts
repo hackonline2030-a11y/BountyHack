@@ -12,6 +12,7 @@ import {
 import { UsersController } from './controllers/users.controller';
 import { AddUsername } from './commands/add-username';
 import { CommonModule } from '../core/common.module';
+import { DATABASE_MODES } from '../shared/database-mode';
 import { variables } from '../shared/variables.config';
 import { GetUserByIdQuery } from './queries/get-user-by-id';
 import { ListUsersAdminSummariesQuery } from './queries/list-users-admin-summaries.query';
@@ -19,11 +20,12 @@ import { InMemoryUserRepository } from './adapters/in-memory/in-memory-user-repo
 
 function resolveUserRepositoryClass() {
   switch (variables.database) {
-    case 'MONGODB':
+    case DATABASE_MODES.MONGODB:
       return MongoUserRepository;
-    case 'POSTGRESQL_PRISMA':
+    case DATABASE_MODES.POSTGRESQL_PRISMA:
+    case DATABASE_MODES.MYSQL_PRISMA:
       return PrismaUserRepository;
-    case 'IN-MEMORY':
+    case DATABASE_MODES.IN_MEMORY:
       return InMemoryUserRepository;
     default:
       return InMemoryUserRepository;
@@ -31,7 +33,7 @@ function resolveUserRepositoryClass() {
 }
 
 const mongoFeatureImports =
-  variables.database === 'MONGODB'
+  variables.database === DATABASE_MODES.MONGODB
     ? [
         MongooseModule.forFeature([
           {

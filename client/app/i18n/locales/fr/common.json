@@ -6,11 +6,31 @@
     "metaTitle": "Accueil",
     "heroTitle": "BugBountyApp",
     "heroLead": "Plateforme de bug bounty pour les applications web.",
-    "heroHint": "Préparez-vous à intégrer de véritable programmes de bug bounty (YesWeHack, HackerOne, etc.) avec notre accompagnement pédagogique."
+    "heroHint": "Préparez-vous à intégrer de véritable programmes de bug bounty (YesWeHack, HackerOne, etc.) avec notre accompagnement pédagogique.",
+    "demoNotice": "Ceci est un site de démonstration. Merci de ne pas y laisser de données personnelles : préférez l’usage de données fictives car le site est en cours de construction."
+  },
+  "loading": {
+    "pageTitle": "Chargement",
+    "pageHint": "Préparation de la page…"
+  },
+  "notFound": {
+    "kicker": "Erreur 404",
+    "title": "Page introuvable",
+    "description": "La page demandée n’existe pas ou n’est plus disponible.",
+    "ctaHome": "Retour à l’accueil"
+  },
+  "routeError": {
+    "kicker": "Erreur",
+    "title": "Impossible d’afficher cette page",
+    "description": "Un incident technique empêche l’affichage du contenu. Vous pouvez réessayer ou revenir à l’accueil.",
+    "retry": "Réessayer",
+    "digestLabel": "Référence",
+    "devMessage": "Détail (dev)"
   },
   "header": {
     "brand": "BugBountyApp",
     "home": "Accueil",
+    "dashboard": "Tableau de bord",
     "admin": "Admin",
     "login": "Connexion",
     "logout": "Déconnexion",

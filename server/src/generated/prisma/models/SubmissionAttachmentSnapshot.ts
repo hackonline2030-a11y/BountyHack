@@ -262,6 +262,7 @@ export type SubmissionAttachmentSnapshotOrderByWithRelationInput = {
   uploadedAt?: Prisma.SortOrder
   uploadedBy?: Prisma.SortOrder
   submission?: Prisma.SubmissionOrderByWithRelationInput
+  _relevance?: Prisma.SubmissionAttachmentSnapshotOrderByRelevanceInput
 }
 
 export type SubmissionAttachmentSnapshotWhereUniqueInput = Prisma.AtLeast<{
@@ -403,6 +404,12 @@ export type SubmissionAttachmentSnapshotListRelationFilter = {
 
 export type SubmissionAttachmentSnapshotOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type SubmissionAttachmentSnapshotOrderByRelevanceInput = {
+  fields: Prisma.SubmissionAttachmentSnapshotOrderByRelevanceFieldEnum | Prisma.SubmissionAttachmentSnapshotOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type SubmissionAttachmentSnapshotCountOrderByAggregateInput = {
@@ -613,31 +620,7 @@ export type SubmissionAttachmentSnapshotSelect<ExtArgs extends runtime.Types.Ext
   submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["submissionAttachmentSnapshot"]>
 
-export type SubmissionAttachmentSnapshotSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  submissionId?: boolean
-  filename?: boolean
-  mimeType?: boolean
-  sizeBytes?: boolean
-  storageKey?: boolean
-  thumbnailUrl?: boolean
-  uploadedAt?: boolean
-  uploadedBy?: boolean
-  submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["submissionAttachmentSnapshot"]>
 
-export type SubmissionAttachmentSnapshotSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  submissionId?: boolean
-  filename?: boolean
-  mimeType?: boolean
-  sizeBytes?: boolean
-  storageKey?: boolean
-  thumbnailUrl?: boolean
-  uploadedAt?: boolean
-  uploadedBy?: boolean
-  submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["submissionAttachmentSnapshot"]>
 
 export type SubmissionAttachmentSnapshotSelectScalar = {
   id?: boolean
@@ -653,12 +636,6 @@ export type SubmissionAttachmentSnapshotSelectScalar = {
 
 export type SubmissionAttachmentSnapshotOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "submissionId" | "filename" | "mimeType" | "sizeBytes" | "storageKey" | "thumbnailUrl" | "uploadedAt" | "uploadedBy", ExtArgs["result"]["submissionAttachmentSnapshot"]>
 export type SubmissionAttachmentSnapshotInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
-}
-export type SubmissionAttachmentSnapshotIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
-}
-export type SubmissionAttachmentSnapshotIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   submission?: boolean | Prisma.SubmissionDefaultArgs<ExtArgs>
 }
 
@@ -795,30 +772,6 @@ export interface SubmissionAttachmentSnapshotDelegate<ExtArgs extends runtime.Ty
   createMany<T extends SubmissionAttachmentSnapshotCreateManyArgs>(args?: Prisma.SelectSubset<T, SubmissionAttachmentSnapshotCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many SubmissionAttachmentSnapshots and returns the data saved in the database.
-   * @param {SubmissionAttachmentSnapshotCreateManyAndReturnArgs} args - Arguments to create many SubmissionAttachmentSnapshots.
-   * @example
-   * // Create many SubmissionAttachmentSnapshots
-   * const submissionAttachmentSnapshot = await prisma.submissionAttachmentSnapshot.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many SubmissionAttachmentSnapshots and only return the `id`
-   * const submissionAttachmentSnapshotWithIdOnly = await prisma.submissionAttachmentSnapshot.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends SubmissionAttachmentSnapshotCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, SubmissionAttachmentSnapshotCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionAttachmentSnapshotPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a SubmissionAttachmentSnapshot.
    * @param {SubmissionAttachmentSnapshotDeleteArgs} args - Arguments to delete one SubmissionAttachmentSnapshot.
    * @example
@@ -881,36 +834,6 @@ export interface SubmissionAttachmentSnapshotDelegate<ExtArgs extends runtime.Ty
    * 
    */
   updateMany<T extends SubmissionAttachmentSnapshotUpdateManyArgs>(args: Prisma.SelectSubset<T, SubmissionAttachmentSnapshotUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more SubmissionAttachmentSnapshots and returns the data updated in the database.
-   * @param {SubmissionAttachmentSnapshotUpdateManyAndReturnArgs} args - Arguments to update many SubmissionAttachmentSnapshots.
-   * @example
-   * // Update many SubmissionAttachmentSnapshots
-   * const submissionAttachmentSnapshot = await prisma.submissionAttachmentSnapshot.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more SubmissionAttachmentSnapshots and only return the `id`
-   * const submissionAttachmentSnapshotWithIdOnly = await prisma.submissionAttachmentSnapshot.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends SubmissionAttachmentSnapshotUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, SubmissionAttachmentSnapshotUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionAttachmentSnapshotPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one SubmissionAttachmentSnapshot.
@@ -1348,29 +1271,6 @@ export type SubmissionAttachmentSnapshotCreateManyArgs<ExtArgs extends runtime.T
 }
 
 /**
- * SubmissionAttachmentSnapshot createManyAndReturn
- */
-export type SubmissionAttachmentSnapshotCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the SubmissionAttachmentSnapshot
-   */
-  select?: Prisma.SubmissionAttachmentSnapshotSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the SubmissionAttachmentSnapshot
-   */
-  omit?: Prisma.SubmissionAttachmentSnapshotOmit<ExtArgs> | null
-  /**
-   * The data used to create many SubmissionAttachmentSnapshots.
-   */
-  data: Prisma.SubmissionAttachmentSnapshotCreateManyInput | Prisma.SubmissionAttachmentSnapshotCreateManyInput[]
-  skipDuplicates?: boolean
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.SubmissionAttachmentSnapshotIncludeCreateManyAndReturn<ExtArgs> | null
-}
-
-/**
  * SubmissionAttachmentSnapshot update
  */
 export type SubmissionAttachmentSnapshotUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1412,36 +1312,6 @@ export type SubmissionAttachmentSnapshotUpdateManyArgs<ExtArgs extends runtime.T
    * Limit how many SubmissionAttachmentSnapshots to update.
    */
   limit?: number
-}
-
-/**
- * SubmissionAttachmentSnapshot updateManyAndReturn
- */
-export type SubmissionAttachmentSnapshotUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the SubmissionAttachmentSnapshot
-   */
-  select?: Prisma.SubmissionAttachmentSnapshotSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the SubmissionAttachmentSnapshot
-   */
-  omit?: Prisma.SubmissionAttachmentSnapshotOmit<ExtArgs> | null
-  /**
-   * The data used to update SubmissionAttachmentSnapshots.
-   */
-  data: Prisma.XOR<Prisma.SubmissionAttachmentSnapshotUpdateManyMutationInput, Prisma.SubmissionAttachmentSnapshotUncheckedUpdateManyInput>
-  /**
-   * Filter which SubmissionAttachmentSnapshots to update
-   */
-  where?: Prisma.SubmissionAttachmentSnapshotWhereInput
-  /**
-   * Limit how many SubmissionAttachmentSnapshots to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.SubmissionAttachmentSnapshotIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

@@ -15,11 +15,18 @@ coverage/
 # Editor / IDE
 # ----------------------------
 .vscode/
+# !.vscode/settings.json
+# !.vscode/extensions.json
+# !.vscode/launch.json
+# !.vscode/tasks.json
 .idea/
 .cursor/
+.cursor
 *.iml
 *.ipr
 *.iws
+.idea
+.idea/*
 
 # VS Code workspace files
 *.code-workspace
@@ -46,6 +53,14 @@ $RECYCLE.BIN/
 *~
 .directory
 
-.env
+.env*
+.env.local
+.env.production
+!.env.example
 
 /localdocs/**
+
+
+
+
+

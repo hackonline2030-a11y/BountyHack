@@ -262,6 +262,7 @@ export type ReportDraftStepOrderByWithRelationInput = {
   reportDraft?: Prisma.ReportDraftOrderByWithRelationInput
   attachments?: Prisma.ReportDraftAttachmentOrderByRelationAggregateInput
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
+  _relevance?: Prisma.ReportDraftStepOrderByRelevanceInput
 }
 
 export type ReportDraftStepWhereUniqueInput = Prisma.AtLeast<{
@@ -414,6 +415,12 @@ export type ReportDraftStepListRelationFilter = {
 
 export type ReportDraftStepOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type ReportDraftStepOrderByRelevanceInput = {
+  fields: Prisma.ReportDraftStepOrderByRelevanceFieldEnum | Prisma.ReportDraftStepOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type ReportDraftStepReportDraftIdStepCompoundUniqueInput = {
@@ -857,31 +864,7 @@ export type ReportDraftStepSelect<ExtArgs extends runtime.Types.Extensions.Inter
   _count?: boolean | Prisma.ReportDraftStepCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reportDraftStep"]>
 
-export type ReportDraftStepSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  reportDraftId?: boolean
-  step?: boolean
-  payload?: boolean
-  status?: boolean
-  currentRound?: boolean
-  assignedReviewerRole?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
-  reportDraft?: boolean | Prisma.ReportDraftDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["reportDraftStep"]>
 
-export type ReportDraftStepSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  reportDraftId?: boolean
-  step?: boolean
-  payload?: boolean
-  status?: boolean
-  currentRound?: boolean
-  assignedReviewerRole?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
-  reportDraft?: boolean | Prisma.ReportDraftDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["reportDraftStep"]>
 
 export type ReportDraftStepSelectScalar = {
   id?: boolean
@@ -901,12 +884,6 @@ export type ReportDraftStepInclude<ExtArgs extends runtime.Types.Extensions.Inte
   attachments?: boolean | Prisma.ReportDraftStep$attachmentsArgs<ExtArgs>
   submissions?: boolean | Prisma.ReportDraftStep$submissionsArgs<ExtArgs>
   _count?: boolean | Prisma.ReportDraftStepCountOutputTypeDefaultArgs<ExtArgs>
-}
-export type ReportDraftStepIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  reportDraft?: boolean | Prisma.ReportDraftDefaultArgs<ExtArgs>
-}
-export type ReportDraftStepIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  reportDraft?: boolean | Prisma.ReportDraftDefaultArgs<ExtArgs>
 }
 
 export type $ReportDraftStepPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1044,30 +1021,6 @@ export interface ReportDraftStepDelegate<ExtArgs extends runtime.Types.Extension
   createMany<T extends ReportDraftStepCreateManyArgs>(args?: Prisma.SelectSubset<T, ReportDraftStepCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many ReportDraftSteps and returns the data saved in the database.
-   * @param {ReportDraftStepCreateManyAndReturnArgs} args - Arguments to create many ReportDraftSteps.
-   * @example
-   * // Create many ReportDraftSteps
-   * const reportDraftStep = await prisma.reportDraftStep.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many ReportDraftSteps and only return the `id`
-   * const reportDraftStepWithIdOnly = await prisma.reportDraftStep.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends ReportDraftStepCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ReportDraftStepCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportDraftStepPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a ReportDraftStep.
    * @param {ReportDraftStepDeleteArgs} args - Arguments to delete one ReportDraftStep.
    * @example
@@ -1130,36 +1083,6 @@ export interface ReportDraftStepDelegate<ExtArgs extends runtime.Types.Extension
    * 
    */
   updateMany<T extends ReportDraftStepUpdateManyArgs>(args: Prisma.SelectSubset<T, ReportDraftStepUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more ReportDraftSteps and returns the data updated in the database.
-   * @param {ReportDraftStepUpdateManyAndReturnArgs} args - Arguments to update many ReportDraftSteps.
-   * @example
-   * // Update many ReportDraftSteps
-   * const reportDraftStep = await prisma.reportDraftStep.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more ReportDraftSteps and only return the `id`
-   * const reportDraftStepWithIdOnly = await prisma.reportDraftStep.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends ReportDraftStepUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ReportDraftStepUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportDraftStepPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ReportDraftStep.
@@ -1599,29 +1522,6 @@ export type ReportDraftStepCreateManyArgs<ExtArgs extends runtime.Types.Extensio
 }
 
 /**
- * ReportDraftStep createManyAndReturn
- */
-export type ReportDraftStepCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ReportDraftStep
-   */
-  select?: Prisma.ReportDraftStepSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the ReportDraftStep
-   */
-  omit?: Prisma.ReportDraftStepOmit<ExtArgs> | null
-  /**
-   * The data used to create many ReportDraftSteps.
-   */
-  data: Prisma.ReportDraftStepCreateManyInput | Prisma.ReportDraftStepCreateManyInput[]
-  skipDuplicates?: boolean
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ReportDraftStepIncludeCreateManyAndReturn<ExtArgs> | null
-}
-
-/**
  * ReportDraftStep update
  */
 export type ReportDraftStepUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1663,36 +1563,6 @@ export type ReportDraftStepUpdateManyArgs<ExtArgs extends runtime.Types.Extensio
    * Limit how many ReportDraftSteps to update.
    */
   limit?: number
-}
-
-/**
- * ReportDraftStep updateManyAndReturn
- */
-export type ReportDraftStepUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ReportDraftStep
-   */
-  select?: Prisma.ReportDraftStepSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the ReportDraftStep
-   */
-  omit?: Prisma.ReportDraftStepOmit<ExtArgs> | null
-  /**
-   * The data used to update ReportDraftSteps.
-   */
-  data: Prisma.XOR<Prisma.ReportDraftStepUpdateManyMutationInput, Prisma.ReportDraftStepUncheckedUpdateManyInput>
-  /**
-   * Filter which ReportDraftSteps to update
-   */
-  where?: Prisma.ReportDraftStepWhereInput
-  /**
-   * Limit how many ReportDraftSteps to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ReportDraftStepIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

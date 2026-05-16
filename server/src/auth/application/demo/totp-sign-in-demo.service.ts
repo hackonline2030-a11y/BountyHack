@@ -276,9 +276,9 @@ export class TotpSignInDemoService {
   }
 
   private assertPrismaDemo(): void {
-    if (variables.database !== 'POSTGRESQL_PRISMA') {
+    if (variables.database !== 'POSTGRESQL_PRISMA' && variables.database !== 'MYSQL_PRISMA') {
       throw new NotImplementedException(
-        'TOTP sign-in demo is only available with DATABASE_NAME=POSTGRESQL_PRISMA',
+        'TOTP sign-in demo requires DATABASE_NAME=POSTGRESQL_PRISMA or MYSQL_PRISMA',
       );
     }
   }

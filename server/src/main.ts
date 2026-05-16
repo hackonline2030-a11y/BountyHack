@@ -122,6 +122,12 @@ async function bootstrap() {
       `🧭 pgweb (UI SQL depuis la machine hôte) : http://localhost:${pgwebHostPort}/ — slug d’accès : / — surcharger le port : PGWEB_HOST_PORT dans .env (défaut 8087)`,
     );
   }
+  if (variables.database === 'MYSQL_PRISMA') {
+    const adminerPort = process.env.ADMINER_HOST_PORT?.trim() || '8088';
+    Logger.log(
+      `🧭 Adminer (UI SQL MySQL sur l’hôte) : http://localhost:${adminerPort}/ — service : mysql — port : ADMINER_HOST_PORT dans .env (défaut 8088)`,
+    );
+  }
 }
 
 bootstrap();

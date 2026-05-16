@@ -13,6 +13,25 @@ import {
 } from "@/lib/locale-path";
 import { SESSION_REFRESHED_EVENT } from "@/lib/session-refresh";
 
+/** `/{lng}/welcome-…` segment for the signed-in role, or `null` when there is no dashboard route. */
+function welcomeDashboardPathFromRoleCode(roleCode: string | null): string | null {
+  if (!roleCode) return null;
+  switch (roleCode) {
+    case "SUPER_ADMIN":
+      return "welcome-admin";
+    case "HUNTER":
+      return "welcome-hunter";
+    case "MENTOR":
+      return "welcome-mentor";
+    case "QUALITY_CHECKER":
+      return "welcome-quality-checker";
+    case "COORDINATOR":
+      return "welcome-coordinator";
+    default:
+      return null;
+  }
+}
+
 export const Header: React.FC<{ className?: string }> = ({ className = "" }) => {
   const { t } = useT("common");
   const router = useRouter();
@@ -38,6 +57,11 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
   const isLoginActive = isAuthHeaderLoginHighlightPath(pathname);
   const isAdminActive = isAdministrationPath(pathname);
   const isSuperAdmin = currentRoleCode === "SUPER_ADMIN";
+  const dashboardSegment = welcomeDashboardPathFromRoleCode(currentRoleCode);
+  const dashboardHref =
+    isAuthenticated && dashboardSegment ? `${prefix}/${dashboardSegment}` : null;
+  const isDashboardActive =
+    !!dashboardHref && (pathname === dashboardHref || pathname.startsWith(`${dashboardHref}/`));
 
   const roleLabelFromRoleCode = (roleCode: string | null): string | null => {
     if (!roleCode) return null;
@@ -152,6 +176,15 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
           <Link href={localeHome} className="header-nav-link">
             {t("header.home")}
           </Link>
+          {dashboardHref ? (
+            <Link
+              href={dashboardHref}
+              aria-current={isDashboardActive ? "page" : undefined}
+              className={`header-nav-link${isDashboardActive ? " header-nav-link--active" : ""}`}
+            >
+              {t("header.dashboard")}
+            </Link>
+          ) : null}
           <LangLinks />
           {isSuperAdmin ? (
             <Link

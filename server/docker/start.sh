@@ -2,6 +2,7 @@
 # Stack dev Docker (compose.dev.yaml).
 # - MongoDB + mongo-express si DATABASE_NAME=MONGODB
 # - PostgreSQL + pgweb si DATABASE_NAME=POSTGRESQL_PRISMA
+# - MySQL + Adminer si DATABASE_NAME=MYSQL_PRISMA
 # (voir server/.env.example ; pas encore de pilote applicatif Postgres dans le code.)
 # Depuis la racine du repo :
 #   ./docker/start.sh          # ou ./docker/start.sh up (sans build)
@@ -58,11 +59,15 @@ read_database_name() {
 DATABASE_NAME_VALUE="$(read_database_name)"
 USE_MONGO=false
 USE_POSTGRES=false
+USE_MYSQL=false
 if [[ "$DATABASE_NAME_VALUE" == "MONGODB" ]]; then
   USE_MONGO=true
 fi
 if [[ "$DATABASE_NAME_VALUE" == "POSTGRESQL_PRISMA" ]]; then
   USE_POSTGRES=true
+fi
+if [[ "$DATABASE_NAME_VALUE" == "MYSQL_PRISMA" ]]; then
+  USE_MYSQL=true
 fi
 
 PROFILE_ARGS=()
@@ -70,16 +75,20 @@ if [[ "$USE_MONGO" == true ]]; then
   PROFILE_ARGS=(--profile mongodb)
 elif [[ "$USE_POSTGRES" == true ]]; then
   PROFILE_ARGS=(--profile pg)
+elif [[ "$USE_MYSQL" == true ]]; then
+  PROFILE_ARGS=(--profile mysql)
 fi
 WATCH_PROFILE_ARGS=(--profile watch)
 if [[ "$USE_MONGO" == true ]]; then
   WATCH_PROFILE_ARGS=(--profile watch --profile mongodb)
 elif [[ "$USE_POSTGRES" == true ]]; then
   WATCH_PROFILE_ARGS=(--profile watch --profile pg)
+elif [[ "$USE_MYSQL" == true ]]; then
+  WATCH_PROFILE_ARGS=(--profile watch --profile mysql)
 fi
 
-# Pour « down » : activer watch + les deux profils bases possibles pour tout arrêter même si .env a changé entre temps.
-DOWN_PROFILE_ARGS=(--profile watch --profile mongodb --profile pg)
+# Pour « down » : activer watch + tous les profils bases pour tout arrêter même si .env a changé entre temps.
+DOWN_PROFILE_ARGS=(--profile watch --profile mongodb --profile pg --profile mysql)
 
 cd "$PROJECT_DIR" || {
   error "Project directory not found: $PROJECT_DIR"
@@ -107,7 +116,7 @@ case "$ACTION" in
     shift || true
     info "Starting API in watch mode (live reload, no rebuild loop)…"
     info "Stopping classic api container first to free host port ${API_PORT} (if running)…"
-    if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true ]]; then
+    if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true || "$USE_MYSQL" == true ]]; then
       "${compose[@]}" -f "$COMPOSE_BASE" "${PROFILE_ARGS[@]}" stop api >/dev/null 2>&1 || true
     else
       "${compose[@]}" -f "$COMPOSE_BASE" stop api >/dev/null 2>&1 || true
@@ -122,6 +131,12 @@ case "$ACTION" in
       info "DATABASE_NAME=POSTGRESQL_PRISMA → start PostgreSQL + pgweb + api-watch."
       if ! "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" up -d --no-build postgres pgweb api-watch "$@"; then
         error "docker compose up watch mode (Postgres) failed"
+        exit 1
+      fi
+    elif [[ "$USE_MYSQL" == true ]]; then
+      info "DATABASE_NAME=MYSQL_PRISMA → start MySQL + Adminer + api-watch."
+      if ! "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" up -d --no-build mysql adminer api-watch "$@"; then
+        error "docker compose up watch mode (MySQL) failed"
         exit 1
       fi
     else
@@ -139,7 +154,7 @@ case "$ACTION" in
     shift || true
     info "Starting API in watch mode (with explicit build)…"
     info "Stopping classic api container first to free host port ${API_PORT} (if running)…"
-    if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true ]]; then
+    if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true || "$USE_MYSQL" == true ]]; then
       "${compose[@]}" -f "$COMPOSE_BASE" "${PROFILE_ARGS[@]}" stop api >/dev/null 2>&1 || true
     else
       "${compose[@]}" -f "$COMPOSE_BASE" stop api >/dev/null 2>&1 || true
@@ -154,6 +169,12 @@ case "$ACTION" in
       info "DATABASE_NAME=POSTGRESQL_PRISMA → build + start PostgreSQL + pgweb + api-watch."
       if ! "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" up -d --build postgres pgweb api-watch "$@"; then
         error "docker compose up watch mode (Postgres build) failed"
+        exit 1
+      fi
+    elif [[ "$USE_MYSQL" == true ]]; then
+      info "DATABASE_NAME=MYSQL_PRISMA → build + start MySQL + Adminer + api-watch."
+      if ! "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" up -d --build mysql adminer api-watch "$@"; then
+        error "docker compose up watch mode (MySQL build) failed"
         exit 1
       fi
     else
@@ -180,6 +201,11 @@ case "$ACTION" in
         error "docker compose stop api-watch postgres failed"
         exit 1
       fi
+    elif [[ "$USE_MYSQL" == true ]]; then
+      if ! "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" stop api-watch adminer mysql "$@"; then
+        error "docker compose stop api-watch mysql failed"
+        exit 1
+      fi
     else
       if ! "${compose[@]}" -f "$COMPOSE_BASE" "${WATCH_PROFILE_ARGS[@]}" stop api-watch "$@"; then
         error "docker compose stop api-watch failed"
@@ -192,7 +218,7 @@ case "$ACTION" in
   logs)
     shift || true
     info "Following API logs only (Ctrl+C to stop tail)…"
-    if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true ]]; then
+    if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true || "$USE_MYSQL" == true ]]; then
       "${compose[@]}" -f "$COMPOSE_BASE" "${PROFILE_ARGS[@]}" logs -f api "$@"
     else
       "${compose[@]}" -f "$COMPOSE_BASE" logs -f api "$@"
@@ -317,7 +343,7 @@ case "$ACTION" in
 
     ok "API restarted without rebuilding images."
     info "Container status:"
-    if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true ]]; then
+    if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true || "$USE_MYSQL" == true ]]; then
       "${compose[@]}" -f "$COMPOSE_BASE" "${PROFILE_ARGS[@]}" ps
     else
       "${compose[@]}" -f "$COMPOSE_BASE" ps
@@ -391,6 +417,12 @@ elif [[ "$USE_POSTGRES" == true ]]; then
   else
     info "Starting dev stack WITHOUT BUILD (API in Docker + PostgreSQL + pgweb)…"
   fi
+elif [[ "$USE_MYSQL" == true ]]; then
+  if [[ "${ACTION}" == "up-build" ]]; then
+    info "Starting dev stack WITH BUILD (API in Docker + MySQL + Adminer)…"
+  else
+    info "Starting dev stack WITHOUT BUILD (API in Docker + MySQL + Adminer)…"
+  fi
 else
   if [[ "${ACTION}" == "up-build" ]]; then
     info "Starting dev stack WITH BUILD (API in Docker, pas de base Docker Compose pour ce DATABASE_NAME)…"
@@ -419,20 +451,30 @@ elif [[ "$USE_POSTGRES" == true ]]; then
       warn "DATABASE_URL pointe encore vers localhost pour Postgres : dans Docker, l’hôte est le service « postgres » (ex. postgres://user:pass@postgres:5432/db), pas localhost — voir .env.example."
     fi
   fi
+elif [[ "$USE_MYSQL" == true ]]; then
+  info "DATABASE_NAME=MYSQL_PRISMA → MySQL + Adminer."
+  if [[ -f "${PROJECT_DIR}/../.env" ]]; then
+    db_url_line=$(grep -E '^[[:space:]]*DATABASE_URL=' "${PROJECT_DIR}/../.env" | head -1 || true)
+    if [[ "$db_url_line" == *localhost* ]] && [[ "$db_url_line" == *mysql* ]]; then
+      warn "DATABASE_URL pointe encore vers localhost pour MySQL : dans Docker, l’hôte est le service « mysql » (ex. mysql://user:pass@mysql:3306/db), pas localhost — voir .env.example."
+    fi
+  fi
 else
-  info "DATABASE_NAME=$DATABASE_NAME_VALUE → pas de conteneurs Mongo/Postgres (profils « mongodb » / « pg » désactivés)."
+  info "DATABASE_NAME=$DATABASE_NAME_VALUE → pas de conteneurs Mongo/Postgres/MySQL (profils désactivés)."
 fi
 
 if [[ "$USE_MONGO" == true ]]; then
   info "Si les ports 27017, ${API_PORT} ou 8086 sont pris, arrête les services en conflit puis relance."
 elif [[ "$USE_POSTGRES" == true ]]; then
   info "Si les ports ${POSTGRES_HOST_PORT:-5432}, ${API_PORT} ou ${PGWEB_HOST_PORT:-${PGWEB_DEFAULT_PORT}} sont pris, arrête les services en conflit puis relance."
+elif [[ "$USE_MYSQL" == true ]]; then
+  info "Si les ports ${MYSQL_HOST_PORT:-3306}, ${API_PORT} ou ${ADMINER_HOST_PORT:-8088} sont pris, arrête les services en conflit puis relance."
 else
   info "Si le port ${API_PORT} est pris, arrête le service en conflit puis relance."
 fi
 
 if [[ "${ACTION}" == "up-build" ]]; then
-  if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true ]]; then
+  if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true || "$USE_MYSQL" == true ]]; then
     if ! "${compose[@]}" -f "$COMPOSE_BASE" "${PROFILE_ARGS[@]}" up -d --build; then
       error "Docker Compose failed to start (build mode)"
       exit 1
@@ -444,7 +486,7 @@ if [[ "${ACTION}" == "up-build" ]]; then
     fi
   fi
 else
-  if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true ]]; then
+  if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true || "$USE_MYSQL" == true ]]; then
     if ! "${compose[@]}" -f "$COMPOSE_BASE" "${PROFILE_ARGS[@]}" up -d --no-build; then
       error "Docker Compose failed to start (no-build mode)"
       exit 1
@@ -465,7 +507,7 @@ fi
 
 echo ""
 info "Checking container status..."
-if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true ]]; then
+if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true || "$USE_MYSQL" == true ]]; then
   "${compose[@]}" -f "$COMPOSE_BASE" "${PROFILE_ARGS[@]}" ps
 else
   "${compose[@]}" -f "$COMPOSE_BASE" ps
@@ -524,6 +566,30 @@ if [[ "$USE_POSTGRES" == true ]]; then
   docker logs "$POSTGRES_SERVICE" --tail 10
 fi
 
+if [[ "$USE_MYSQL" == true ]]; then
+  MYSQL_SERVICE="web-api-mysql"
+  info "Waiting for MySQL to become ready…"
+  READY_MY=false
+  for _ in {1..20}; do
+    if docker exec "$MYSQL_SERVICE" mysqladmin ping -h 127.0.0.1 -uroot -p"${MYSQL_ROOT_PASSWORD:-bugbountyapp}" --silent >/dev/null 2>&1; then
+      READY_MY=true
+      break
+    fi
+    sleep 3
+  done
+
+  if [ "$READY_MY" = false ]; then
+    warn "MySQL did not become ready in time"
+    docker logs "$MYSQL_SERVICE" --tail 30
+    exit 1
+  fi
+
+  ok "MySQL is ready"
+  ADMINER_PORT="${ADMINER_HOST_PORT:-8088}"
+  info "Adminer — http://localhost:${ADMINER_PORT}/ (serveur mysql, utilisateur MYSQL_USER / MYSQL_PASSWORD)"
+  docker logs "$MYSQL_SERVICE" --tail 10
+fi
+
 echo ""
 info "Recent API logs:"
 docker logs "$API_NAME" --tail 15 2>/dev/null || warn "API container not logging yet — check: docker logs $API_NAME"
@@ -550,12 +616,19 @@ if [[ "$USE_POSTGRES" == true ]]; then
   echo "🧭 pgweb (UI SQL) : http://localhost:${PGWEB_SLUG_PORT}/"
   echo "   └─ slug d’accès : / (racine) — conteneur web-api-pgweb — port hôte : ${PGWEB_SLUG_PORT} (surcharge .env : PGWEB_HOST_PORT)"
 fi
+if [[ "$USE_MYSQL" == true ]]; then
+  echo "📡 MySQL — depuis l’hôte : port ${MYSQL_HOST_PORT:-3306} (MYSQL_* dans .env, défauts bugbountyapp)."
+  echo "📡 Depuis le conteneur « api » : hôte « mysql », port 3306 — DATABASE_URL=mysql://bugbountyapp:bugbountyapp@mysql:3306/bugbountyapp"
+  echo "🧭 Adminer : http://localhost:${ADMINER_HOST_PORT:-8088}/"
+fi
 echo "🚀 API (Docker):   http://localhost:${API_PORT}/api"
 echo ""
 if [[ "$USE_MONGO" == true ]]; then
   echo "💡 nx serve sur la machine : DATABASE_URL=${MONGO_URI_HOST}/bugbountyapp (même base, vue depuis l’hôte)."
 elif [[ "$USE_POSTGRES" == true ]]; then
   echo "💡 Préparer DATABASE_URL Postgres côté hôte (psql) vs Docker (host=postgres) selon où tourne le process Node."
+elif [[ "$USE_MYSQL" == true ]]; then
+  echo "💡 Préparer DATABASE_URL MySQL côté hôte vs Docker (host=mysql) ; pnpm prisma:migrate:deploy avec DATABASE_NAME=MYSQL_PRISMA."
 else
   echo "💡 Vérifie DATABASE_NAME / IN-MEMORY dans .env (pas de base Docker pour ce mode)."
 fi
@@ -566,6 +639,8 @@ if [[ "$USE_MONGO" == true ]]; then
   echo "   mongosh \"${MONGO_URI_HOST}\""
 elif [[ "$USE_POSTGRES" == true ]]; then
   echo "   cd \"$PROJECT_DIR\" && ${compose[*]} -f compose.dev.yaml --profile pg logs -f"
+elif [[ "$USE_MYSQL" == true ]]; then
+  echo "   cd \"$PROJECT_DIR\" && ${compose[*]} -f compose.dev.yaml --profile mysql logs -f"
 else
   echo "   cd \"$PROJECT_DIR\" && ${compose[*]} -f compose.dev.yaml logs -f"
 fi
@@ -574,7 +649,7 @@ echo "----------------------------------"
 if [[ "${FOLLOW_API_LOGS,,}" == "1" || "${FOLLOW_API_LOGS,,}" == "true" || "${FOLLOW_API_LOGS,,}" == "yes" ]]; then
   echo ""
   info "Following live API logs (Ctrl+C to stop tail, containers keep running)…"
-  if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true ]]; then
+  if [[ "$USE_MONGO" == true || "$USE_POSTGRES" == true || "$USE_MYSQL" == true ]]; then
     "${compose[@]}" -f "$COMPOSE_BASE" "${PROFILE_ARGS[@]}" logs -f api
   else
     "${compose[@]}" -f "$COMPOSE_BASE" logs -f api

@@ -1,4 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { castDraft } from "immer";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 
 /**
@@ -93,7 +94,7 @@ export const reportDraftsSlice = createSlice({
       state,
       action: PayloadAction<ReportDraftDomainModel.ReportDraft>,
     ) => {
-      state.byId[action.payload.id] = action.payload;
+      state.byId[action.payload.id] = castDraft(action.payload);
     },
     /** Insert or replace a submission (covers fresh submit + decision update). */
     submissionUpserted: (
@@ -171,7 +172,7 @@ export const reportDraftsSlice = createSlice({
       action: PayloadAction<{ drafts: ReportDraftDomainModel.ReportDraft[] }>,
     ) => {
       for (const draft of action.payload.drafts) {
-        state.byId[draft.id] = draft;
+        state.byId[draft.id] = castDraft(draft);
       }
       state.myDraftIds = action.payload.drafts.map((d) => d.id);
       state.list = { status: "success" };

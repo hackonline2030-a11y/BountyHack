@@ -196,6 +196,7 @@ export type ReportTeamOrderByWithRelationInput = {
   reportDraft?: Prisma.ReportDraftOrderByWithRelationInput
   members?: Prisma.ReportTeamMemberOrderByRelationAggregateInput
   joinRequests?: Prisma.ReportTeamJoinRequestOrderByRelationAggregateInput
+  _relevance?: Prisma.ReportTeamOrderByRelevanceInput
 }
 
 export type ReportTeamWhereUniqueInput = Prisma.AtLeast<{
@@ -300,6 +301,12 @@ export type ReportTeamUncheckedUpdateManyInput = {
 export type ReportTeamNullableScalarRelationFilter = {
   is?: Prisma.ReportTeamWhereInput | null
   isNot?: Prisma.ReportTeamWhereInput | null
+}
+
+export type ReportTeamOrderByRelevanceInput = {
+  fields: Prisma.ReportTeamOrderByRelevanceFieldEnum | Prisma.ReportTeamOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type ReportTeamCountOrderByAggregateInput = {
@@ -601,23 +608,7 @@ export type ReportTeamSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   _count?: boolean | Prisma.ReportTeamCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reportTeam"]>
 
-export type ReportTeamSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  reportDraftId?: boolean
-  label?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
-  reportDraft?: boolean | Prisma.ReportDraftDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["reportTeam"]>
 
-export type ReportTeamSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  reportDraftId?: boolean
-  label?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
-  reportDraft?: boolean | Prisma.ReportDraftDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["reportTeam"]>
 
 export type ReportTeamSelectScalar = {
   id?: boolean
@@ -633,12 +624,6 @@ export type ReportTeamInclude<ExtArgs extends runtime.Types.Extensions.InternalA
   members?: boolean | Prisma.ReportTeam$membersArgs<ExtArgs>
   joinRequests?: boolean | Prisma.ReportTeam$joinRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.ReportTeamCountOutputTypeDefaultArgs<ExtArgs>
-}
-export type ReportTeamIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  reportDraft?: boolean | Prisma.ReportDraftDefaultArgs<ExtArgs>
-}
-export type ReportTeamIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  reportDraft?: boolean | Prisma.ReportDraftDefaultArgs<ExtArgs>
 }
 
 export type $ReportTeamPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -772,30 +757,6 @@ export interface ReportTeamDelegate<ExtArgs extends runtime.Types.Extensions.Int
   createMany<T extends ReportTeamCreateManyArgs>(args?: Prisma.SelectSubset<T, ReportTeamCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many ReportTeams and returns the data saved in the database.
-   * @param {ReportTeamCreateManyAndReturnArgs} args - Arguments to create many ReportTeams.
-   * @example
-   * // Create many ReportTeams
-   * const reportTeam = await prisma.reportTeam.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many ReportTeams and only return the `id`
-   * const reportTeamWithIdOnly = await prisma.reportTeam.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends ReportTeamCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ReportTeamCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportTeamPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a ReportTeam.
    * @param {ReportTeamDeleteArgs} args - Arguments to delete one ReportTeam.
    * @example
@@ -858,36 +819,6 @@ export interface ReportTeamDelegate<ExtArgs extends runtime.Types.Extensions.Int
    * 
    */
   updateMany<T extends ReportTeamUpdateManyArgs>(args: Prisma.SelectSubset<T, ReportTeamUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more ReportTeams and returns the data updated in the database.
-   * @param {ReportTeamUpdateManyAndReturnArgs} args - Arguments to update many ReportTeams.
-   * @example
-   * // Update many ReportTeams
-   * const reportTeam = await prisma.reportTeam.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more ReportTeams and only return the `id`
-   * const reportTeamWithIdOnly = await prisma.reportTeam.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends ReportTeamUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ReportTeamUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportTeamPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one ReportTeam.
@@ -1323,29 +1254,6 @@ export type ReportTeamCreateManyArgs<ExtArgs extends runtime.Types.Extensions.In
 }
 
 /**
- * ReportTeam createManyAndReturn
- */
-export type ReportTeamCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ReportTeam
-   */
-  select?: Prisma.ReportTeamSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the ReportTeam
-   */
-  omit?: Prisma.ReportTeamOmit<ExtArgs> | null
-  /**
-   * The data used to create many ReportTeams.
-   */
-  data: Prisma.ReportTeamCreateManyInput | Prisma.ReportTeamCreateManyInput[]
-  skipDuplicates?: boolean
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ReportTeamIncludeCreateManyAndReturn<ExtArgs> | null
-}
-
-/**
  * ReportTeam update
  */
 export type ReportTeamUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1387,36 +1295,6 @@ export type ReportTeamUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many ReportTeams to update.
    */
   limit?: number
-}
-
-/**
- * ReportTeam updateManyAndReturn
- */
-export type ReportTeamUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ReportTeam
-   */
-  select?: Prisma.ReportTeamSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the ReportTeam
-   */
-  omit?: Prisma.ReportTeamOmit<ExtArgs> | null
-  /**
-   * The data used to update ReportTeams.
-   */
-  data: Prisma.XOR<Prisma.ReportTeamUpdateManyMutationInput, Prisma.ReportTeamUncheckedUpdateManyInput>
-  /**
-   * Filter which ReportTeams to update
-   */
-  where?: Prisma.ReportTeamWhereInput
-  /**
-   * Limit how many ReportTeams to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ReportTeamIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
