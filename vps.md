@@ -97,3 +97,38 @@ mysql -u bugbountyapp -p -h 127.0.0.1 bugbountyapp -t -e "SELECT * FROM users LI
 - Préférer la **CLI + SSH** plutôt qu’Adminer exposé sur Internet.
 - Utiliser `LIMIT` sur les grosses tables en production.
 - Ne pas committer les mots de passe : ils restent dans `server/.env` (`chmod 600`).
+
+---
+
+## Premier compte SUPER_ADMIN (prod)
+
+`POST /api/auth/register` exige **déjà** un JWT `SUPER_ADMIN` : impossible de créer le premier admin via l’UI ou Bruno sans compte existant. Utiliser le script one-shot (pas le seed démo `demo-user@example.local`).
+
+**Prérequis :** migrations appliquées, rôles en base (`pnpm run prisma:seed` avec `SEED_DEMO_USER=false` en prod).
+
+Sur le VPS :
+
+```bash
+cd ~/bugbountyapp/server
+
+# Mot de passe choisi pour Lead (ne pas committer ; éviter -h history si possible)
+read -s SUPER_ADMIN_PASSWORD
+export SUPER_ADMIN_PASSWORD
+
+pnpm run create-super-admin -- \
+  --username "Lead" \
+  --email "hackonline2030@gmail.com"
+
+unset SUPER_ADMIN_PASSWORD
+```
+
+Vérification :
+
+```bash
+mysql -u bugbountyapp -p -h 127.0.0.1 bugbountyapp -e \
+  "SELECT u.id, u.username, u.email, r.name AS role FROM users u LEFT JOIN roles r ON r.id = u.role_id WHERE u.email = 'hackonline2030@gmail.com';"
+```
+
+Connexion : front → login avec **email** `hackonline2030@gmail.com` et le mot de passe choisi. Ensuite création d’autres comptes via **Administration → Inscription** (réservée aux super-admins).
+
+Si l’email existe déjà, le script met à jour le mot de passe et force le rôle `SUPER_ADMIN`.

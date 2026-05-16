@@ -39,7 +39,8 @@
     "prisma:seed-demo": "pnpm run prisma:seed",
     "prisma:migrate:deploy:docker": "node docker/prisma-migrate-docker-from-host.cjs",
     "prisma:seed:docker": "node docker/prisma-seed-docker-from-host.cjs",
-    "prisma:seed-demo:docker": "node docker/prisma-seed-docker-from-host.cjs"
+    "prisma:seed-demo:docker": "node docker/prisma-seed-docker-from-host.cjs",
+    "create-super-admin": "node scripts/create-super-admin.mjs"
   },
   "private": true,
   "prisma": {
