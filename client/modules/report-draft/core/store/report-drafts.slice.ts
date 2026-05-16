@@ -1,0 +1,226 @@
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { castDraft } from "immer";
+import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
+
+/**
+ * State of the **aggregate-level** report-draft store (plural — one per
+ * domain entity loaded into memory). This slice is the local mirror of
+ * what the three gateways know about; mutations come from thunks that
+ * round-trip through them.
+ *
+ * Separation of concerns:
+ * - `reportDraftSlice` (singular, legacy) — wizard UI buffer (current
+ *   step, in-flight keystrokes). To be retired once every read path has
+ *   migrated to `byId[currentDraftId]`.
+ * - `reportDraftsSlice` (this file)        — canonical aggregate state +
+ *   submissions + reviewer comments, ready for the review workflow.
+ *
+ * Storage strategy: flat `byId` maps for drafts / submissions / comments
+ * so any thunk can update a single entity in O(1). Ordered lists (e.g.
+ * "my drafts latest first") are kept as separate id arrays.
+ */
+export type ReportDraftsState = {
+  byId: Record<string, ReportDraftDomainModel.ReportDraft>;
+  submissionsById: Record<string, ReportDraftDomainModel.Submission<unknown>>;
+  commentsById: Record<string, ReportDraftDomainModel.ReviewerComment>;
+
+  /** Id of the draft currently being edited by the wizard. */
+  currentDraftId: string | null;
+  /** Ids returned by the last `listMyDrafts` call, in gateway order. */
+  myDraftIds: string[];
+  /** Ids returned by the last QC list call (`listReviewerSubmissions` or legacy pending list). */
+  pendingSubmissionIds: string[];
+  /** Mentor advisory threads visible on the QC board (same teams). */
+  mentorPeerSubmissionIds: string[];
+  /** Submission currently open on the QC review board. */
+  currentSubmissionId: string | null;
+
+  creation: CreationStatus;
+  /** Hunter wizard: `loadReportDraft`. */
+  load: OperationStatus;
+  /** QC review page: `loadSubmissionForReview` (separate from `load` — no shared idle/success). */
+  reviewLoad: OperationStatus;
+  list: OperationStatus;
+  reviewList: OperationStatus;
+  mentorPeerList: OperationStatus;
+  /** Shared status for every aggregate transition (submit / approve / request / resume / giveUp / reject). */
+  transition: OperationStatus;
+};
+
+export type CreationStatus =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "success"; draftId: string }
+  | { status: "error"; message: string };
+
+export type OperationStatus =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "success" }
+  | { status: "error"; message: string };
+
+export const reportDraftsInitialState: ReportDraftsState = {
+  byId: {},
+  submissionsById: {},
+  commentsById: {},
+  currentDraftId: null,
+  myDraftIds: [],
+  pendingSubmissionIds: [],
+  mentorPeerSubmissionIds: [],
+  currentSubmissionId: null,
+  creation: { status: "idle" },
+  load: { status: "idle" },
+  reviewLoad: { status: "idle" },
+  list: { status: "idle" },
+  reviewList: { status: "idle" },
+  mentorPeerList: { status: "idle" },
+  transition: { status: "idle" },
+};
+
+export const reportDraftsSlice = createSlice({
+  name: "reportDrafts",
+  initialState: reportDraftsInitialState,
+  reducers: {
+    // ──────────────────────────────────────────────────────────────────
+    // Entity mutations (called by thunks after the gateway has acked)
+    // ──────────────────────────────────────────────────────────────────
+
+    /**
+     * Insert or replace a draft snapshot. Optimistic-locking is the
+     * thunk's responsibility — by the time this reducer runs the gateway
+     * has already accepted the write.
+     */
+    draftUpserted: (
+      state,
+      action: PayloadAction<ReportDraftDomainModel.ReportDraft>,
+    ) => {
+      state.byId[action.payload.id] = castDraft(action.payload);
+    },
+    /** Insert or replace a submission (covers fresh submit + decision update). */
+    submissionUpserted: (
+      state,
+      action: PayloadAction<ReportDraftDomainModel.Submission<unknown>>,
+    ) => {
+      state.submissionsById[action.payload.id] = action.payload;
+    },
+    /** Append (or replace by id) a batch of reviewer comments. */
+    commentsUpserted: (
+      state,
+      action: PayloadAction<ReportDraftDomainModel.ReviewerComment[]>,
+    ) => {
+      for (const comment of action.payload) {
+        state.commentsById[comment.id] = comment;
+      }
+    },
+
+    setCurrentDraftId: (state, action: PayloadAction<string | null>) => {
+      state.currentDraftId = action.payload;
+    },
+
+    setCurrentSubmissionId: (state, action: PayloadAction<string | null>) => {
+      state.currentSubmissionId = action.payload;
+    },
+
+    // ──────────────────────────────────────────────────────────────────
+    // createReportDraft (status only — data lands via draftUpserted)
+    // ──────────────────────────────────────────────────────────────────
+
+    createReportDraftStarted: (state) => {
+      state.creation = { status: "loading" };
+    },
+    createReportDraftSucceeded: (state, action: PayloadAction<{ draftId: string }>) => {
+      state.creation = { status: "success", draftId: action.payload.draftId };
+    },
+    createReportDraftFailed: (state, action: PayloadAction<{ message: string }>) => {
+      state.creation = { status: "error", message: action.payload.message };
+    },
+
+    // ──────────────────────────────────────────────────────────────────
+    // loadReportDraft
+    // ──────────────────────────────────────────────────────────────────
+
+    loadStarted: (state) => {
+      state.load = { status: "loading" };
+    },
+    loadSucceeded: (state) => {
+      state.load = { status: "success" };
+    },
+    loadFailed: (state, action: PayloadAction<{ message: string }>) => {
+      state.load = { status: "error", message: action.payload.message };
+    },
+
+    reviewLoadStarted: (state) => {
+      state.reviewLoad = { status: "loading" };
+      state.transition = { status: "idle" };
+    },
+    reviewLoadSucceeded: (state) => {
+      state.reviewLoad = { status: "success" };
+    },
+    reviewLoadFailed: (state, action: PayloadAction<{ message: string }>) => {
+      state.reviewLoad = { status: "error", message: action.payload.message };
+    },
+
+    // ──────────────────────────────────────────────────────────────────
+    // listMyDrafts — bulk-upserts drafts and rewrites the ordered index
+    // ──────────────────────────────────────────────────────────────────
+
+    listStarted: (state) => {
+      state.list = { status: "loading" };
+    },
+    listSucceeded: (
+      state,
+      action: PayloadAction<{ drafts: ReportDraftDomainModel.ReportDraft[] }>,
+    ) => {
+      for (const draft of action.payload.drafts) {
+        state.byId[draft.id] = castDraft(draft);
+      }
+      state.myDraftIds = action.payload.drafts.map((d) => d.id);
+      state.list = { status: "success" };
+    },
+    listFailed: (state, action: PayloadAction<{ message: string }>) => {
+      state.list = { status: "error", message: action.payload.message };
+    },
+
+    reviewListStarted: (state) => {
+      state.reviewList = { status: "loading" };
+    },
+    reviewListSucceeded: (
+      state,
+      action: PayloadAction<{ submissionIds: string[] }>,
+    ) => {
+      state.pendingSubmissionIds = action.payload.submissionIds;
+      state.reviewList = { status: "success" };
+    },
+    reviewListFailed: (state, action: PayloadAction<{ message: string }>) => {
+      state.reviewList = { status: "error", message: action.payload.message };
+    },
+
+    mentorPeerListSucceeded: (
+      state,
+      action: PayloadAction<{ submissionIds: string[] }>,
+    ) => {
+      state.mentorPeerSubmissionIds = action.payload.submissionIds;
+      state.mentorPeerList = { status: "success" };
+    },
+    mentorPeerListFailed: (state, action: PayloadAction<{ message: string }>) => {
+      state.mentorPeerList = { status: "error", message: action.payload.message };
+    },
+
+    // ──────────────────────────────────────────────────────────────────
+    // Aggregate transitions — single shared status (UI shows one in-flight at a time)
+    // ──────────────────────────────────────────────────────────────────
+
+    transitionStarted: (state) => {
+      state.transition = { status: "loading" };
+    },
+    transitionSucceeded: (state) => {
+      state.transition = { status: "success" };
+    },
+    transitionFailed: (state, action: PayloadAction<{ message: string }>) => {
+      state.transition = { status: "error", message: action.payload.message };
+    },
+  },
+});
+
+export const reportDraftsReducer = reportDraftsSlice.reducer;
+export const reportDraftsActions = reportDraftsSlice.actions;

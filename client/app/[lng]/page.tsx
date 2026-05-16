@@ -24,13 +24,21 @@ export default async function Home({ params }: PageProps) {
     <main className="flex min-h-[calc(100vh-(var(--header-height)+var(--footer-height)))] w-full flex-col">
       <Section
         fluid
-        classNames="flex-1 flex flex-col items-center justify-center bg-pattern"
+        classNames="flex-1 flex flex-col items-center justify-center bg-pattern px-4 py-10 sm:px-6 sm:py-12"
       >
-        <article className="max-w-2xl w-full px-6 py-12 text-center text-white">
-          <h1 className="text-4xl font-bold">{t("home.heroTitle")}</h1>
-          <p className="mt-4 text-lg text-white/90">{t("home.heroLead")}</p>
-          <p className="mt-6 text-sm text-white/80">{t("home.heroHint")}</p>
-        </article>
+        <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
+          <article className="dashboard-card px-6 py-10 text-center sm:py-12">
+            <h1 className="text-4xl font-bold text-dashboard-text">{t("home.heroTitle")}</h1>
+            <p className="mt-4 text-lg text-dashboard-text-muted">{t("home.heroLead")}</p>
+            <p className="mt-6 text-sm text-dashboard-text-subtle">{t("home.heroHint")}</p>
+          </article>
+          <aside
+            className="dashboard-card px-5 py-4 text-center text-sm leading-relaxed text-dashboard-text sm:px-6 sm:py-5"
+            role="note"
+          >
+            <p className="m-0">{t("home.demoNotice")}</p>
+          </aside>
+        </div>
       </Section>
     </main>
   );

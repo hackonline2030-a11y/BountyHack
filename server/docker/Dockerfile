@@ -50,7 +50,7 @@ COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/dist ./dist
 COPY --from=build /usr/src/app/views ./views
 COPY --from=build /usr/src/app/static ./static
-# Runtime data not bundled into main.js: JsonCvRepositoryAdapter reads cwd/src/document-rendering/data; /template-assets uses cwd/templates
+# Runtime data not bundled into main.js: JsonReportRepositoryAdapter reads cwd/src/document-rendering/data; /template-assets uses cwd/templates
 COPY --from=build /usr/src/app/src/document-rendering/data ./src/document-rendering/data
 COPY --from=build /usr/src/app/templates ./templates
 CMD ["node", "dist/main.js"]

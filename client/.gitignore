@@ -37,6 +37,8 @@ analyze/
 
 # Env (.env.example can stay tracked)
 .env*
+.env.local
+.env.production
 !.env.example
 
 # Debug logs
@@ -55,3 +57,5 @@ next-env.d.ts
 
 # Misc
 *.pem
+
+.cursor

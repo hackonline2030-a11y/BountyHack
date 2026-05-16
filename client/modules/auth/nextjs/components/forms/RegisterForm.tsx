@@ -17,7 +17,7 @@ const inputBase =
   "w-full bg-white placeholder:text-gray-500 text-gray-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow";
 
 export function RegisterForm() {
-  const { t } = useT("connexion");
+  const { t } = useT(["register", "common"]);
   const router = useRouter();
   const pathname = usePathname();
   const prefix = localePrefixFromPathname(pathname);
@@ -55,10 +55,17 @@ export function RegisterForm() {
 
       setStatus("success");
       setMessage(t("registerForm.successRegister"));
-      router.replace(`${prefix}/login`);
+      /**
+       * The admin who registered the user stays on the admin surface — landing
+       * on /administration where the new row is visible in the management table.
+       * `router.refresh()` re-runs the Server Component on that route so the
+       * fresh user shows up without a manual reload.
+       */
+      router.replace(`${prefix}/administration`);
+      router.refresh();
     } catch {
       setStatus("error");
-      setMessage(t("errors.network"));
+      setMessage(t("common:errors.network"));
     }
   }
 

@@ -1,48 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import type { Resource } from "i18next";
 import { Rubik } from "next/font/google";
 import { headers } from "next/headers";
 import { I18nProvider } from "next-i18next/client";
 import { getT, initServerI18next } from "next-i18next/server";
 import i18nConfig from "@/i18n.config";
-import enCommon from "@/app/i18n/locales/en/common.json";
-import enConnexion from "@/app/i18n/locales/en/connexion.json";
-import enPasswordReset from "@/app/i18n/locales/en/passwordReset.json";
-import enCredits from "@/app/i18n/locales/en/credits.json";
-import enLegal from "@/app/i18n/locales/en/legal.json";
-import enParameters from "@/app/i18n/locales/en/parameters.json";
-import frCommon from "@/app/i18n/locales/fr/common.json";
-import frConnexion from "@/app/i18n/locales/fr/connexion.json";
-import frPasswordReset from "@/app/i18n/locales/fr/passwordReset.json";
-import frCredits from "@/app/i18n/locales/fr/credits.json";
-import frLegal from "@/app/i18n/locales/fr/legal.json";
-import frParameters from "@/app/i18n/locales/fr/parameters.json";
+import {
+  clientI18nNamespaces,
+  clientI18nResources,
+} from "@/lib/client-i18n-resources";
 import "@/app/globals.css";
 import { ThemeProvider } from "@/modules/app/nextjs/ThemeProvider";
+import { AppWrapper } from "@/modules/app/nextjs/appWrapper";
 import { Header } from "@/modules/app/nextjs/layout/Header";
 import { Footer } from "@/modules/app/nextjs/layout/Footer";
 
 initServerI18next(i18nConfig);
-
-/** Bundled for client `I18nProvider` so every namespace (e.g. `connexion`) hydrates reliably. */
-const clientI18nResources = {
-  en: {
-    common: enCommon,
-    connexion: enConnexion,
-    passwordReset: enPasswordReset,
-    parameters: enParameters,
-    legal: enLegal,
-    credits: enCredits,
-  },
-  fr: {
-    common: frCommon,
-    connexion: frConnexion,
-    passwordReset: frPasswordReset,
-    parameters: frParameters,
-    legal: frLegal,
-    credits: frCredits,
-  },
-} satisfies Resource;
 
 const LANG_HEADER = "x-i18next-current-language";
 
@@ -98,7 +70,7 @@ export default async function RootLayout({
 }) {
   const lang =
     (await headers()).get(LANG_HEADER) ?? i18nConfig.fallbackLng ?? "en";
-  await getT(["common", "connexion", "passwordReset", "legal", "credits"], { lng: lang });
+  await getT([...clientI18nNamespaces], { lng: lang });
 
   return (
     <html
@@ -118,9 +90,11 @@ export default async function RootLayout({
             supportedLngs={i18nConfig.supportedLngs}
             fallbackLng={i18nConfig.fallbackLng}
           >
-            <Header />
-            {children}
-            <Footer />
+            <AppWrapper>
+              <Header />
+              {children}
+              <Footer />
+            </AppWrapper>
           </I18nProvider>
         </ThemeProvider>
       </body>

@@ -59,7 +59,18 @@ export const ModelName = {
   RefreshToken: 'RefreshToken',
   PasswordResetToken: 'PasswordResetToken',
   TwoFactor: 'TwoFactor',
-  TwoFactorTotp: 'TwoFactorTotp'
+  TwoFactorTotp: 'TwoFactorTotp',
+  ReportDraft: 'ReportDraft',
+  ReportDraftStep: 'ReportDraftStep',
+  ReportDraftAttachment: 'ReportDraftAttachment',
+  Submission: 'Submission',
+  ReviewerComment: 'ReviewerComment',
+  SubmissionAttachmentSnapshot: 'SubmissionAttachmentSnapshot',
+  SubmissionContentSnapshot: 'SubmissionContentSnapshot',
+  Report: 'Report',
+  ReportTeam: 'ReportTeam',
+  ReportTeamMember: 'ReportTeamMember',
+  ReportTeamJoinRequest: 'ReportTeamJoinRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -169,12 +180,274 @@ export const TwoFactorTotpScalarFieldEnum = {
 export type TwoFactorTotpScalarFieldEnum = (typeof TwoFactorTotpScalarFieldEnum)[keyof typeof TwoFactorTotpScalarFieldEnum]
 
 
+export const ReportDraftScalarFieldEnum = {
+  id: 'id',
+  hunterId: 'hunterId',
+  version: 'version',
+  aggregateStatus: 'aggregateStatus',
+  pendingReportId: 'pendingReportId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReportDraftScalarFieldEnum = (typeof ReportDraftScalarFieldEnum)[keyof typeof ReportDraftScalarFieldEnum]
+
+
+export const ReportDraftStepScalarFieldEnum = {
+  id: 'id',
+  reportDraftId: 'reportDraftId',
+  step: 'step',
+  payload: 'payload',
+  status: 'status',
+  currentRound: 'currentRound',
+  assignedReviewerRole: 'assignedReviewerRole',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReportDraftStepScalarFieldEnum = (typeof ReportDraftStepScalarFieldEnum)[keyof typeof ReportDraftStepScalarFieldEnum]
+
+
+export const ReportDraftAttachmentScalarFieldEnum = {
+  id: 'id',
+  reportDraftStepId: 'reportDraftStepId',
+  filename: 'filename',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  storageKey: 'storageKey',
+  thumbnailUrl: 'thumbnailUrl',
+  uploadedBy: 'uploadedBy',
+  uploadedAt: 'uploadedAt'
+} as const
+
+export type ReportDraftAttachmentScalarFieldEnum = (typeof ReportDraftAttachmentScalarFieldEnum)[keyof typeof ReportDraftAttachmentScalarFieldEnum]
+
+
+export const SubmissionScalarFieldEnum = {
+  id: 'id',
+  reportDraftStepId: 'reportDraftStepId',
+  reportDraftId: 'reportDraftId',
+  step: 'step',
+  round: 'round',
+  submissionKind: 'submissionKind',
+  payload: 'payload',
+  submittedAt: 'submittedAt',
+  submittedBy: 'submittedBy',
+  reviewerRole: 'reviewerRole',
+  decision: 'decision',
+  decidedAt: 'decidedAt',
+  decidedBy: 'decidedBy'
+} as const
+
+export type SubmissionScalarFieldEnum = (typeof SubmissionScalarFieldEnum)[keyof typeof SubmissionScalarFieldEnum]
+
+
+export const ReviewerCommentScalarFieldEnum = {
+  id: 'id',
+  submissionId: 'submissionId',
+  authorId: 'authorId',
+  authorRole: 'authorRole',
+  anchor: 'anchor',
+  body: 'body',
+  createdAt: 'createdAt',
+  resolvedAt: 'resolvedAt'
+} as const
+
+export type ReviewerCommentScalarFieldEnum = (typeof ReviewerCommentScalarFieldEnum)[keyof typeof ReviewerCommentScalarFieldEnum]
+
+
+export const SubmissionAttachmentSnapshotScalarFieldEnum = {
+  id: 'id',
+  submissionId: 'submissionId',
+  filename: 'filename',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  storageKey: 'storageKey',
+  thumbnailUrl: 'thumbnailUrl',
+  uploadedAt: 'uploadedAt',
+  uploadedBy: 'uploadedBy'
+} as const
+
+export type SubmissionAttachmentSnapshotScalarFieldEnum = (typeof SubmissionAttachmentSnapshotScalarFieldEnum)[keyof typeof SubmissionAttachmentSnapshotScalarFieldEnum]
+
+
+export const SubmissionContentSnapshotScalarFieldEnum = {
+  id: 'id',
+  submissionId: 'submissionId',
+  payload: 'payload',
+  capturedAt: 'capturedAt'
+} as const
+
+export type SubmissionContentSnapshotScalarFieldEnum = (typeof SubmissionContentSnapshotScalarFieldEnum)[keyof typeof SubmissionContentSnapshotScalarFieldEnum]
+
+
+export const ReportScalarFieldEnum = {
+  id: 'id',
+  hunterId: 'hunterId',
+  sourceDraftId: 'sourceDraftId',
+  status: 'status',
+  frozenContent: 'frozenContent',
+  contentSyncedAt: 'contentSyncedAt',
+  promotedBy: 'promotedBy',
+  publishedBy: 'publishedBy',
+  publishedAt: 'publishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReportScalarFieldEnum = (typeof ReportScalarFieldEnum)[keyof typeof ReportScalarFieldEnum]
+
+
+export const ReportTeamScalarFieldEnum = {
+  id: 'id',
+  reportDraftId: 'reportDraftId',
+  label: 'label',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReportTeamScalarFieldEnum = (typeof ReportTeamScalarFieldEnum)[keyof typeof ReportTeamScalarFieldEnum]
+
+
+export const ReportTeamMemberScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  role: 'role',
+  joinedAt: 'joinedAt'
+} as const
+
+export type ReportTeamMemberScalarFieldEnum = (typeof ReportTeamMemberScalarFieldEnum)[keyof typeof ReportTeamMemberScalarFieldEnum]
+
+
+export const ReportTeamJoinRequestScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  requestedRole: 'requestedRole',
+  message: 'message',
+  status: 'status',
+  requestedAt: 'requestedAt',
+  decidedAt: 'decidedAt',
+  decidedById: 'decidedById'
+} as const
+
+export type ReportTeamJoinRequestScalarFieldEnum = (typeof ReportTeamJoinRequestScalarFieldEnum)[keyof typeof ReportTeamJoinRequestScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const UserOrderByRelevanceFieldEnum = {
+  id: 'id',
+  username: 'username',
+  email: 'email',
+  passwordHash: 'passwordHash'
+} as const
+
+export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
+
+
+export const RoleOrderByRelevanceFieldEnum = {
+  name: 'name'
+} as const
+
+export type RoleOrderByRelevanceFieldEnum = (typeof RoleOrderByRelevanceFieldEnum)[keyof typeof RoleOrderByRelevanceFieldEnum]
+
+
+export const AuthzObjectOrderByRelevanceFieldEnum = {
+  name: 'name'
+} as const
+
+export type AuthzObjectOrderByRelevanceFieldEnum = (typeof AuthzObjectOrderByRelevanceFieldEnum)[keyof typeof AuthzObjectOrderByRelevanceFieldEnum]
+
+
+export const PermissionOrderByRelevanceFieldEnum = {
+  action: 'action'
+} as const
+
+export type PermissionOrderByRelevanceFieldEnum = (typeof PermissionOrderByRelevanceFieldEnum)[keyof typeof PermissionOrderByRelevanceFieldEnum]
+
+
+export const RefreshTokenOrderByRelevanceFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  userId: 'userId'
+} as const
+
+export type RefreshTokenOrderByRelevanceFieldEnum = (typeof RefreshTokenOrderByRelevanceFieldEnum)[keyof typeof RefreshTokenOrderByRelevanceFieldEnum]
+
+
+export const PasswordResetTokenOrderByRelevanceFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  userId: 'userId'
+} as const
+
+export type PasswordResetTokenOrderByRelevanceFieldEnum = (typeof PasswordResetTokenOrderByRelevanceFieldEnum)[keyof typeof PasswordResetTokenOrderByRelevanceFieldEnum]
+
+
+export const TwoFactorOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId'
+} as const
+
+export type TwoFactorOrderByRelevanceFieldEnum = (typeof TwoFactorOrderByRelevanceFieldEnum)[keyof typeof TwoFactorOrderByRelevanceFieldEnum]
+
+
+export const TwoFactorTotpOrderByRelevanceFieldEnum = {
+  id: 'id',
+  twoFactorId: 'twoFactorId',
+  secret: 'secret'
+} as const
+
+export type TwoFactorTotpOrderByRelevanceFieldEnum = (typeof TwoFactorTotpOrderByRelevanceFieldEnum)[keyof typeof TwoFactorTotpOrderByRelevanceFieldEnum]
+
+
+export const ReportDraftOrderByRelevanceFieldEnum = {
+  id: 'id',
+  hunterId: 'hunterId',
+  pendingReportId: 'pendingReportId'
+} as const
+
+export type ReportDraftOrderByRelevanceFieldEnum = (typeof ReportDraftOrderByRelevanceFieldEnum)[keyof typeof ReportDraftOrderByRelevanceFieldEnum]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 export const QueryMode = {
@@ -185,10 +458,105 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
+export const ReportDraftStepOrderByRelevanceFieldEnum = {
+  id: 'id',
+  reportDraftId: 'reportDraftId'
 } as const
 
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+export type ReportDraftStepOrderByRelevanceFieldEnum = (typeof ReportDraftStepOrderByRelevanceFieldEnum)[keyof typeof ReportDraftStepOrderByRelevanceFieldEnum]
+
+
+export const ReportDraftAttachmentOrderByRelevanceFieldEnum = {
+  id: 'id',
+  reportDraftStepId: 'reportDraftStepId',
+  filename: 'filename',
+  mimeType: 'mimeType',
+  storageKey: 'storageKey',
+  thumbnailUrl: 'thumbnailUrl',
+  uploadedBy: 'uploadedBy'
+} as const
+
+export type ReportDraftAttachmentOrderByRelevanceFieldEnum = (typeof ReportDraftAttachmentOrderByRelevanceFieldEnum)[keyof typeof ReportDraftAttachmentOrderByRelevanceFieldEnum]
+
+
+export const SubmissionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  reportDraftStepId: 'reportDraftStepId',
+  reportDraftId: 'reportDraftId',
+  submittedBy: 'submittedBy',
+  decidedBy: 'decidedBy'
+} as const
+
+export type SubmissionOrderByRelevanceFieldEnum = (typeof SubmissionOrderByRelevanceFieldEnum)[keyof typeof SubmissionOrderByRelevanceFieldEnum]
+
+
+export const ReviewerCommentOrderByRelevanceFieldEnum = {
+  id: 'id',
+  submissionId: 'submissionId',
+  authorId: 'authorId',
+  body: 'body'
+} as const
+
+export type ReviewerCommentOrderByRelevanceFieldEnum = (typeof ReviewerCommentOrderByRelevanceFieldEnum)[keyof typeof ReviewerCommentOrderByRelevanceFieldEnum]
+
+
+export const SubmissionAttachmentSnapshotOrderByRelevanceFieldEnum = {
+  id: 'id',
+  submissionId: 'submissionId',
+  filename: 'filename',
+  mimeType: 'mimeType',
+  storageKey: 'storageKey',
+  thumbnailUrl: 'thumbnailUrl',
+  uploadedBy: 'uploadedBy'
+} as const
+
+export type SubmissionAttachmentSnapshotOrderByRelevanceFieldEnum = (typeof SubmissionAttachmentSnapshotOrderByRelevanceFieldEnum)[keyof typeof SubmissionAttachmentSnapshotOrderByRelevanceFieldEnum]
+
+
+export const SubmissionContentSnapshotOrderByRelevanceFieldEnum = {
+  id: 'id',
+  submissionId: 'submissionId'
+} as const
+
+export type SubmissionContentSnapshotOrderByRelevanceFieldEnum = (typeof SubmissionContentSnapshotOrderByRelevanceFieldEnum)[keyof typeof SubmissionContentSnapshotOrderByRelevanceFieldEnum]
+
+
+export const ReportOrderByRelevanceFieldEnum = {
+  id: 'id',
+  hunterId: 'hunterId',
+  sourceDraftId: 'sourceDraftId',
+  promotedBy: 'promotedBy',
+  publishedBy: 'publishedBy'
+} as const
+
+export type ReportOrderByRelevanceFieldEnum = (typeof ReportOrderByRelevanceFieldEnum)[keyof typeof ReportOrderByRelevanceFieldEnum]
+
+
+export const ReportTeamOrderByRelevanceFieldEnum = {
+  id: 'id',
+  reportDraftId: 'reportDraftId',
+  label: 'label'
+} as const
+
+export type ReportTeamOrderByRelevanceFieldEnum = (typeof ReportTeamOrderByRelevanceFieldEnum)[keyof typeof ReportTeamOrderByRelevanceFieldEnum]
+
+
+export const ReportTeamMemberOrderByRelevanceFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId'
+} as const
+
+export type ReportTeamMemberOrderByRelevanceFieldEnum = (typeof ReportTeamMemberOrderByRelevanceFieldEnum)[keyof typeof ReportTeamMemberOrderByRelevanceFieldEnum]
+
+
+export const ReportTeamJoinRequestOrderByRelevanceFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  message: 'message',
+  decidedById: 'decidedById'
+} as const
+
+export type ReportTeamJoinRequestOrderByRelevanceFieldEnum = (typeof ReportTeamJoinRequestOrderByRelevanceFieldEnum)[keyof typeof ReportTeamJoinRequestOrderByRelevanceFieldEnum]
 

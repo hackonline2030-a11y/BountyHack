@@ -1,24 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PdfController } from './pdf.controller';
-import { PreviewCvHtmlQuery } from '../application/queries/preview-cv-html.query';
-import { GenerateCvPdfCommand } from '../application/commands/generate-cv-pdf.command';
+import { PreviewReportHtmlQuery } from '../application/queries/preview-report-html.query';
+import { GenerateReportPdfCommand } from '../application/commands/generate-report-pdf.command';
 
 describe('PdfController', () => {
   let controller: PdfController;
-  const previewQueryMock = { execute: jest.fn() };
-  const generateCommandMock = { execute: jest.fn() };
+  const previewReportQueryMock = { execute: jest.fn() };
+  const generateReportCommandMock = { execute: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PdfController],
       providers: [
         {
-          provide: PreviewCvHtmlQuery,
-          useValue: previewQueryMock,
+          provide: PreviewReportHtmlQuery,
+          useValue: previewReportQueryMock,
         },
         {
-          provide: GenerateCvPdfCommand,
-          useValue: generateCommandMock,
+          provide: GenerateReportPdfCommand,
+          useValue: generateReportCommandMock,
         },
       ],
     }).compile();
@@ -31,25 +31,25 @@ describe('PdfController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('returns preview html from use case', async () => {
-    previewQueryMock.execute.mockResolvedValue('<html>preview</html>');
+  it('returns report preview html from use case', async () => {
+    previewReportQueryMock.execute.mockResolvedValue('<html>report preview</html>');
 
-    const result = await controller.previewHtml();
+    const result = await controller.previewReportHtml();
 
-    expect(previewQueryMock.execute).toHaveBeenCalledWith({});
-    expect(result).toBe('<html>preview</html>');
+    expect(previewReportQueryMock.execute).toHaveBeenCalledWith({});
+    expect(result).toBe('<html>report preview</html>');
   });
 
-  it('returns generated pdf url from use case', async () => {
-    generateCommandMock.execute.mockResolvedValue({
-      url: '/pdfs/cv-red-squared-1.pdf',
+  it('returns generated report pdf url from use case', async () => {
+    generateReportCommandMock.execute.mockResolvedValue({
+      url: '/pdfs/report-final-1.pdf',
     });
 
-    const result = await controller.exportPDF();
+    const result = await controller.exportReportPDF();
 
-    expect(generateCommandMock.execute).toHaveBeenCalledWith({});
+    expect(generateReportCommandMock.execute).toHaveBeenCalledWith({});
     expect(result).toEqual({
-      url: '/pdfs/cv-red-squared-1.pdf',
+      url: '/pdfs/report-final-1.pdf',
     });
   });
 });

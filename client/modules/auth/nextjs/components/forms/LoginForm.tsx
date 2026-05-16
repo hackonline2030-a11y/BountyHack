@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useT } from "next-i18next/client";
 import { localePrefixFromPathname } from "@/lib/locale-path";
+import { AppRoleCode } from "@/lib/app-role-code";
 import {
   messageFromNestBody,
   postAuthLogin,
@@ -13,8 +14,32 @@ import {
 const inputBase =
   "w-full bg-white placeholder:text-gray-500 text-gray-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow";
 
+type PostLoginTarget =
+  | "welcome-admin"
+  | "welcome-hunter"
+  | "welcome-quality-checker"
+  | "welcome-mentor"
+  | "welcome-coordinator";
+
+/**
+ * Maps the `roleCode` returned by `POST /api/session` to a dashboard slug.
+ * The BFF already rejected any role outside the allow-list (see
+ * `APP_LOGIN_ALLOWED_ROLES`) before setting the cookie, so this only needs
+ * to fan out the allowed roles. The `null` branch is defensive — it fires
+ * only if a future role is added to the BFF allow-list before this mapping
+ * is updated.
+ */
+function dashboardSlugForRole(roleCode: unknown): PostLoginTarget | null {
+  if (roleCode === AppRoleCode.SUPER_ADMIN) return "welcome-admin";
+  if (roleCode === AppRoleCode.HUNTER) return "welcome-hunter";
+  if (roleCode === AppRoleCode.QUALITY_CHECKER) return "welcome-quality-checker";
+  if (roleCode === AppRoleCode.MENTOR) return "welcome-mentor";
+  if (roleCode === AppRoleCode.COORDINATOR) return "welcome-coordinator";
+  return null;
+}
+
 export function LoginForm() {
-  const { t } = useT("connexion");
+  const { t } = useT(["connexion", "common"]);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -83,6 +108,18 @@ export function LoginForm() {
         credentials: "same-origin",
         body: JSON.stringify({ token, lng }),
       });
+      const sessionData: unknown = await sessionRes.json().catch(() => null);
+
+      /**
+       * The BFF refuses to set the cookie for roles outside the allow-list,
+       * so no session exists on the browser when we hit this branch — nothing
+       * to revoke client-side.
+       */
+      if (sessionRes.status === 403) {
+        setStatus("error");
+        setMessage(t("loginForm.errorRoleNotAllowed"));
+        return;
+      }
 
       if (!sessionRes.ok) {
         setStatus("error");
@@ -90,11 +127,22 @@ export function LoginForm() {
         return;
       }
 
+      const roleCode =
+        sessionData && typeof sessionData === "object"
+          ? (sessionData as Record<string, unknown>).roleCode
+          : null;
+      const target = dashboardSlugForRole(roleCode);
+      if (target === null) {
+        setStatus("error");
+        setMessage(t("loginForm.errorRoleNotAllowed"));
+        return;
+      }
+
       setStatus("success");
-      router.replace(`${prefix}/welcome-dashboard`);
+      router.replace(`${prefix}/${target}`);
     } catch {
       setStatus("error");
-      setMessage(t("errors.network"));
+      setMessage(t("common:errors.network"));
     }
   }
 

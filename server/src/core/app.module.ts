@@ -15,11 +15,17 @@ import { UserModule } from '../users/user.module';
 import { DocumentRenderingModule } from '../document-rendering/pdf.module';
 import { CommonModule } from './common.module';
 import { AppController } from './app.controller';
+import { DATABASE_MODES, isPrismaSqlMode } from '../shared/database-mode';
 import { variables } from '../shared/variables.config';
 import { PrismaModule } from './infrastructure/database/prisma/prisma.module';
+import { ReportDraftModule } from '../report-draft/report-draft.module';
+import { ReportTeamModule } from '../report-team/report-team.module';
 
-const prismaImports =
-  variables.database === 'POSTGRESQL_PRISMA' ? [PrismaModule] : [];
+const prismaImports = isPrismaSqlMode() ? [PrismaModule] : [];
+
+const reportDraftImports = isPrismaSqlMode() ? [ReportDraftModule] : [];
+
+const reportTeamImports = isPrismaSqlMode() ? [ReportTeamModule] : [];
 
 const baseImports = [
   PingModule,
@@ -27,10 +33,12 @@ const baseImports = [
   UserModule,
   DocumentRenderingModule,
   CommonModule,
+  ...reportDraftImports,
+  ...reportTeamImports,
 ];
 
 const mongooseRoot =
-  variables.database === 'MONGODB'
+  variables.database === DATABASE_MODES.MONGODB
     ? [
         MongooseModule.forRootAsync({
           imports: [ConfigModule],

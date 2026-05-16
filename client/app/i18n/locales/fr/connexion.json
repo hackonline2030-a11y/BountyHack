@@ -3,13 +3,6 @@
     "metaTitle": "Connexion",
     "heading": "Connectez-vous à votre compte"
   },
-  "registerPage": {
-    "metaTitle": "Inscription",
-    "heading": "Créez votre compte"
-  },
-  "errors": {
-    "network": "Erreur réseau. Veuillez réessayer."
-  },
   "loginForm": {
     "emailLabel": "E-mail",
     "passwordLabel": "Mot de passe",
@@ -26,30 +19,7 @@
     "forgotPasswordLink": "Mot de passe oublié ?",
     "afterPasswordReset": "Votre mot de passe a été mis à jour. Vous pouvez vous connecter avec le nouveau mot de passe.",
     "errorLogin": "Échec de la connexion",
+    "errorRoleNotAllowed": "Votre rôle ne permet pas l'accès à l'application pour le moment. Veuillez contacter un administrateur.",
     "successLogin": "Connexion réussie"
-  },
-  "registerForm": {
-    "roleLabel": "Rôle attribué",
-    "roles": {
-      "USER": "Utilisateur (défaut)",
-      "SUPER_ADMIN": "Super administrateur",
-      "HUNTER": "Chercheur (junior / bug bounty)",
-      "MENTOR": "Mentor",
-      "QUALITY_CHECKER": "Contrôle qualité (rapports & processus vuln.)",
-      "COORDINATOR": "Coordinateur",
-      "QUALITY_CONTENT": "Qualité du contenu pédagogique"
-    },
-    "usernameLabel": "Nom d’utilisateur",
-    "emailLabel": "E-mail",
-    "passwordLabel": "Mot de passe",
-    "usernamePlaceholder": "votre_pseudo",
-    "emailPlaceholder": "vous@exemple.com",
-    "passwordPlaceholder": "••••••••",
-    "submit": "Créer un compte",
-    "submitting": "Création du compte…",
-    "haveAccount": "Déjà un compte ?",
-    "loginLink": "Se connecter",
-    "errorRegister": "Échec de l'inscription",
-    "successRegister": "Compte créé avec succès"
   }
 }

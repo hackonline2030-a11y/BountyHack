@@ -224,9 +224,9 @@ export class TotpEnrollmentService {
   }
 
   private assertPrisma(): void {
-    if (variables.database !== 'POSTGRESQL_PRISMA') {
+    if (variables.database !== 'POSTGRESQL_PRISMA' && variables.database !== 'MYSQL_PRISMA') {
       throw new NotImplementedException(
-        'TOTP enrollment requires DATABASE_NAME=POSTGRESQL_PRISMA',
+        'TOTP enrollment requires DATABASE_NAME=POSTGRESQL_PRISMA or MYSQL_PRISMA',
       );
     }
   }

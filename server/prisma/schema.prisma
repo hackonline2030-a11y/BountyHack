@@ -33,6 +33,11 @@ model User {
   refreshTokens RefreshToken[]
   passwordResetTokens PasswordResetToken[]
   role       Role?   @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  reportDrafts ReportDraft[]
+  reports      Report[]
+  reportTeamMembers ReportTeamMember[]
+  reportTeamJoinRequests ReportTeamJoinRequest[] @relation("JoinRequestUser")
+  reportTeamJoinRequestsDecided ReportTeamJoinRequest[] @relation("JoinRequestDecider")
 
   @@index([roleId])
   @@map("users")
@@ -140,4 +145,285 @@ model TwoFactorTotp {
   twoFactor TwoFactor @relation(fields: [twoFactorId], references: [id], onDelete: Cascade)
 
   @@map("two_factor_totp")
+}
+
+// ─── Report draft workflow (MCD v1 — hunter↔QC first; mentor / super-admin later) ───
+
+enum DraftStep {
+  META
+  DESCRIPTION
+  COLLECTION
+  EXPLOITATION
+  PROOF_OF_CONCEPT
+  RISKS
+  REMEDIATION
+  FINAL
+}
+
+enum StepStatus {
+  IN_PROGRESS
+  AWAITING_REVIEW
+  NEEDS_REVISION
+  APPROVED
+}
+
+enum ReportDraftAggregateStatus {
+  DRAFT
+  UNDER_REVIEW
+  READY_TO_PROGRAM
+  SUBMITTED_TO_PROGRAM
+  GIVEN_UP
+  REJECTED
+}
+
+enum ReviewerRole {
+  HUNTER
+  MENTOR
+  QUALITY_CHECKER
+  SUPER_ADMIN
+}
+
+enum SubmissionKind {
+  HUNTER_TO_REVIEWER
+  HUNTER_TO_MENTOR
+  MENTOR_TO_QC
+  QC_TO_MENTOR
+  QC_TO_SUPER_ADMIN
+}
+
+enum SubmissionDecision {
+  PENDING
+  APPROVE
+  REQUEST_CHANGES
+  /// Mentor advisory OK — does not set step to APPROVED (only QC APPROVE does).
+  ENDORSE
+}
+
+enum ReportStatus {
+  PENDING
+  PUBLISHED
+}
+
+/// Hunter workspace: 8 wizard steps until promotion to a pending Report.
+model ReportDraft {
+  id              String                     @id @default(uuid())
+  hunterId        String                     @map("hunter_id")
+  version         Int                        @default(1)
+  aggregateStatus ReportDraftAggregateStatus @default(DRAFT) @map("aggregate_status")
+  /// Set when super-admin promotes draft → pending report (draft still exists).
+  pendingReportId String?                    @unique @map("pending_report_id")
+  createdAt       DateTime                   @default(now()) @map("created_at")
+  updatedAt       DateTime                   @updatedAt @map("updated_at")
+
+  hunter        User              @relation(fields: [hunterId], references: [id], onDelete: Cascade)
+  pendingReport Report?           @relation("DraftPendingReport", fields: [pendingReportId], references: [id], onDelete: SetNull)
+  steps         ReportDraftStep[]
+  submissions   Submission[]
+  reportTeam    ReportTeam?
+
+  @@index([hunterId])
+  @@index([aggregateStatus])
+  @@map("report_drafts")
+}
+
+/// One row per wizard step (8 per draft). Submissions attach here, not on the draft root.
+model ReportDraftStep {
+  id                   String        @id @default(uuid())
+  reportDraftId        String        @map("report_draft_id")
+  step                 DraftStep
+  payload              Json          @default("{}")
+  status               StepStatus    @default(IN_PROGRESS)
+  currentRound         Int           @default(0) @map("current_round")
+  assignedReviewerRole ReviewerRole? @map("assigned_reviewer_role")
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+
+  reportDraft ReportDraft             @relation(fields: [reportDraftId], references: [id], onDelete: Cascade)
+  attachments ReportDraftAttachment[]
+  submissions Submission[]
+
+  @@unique([reportDraftId, step])
+  @@index([reportDraftId])
+  @@map("report_draft_steps")
+}
+
+/// Live binary assets on a step (upload wired later).
+model ReportDraftAttachment {
+  id                String   @id @default(uuid())
+  reportDraftStepId String   @map("report_draft_step_id")
+  filename          String
+  mimeType          String   @map("mime_type")
+  sizeBytes         Int      @map("size_bytes")
+  storageKey        String   @map("storage_key")
+  thumbnailUrl      String?  @map("thumbnail_url")
+  uploadedBy        String   @map("uploaded_by")
+  uploadedAt        DateTime @default(now()) @map("uploaded_at")
+
+  reportDraftStep ReportDraftStep @relation(fields: [reportDraftStepId], references: [id], onDelete: Cascade)
+
+  @@index([reportDraftStepId])
+  @@map("report_draft_attachments")
+}
+
+/// Immutable review round; parent is the step. Denormalized draft/step for list queries.
+model Submission {
+  id                String             @id @default(uuid())
+  reportDraftStepId String             @map("report_draft_step_id")
+  reportDraftId     String             @map("report_draft_id")
+  step              DraftStep
+  round             Int
+  submissionKind    SubmissionKind     @default(HUNTER_TO_REVIEWER) @map("submission_kind")
+  payload           Json
+  submittedAt       DateTime           @default(now()) @map("submitted_at")
+  submittedBy       String             @map("submitted_by")
+  reviewerRole      ReviewerRole       @map("reviewer_role")
+  decision          SubmissionDecision @default(PENDING)
+  decidedAt         DateTime?          @map("decided_at")
+  decidedBy         String?            @map("decided_by")
+
+  reportDraftStep     ReportDraftStep                @relation(fields: [reportDraftStepId], references: [id], onDelete: Cascade)
+  reportDraft         ReportDraft                    @relation(fields: [reportDraftId], references: [id], onDelete: Cascade)
+  reviewerComments    ReviewerComment[]
+  attachmentSnapshots SubmissionAttachmentSnapshot[]
+  contentSnapshots    SubmissionContentSnapshot[]
+
+  @@unique([reportDraftStepId, round, reviewerRole, submissionKind])
+  @@index([reportDraftId])
+  @@index([reviewerRole, decision])
+  @@map("submissions")
+}
+
+model ReviewerComment {
+  id           String       @id @default(uuid())
+  submissionId String       @map("submission_id")
+  authorId     String       @map("author_id")
+  authorRole   ReviewerRole @map("author_role")
+  anchor       Json?
+  body         String
+  createdAt    DateTime     @default(now()) @map("created_at")
+  resolvedAt   DateTime?    @map("resolved_at")
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@map("reviewer_comments")
+}
+
+/// Frozen files at submit time (domain: attachmentsSnapshot).
+model SubmissionAttachmentSnapshot {
+  id           String   @id @default(uuid())
+  submissionId String   @map("submission_id")
+  filename     String
+  mimeType     String   @map("mime_type")
+  sizeBytes    Int      @map("size_bytes")
+  storageKey   String   @map("storage_key")
+  thumbnailUrl String?  @map("thumbnail_url")
+  uploadedAt   DateTime @map("uploaded_at")
+  uploadedBy   String   @map("uploaded_by")
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@map("submission_attachment_snapshots")
+}
+
+/// Optional payload history inside one submission (reserved for later).
+model SubmissionContentSnapshot {
+  id           String   @id @default(uuid())
+  submissionId String   @map("submission_id")
+  payload      Json
+  capturedAt   DateTime @default(now()) @map("captured_at")
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@map("submission_content_snapshots")
+}
+
+/// Promoted artefact after full step validation; super-admin pending → published.
+model Report {
+  id              String       @id @default(uuid())
+  hunterId        String       @map("hunter_id")
+  sourceDraftId   String       @unique @map("source_draft_id")
+  status          ReportStatus @default(PENDING)
+  frozenContent   Json?        @map("frozen_content")
+  contentSyncedAt DateTime?    @map("content_synced_at")
+  promotedBy      String?      @map("promoted_by")
+  publishedBy     String?      @map("published_by")
+  publishedAt     DateTime?    @map("published_at")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  hunter          User         @relation(fields: [hunterId], references: [id], onDelete: Cascade)
+  pendingForDraft ReportDraft? @relation("DraftPendingReport")
+
+  @@index([hunterId])
+  @@index([status])
+  @@map("reports")
+}
+
+/// Workflow role on a report team (distinct from global `Role`).
+enum ReportTeamMemberRole {
+  HUNTER
+  QUALITY_CHECKER
+  MENTOR
+}
+
+enum ReportTeamJoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// Squad for one report draft (not org-wide teams).
+model ReportTeam {
+  id            String   @id @default(uuid())
+  reportDraftId String   @unique @map("report_draft_id")
+  label         String
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  reportDraft  ReportDraft             @relation(fields: [reportDraftId], references: [id], onDelete: Cascade)
+  members      ReportTeamMember[]
+  joinRequests ReportTeamJoinRequest[]
+
+  @@index([reportDraftId])
+  @@map("report_draft_teams")
+}
+
+model ReportTeamMember {
+  id       String               @id @default(uuid())
+  teamId   String               @map("team_id")
+  userId   String               @map("user_id")
+  role     ReportTeamMemberRole
+  joinedAt DateTime             @default(now()) @map("joined_at")
+
+  team ReportTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+  @@map("report_team_members")
+}
+
+/// User asks coordinator to join a team (or general pool when teamId is null).
+model ReportTeamJoinRequest {
+  id            String                      @id @default(uuid())
+  teamId        String?                     @map("team_id")
+  userId        String                      @map("user_id")
+  requestedRole ReportTeamMemberRole        @map("requested_role")
+  message       String?
+  status        ReportTeamJoinRequestStatus @default(PENDING)
+  requestedAt   DateTime                    @default(now()) @map("requested_at")
+  decidedAt     DateTime?                   @map("decided_at")
+  decidedById   String?                     @map("decided_by_id")
+
+  team      ReportTeam? @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User       @relation("JoinRequestUser", fields: [userId], references: [id], onDelete: Cascade)
+  decidedBy User?      @relation("JoinRequestDecider", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  @@index([teamId, status])
+  @@index([userId, status])
+  @@map("report_team_join_requests")
 }

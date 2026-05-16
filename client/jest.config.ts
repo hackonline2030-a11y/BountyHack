@@ -14,6 +14,9 @@ const config: Config = {
   moduleNameMapper: {
     "^@flagapp/(.*)$": "<rootDir>/$1",
     "^@modules/(.*)$": "<rootDir>/modules/$1",
+    "^@store/(.*)$": "<rootDir>/modules/store/$1",
+    "^@components/(.*)$": "<rootDir>/app/_components/$1",
+    "^@presenters/(.*)$": "<rootDir>/app/presenters/$1",
     "^@/(.*)$": "<rootDir>/$1",
   },
   coveragePathIgnorePatterns: [

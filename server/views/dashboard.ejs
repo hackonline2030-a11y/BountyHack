@@ -10,9 +10,9 @@
 <% if (typeof mode !== 'undefined' && mode === 'pick') { %>
 <main class="dashboard">
     <section class="dashboard-header">
-        <nav class="dashboard-breadcrumb" aria-label="Navigation CV">
+        <nav class="dashboard-breadcrumb" aria-label="Navigation rapport">
             <% if (typeof dashboardBaseUrl !== 'undefined') { %>
-                <a href="<%= dashboardBaseUrl %>" class="dashboard-breadcrumb-link">Dashboard CV</a>
+                <a href="<%= dashboardBaseUrl %>" class="dashboard-breadcrumb-link">Dashboard rapport</a>
             <% } %>
             <% if (typeof currentStyle !== 'undefined' && currentStyle) { %>
                 <span class="dashboard-breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
@@ -36,9 +36,9 @@
 <% } else { %>
 <main class="dashboard">
     <section class="dashboard-header">
-        <nav class="dashboard-breadcrumb" aria-label="Navigation CV">
+        <nav class="dashboard-breadcrumb" aria-label="Navigation rapport">
             <% if (typeof dashboardBaseUrl !== 'undefined') { %>
-                <a href="<%= dashboardBaseUrl %>" class="dashboard-breadcrumb-link">Dashboard CV</a>
+                <a href="<%= dashboardBaseUrl %>" class="dashboard-breadcrumb-link">Dashboard rapport</a>
             <% } %>
             <% if (typeof currentStyle !== 'undefined' && currentStyle) { %>
                 <span class="dashboard-breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
@@ -73,7 +73,7 @@
                 id="previewFrame"
                 class="dashboard-preview-frame"
                 src="<%= previewUrl %>"
-                title="Aperçu CV"
+                title="Aperçu rapport"
                 loading="lazy"
                 scrolling="no"
         ></iframe>
