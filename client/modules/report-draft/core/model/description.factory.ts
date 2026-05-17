@@ -1,4 +1,5 @@
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
+import { normalizeSectionBlocs } from "@modules/report-draft/core/model/section-bloc";
 
 /**
  * Default-builder for `DescriptionFields`. Every metric starts empty (the
@@ -11,6 +12,7 @@ export class DescriptionFactory {
   static create(
     data?: Partial<ReportDraftDomainModel.DescriptionFields>,
   ): ReportDraftDomainModel.DescriptionFields {
+    const { sectionBlocs: rawBlocs, ...rest } = data ?? {};
     return {
       attackVector: "",
       attackComplexity: "",
@@ -20,7 +22,16 @@ export class DescriptionFactory {
       confidentiality: "",
       integrity: "",
       availability: "",
-      ...data,
+      sectionBlocs: rawBlocs ? normalizeSectionBlocs(rawBlocs) : [],
+      ...rest,
     };
   }
+}
+
+/** Normalizes persisted or API description payload (CVSS + section blocs). */
+export function normalizeDescriptionPayload(raw: unknown): ReportDraftDomainModel.DescriptionFields {
+  if (!raw || typeof raw !== "object") {
+    return DescriptionFactory.create();
+  }
+  return DescriptionFactory.create(raw as Partial<ReportDraftDomainModel.DescriptionFields>);
 }

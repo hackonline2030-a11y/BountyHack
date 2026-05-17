@@ -5,6 +5,7 @@ import type { CvssMetricOption } from "@modules/report-draft/core/catalog/cvss-m
 import type { CvssSeverity } from "@modules/report-draft/core/cvss/cvss-3.1";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { ReportDraftGlobalSubmitButton } from "@modules/report-draft/react/components/ReportDraftGlobalSubmitButton";
+import { SectionBlocRepeater } from "@modules/report-draft/react/components/section-bloc/SectionBlocRepeater";
 import { useDescriptionSection } from "@modules/report-draft/react/sections/description/use-description-section";
 
 const DESCRIPTION_STEP = ReportDraftDomainModel.ReportDraftStep.DESCRIPTION;
@@ -151,6 +152,14 @@ export const DescriptionSection: FC = () => {
         options={catalogs.ciaImpact}
         onChange={(v) => setField("availability", v)}
       />
+
+      <div className="border-t border-form-border pt-4" aria-label="Sections libres">
+        <SectionBlocRepeater
+          blocs={draft.sectionBlocs}
+          editable={editable && !transitionBusy}
+          onChange={(sectionBlocs) => setField("sectionBlocs", sectionBlocs)}
+        />
+      </div>
 
       <div className="flex flex-col gap-2 border-t border-form-border pt-4">
         <p className="text-sm text-form-text-muted">

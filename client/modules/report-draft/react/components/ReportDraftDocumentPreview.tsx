@@ -2,7 +2,8 @@
 
 import { Fragment, type FC } from "react";
 import { ReportDraftDomainModel as M } from "@modules/report-draft/core/model/report-draft.domain-model";
-import { DescriptionFactory } from "@modules/report-draft/core/model/description.factory";
+import { normalizeDescriptionPayload } from "@modules/report-draft/core/model/description.factory";
+import { sectionBlocsHaveSubmittedContent } from "@modules/report-draft/core/model/section-bloc";
 import { normalizeLongFormPayload } from "@modules/report-draft/core/model/long-form-steps.factory";
 import {
   cvssBaseScore,
@@ -25,36 +26,40 @@ import {
 } from "@modules/report-draft/react/components/report-draft-preview-layout";
 import { SectionBlocDisplay } from "@modules/report-draft/react/components/section-bloc/SectionBlocDisplay";
 
-function asDescriptionFields(payload: unknown): M.DescriptionFields {
-  return DescriptionFactory.create(
-    payload && typeof payload === "object"
-      ? (payload as Partial<M.DescriptionFields>)
-      : undefined,
-  );
-}
-
 const PdfChapterHeading: FC<{ title: string }> = ({ title }) => (
   <h2 className="mb-4 text-lg font-bold text-[#c1121f]">{title} :</h2>
 );
 
 const DescriptionChapterBody: FC<{ payload: unknown }> = ({ payload }) => {
-  const desc = asDescriptionFields(payload);
+  const desc = normalizeDescriptionPayload(payload);
   const score = cvssBaseScore(desc);
   const severity = cvssSeverity(score);
   const vector = cvssVector(desc);
+  const hasBlocs = sectionBlocsHaveSubmittedContent(desc.sectionBlocs);
 
-  if (score == null) {
+  if (score == null && !hasBlocs) {
     return <p className="text-sm text-slate-500">—</p>;
   }
 
   return (
-    <div className="space-y-3 text-sm text-slate-800">
-      <p>
-        Sévérité estimée : <strong>{severity ?? "—"}</strong>
-        {score != null ? ` (score CVSS ${score} / 10)` : ""}.
-      </p>
-      {vector ? (
-        <p className="font-mono text-xs text-slate-600">{vector}</p>
+    <div className="space-y-4 text-sm text-slate-800">
+      {score != null ? (
+        <div className="space-y-3">
+          <p>
+            Sévérité estimée : <strong>{severity ?? "—"}</strong>
+            {` (score CVSS ${score} / 10)`}.
+          </p>
+          {vector ? (
+            <p className="font-mono text-xs text-slate-600">{vector}</p>
+          ) : null}
+        </div>
+      ) : null}
+      {hasBlocs ? (
+        <div className="flex flex-col">
+          {desc.sectionBlocs.map((bloc, index) => (
+            <SectionBlocDisplay key={bloc.id} bloc={bloc} index={index} documentMode />
+          ))}
+        </div>
       ) : null}
     </div>
   );
