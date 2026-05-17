@@ -13,6 +13,8 @@ export interface IReportTeamRepository {
   findJoinableForUserId(userId: string): Promise<ReportTeamWire[]>;
   isMemberOfDraft(userId: string, reportDraftId: string): Promise<boolean>;
   findDraftIdsForMember(userId: string): Promise<string[]>;
+  /** Draft exists and has no team — used before attaching a new squad. */
+  findOrphanDraftOwnerId(reportDraftId: string): Promise<string | null>;
   create(input: CreateReportTeamInput): Promise<ReportTeamWire>;
   update(id: string, input: UpdateReportTeamInput): Promise<ReportTeamWire>;
   delete(id: string): Promise<void>;

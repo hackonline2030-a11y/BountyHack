@@ -4,6 +4,18 @@
     "heading": "Welcome",
     "headingWithUsername": "Welcome, {{username}}",
     "subheading": "A quick overview of the reports you need to review and your conversations.",
+    "mission": {
+      "title": "Report quality lead",
+      "intro": "This role ensures a consistent, professional quality level for vulnerabilities submitted to programs.",
+      "responsibilitiesTitle": "Main responsibilities",
+      "items": {
+        "reproducibility": "Verifying vulnerability reproducibility",
+        "scope": "Checking compliance with program scope",
+        "duplicates": "Detecting duplicates and false positives",
+        "harmonization": "Harmonizing reports (structure, vocabulary, evidence)",
+        "finalValidation": "Preparing reports for final validation"
+      }
+    },
     "nav": {
       "label": "Dashboard navigation",
       "emails": "Emails",

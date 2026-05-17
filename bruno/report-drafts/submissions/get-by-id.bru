@@ -1,0 +1,22 @@
+meta {
+  name: Get submission by id (snapshot étape)
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/report-drafts/submissions/{{submissionId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  # Snapshot soumis pour une étape
+
+  - `step` : 0=META … 7=FINAL
+  - `payload` : copie figée au moment de la soumission (utilisée côté QC pour l'aperçu étape en revue).
+}

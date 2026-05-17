@@ -5,6 +5,7 @@ import type {
   ReviewerRoleWire,
   SubmissionWire,
 } from '../../models/report-draft-api.types';
+import type { IReportDraftRepository } from '../../ports/report-draft-repository.interface';
 import type { ISubmissionRepository } from '../../ports/submission-repository.interface';
 import type { IReportTeamRepository } from '../../../report-team/ports/report-team-repository.interface';
 import { ReportDraftAccessPolicy } from '../report-draft-access.policy';
@@ -19,6 +20,7 @@ export type ListSubmissionsInput =
 export class ListSubmissionsQuery {
   constructor(
     private readonly repository: ISubmissionRepository,
+    private readonly reportDraftRepository: IReportDraftRepository,
     private readonly access: ReportDraftAccessPolicy,
     private readonly reportTeamRepository: IReportTeamRepository,
   ) {}
@@ -28,9 +30,14 @@ export class ListSubmissionsQuery {
     input: ListSubmissionsInput,
   ): Promise<SubmissionWire[]> {
     switch (input.kind) {
-      case 'draftId':
-        await this.access.assertDraftOwnedByHunter(identity, input.draftId);
+      case 'draftId': {
+        const draft = await this.reportDraftRepository.findById(input.draftId);
+        if (draft === null) {
+          return [];
+        }
+        await this.access.assertCanReadDraft(identity, draft);
         return this.repository.findByDraftId(input.draftId);
+      }
       case 'pendingForReviewer':
         this.access.assertCanQueryReviewerRole(identity, input.reviewerRole);
         return this.repository.findPendingForReviewerRole(input.reviewerRole);

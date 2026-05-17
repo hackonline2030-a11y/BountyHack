@@ -662,18 +662,6 @@ export type EnumSubmissionKindFieldUpdateOperationsInput = {
   set?: $Enums.SubmissionKind
 }
 
-export type EnumReviewerRoleFieldUpdateOperationsInput = {
-  set?: $Enums.ReviewerRole
-}
-
-export type EnumSubmissionDecisionFieldUpdateOperationsInput = {
-  set?: $Enums.SubmissionDecision
-}
-
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type SubmissionCreateNestedOneWithoutReviewerCommentsInput = {
   create?: Prisma.XOR<Prisma.SubmissionCreateWithoutReviewerCommentsInput, Prisma.SubmissionUncheckedCreateWithoutReviewerCommentsInput>
   connectOrCreate?: Prisma.SubmissionCreateOrConnectWithoutReviewerCommentsInput

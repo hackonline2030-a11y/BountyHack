@@ -15,6 +15,7 @@ function reportDraftsNestUrl(relativePath: string): string {
   }
   if (
     path.startsWith("submissions") ||
+    path.startsWith("global-submissions") ||
     path.startsWith("comments") ||
     path.startsWith("report-teams")
   ) {

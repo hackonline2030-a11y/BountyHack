@@ -56,6 +56,36 @@
       "noTeamsAvailable": "No teams available yet. The coordinator must create a team for a report draft first.",
       "errorGeneric": "Could not send the request."
     },
+    "orphanDrafts": {
+      "title": "Drafts without a team",
+      "subheading": "These report drafts are not linked to any report team (team deleted or never created). The hunter remains the owner. Use the assignment requests above to form a new team on request.",
+      "empty": "No orphan drafts at the moment.",
+      "table": {
+        "reportDraftId": "Draft ID",
+        "report": "Report",
+        "hunter": "Hunter (owner)",
+        "status": "Overall status",
+        "updated": "Updated",
+        "untitled": "Untitled report",
+        "actions": "Actions",
+        "attachRequests": "Attach requests"
+      },
+      "attach": {
+        "title": "Form a team on this draft",
+        "description": "The owning hunter stays on the team. Check pending enrollment requests (mentor or quality checker) to attach to this draft.",
+        "cancel": "Cancel",
+        "ownerHunter": "Draft owner (hunter)",
+        "labelField": "Team label",
+        "labelPlaceholder": "e.g. Report #1042 — comments module XSS",
+        "applicantsTitle": "Pending enrollment requests",
+        "applicantsEmpty": "No pending mentor or quality checker enrollment requests.",
+        "submit": "Create team on this draft",
+        "submitting": "Creating…",
+        "success": "Team created on the orphan draft.",
+        "errorLabel": "Team label is required.",
+        "errorApplicants": "Select at least one pending request."
+      }
+    },
     "admin": {
       "metaTitle": "Report team management",
       "heading": "Report teams — administration",
@@ -64,8 +94,10 @@
         "reportDraftId": "Report draft ID",
         "label": "Label",
         "validity": "Validity",
+        "reportStatus": "Report status",
         "members": "Members",
-        "actions": "Actions"
+        "actions": "Actions",
+        "openFinalValidation": "Final report validation"
       },
       "edit": "Edit",
       "delete": "Delete",

@@ -46,12 +46,12 @@ export const ReportDraftWizardPage: FC = () => {
   const stepIndex = step + 1;
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-4 px-1 py-2">
+    <div className="flex w-full max-w-lg flex-col gap-4 py-2">
       <header className="flex flex-col gap-1">
         <p className="text-sm text-form-text-muted">
-          Étape {stepIndex} / {TOTAL_STEPS} — « Enregistrer le brouillon » sauvegarde sans revue. «
-          Soumettre pour revue » envoie au reviewer. « Suivant » n’est actif qu’après validation
-          (voir pastille sous les onglets et l’onglet Commentaires).
+          Étape {stepIndex} / {TOTAL_STEPS} — « Soumettre pour revue » enregistre et envoie au
+          reviewer. « Suivant » n’est actif qu’après validation par le quality checker (pastille et
+          onglet Commentaires).
         </p>
         <h1 className="text-2xl font-semibold text-form-text">{label}</h1>
       </header>

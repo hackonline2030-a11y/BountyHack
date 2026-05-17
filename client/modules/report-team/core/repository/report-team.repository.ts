@@ -1,3 +1,4 @@
+import type { OrphanReportDraft } from "@modules/report-team/model/orphan-report-draft.types";
 import type {
   ReportTeam,
   ReportTeamJoinRequest,
@@ -8,11 +9,13 @@ export interface IReportTeamRepository {
   findMyTeams(): Promise<ReportTeam[]>;
   findJoinableTeams(): Promise<ReportTeam[]>;
   findAllTeams(): Promise<ReportTeam[]>;
+  findOrphanDrafts(): Promise<OrphanReportDraft[]>;
   findById(id: string): Promise<ReportTeam | null>;
   findByReportDraftId(reportDraftId: string): Promise<ReportTeam | null>;
   createTeam(input: {
     label: string;
     members: Array<{ userId: string; role: ReportTeamMemberRole }>;
+    reportDraftId?: string;
   }): Promise<ReportTeam>;
   updateTeam(id: string, input: { label: string }): Promise<ReportTeam>;
   deleteTeam(id: string): Promise<void>;

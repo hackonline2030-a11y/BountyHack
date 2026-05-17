@@ -3,6 +3,7 @@ import { SystemIdProvider } from "@modules/core/provider/system.id-provider";
 import { HttpReportDraftRepository } from "@modules/report-draft/core/repository-infra/http.report-draft.repository-infra";
 import { HttpReviewerCommentRepository } from "@modules/report-draft/core/repository-infra/http.reviewer-comment.repository-infra";
 import { HttpSubmissionRepository } from "@modules/report-draft/core/repository-infra/http.submission.repository-infra";
+import { HttpGlobalSubmissionRepository } from "@modules/report-draft/core/repository-infra/http.global-submission.repository-infra";
 import { HttpReportTeamRepository } from "@modules/report-team/core/repository-infra/http.report-team.repository-infra";
 import { Dependencies } from "@store/dependencies";
 import { AppStore, createStore } from "@store/redux/store";
@@ -32,6 +33,7 @@ export class App {
       clock: new SystemClockProvider(),
       reportDraftRepository: new HttpReportDraftRepository(),
       submissionRepository: new HttpSubmissionRepository(),
+      globalSubmissionRepository: new HttpGlobalSubmissionRepository(),
       reviewerCommentRepository: new HttpReviewerCommentRepository(),
       reportTeamRepository: new HttpReportTeamRepository(),
     };

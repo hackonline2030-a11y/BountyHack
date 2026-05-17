@@ -42,6 +42,12 @@
         "subtitle": "Supervision des équipes",
         "body": "Créez et gérez les équipes rapport (composition, coordinateur, affectations).",
         "cta": "Gérer les équipes"
+      },
+      "finalValidation": {
+        "title": "Validation finale",
+        "subtitle": "Brouillons prêts à valider",
+        "body": "Consultez tous les brouillons de rapport et validez ceux prêts à soumettre au programme.",
+        "cta": "Ouvrir la file de validation"
       }
     }
   }

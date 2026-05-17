@@ -5,8 +5,8 @@ import { Dependencies } from "@store/dependencies";
 import { AppDispatch, AppGetState } from "@store/redux/store";
 
 /**
- * Use case: hunter submits one step of a draft to the assigned reviewer
- * role. Loads the aggregate, runs `submitStepForReview` (which freezes
+ * Use case: hunter submits one step for QC validation. Loads the aggregate,
+ * runs `submitStepForReview` (which freezes
  * the current payload + attachments into a {@link ReportDraftDomainModel.Submission}
  * snapshot and flips the step to `awaiting-review`), then persists both
  * the updated draft and the new submission before mirroring the changes

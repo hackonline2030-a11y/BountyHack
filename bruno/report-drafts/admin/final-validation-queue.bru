@@ -1,0 +1,19 @@
+meta {
+  name: [ADMIN] Final validation queue
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/report-drafts/admin/final-validation-queue
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  SUPER_ADMIN JWT required. Returns all report drafts (UI filters by aggregateStatus, default ready-to-program).
+}

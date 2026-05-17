@@ -1,7 +1,10 @@
 "use client";
 
 import { type FC, useMemo } from "react";
+import { useT } from "next-i18next/client";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
+import { ReportDraftMentorEndorsementsSection } from "@modules/report-draft/react/components/ReportDraftMentorEndorsementsSection";
+import { ReportDraftGlobalCommentsSection } from "@modules/report-draft/react/components/ReportDraftGlobalCommentsSection";
 import {
   GENERAL_REVIEW_COMMENT_FIELD,
   isGeneralReviewComment,
@@ -13,6 +16,7 @@ import { useAppSelector } from "@store/redux/store";
  * Commentaires reviewer pour l'étape courante (par champ + commentaire général).
  */
 export const ReportDraftStepCommentsPanel: FC = () => {
+  const { t } = useT("myReports");
   const draftId = useAppSelector((s) => s.reportDrafts.currentDraftId);
   const step = useAppSelector((s) => s.reportDraft.step);
   const submissionsById = useAppSelector((s) => s.reportDrafts.submissionsById);
@@ -52,29 +56,42 @@ export const ReportDraftStepCommentsPanel: FC = () => {
     return <p className="text-sm text-form-text-muted">Aucun brouillon chargé.</p>;
   }
 
-  if (comments.length === 0) {
-    return (
-      <p className="text-sm text-form-text-muted">
-        Aucun commentaire pour cette étape pour l&apos;instant. Après une demande de révisions,
-        les retours du reviewer apparaîtront ici.
-      </p>
-    );
-  }
-
   return (
-    <ul className="flex flex-col gap-3">
-      {comments.map((c) => (
-        <li
-          key={c.id}
-          className="rounded-md border border-form-border bg-form-overlay p-3 text-sm text-form-text"
+    <div className="flex flex-col gap-8">
+      {draftId ? (
+        <ReportDraftGlobalCommentsSection draftId={draftId} placement="quality_checker" />
+      ) : null}
+      <ReportDraftMentorEndorsementsSection step={step} />
+
+      <section className="flex flex-col gap-3" aria-labelledby="step-review-comments-heading">
+        <h2
+          id="step-review-comments-heading"
+          className="text-sm font-semibold text-form-text"
         >
-          <p className="text-xs text-form-text-muted">
-            {commentAnchorLabel(c)} · {c.authorRole} ·{" "}
-            {new Date(c.createdAt).toLocaleString("fr-FR")}
+          {t("myReports.activity.stepCommentsTitle")}
+        </h2>
+        {comments.length === 0 ? (
+          <p className="text-sm text-form-text-muted">
+            Aucun commentaire pour cette étape pour l&apos;instant. Après une demande de révisions,
+            les retours du reviewer apparaîtront ici.
           </p>
-          <p className="mt-2 whitespace-pre-wrap">{c.body}</p>
-        </li>
-      ))}
-    </ul>
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {comments.map((c) => (
+              <li
+                key={c.id}
+                className="rounded-md border border-form-border bg-form-overlay p-3 text-sm text-form-text"
+              >
+                <p className="text-xs text-form-text-muted">
+                  {commentAnchorLabel(c)} · {c.authorRole} ·{" "}
+                  {new Date(c.createdAt).toLocaleString("fr-FR")}
+                </p>
+                <p className="mt-2 whitespace-pre-wrap">{c.body}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
   );
 };

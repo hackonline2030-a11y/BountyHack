@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { AppRoleCode } from "@/lib/app-role-code";
 import { verifySessionForRoles } from "@/lib/dal/session";
 import { isSupportedLanguage } from "@modules/auth/core/model/locale.policy";
@@ -24,7 +25,9 @@ export default async function QcSubmissionsListPage({ params }: PageProps) {
   return (
     <main className="flex w-full min-h-[calc(100vh-(var(--header-height)+var(--footer-height)))] flex-col">
       <Section fluid classNames="flex min-h-0 flex-1 flex-col bg-pattern py-6">
-        <QualityCheckerSubmissionsPage lng={lng} />
+        <Suspense fallback={<p className="p-6 text-sm text-dashboard-text-muted">Chargement…</p>}>
+          <QualityCheckerSubmissionsPage lng={lng} />
+        </Suspense>
       </Section>
     </main>
   );

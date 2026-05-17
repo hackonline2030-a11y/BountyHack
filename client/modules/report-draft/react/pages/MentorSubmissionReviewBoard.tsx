@@ -4,23 +4,22 @@ import Link from "next/link";
 import { type FC, type KeyboardEvent, useCallback, useMemo, useState } from "react";
 import {
   GENERAL_REVIEW_COMMENT_FIELD,
-  isGeneralReviewComment,
   submissionRowStatusLabel,
 } from "@modules/report-draft/core/model/submission-review-status";
 import {
   STEP_TITLE_FR,
-  stepFieldsFromPayload,
+  stepCommentGroupsFromPayload,
 } from "@modules/report-draft/core/model/step-field-catalog";
 import { SubmissionStepPreview } from "@modules/report-draft/react/components/SubmissionStepPreview";
+import { SubmissionStepFieldCommentsPanel } from "@modules/report-draft/react/components/review/SubmissionStepFieldCommentsPanel";
 import {
-  SubmissionReviewCumulativeDummyPreview,
-  SubmissionReviewStepDummyPreview,
+  SubmissionReviewCumulativePreview,
+  SubmissionReviewStepPreview,
 } from "@modules/report-draft/react/components/SubmissionReviewDummyPreview";
 import { endorseSubmission } from "@modules/report-draft/core/useCase/endorse-submission.usecase";
 import { listReviewerSubmissions } from "@modules/report-draft/core/useCase/list-reviewer-submissions.usecase";
 import { requestStepRevisions } from "@modules/report-draft/core/useCase/request-step-revisions.usecase";
 import type { ReviewerCommentDraft } from "@modules/report-draft/core/model/report-draft.aggregate";
-import { reviewerRoleLabelFr } from "@modules/report-draft/react/review/reviewer-role-label";
 import { ReportDraftTeamContextBanner } from "@modules/report-draft/react/components/ReportDraftTeamContextBanner";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
@@ -89,9 +88,9 @@ export const MentorSubmissionReviewBoard: FC<Props> = ({
     [commentsById, stepPeerSubmissionIds],
   );
 
-  const fields = useMemo(() => {
+  const commentGroups = useMemo(() => {
     if (!submission) return [];
-    return stepFieldsFromPayload(submission.step, submission.payload);
+    return stepCommentGroupsFromPayload(submission.step, submission.payload);
   }, [submission]);
 
   const transitionBusy = transition.status === "loading";
@@ -284,107 +283,28 @@ export const MentorSubmissionReviewBoard: FC<Props> = ({
         aria-labelledby={tabButtonId("comments")}
         className="rounded-lg border border-form-border bg-form-surface p-4"
       >
-        <h2 className="text-lg font-semibold text-form-text">Commentaires par champ</h2>
-        <p className="mt-1 text-sm text-form-text-muted">
-          Commentaires mentor et QC sur cette étape. « Demander une révision » renvoie le hunter
-          en modification ; le QC verra ces retours sur son tableau de bord.
-        </p>
-
-        <ul className="mt-4 flex flex-col gap-4">
-          {fields.map((row) => {
-            const existing = savedComments.filter(
-              (c) => !isGeneralReviewComment(c) && c.anchor?.field === row.fieldId,
-            );
-            const pending = pendingComments.find((c) => c.fieldId === row.fieldId);
-
-            return (
-              <li
-                key={row.fieldId}
-                className="rounded-md border border-form-border bg-form-overlay p-3"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <p className="text-sm font-medium text-form-text">{row.label}</p>
-                  {canDecide ? (
-                    <button
-                      type="button"
-                      className="rounded-md border border-form-border bg-white px-2 py-1 text-xs font-medium"
-                      onClick={() => {
-                        setDraftingFieldId(row.fieldId);
-                        setDraftBody(pending?.body ?? "");
-                      }}
-                      disabled={transitionBusy}
-                    >
-                      Ajouter un commentaire
-                    </button>
-                  ) : null}
-                </div>
-                {existing.map((c) => (
-                  <div key={c.id} className="mt-2">
-                    <span className="text-xs font-semibold text-form-text-muted">
-                      {reviewerRoleLabelFr(c.authorRole)}
-                    </span>
-                    <p className="whitespace-pre-wrap text-sm text-form-text">{c.body}</p>
-                  </div>
-                ))}
-                {pending ? (
-                  <p className="mt-2 whitespace-pre-wrap text-sm text-amber-950">
-                    <span className="text-xs font-semibold">Brouillon · </span>
-                    {pending.body}
-                  </p>
-                ) : null}
-                {draftingFieldId === row.fieldId ? (
-                  <div className="mt-2 flex flex-col gap-2">
-                    <textarea
-                      className="min-h-[72px] w-full rounded-md border border-form-border bg-white p-2 text-sm"
-                      value={draftBody}
-                      onChange={(e) => setDraftBody(e.target.value)}
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        className="rounded-md bg-form-accent px-3 py-1 text-xs font-medium text-white"
-                        onClick={addPendingComment}
-                      >
-                        Ajouter au lot
-                      </button>
-                      <button
-                        type="button"
-                        className="rounded-md border border-form-border px-3 py-1 text-xs"
-                        onClick={() => {
-                          setDraftingFieldId(null);
-                          setDraftBody("");
-                        }}
-                      >
-                        Annuler
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
-
-        <section className="mt-6 rounded-md border border-form-border bg-form-overlay p-3">
-          <h3 className="text-sm font-semibold text-form-text">Commentaire général</h3>
-          {savedComments.filter(isGeneralReviewComment).map((c) => (
-            <div key={c.id} className="mt-2">
-              <span className="text-xs font-semibold text-form-text-muted">
-                {reviewerRoleLabelFr(c.authorRole)}
-              </span>
-              <p className="whitespace-pre-wrap text-sm text-form-text">{c.body}</p>
-            </div>
-          ))}
-          {canDecide ? (
-            <textarea
-              className="mt-2 min-h-[80px] w-full rounded-md border border-form-border bg-white p-2 text-sm"
-              value={pendingGeneralComment}
-              onChange={(e) => setPendingGeneralComment(e.target.value)}
-              placeholder="Retour global (visible par le hunter et le QC)"
-              disabled={transitionBusy}
-            />
-          ) : null}
-        </section>
+        <SubmissionStepFieldCommentsPanel
+          groups={commentGroups}
+          canDecide={canDecide}
+          transitionBusy={transitionBusy}
+          savedComments={savedComments}
+          pendingComments={pendingComments}
+          draftingFieldId={draftingFieldId}
+          draftBody={draftBody}
+          pendingGeneralComment={pendingGeneralComment}
+          onStartDraft={(fieldId, initialBody) => {
+            setDraftingFieldId(fieldId);
+            setDraftBody(initialBody);
+          }}
+          onDraftBodyChange={setDraftBody}
+          onAddPendingComment={addPendingComment}
+          onCancelDraft={() => {
+            setDraftingFieldId(null);
+            setDraftBody("");
+          }}
+          onPendingGeneralCommentChange={setPendingGeneralComment}
+          introText="Commentaires sur le contenu soumis, par section. « Demander une révision » exige au moins un commentaire (section ou libre)."
+        />
       </div>
 
       <div
@@ -393,7 +313,13 @@ export const MentorSubmissionReviewBoard: FC<Props> = ({
         hidden={activeTab !== "stepPreview"}
         aria-labelledby={tabButtonId("stepPreview")}
       >
-        <SubmissionReviewStepDummyPreview step={submission.step} />
+        {draft ? (
+          <SubmissionReviewStepPreview
+            step={submission.step}
+            draft={draft}
+            submissionPayload={submission.payload}
+          />
+        ) : null}
       </div>
 
       <div
@@ -402,10 +328,13 @@ export const MentorSubmissionReviewBoard: FC<Props> = ({
         hidden={activeTab !== "cumulativePreview"}
         aria-labelledby={tabButtonId("cumulativePreview")}
       >
-        <SubmissionReviewCumulativeDummyPreview
-          submissionStep={submission.step}
-          draft={draft}
-        />
+        {draft ? (
+          <SubmissionReviewCumulativePreview
+            submissionStep={submission.step}
+            draft={draft}
+            submissionPayload={submission.payload}
+          />
+        ) : null}
       </div>
 
       {canDecide ? (

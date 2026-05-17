@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "name": "HackTheBounty — report-drafts",
+  "type": "collection",
+  "ignore": ["node_modules", ".git"]
+}

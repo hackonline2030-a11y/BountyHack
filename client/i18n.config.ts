@@ -22,6 +22,7 @@ const i18nConfig: I18nConfig = {
     'legal',
     'credits',
     'myReports',
+    'reportDraft',
   ],
   resourceLoader: (language, namespace) =>
     import(`./app/i18n/locales/${language}/${namespace}.json`),

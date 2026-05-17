@@ -4,27 +4,20 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { useT } from "next-i18next/client";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
+import { hasOpenSuperAdminRevisionCycle } from "@modules/report-draft/core/model/super-admin-final-validation";
 import { formatReportTeamMembersDisplay } from "@modules/report-draft/core/view/format-report-team-members";
 import {
-  hunterDraftActivityHints,
-  reviewerDisplayNameFromTeam,
-} from "@modules/report-draft/core/view/hunter-draft-review-activity";
+  MY_REPORTS_STEP_KEYS,
+  countMyReportsValidatedSteps,
+  resolveMyReportsStepSegmentTone,
+  segmentToneClassName,
+  superAdminGlobalRevisionNumber,
+} from "@modules/report-draft/core/view/my-reports-card-progress";
 import { HunterReviewHistoryTable } from "@modules/report-draft/react/components/HunterReviewHistoryTable";
-import { reviewerRoleLabelFr } from "@modules/report-draft/react/review/reviewer-role-label";
-import { useAppSelector } from "@store/redux/store";
 import { useMyReportsPage } from "@modules/report-draft/react/pages/use-my-reports-page";
+import { useAppSelector } from "@store/redux/store";
 
-const STEP_KEYS = [
-  "meta",
-  "description",
-  "collection",
-  "exploitation",
-  "proofOfConcept",
-  "risks",
-  "remediation",
-  "final",
-] as const satisfies ReadonlyArray<keyof ReportDraftDomainModel.ReportDraft>;
-const STEPS_TOTAL = STEP_KEYS.length;
+const STEPS_TOTAL = MY_REPORTS_STEP_KEYS.length;
 
 type Props = {
   hunterId: string;
@@ -128,32 +121,10 @@ const MyReportsDraftCard: React.FC<{
   t: TFunction;
 }> = ({ draft, lng, dateFormatter, roleLabel, t }) => {
   const submissionsById = useAppSelector((s) => s.reportDrafts.submissionsById);
-  const commentsById = useAppSelector((s) => s.reportDrafts.commentsById);
-
-  const subsForDraft = useMemo(
-    () => Object.values(submissionsById).filter((s) => s.reportDraftId === draft.id),
-    [submissionsById, draft.id],
-  );
-
-  const commentsForDraft = useMemo(() => {
-    const ids = new Set(subsForDraft.map((s) => s.id));
-    return Object.values(commentsById).filter((c) => ids.has(c.submissionId));
-  }, [commentsById, subsForDraft]);
-
-  const activity = useMemo(
-    () => hunterDraftActivityHints(draft, subsForDraft, commentsForDraft),
-    [draft, subsForDraft, commentsForDraft],
-  );
-
-  const shortWhen = useMemo(
+  const draftSubmissions = useMemo(
     () =>
-      new Intl.DateTimeFormat(undefined, {
-        day: "2-digit",
-        month: "short",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    [],
+      Object.values(submissionsById).filter((s) => s.reportDraftId === draft.id),
+    [submissionsById, draft.id],
   );
 
   const contentTitle = draft.meta.payload.reportTitle?.trim() ?? "";
@@ -170,10 +141,8 @@ const MyReportsDraftCard: React.FC<{
       ? formatReportTeamMembersDisplay(team.members, roleLabel)
       : null;
 
-  const approvedSteps = STEP_KEYS.reduce(
-    (n, key) => n + (draft[key].status === "approved" ? 1 : 0),
-    0,
-  );
+  const approvedSteps = countMyReportsValidatedSteps(draft, draftSubmissions);
+  const globalRevisionOpen = hasOpenSuperAdminRevisionCycle(draft);
 
   return (
     <Link
@@ -185,7 +154,14 @@ const MyReportsDraftCard: React.FC<{
         <h2 className="line-clamp-2 text-base font-semibold text-dashboard-text">
           {headline}
         </h2>
-        <StatusBadge status={draft.aggregateStatus} t={t} />
+        {globalRevisionOpen ? (
+          <GlobalRevisionStatusBadge
+            revisionNumber={superAdminGlobalRevisionNumber(draft)}
+            t={t}
+          />
+        ) : (
+          <StatusBadge status={draft.aggregateStatus} t={t} />
+        )}
       </div>
 
       {headlineIsTeam && contentTitle ? (
@@ -204,41 +180,6 @@ const MyReportsDraftCard: React.FC<{
         </p>
       ) : null}
 
-      {activity.latestMentorEndorse ? (
-        <div className="rounded-md border border-emerald-200/80 bg-emerald-50/90 px-2 py-1.5 text-[11px] font-medium leading-snug text-emerald-950">
-          {t("myReports.activity.endorseBanner", {
-            name: reviewerDisplayNameFromTeam(draft, activity.latestMentorEndorse.decidedBy),
-            date: shortWhen.format(new Date(activity.latestMentorEndorse.decidedAt)),
-          })}
-        </div>
-      ) : null}
-
-      {activity.latestStaffComment ? (
-        <div className="rounded-md border border-sky-200/80 bg-sky-50/90 px-2 py-1.5 text-[11px] leading-snug text-sky-950">
-          {(() => {
-            const c = activity.latestStaffComment;
-            const name = reviewerDisplayNameFromTeam(draft, c.authorId);
-            const rLabel =
-              c.authorRole === "mentor" || c.authorRole === "quality_checker"
-                ? roleLabel(c.authorRole)
-                : reviewerRoleLabelFr(c.authorRole);
-            const preview =
-              c.body.length > 90 ? `${c.body.slice(0, 87)}…` : c.body;
-            return (
-              <>
-                {t("myReports.activity.commentBanner", {
-                  name,
-                  role: rLabel,
-                  date: shortWhen.format(new Date(c.createdAt)),
-                })}
-                {preview.length > 0
-                  ? ` ${t("myReports.activity.commentPreview", { preview })}`
-                  : null}
-              </>
-            );
-          })()}
-        </div>
-      ) : null}
 
       <p className="text-xs text-dashboard-text-subtle">
         {t("myReports.card.updatedAt", {
@@ -258,21 +199,20 @@ const MyReportsDraftCard: React.FC<{
             total: STEPS_TOTAL,
           })}
         >
-          {STEP_KEYS.map((key) => (
-            <span
-              key={key}
-              aria-hidden
-              className={`h-1.5 flex-1 rounded-full ${
-                draft[key].status === "approved"
-                  ? "bg-dashboard-accent"
-                  : draft[key].status === "awaiting-review"
-                  ? "bg-dashboard-accent/50"
-                  : draft[key].status === "needs-revision"
-                  ? "bg-amber-400"
-                  : "bg-dashboard-accent-soft"
-              }`}
-            />
-          ))}
+          {MY_REPORTS_STEP_KEYS.map((key) => {
+            const tone = resolveMyReportsStepSegmentTone(
+              draft,
+              key,
+              draftSubmissions,
+            );
+            return (
+              <span
+                key={key}
+                aria-hidden
+                className={`h-1.5 flex-1 rounded-full ${segmentToneClassName(tone)}`}
+              />
+            );
+          })}
         </div>
         <p className="mt-2 text-xs text-dashboard-text-muted">
           {t("myReports.card.stepsProgress", {
@@ -285,6 +225,20 @@ const MyReportsDraftCard: React.FC<{
   );
 };
 
+const GlobalRevisionStatusBadge: React.FC<{
+  revisionNumber: number;
+  t: TFunction;
+}> = ({ revisionNumber, t }) => (
+  <div className="flex shrink-0 flex-col items-end gap-1">
+    <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-violet-900">
+      {t("myReports.status.globalRevisionInProgress")}
+    </span>
+    <span className="text-[10px] font-medium text-violet-800">
+      {t("myReports.card.globalRevisionNumber", { n: revisionNumber })}
+    </span>
+  </div>
+);
+
 const StatusBadge: React.FC<{
   status: ReportDraftDomainModel.AggregateStatus;
   t: TFunction;
@@ -294,6 +248,8 @@ const StatusBadge: React.FC<{
       ? "bg-dashboard-accent-soft text-dashboard-accent"
       : status === "under-review"
       ? "bg-amber-100 text-amber-900"
+      : status === "under-global-review"
+      ? "bg-violet-100 text-violet-900"
       : status === "ready-to-program"
       ? "bg-emerald-100 text-emerald-900"
       : status === "submitted-to-program"

@@ -1,3 +1,4 @@
+import type { OrphanReportDraft } from "@modules/report-team/model/orphan-report-draft.types";
 import type {
   ReportTeam,
   ReportTeamJoinRequest,
@@ -21,6 +22,10 @@ export class InMemoryReportTeamRepository implements IReportTeamRepository {
     return [...this.teams.values()];
   }
 
+  async findOrphanDrafts(): Promise<OrphanReportDraft[]> {
+    return [];
+  }
+
   async findById(id: string): Promise<ReportTeam | null> {
     return this.teams.get(id) ?? null;
   }
@@ -34,12 +39,14 @@ export class InMemoryReportTeamRepository implements IReportTeamRepository {
   async createTeam(input: {
     label: string;
     members: Array<{ userId: string; role: ReportTeamMemberRole }>;
+    reportDraftId?: string;
   }): Promise<ReportTeam> {
     const team: ReportTeam = {
       id: `team-${this.teams.size + 1}`,
-      reportDraftId: `draft-${this.teams.size + 1}`,
+      reportDraftId: input.reportDraftId ?? `draft-${this.teams.size + 1}`,
       label: input.label,
       validity: "incomplete",
+      draftAggregateStatus: "draft",
       members: [],
       updatedAt: new Date().toISOString(),
     };

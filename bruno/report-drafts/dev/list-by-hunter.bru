@@ -1,0 +1,11 @@
+meta {
+  name: [DEV] List drafts by hunter (no auth)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/dev/report-drafts?hunterId={{hunterId}}
+  body: none
+  auth: none
+}

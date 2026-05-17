@@ -61,6 +61,8 @@ export const ModelName = {
   TwoFactor: 'TwoFactor',
   TwoFactorTotp: 'TwoFactorTotp',
   ReportDraft: 'ReportDraft',
+  GlobalSubmission: 'GlobalSubmission',
+  GlobalReviewerComment: 'GlobalReviewerComment',
   ReportDraftStep: 'ReportDraftStep',
   ReportDraftAttachment: 'ReportDraftAttachment',
   Submission: 'Submission',
@@ -185,12 +187,44 @@ export const ReportDraftScalarFieldEnum = {
   hunterId: 'hunterId',
   version: 'version',
   aggregateStatus: 'aggregateStatus',
+  superAdminRevisionRequestedAt: 'superAdminRevisionRequestedAt',
+  superAdminGlobalRevisionCount: 'superAdminGlobalRevisionCount',
   pendingReportId: 'pendingReportId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type ReportDraftScalarFieldEnum = (typeof ReportDraftScalarFieldEnum)[keyof typeof ReportDraftScalarFieldEnum]
+
+
+export const GlobalSubmissionScalarFieldEnum = {
+  id: 'id',
+  reportDraftId: 'reportDraftId',
+  revisionNumber: 'revisionNumber',
+  payload: 'payload',
+  submittedAt: 'submittedAt',
+  submittedBy: 'submittedBy',
+  reviewerRole: 'reviewerRole',
+  decision: 'decision',
+  decidedAt: 'decidedAt',
+  decidedBy: 'decidedBy'
+} as const
+
+export type GlobalSubmissionScalarFieldEnum = (typeof GlobalSubmissionScalarFieldEnum)[keyof typeof GlobalSubmissionScalarFieldEnum]
+
+
+export const GlobalReviewerCommentScalarFieldEnum = {
+  id: 'id',
+  globalSubmissionId: 'globalSubmissionId',
+  authorId: 'authorId',
+  authorRole: 'authorRole',
+  anchor: 'anchor',
+  body: 'body',
+  createdAt: 'createdAt',
+  resolvedAt: 'resolvedAt'
+} as const
+
+export type GlobalReviewerCommentScalarFieldEnum = (typeof GlobalReviewerCommentScalarFieldEnum)[keyof typeof GlobalReviewerCommentScalarFieldEnum]
 
 
 export const ReportDraftStepScalarFieldEnum = {
@@ -456,6 +490,26 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const GlobalSubmissionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  reportDraftId: 'reportDraftId',
+  submittedBy: 'submittedBy',
+  decidedBy: 'decidedBy'
+} as const
+
+export type GlobalSubmissionOrderByRelevanceFieldEnum = (typeof GlobalSubmissionOrderByRelevanceFieldEnum)[keyof typeof GlobalSubmissionOrderByRelevanceFieldEnum]
+
+
+export const GlobalReviewerCommentOrderByRelevanceFieldEnum = {
+  id: 'id',
+  globalSubmissionId: 'globalSubmissionId',
+  authorId: 'authorId',
+  body: 'body'
+} as const
+
+export type GlobalReviewerCommentOrderByRelevanceFieldEnum = (typeof GlobalReviewerCommentOrderByRelevanceFieldEnum)[keyof typeof GlobalReviewerCommentOrderByRelevanceFieldEnum]
 
 
 export const ReportDraftStepOrderByRelevanceFieldEnum = {

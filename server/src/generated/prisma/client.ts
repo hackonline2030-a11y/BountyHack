@@ -92,6 +92,16 @@ export type TwoFactorTotp = Prisma.TwoFactorTotpModel
  */
 export type ReportDraft = Prisma.ReportDraftModel
 /**
+ * Model GlobalSubmission
+ * 
+ */
+export type GlobalSubmission = Prisma.GlobalSubmissionModel
+/**
+ * Model GlobalReviewerComment
+ * 
+ */
+export type GlobalReviewerComment = Prisma.GlobalReviewerCommentModel
+/**
  * Model ReportDraftStep
  * One row per wizard step (8 per draft). Submissions attach here, not on the draft root.
  */
