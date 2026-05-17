@@ -4,6 +4,8 @@ import { ReportTeamModule } from '../report-team/report-team.module';
 import { I_REPORT_TEAM_REPOSITORY } from '../report-team/ports/report-team-repository.interface';
 import type { IReportTeamRepository } from '../report-team/ports/report-team-repository.interface';
 import { ReportDraftController } from './controllers/report-draft.controller';
+import { ReportDraftAdminController } from './controllers/report-draft-admin.controller';
+import { ReportDraftCoordinationController } from './controllers/report-draft-coordination.controller';
 import { SubmissionController } from './controllers/submission.controller';
 import { ReviewerCommentController } from './controllers/reviewer-comment.controller';
 import { I_REPORT_DRAFT_REPOSITORY } from './ports/report-draft-repository.interface';
@@ -15,6 +17,8 @@ import { PrismaReviewerCommentRepository } from './adapters/postgre-prisma/prism
 import { SaveReportDraftCommand } from './application/commands/save-report-draft.command';
 import { GetReportDraftByIdQuery } from './application/queries/get-report-draft-by-id.query';
 import { ListReportDraftsByHunterQuery } from './application/queries/list-report-drafts-by-hunter.query';
+import { ListReportDraftsForFinalValidationQuery } from './application/queries/list-report-drafts-for-final-validation.query';
+import { ListOrphanReportDraftsQuery } from './application/queries/list-orphan-report-drafts.query';
 import { SaveSubmissionCommand } from './application/commands/save-submission.command';
 import { GetSubmissionByIdQuery } from './application/queries/get-submission-by-id.query';
 import { ListSubmissionsQuery } from './application/queries/list-submissions.query';
@@ -27,6 +31,8 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
   imports: [AuthModule, ReportTeamModule],
   controllers: [
     ReportDraftController,
+    ReportDraftAdminController,
+    ReportDraftCoordinationController,
     SubmissionController,
     ReviewerCommentController,
   ],
@@ -84,6 +90,18 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
         new ListReportDraftsByHunterQuery(repository),
     },
     {
+      provide: ListReportDraftsForFinalValidationQuery,
+      inject: [I_REPORT_DRAFT_REPOSITORY],
+      useFactory: (repository: PrismaReportDraftRepository) =>
+        new ListReportDraftsForFinalValidationQuery(repository),
+    },
+    {
+      provide: ListOrphanReportDraftsQuery,
+      inject: [I_REPORT_DRAFT_REPOSITORY],
+      useFactory: (repository: PrismaReportDraftRepository) =>
+        new ListOrphanReportDraftsQuery(repository),
+    },
+    {
       provide: SaveSubmissionCommand,
       inject: [I_SUBMISSION_REPOSITORY, ReportDraftAccessPolicy],
       useFactory: (
@@ -103,15 +121,22 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
       provide: ListSubmissionsQuery,
       inject: [
         I_SUBMISSION_REPOSITORY,
+        I_REPORT_DRAFT_REPOSITORY,
         ReportDraftAccessPolicy,
         I_REPORT_TEAM_REPOSITORY,
       ],
       useFactory: (
         repository: PrismaSubmissionRepository,
+        reportDraftRepository: PrismaReportDraftRepository,
         access: ReportDraftAccessPolicy,
         reportTeamRepository: IReportTeamRepository,
       ) =>
-        new ListSubmissionsQuery(repository, access, reportTeamRepository),
+        new ListSubmissionsQuery(
+          repository,
+          reportDraftRepository,
+          access,
+          reportTeamRepository,
+        ),
     },
     {
       provide: SaveReviewerCommentsCommand,

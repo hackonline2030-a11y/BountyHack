@@ -54,6 +54,8 @@ export default async function WelcomeAdminPage({ params }: PageProps) {
     settings: t("welcomeAdmin.nav.settings"),
   };
 
+  const finalValidationHref = `${prefix}/administration/final-validation`;
+
   const navHrefs: AdminNavHrefs = {
     users: `${prefix}/administration`,
     register: `${prefix}/administration/register`,
@@ -104,6 +106,22 @@ export default async function WelcomeAdminPage({ params }: PageProps) {
                   </p>
                   <Link href={navHrefs.users} className="dashboard-card-cta mt-auto pt-4">
                     {t("welcomeAdmin.cards.users.cta")} →
+                  </Link>
+                </DashboardCard>
+
+                <DashboardCard
+                  titleId="card-final-validation"
+                  title={t("welcomeAdmin.cards.finalValidation.title")}
+                  subtitle={t("welcomeAdmin.cards.finalValidation.subtitle")}
+                >
+                  <p className="text-sm text-dashboard-text-muted">
+                    {t("welcomeAdmin.cards.finalValidation.body")}
+                  </p>
+                  <Link
+                    href={finalValidationHref}
+                    className="dashboard-card-cta mt-auto pt-4"
+                  >
+                    {t("welcomeAdmin.cards.finalValidation.cta")} →
                   </Link>
                 </DashboardCard>
 

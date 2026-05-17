@@ -119,6 +119,18 @@ const REVIEWER_ROLE_FROM_WIRE: Record<ReviewerRoleWire, ReviewerRole> = {
 };
 
 export class ReportDraftPrismaMapper {
+  static aggregateStatusFromWire(
+    status: AggregateStatusWire,
+  ): ReportDraftAggregateStatus {
+    return AGGREGATE_STATUS_FROM_WIRE[status];
+  }
+
+  static aggregateStatusToWire(
+    status: ReportDraftAggregateStatus,
+  ): AggregateStatusWire {
+    return AGGREGATE_STATUS_TO_WIRE[status];
+  }
+
   static toDomain(row: ReportDraftWithSteps): ReportDraftWire {
     const draft: ReportDraftWire = {
       id: row.id,

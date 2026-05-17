@@ -73,16 +73,7 @@ export class ReportDraftAccessPolicy {
     if (draft === null) {
       throw new ForbiddenException('Cannot access this submission');
     }
-    if (draft.hunterId === identity.uid) {
-      return;
-    }
-    if (this.identityMatchesReviewerRole(identity, submission.reviewerRole)) {
-      return;
-    }
-    if (await this.canReadPeerReviewerSubmission(identity, submission)) {
-      return;
-    }
-    throw new ForbiddenException('Cannot access this submission');
+    await this.assertCanReadDraft(identity, draft);
   }
 
   assertCanQueryReviewerRole(
@@ -195,30 +186,6 @@ export class ReportDraftAccessPolicy {
       identity.roleCode === AppRoleCode.QUALITY_CHECKER ||
       identity.roleCode === AppRoleCode.MENTOR ||
       identity.roleCode === AppRoleCode.SUPER_ADMIN
-    );
-  }
-
-  /** Mentor and QC on the same report team can read each other's review threads. */
-  private async canReadPeerReviewerSubmission(
-    identity: Identity,
-    submission: SubmissionWire,
-  ): Promise<boolean> {
-    if (
-      submission.reviewerRole !== 'mentor' &&
-      submission.reviewerRole !== 'quality_checker'
-    ) {
-      return false;
-    }
-    if (
-      identity.roleCode !== AppRoleCode.MENTOR &&
-      identity.roleCode !== AppRoleCode.QUALITY_CHECKER &&
-      identity.roleCode !== AppRoleCode.SUPER_ADMIN
-    ) {
-      return false;
-    }
-    return this.reportTeamRepository.isMemberOfDraft(
-      identity.uid,
-      submission.reportDraftId,
     );
   }
 

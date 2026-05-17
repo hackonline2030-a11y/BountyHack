@@ -38,6 +38,8 @@ describe('SaveReportDraftCommand', () => {
     save: jest.fn(),
     findById: jest.fn(),
     findByHunterId: jest.fn(),
+    findAll: jest.fn(),
+    findOrphanSummaries: jest.fn(),
   };
   const submissionRepository: jest.Mocked<ISubmissionRepository> = {
     save: jest.fn(),

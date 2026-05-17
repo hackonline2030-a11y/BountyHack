@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { OrphanReportDraft } from "@modules/report-team/model/orphan-report-draft.types";
 import type {
   ReportTeam,
   ReportTeamJoinRequest,
@@ -12,6 +13,7 @@ export type ReportTeamsState = {
   allTeams: ReportTeam[];
   myJoinRequests: ReportTeamJoinRequest[];
   pendingJoinRequests: ReportTeamJoinRequest[];
+  orphanDrafts: OrphanReportDraft[];
   loadStatus: ReportTeamsLoadStatus;
   loadError: string | null;
   mutationStatus: ReportTeamsLoadStatus;
@@ -24,6 +26,7 @@ const initialState: ReportTeamsState = {
   allTeams: [],
   myJoinRequests: [],
   pendingJoinRequests: [],
+  orphanDrafts: [],
   loadStatus: "idle",
   loadError: null,
   mutationStatus: "idle",
@@ -46,6 +49,7 @@ export const reportTeamsSlice = createSlice({
         allTeams?: ReportTeam[];
         myJoinRequests?: ReportTeamJoinRequest[];
         pendingJoinRequests?: ReportTeamJoinRequest[];
+        orphanDrafts?: OrphanReportDraft[];
       }>,
     ) {
       state.loadStatus = "success";
@@ -59,6 +63,9 @@ export const reportTeamsSlice = createSlice({
       }
       if (action.payload.pendingJoinRequests !== undefined) {
         state.pendingJoinRequests = action.payload.pendingJoinRequests;
+      }
+      if (action.payload.orphanDrafts !== undefined) {
+        state.orphanDrafts = action.payload.orphanDrafts;
       }
     },
     loadFailed(state, action: PayloadAction<{ message: string }>) {

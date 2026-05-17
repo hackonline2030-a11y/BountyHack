@@ -1,0 +1,46 @@
+{
+  "reportDraft": {
+    "finalValidation": {
+      "metaTitle": "Validation finale des rapports",
+      "heading": "Validation finale",
+      "subheading": "Tous les brouillons de rapport. Par défaut, seuls ceux prêts à soumettre sont affichés.",
+      "backToAdmin": "← Tableau de bord admin",
+      "filter": {
+        "label": "Filtrer par statut global",
+        "options": {
+          "all": "Tous les statuts",
+          "ready-to-program": "Prêt à soumettre (défaut)",
+          "under-review": "En relecture",
+          "draft": "Brouillon",
+          "submitted-to-program": "Soumis au programme",
+          "rejected": "Rejeté",
+          "given-up": "Abandonné"
+        }
+      },
+      "table": {
+        "count": "{{count}} affiché(s) sur {{total}} brouillon(s)",
+        "empty": "Aucun brouillon pour ce filtre.",
+        "untitled": "Rapport sans titre",
+        "columns": {
+          "report": "Rapport",
+          "status": "Statut global",
+          "team": "Équipe",
+          "steps": "Étapes",
+          "updated": "Mis à jour"
+        }
+      },
+      "errors": {
+        "unreachable": "Impossible de joindre l’API.",
+        "malformed_payload": "Réponse serveur invalide."
+      },
+      "detail": {
+        "metaTitle": "Validation finale — rapport",
+        "backToTeams": "← Retour aux équipes",
+        "tablistAria": "Validation finale du rapport",
+        "tabs": {
+          "generalPreview": "Aperçu général"
+        }
+      }
+    }
+  }
+}

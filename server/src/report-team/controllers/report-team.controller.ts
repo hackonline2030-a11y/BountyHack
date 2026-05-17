@@ -124,6 +124,8 @@ export class ReportTeamController {
   @AuthCoordinatorOrSuperAdmin()
   @ApiOperation({
     summary: 'Create a report-draft team (coordinator)',
+    description:
+      'Without `reportDraftId`: creates a new draft and team. With `reportDraftId`: attaches a team to an orphan draft; the draft owner is always the hunter; `members` are from pending join requests.',
   })
   @ApiOkResponse({ description: 'Created report-draft team' })
   @ApiHttpUnauthorized('Missing or invalid bearer token.')

@@ -54,3 +54,25 @@ export function cumulativeStepsForReview(
 export function cumulativeStepsForHunter(currentStep: M.ReportDraftStep): M.ReportDraftStep[] {
   return stepsUpTo(currentStep);
 }
+
+/**
+ * Shared « aperçu général » (hunter Aperçu, super-admin validation) :
+ * META through the furthest step with workflow activity on the draft.
+ */
+export function cumulativeStepsForGeneralReportPreview(
+  draft: M.ReportDraft,
+): M.ReportDraftStep[] {
+  let furthest = M.ReportDraftStep.META;
+  for (let s = M.ReportDraftStep.META; s <= M.ReportDraftStep.FINAL; s++) {
+    const step = s as M.ReportDraftStep;
+    const state = draft[reportDraftStepToStateKey(step)];
+    if (step === M.ReportDraftStep.META) {
+      furthest = step;
+      continue;
+    }
+    if (state.status !== "in-progress" || state.currentRound > 0) {
+      furthest = step;
+    }
+  }
+  return stepsUpTo(furthest);
+}

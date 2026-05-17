@@ -1,0 +1,46 @@
+{
+  "reportDraft": {
+    "finalValidation": {
+      "metaTitle": "Final report validation",
+      "heading": "Final validation",
+      "subheading": "All report drafts. By default, only those ready to submit are shown.",
+      "backToAdmin": "← Admin dashboard",
+      "filter": {
+        "label": "Filter by aggregate status",
+        "options": {
+          "all": "All statuses",
+          "ready-to-program": "Ready to submit (default)",
+          "under-review": "Under review",
+          "draft": "Draft",
+          "submitted-to-program": "Submitted to program",
+          "rejected": "Rejected",
+          "given-up": "Given up"
+        }
+      },
+      "table": {
+        "count": "{{count}} shown of {{total}} draft(s)",
+        "empty": "No drafts match this filter.",
+        "untitled": "Untitled report",
+        "columns": {
+          "report": "Report",
+          "status": "Aggregate status",
+          "team": "Team",
+          "steps": "Steps",
+          "updated": "Updated"
+        }
+      },
+      "errors": {
+        "unreachable": "Could not reach the API.",
+        "malformed_payload": "Invalid server response."
+      },
+      "detail": {
+        "metaTitle": "Final validation — report",
+        "backToTeams": "← Back to teams",
+        "tablistAria": "Final report validation",
+        "tabs": {
+          "generalPreview": "General preview"
+        }
+      }
+    }
+  }
+}

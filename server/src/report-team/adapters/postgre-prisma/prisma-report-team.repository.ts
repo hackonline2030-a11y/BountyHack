@@ -24,6 +24,7 @@ import { ReportTeamPrismaMapper } from './report-team-prisma.mapper';
 
 const teamInclude = {
   members: { include: { user: true } },
+  reportDraft: { select: { aggregateStatus: true } },
 } as const;
 
 @Injectable()
@@ -81,6 +82,20 @@ export class PrismaReportTeamRepository implements IReportTeamRepository {
     return rows.map((row) => row.team.reportDraftId);
   }
 
+  async findOrphanDraftOwnerId(reportDraftId: string): Promise<string | null> {
+    const row = await this.prisma.reportDraft.findUnique({
+      where: { id: reportDraftId },
+      select: {
+        hunterId: true,
+        reportTeam: { select: { id: true } },
+      },
+    });
+    if (row === null || row.reportTeam !== null) {
+      return null;
+    }
+    return row.hunterId;
+  }
+
   async findJoinableForUserId(userId: string): Promise<ReportTeamWire[]> {
     const rows = await this.prisma.reportTeam.findMany({
       where: {
@@ -99,6 +114,11 @@ export class PrismaReportTeamRepository implements IReportTeamRepository {
   }
 
   async create(input: CreateReportTeamInput): Promise<ReportTeamWire> {
+    const existingDraftId = input.reportDraftId?.trim();
+    if (existingDraftId) {
+      return this.createForOrphanDraft(existingDraftId, input);
+    }
+
     const hunters = input.members.filter((m) => m.role === 'hunter');
     const hunterId = hunters[0]!.userId;
     const reportDraftId = randomUUID();
@@ -159,6 +179,82 @@ export class PrismaReportTeamRepository implements IReportTeamRepository {
         await tx.reportTeamJoinRequest.updateMany({
           where: {
             userId: { in: memberUserIds },
+            status: ReportTeamJoinRequestStatus.PENDING,
+          },
+          data: {
+            status: ReportTeamJoinRequestStatus.APPROVED,
+            decidedAt: new Date(),
+          },
+        });
+      }
+
+      return tx.reportTeam.findUniqueOrThrow({
+        where: { id: teamId },
+        include: teamInclude,
+      });
+    });
+
+    return ReportTeamPrismaMapper.teamToWire(row);
+  }
+
+  private async createForOrphanDraft(
+    reportDraftId: string,
+    input: CreateReportTeamInput,
+  ): Promise<ReportTeamWire> {
+    const hunterId = await this.findOrphanDraftOwnerId(reportDraftId);
+    if (hunterId === null) {
+      throw new NotFoundException(
+        'Orphan report draft not found or already has a team',
+      );
+    }
+
+    const teamId = randomUUID();
+    const memberUserIds = input.members.map((m) => m.userId);
+
+    const row = await this.prisma.$transaction(async (tx) => {
+      const draft = await tx.reportDraft.findUnique({
+        where: { id: reportDraftId },
+        select: { reportTeam: { select: { id: true } } },
+      });
+      if (draft === null || draft.reportTeam !== null) {
+        throw new NotFoundException(
+          'Orphan report draft not found or already has a team',
+        );
+      }
+
+      await tx.reportTeam.create({
+        data: {
+          id: teamId,
+          reportDraftId,
+          label: input.label.trim(),
+        },
+      });
+
+      await tx.reportTeamMember.create({
+        data: {
+          id: randomUUID(),
+          teamId,
+          userId: hunterId,
+          role: ReportTeamEnumMapper.memberRoleFromWire('hunter'),
+        },
+      });
+
+      for (const member of input.members) {
+        await tx.reportTeamMember.create({
+          data: {
+            id: randomUUID(),
+            teamId,
+            userId: member.userId,
+            role: ReportTeamEnumMapper.memberRoleFromWire(member.role),
+          },
+        });
+      }
+
+      const approveUserIds = [...memberUserIds];
+      if (approveUserIds.length > 0) {
+        await tx.reportTeamJoinRequest.updateMany({
+          where: {
+            userId: { in: approveUserIds },
             status: ReportTeamJoinRequestStatus.PENDING,
           },
           data: {
