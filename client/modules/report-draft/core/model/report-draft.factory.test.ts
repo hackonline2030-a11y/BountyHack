@@ -184,7 +184,17 @@ describe("ReportDraftFactory", () => {
     const draft = ReportDraftFactory.create(
       makeDeps({
         overrides: {
-          collection: CollectionFactory.create({ hypothesis: "C" }),
+          collection: CollectionFactory.create({
+            sectionBlocs: [
+              {
+                id: "b1",
+                heading: "Collecte",
+                subheading: "",
+                body: "C",
+                attachmentId: null,
+              },
+            ],
+          }),
           exploitation: ExploitationFactory.create({ prerequisites: "E" }),
           proofOfConcept: ProofOfConceptFactory.create({ environment: "P" }),
           risks: RisksFactory.create({ confidentiality: "R" }),
@@ -194,7 +204,7 @@ describe("ReportDraftFactory", () => {
       }),
     );
 
-    expect(draft.collection.payload).toEqual(CollectionFactory.create({ hypothesis: "C" }));
+    expect(draft.collection.payload.sectionBlocs[0]?.body).toBe("C");
     expect(draft.exploitation.payload).toEqual(ExploitationFactory.create({ prerequisites: "E" }));
     expect(draft.proofOfConcept.payload).toEqual(ProofOfConceptFactory.create({ environment: "P" }));
     expect(draft.risks.payload).toEqual(RisksFactory.create({ confidentiality: "R" }));

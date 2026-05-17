@@ -29,6 +29,7 @@ import frWelcomeAdmin from "@/app/i18n/locales/fr/welcomeAdmin.json";
 import frWelcomeCoordinator from "@/app/i18n/locales/fr/welcomeCoordinator.json";
 import frWelcomeHunter from "@/app/i18n/locales/fr/welcomeHunter.json";
 import frWelcomeMentor from "@/app/i18n/locales/fr/welcomeMentor.json";
+import frWelcomePlatformManager from "@/app/i18n/locales/fr/welcomePlatformManager.json";
 import frWelcomeQualityChecker from "@/app/i18n/locales/fr/welcomeQualityChecker.json";
 
 /**
@@ -69,6 +70,7 @@ export const clientI18nResources = {
     welcomeMentor: enWelcomeMentor,
     welcomeCoordinator: enWelcomeCoordinator,
     welcomeAdmin: enWelcomeAdmin,
+    welcomePlatformManager: enWelcomePlatformManager,
     reportTeams: enReportTeams,
     parameters: enParameters,
     legal: enLegal,

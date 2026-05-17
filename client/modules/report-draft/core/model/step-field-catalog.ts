@@ -1,5 +1,9 @@
 import { ReportDraftDomainModel as M } from "./report-draft.domain-model";
 import { normalizeLongFormPayload } from "./long-form-steps.factory";
+import {
+  sectionBlocFieldId,
+  sectionBlocPartLabel,
+} from "./section-bloc";
 
 export type StepFieldRow = {
   fieldId: string;
@@ -33,45 +37,24 @@ const DESCRIPTION_LABELS: Record<keyof M.DescriptionFields, string> = {
   availability: "Availability (A)",
 };
 
-const LONG_FORM_LABELS: Record<
-  Exclude<M.ReportDraftStep, M.ReportDraftStep.META | M.ReportDraftStep.DESCRIPTION>,
-  Record<string, string>
-> = {
-  [M.ReportDraftStep.COLLECTION]: {
-    hypothesis: "Hypothèse de travail",
-    reconNarrative: "Collecte et reconnaissance",
-    endpointsAndParameters: "Endpoints, paramètres et entrées observés",
-    evidenceSummary: "Synthèse des éléments collectés",
-  },
-  [M.ReportDraftStep.EXPLOITATION]: {
-    prerequisites: "Prérequis",
-    attackPath: "Chemin d’attaque",
-    exploitationNarrative: "Scénario d’exploitation",
-    impactIfExploited: "Impact si exploité",
-  },
-  [M.ReportDraftStep.PROOF_OF_CONCEPT]: {
-    environment: "Environnement de test",
-    stepsToReproduce: "Étapes de reproduction",
-    proofArtifactsDescription: "Requêtes, payloads, captures",
-    expectedBehavior: "Comportement attendu vs observé",
-  },
-  [M.ReportDraftStep.RISKS]: {
-    confidentiality: "Risque — confidentialité",
-    integrity: "Risque — intégrité",
-    availability: "Risque — disponibilité",
-    overallRiskStatement: "Synthèse du risque global",
-  },
-  [M.ReportDraftStep.REMEDIATION]: {
-    shortTermMitigation: "Atténuation court terme",
-    longTermFix: "Correctif durable",
-    verificationSteps: "Vérification après correctif",
-  },
-  [M.ReportDraftStep.FINAL]: {
-    conclusion: "Conclusion",
-    references: "Références",
-    bugBountyNotes: "Notes finales",
-  },
-};
+function longFormFieldsFromPayload(payload: unknown): StepFieldRow[] {
+  const normalized =
+    typeof payload === "object" && payload !== null && "sectionBlocs" in payload
+      ? (payload as M.LongFormStepPayload)
+      : { sectionBlocs: [] as M.SectionBloc[] };
+
+  const rows: StepFieldRow[] = [];
+  for (const bloc of normalized.sectionBlocs) {
+    for (const part of ["heading", "subheading", "body"] as const) {
+      rows.push({
+        fieldId: sectionBlocFieldId(bloc.id, part),
+        label: sectionBlocPartLabel(bloc, part),
+        value: bloc[part],
+      });
+    }
+  }
+  return rows;
+}
 
 export const STEP_TITLE_FR: Record<M.ReportDraftStep, string> = {
   [M.ReportDraftStep.META]: "Métadonnées",
@@ -120,12 +103,7 @@ export function stepFieldsFromPayload(
     }
     default: {
       const normalized = normalizeLongFormPayload(step, payload);
-      const labels = LONG_FORM_LABELS[step];
-      return Object.keys(labels).map((fieldId) => ({
-        fieldId,
-        label: labels[fieldId] ?? fieldId,
-        value: normalized[fieldId] ?? "",
-      }));
+      return longFormFieldsFromPayload(normalized);
     }
   }
 }

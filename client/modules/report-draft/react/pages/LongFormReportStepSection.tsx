@@ -1,7 +1,6 @@
 "use client";
 
 import { type FC, useCallback, useEffect, useMemo, useState } from "react";
-import { longFormFormForStep } from "@modules/report-draft/core/form/long-form-steps.form";
 import { normalizeLongFormPayload } from "@modules/report-draft/core/model/long-form-steps.factory";
 import type { LongFormWizardStep } from "@modules/report-draft/core/model/long-form-steps.factory";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
@@ -9,48 +8,12 @@ import { reportDraftStepToStateKey } from "@modules/report-draft/core/model/repo
 import { reportDraftSlice } from "@modules/report-draft/core/store/report-draft.slice";
 import { saveStepPayload } from "@modules/report-draft/core/useCase/save-step-payload.usecase";
 import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-step-for-review.usecase";
+import { SectionBlocRepeater } from "@modules/report-draft/react/components/section-bloc/SectionBlocRepeater";
 import { reviewerRoleFromDraftStep } from "@modules/report-draft/react/wizard/reviewer-role-from-draft";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
 const Step = ReportDraftDomainModel.ReportDraftStep;
-
-const FIELD_LABELS_FR: Record<LongFormWizardStep, Record<string, string>> = {
-  [Step.COLLECTION]: {
-    hypothesis: "Hypothèse de travail",
-    reconNarrative: "Collecte et reconnaissance",
-    endpointsAndParameters: "Endpoints, paramètres et entrées observés",
-    evidenceSummary: "Synthèse des éléments collectés",
-  },
-  [Step.EXPLOITATION]: {
-    prerequisites: "Prérequis (auth, rôle, configuration…)",
-    attackPath: "Chemin d’attaque",
-    exploitationNarrative: "Scénario d’exploitation",
-    impactIfExploited: "Impact si exploité",
-  },
-  [Step.PROOF_OF_CONCEPT]: {
-    environment: "Environnement de test",
-    stepsToReproduce: "Étapes de reproduction",
-    proofArtifactsDescription: "Requêtes, payloads, captures (texte)",
-    expectedBehavior: "Comportement attendu vs observé",
-  },
-  [Step.RISKS]: {
-    confidentiality: "Risque pour la confidentialité",
-    integrity: "Risque pour l’intégrité",
-    availability: "Risque pour la disponibilité",
-    overallRiskStatement: "Synthèse du risque global",
-  },
-  [Step.REMEDIATION]: {
-    shortTermMitigation: "Atténuation court terme",
-    longTermFix: "Correctif durable",
-    verificationSteps: "Vérification après correctif",
-  },
-  [Step.FINAL]: {
-    conclusion: "Conclusion",
-    references: "Références (CVE, CWE, liens…)",
-    bugBountyNotes: "Notes finales / chaîne de bugs",
-  },
-};
 
 type Props = {
   step: LongFormWizardStep;
@@ -58,8 +21,7 @@ type Props = {
 };
 
 /**
- * Étapes structurées (COLLECTION → FINAL). Brouillon, soumission et « Suivant »
- * suivent la même machine d’état que META / DESCRIPTION.
+ * Long-form wizard steps (COLLECTION → FINAL) — free section blocs repeater only.
  */
 export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
   const dispatch = useAppDispatch();
@@ -87,8 +49,8 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
     setReviewerRole(fromDraft ?? "mentor");
   }, [currentDraftId, draftRow, step]);
 
-  const form = useMemo(() => longFormFormForStep(step), [step]);
-  const [draft, setDraft] = useState<Record<string, string>>(persistedPayload);
+  const [draft, setDraft] =
+    useState<ReportDraftDomainModel.LongFormStepPayload>(persistedPayload);
 
   useEffect(() => {
     setDraft(persistedPayload);
@@ -133,8 +95,6 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
   const transitionErr =
     transition.status === "error" ? transition.message : null;
 
-  const labelsForStep = FIELD_LABELS_FR[step];
-
   return (
     <>
       {transitionErr ? (
@@ -163,21 +123,12 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
         </p>
       ) : null}
 
-      <div className="flex flex-col gap-4" aria-label={label}>
-        {form.keys().map((fieldKey) => (
-          <label key={fieldKey} className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-form-text">
-              {labelsForStep[fieldKey] ?? fieldKey}
-            </span>
-            <textarea
-              className="min-h-[96px] rounded-md border border-form-border bg-form-surface p-3 text-form-text placeholder:text-form-placeholder focus:border-form-border-strong focus:outline-none focus:ring-2 focus:ring-form-accent/40 disabled:cursor-not-allowed disabled:opacity-60"
-              value={draft[fieldKey] ?? ""}
-              placeholder="…"
-              onChange={(e) => setDraft(form.setField(draft, fieldKey, e.target.value))}
-              disabled={!editable}
-            />
-          </label>
-        ))}
+      <div aria-label={label}>
+        <SectionBlocRepeater
+          blocs={draft.sectionBlocs}
+          editable={editable}
+          onChange={(sectionBlocs) => setDraft({ sectionBlocs })}
+        />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -198,6 +149,7 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
           <option value="hunter">Hunter (pair review)</option>
         </select>
       </div>
+
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
