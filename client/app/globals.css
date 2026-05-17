@@ -248,9 +248,12 @@
    mirror the original TSX, which intentionally or not left it off the cancel
    button). */
 .action-btn {
-  @apply rounded-lg px-4 py-2.5 text-sm shadow-sm transition disabled:cursor-not-allowed;
+  cursor: pointer;
+  @apply rounded-lg px-4 py-2.5 text-sm shadow-sm transition;
 }
-
+.action-btn:disabled {
+  cursor: not-allowed;
+}
 /* Primary action – violet solid */
 .action-btn--primary {
   @apply bg-violet-600 text-white font-semibold disabled:opacity-60;

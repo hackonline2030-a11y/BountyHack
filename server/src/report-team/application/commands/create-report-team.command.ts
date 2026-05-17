@@ -50,7 +50,7 @@ export class CreateReportTeamCommand {
     const validity = computeTeamValidity(members.map((m) => m.role));
     if (validity === 'incomplete') {
       throw new BadRequestException(
-        'Team must include at least one hunter, one quality checker, and one mentor',
+        'Team must include at least one hunter and either a mentor or a quality checker',
       );
     }
 

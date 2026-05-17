@@ -65,51 +65,28 @@ export namespace ReportDraftDomainModel {
   };
 
   /**
-   * Structured payloads for COLLECTION → FINAL (YesWeHack-style sections).
-   * Each field is plain text (Markdown-friendly prose is fine). Binaries
-   * stay in `StepState.attachments`.
-   *
-   * Required-field rules live in `long-form-steps.form.ts` (`*Form.isSubmitable`).
+   * Free-form section inside a long-form wizard step (COLLECTION → FINAL).
+   * Order in `sectionBlocs[]` = PDF order. Images use `attachmentId` (phase 2).
    */
-  export type CollectionFields = {
-    hypothesis: string;
-    reconNarrative: string;
-    endpointsAndParameters: string;
-    evidenceSummary: string;
+  export type SectionBloc = {
+    id: string;
+    heading: string;
+    subheading: string;
+    body: string;
+    attachmentId: string | null;
   };
 
-  export type ExploitationFields = {
-    prerequisites: string;
-    attackPath: string;
-    exploitationNarrative: string;
-    impactIfExploited: string;
+  /** Long-form steps store only repeatable section blocs (replaces fixed textareas). */
+  export type LongFormStepPayload = {
+    sectionBlocs: SectionBloc[];
   };
 
-  export type ProofOfConceptFields = {
-    environment: string;
-    stepsToReproduce: string;
-    proofArtifactsDescription: string;
-    expectedBehavior: string;
-  };
-
-  export type RisksFields = {
-    confidentiality: string;
-    integrity: string;
-    availability: string;
-    overallRiskStatement: string;
-  };
-
-  export type RemediationFields = {
-    shortTermMitigation: string;
-    longTermFix: string;
-    verificationSteps: string;
-  };
-
-  export type FinalFields = {
-    conclusion: string;
-    references: string;
-    bugBountyNotes: string;
-  };
+  export type CollectionFields = LongFormStepPayload;
+  export type ExploitationFields = LongFormStepPayload;
+  export type ProofOfConceptFields = LongFormStepPayload;
+  export type RisksFields = LongFormStepPayload;
+  export type RemediationFields = LongFormStepPayload;
+  export type FinalFields = LongFormStepPayload;
 
   export type ReportDraftId = string;
 

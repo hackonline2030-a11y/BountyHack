@@ -8,7 +8,7 @@
     "validity": {
       "valid": "Équipe valide",
       "incomplete": "Équipe incomplète",
-      "hint": "Une équipe rapport est valide lorsqu’elle compte au moins un hunter, un quality checker et un mentor."
+      "hint": "Une équipe rapport est valide avec au moins un hunter et un mentor ou un quality checker (vous pouvez ajouter d’autres membres librement)."
     },
     "roles": {
       "hunter": "Hunter",
@@ -98,7 +98,7 @@
       },
       "create": {
         "title": "Créer une équipe rapport",
-        "description": "Un brouillon de rapport est créé automatiquement. L’équipe doit comporter un hunter, un quality checker et un mentor.",
+        "description": "Un brouillon de rapport est créé automatiquement. L’équipe doit comporter un hunter et un mentor ou un quality checker. Vous pouvez ajouter d’autres membres librement.",
         "labelField": "Titre de l’équipe",
         "labelPlaceholder": "Ex. Rapport #1042 — XSS module commentaires",
         "membersField": "Membres sélectionnés",
