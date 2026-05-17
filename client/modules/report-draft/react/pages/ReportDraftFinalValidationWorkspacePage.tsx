@@ -7,14 +7,17 @@ import type { ReportDraftDomainModel } from "@modules/report-draft/core/model/re
 import { ReportDraftAggregateStatusBadge } from "@modules/report-draft/react/components/ReportDraftAggregateStatusBadge";
 import { ReportDraftGeneralPreview } from "@modules/report-draft/react/components/ReportDraftGeneralPreview";
 import { ReportDraftTeamContextBanner } from "@modules/report-draft/react/components/ReportDraftTeamContextBanner";
+import { SuperAdminFinalValidationActions } from "@modules/report-draft/react/components/admin/SuperAdminFinalValidationActions";
+import { SuperAdminStepCommentsEditor } from "@modules/report-draft/react/components/admin/SuperAdminStepCommentsEditor";
 
-type ValidationTab = "generalPreview";
+type ValidationTab = "generalPreview" | "superAdminComments";
 
-const TAB_ORDER: readonly ValidationTab[] = ["generalPreview"] as const;
+const TAB_ORDER: readonly ValidationTab[] = ["generalPreview", "superAdminComments"] as const;
 
 type Props = {
   draft: ReportDraftDomainModel.ReportDraft;
   teamsHref: string;
+  lng: string;
 };
 
 const tabButtonId = (key: ValidationTab) => `final-validation-tab-${key}`;
@@ -28,6 +31,7 @@ function reportTitleFromDraft(draft: ReportDraftDomainModel.ReportDraft): string
 export const ReportDraftFinalValidationWorkspacePage: FC<Props> = ({
   draft,
   teamsHref,
+  lng,
 }) => {
   const { t } = useT(["reportDraft", "myReports"]);
   const [activeTab, setActiveTab] = useState<ValidationTab>("generalPreview");
@@ -80,6 +84,8 @@ export const ReportDraftFinalValidationWorkspacePage: FC<Props> = ({
         <ReportDraftTeamContextBanner team={draft.reportTeam} className="mt-0 mb-0" />
       ) : null}
 
+      <SuperAdminFinalValidationActions draft={draft} lng={lng} />
+
       <div
         role="tablist"
         aria-label={t("reportDraft.finalValidation.detail.tablistAria")}
@@ -104,7 +110,7 @@ export const ReportDraftFinalValidationWorkspacePage: FC<Props> = ({
                   : "border-transparent text-form-text-muted hover:text-form-text"
               }`}
             >
-              {t("reportDraft.finalValidation.detail.tabs.generalPreview")}
+              {t(`reportDraft.finalValidation.detail.tabs.${key}`)}
             </button>
           );
         })}
@@ -118,6 +124,16 @@ export const ReportDraftFinalValidationWorkspacePage: FC<Props> = ({
         className="min-h-[200px]"
       >
         <ReportDraftGeneralPreview draft={draft} />
+      </div>
+
+      <div
+        role="tabpanel"
+        id={tabPanelId("superAdminComments")}
+        aria-labelledby={tabButtonId("superAdminComments")}
+        hidden={activeTab !== "superAdminComments"}
+        className="min-h-[200px]"
+      >
+        <SuperAdminStepCommentsEditor draftId={draft.id} />
       </div>
     </div>
   );

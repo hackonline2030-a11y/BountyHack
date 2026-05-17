@@ -948,3 +948,65 @@ describe("ReportDraftAggregate.updateStepPayload", () => {
     },
   );
 });
+
+describe("ReportDraftAggregate.submitAllStepsForGlobalRevision", () => {
+  it("marks every in-global-progress step as awaiting-global-review", () => {
+    const { aggregate, draft } = makeAggregate();
+    draft.aggregateStatus = "under-global-review";
+    draft.superAdminRevisionRequestedAt = "2026-05-17T12:00:00.000Z";
+    for (const key of [
+      "meta",
+      "description",
+      "collection",
+      "exploitation",
+      "proofOfConcept",
+      "risks",
+      "remediation",
+      "final",
+    ] as const) {
+      draft[key].status = "in-global-progress";
+    }
+
+    const submissions = aggregate.submitAllStepsForGlobalRevision({
+      submittedBy: "u-42",
+    });
+
+    expect(submissions).toHaveLength(0);
+    expect(draft.meta.status).toBe("awaiting-global-review");
+    expect(draft.final.status).toBe("awaiting-global-review");
+  });
+
+  it("skips steps already awaiting global review", () => {
+    const { aggregate, draft } = makeAggregate();
+    draft.aggregateStatus = "under-global-review";
+    draft.superAdminRevisionRequestedAt = "2026-05-17T12:00:00.000Z";
+    for (const key of [
+      "meta",
+      "description",
+      "collection",
+      "exploitation",
+      "proofOfConcept",
+      "risks",
+      "remediation",
+      "final",
+    ] as const) {
+      draft[key].status = "in-global-progress";
+    }
+    draft.meta.status = "awaiting-global-review";
+
+    aggregate.submitAllStepsForGlobalRevision({
+      submittedBy: "u-42",
+    });
+
+    expect(draft.meta.status).toBe("awaiting-global-review");
+    expect(draft.description.status).toBe("awaiting-global-review");
+  });
+
+  it("throws outside global revision mode", () => {
+    const { aggregate } = makeAggregate();
+
+    expect(() =>
+      aggregate.submitAllStepsForGlobalRevision({ submittedBy: "u-42" }),
+    ).toThrow(/global batch submit/);
+  });
+});

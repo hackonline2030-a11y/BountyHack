@@ -165,11 +165,19 @@ enum StepStatus {
   AWAITING_REVIEW
   NEEDS_REVISION
   APPROVED
+  /// Super-admin global revision — hunter is editing.
+  IN_GLOBAL_PROGRESS
+  /// QC requested changes on the global submission.
+  NEEDS_GLOBAL_REVISION
+  /// Hunter submitted globally; waiting for QC decision.
+  AWAITING_GLOBAL_REVIEW
 }
 
 enum ReportDraftAggregateStatus {
   DRAFT
   UNDER_REVIEW
+  /// Super-admin global revision cycle (team rework / global QC submission).
+  UNDER_GLOBAL_REVIEW
   READY_TO_PROGRAM
   SUBMITTED_TO_PROGRAM
   GIVEN_UP
@@ -210,6 +218,10 @@ model ReportDraft {
   hunterId        String                     @map("hunter_id")
   version         Int                        @default(1)
   aggregateStatus ReportDraftAggregateStatus @default(DRAFT) @map("aggregate_status")
+  /// Set when super-admin requests a global revision (team-wide rework).
+  superAdminRevisionRequestedAt DateTime? @map("super_admin_revision_requested_at")
+  /// Incremented on each super-admin global revision request (never decremented).
+  superAdminGlobalRevisionCount Int @default(0) @map("super_admin_global_revision_count")
   /// Set when super-admin promotes draft → pending report (draft still exists).
   pendingReportId String?                    @unique @map("pending_report_id")
   createdAt       DateTime                   @default(now()) @map("created_at")
@@ -217,13 +229,52 @@ model ReportDraft {
 
   hunter        User              @relation(fields: [hunterId], references: [id], onDelete: Cascade)
   pendingReport Report?           @relation("DraftPendingReport", fields: [pendingReportId], references: [id], onDelete: SetNull)
-  steps         ReportDraftStep[]
-  submissions   Submission[]
-  reportTeam    ReportTeam?
+  steps             ReportDraftStep[]
+  submissions       Submission[]
+  globalSubmissions GlobalSubmission[]
+  reportTeam        ReportTeam?
 
   @@index([hunterId])
   @@index([aggregateStatus])
   @@map("report_drafts")
+}
+
+/// One hunter batch submit after super-admin global revision (whole draft, not a single step).
+model GlobalSubmission {
+  id               String             @id @default(uuid())
+  reportDraftId    String             @map("report_draft_id")
+  revisionNumber   Int                @map("revision_number")
+  payload          Json
+  submittedAt      DateTime           @default(now()) @map("submitted_at")
+  submittedBy      String             @map("submitted_by")
+  reviewerRole     ReviewerRole       @map("reviewer_role")
+  decision         SubmissionDecision @default(PENDING)
+  decidedAt        DateTime?          @map("decided_at")
+  decidedBy        String?            @map("decided_by")
+
+  reportDraft      ReportDraft              @relation(fields: [reportDraftId], references: [id], onDelete: Cascade)
+  reviewerComments GlobalReviewerComment[]
+
+  @@unique([reportDraftId, revisionNumber, reviewerRole])
+  @@index([reportDraftId])
+  @@index([reviewerRole, decision])
+  @@map("global_submissions")
+}
+
+model GlobalReviewerComment {
+  id                 String       @id @default(uuid())
+  globalSubmissionId String       @map("global_submission_id")
+  authorId           String       @map("author_id")
+  authorRole         ReviewerRole @map("author_role")
+  anchor             Json?
+  body               String
+  createdAt          DateTime     @default(now()) @map("created_at")
+  resolvedAt         DateTime?    @map("resolved_at")
+
+  globalSubmission GlobalSubmission @relation(fields: [globalSubmissionId], references: [id], onDelete: Cascade)
+
+  @@index([globalSubmissionId])
+  @@map("global_reviewer_comments")
 }
 
 /// One row per wizard step (8 per draft). Submissions attach here, not on the draft root.

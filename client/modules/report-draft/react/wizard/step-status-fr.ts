@@ -13,6 +13,12 @@ export function stepStatusLabelFr(
       return "Révisions demandées";
     case "approved":
       return "Validée";
+    case "in-global-progress":
+      return "Révision globale — en cours";
+    case "awaiting-global-review":
+      return "Révision globale — en attente QC";
+    case "needs-global-revision":
+      return "Révision globale — à corriger";
   }
 }
 
@@ -25,10 +31,14 @@ export function stepStatusPillClassFr(
     case "approved":
       return `${base} border-emerald-300 bg-emerald-50 text-emerald-950`;
     case "awaiting-review":
+    case "awaiting-global-review":
       return `${base} border-amber-300 bg-amber-50 text-amber-950`;
     case "needs-revision":
+    case "needs-global-revision":
       return `${base} border-rose-300 bg-rose-50 text-rose-950`;
     case "in-progress":
       return `${base} border-slate-200 bg-slate-50 text-slate-800`;
+    case "in-global-progress":
+      return `${base} border-violet-300 bg-violet-50 text-violet-950`;
   }
 }

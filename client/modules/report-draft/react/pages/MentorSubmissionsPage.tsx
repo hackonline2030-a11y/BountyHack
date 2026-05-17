@@ -14,6 +14,8 @@ import {
   sessionExpiredUserMessage,
 } from "@/lib/session-refresh";
 import { ActionButton } from "@modules/app/nextjs/components/buttons/ActionButton";
+import { GlobalRevisionRequestsTable } from "@modules/report-draft/react/components/GlobalRevisionRequestsTable";
+import { ScrollableTablePanel } from "@modules/report-draft/react/components/ScrollableTablePanel";
 import { SubmissionReviewDraftTitleCell } from "@modules/report-draft/react/components/SubmissionReviewDraftTitleCell";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
@@ -74,6 +76,12 @@ export const MentorSubmissionsPage: React.FC<Props> = ({ lng }) => {
         </p>
       </header>
 
+      <GlobalRevisionRequestsTable
+        draftsById={draftsById}
+        lng={lng}
+        reviewBasePath={`/${lng}/mentor-global-revisions`}
+      />
+
       {reviewList.status === "loading" ? (
         <p className="text-sm text-dashboard-text-muted">Chargement…</p>
       ) : null}
@@ -96,9 +104,13 @@ export const MentorSubmissionsPage: React.FC<Props> = ({ lng }) => {
       ) : null}
 
       {rows.length > 0 ? (
-        <div className="overflow-x-auto rounded-lg border border-form-border bg-white shadow-sm">
+        <section>
+          <h2 className="text-lg font-semibold text-dashboard-text">
+            Soumissions hunter → mentor
+          </h2>
+          <ScrollableTablePanel className="mt-3">
           <table className="w-full min-w-[960px] text-left text-sm">
-            <thead className="border-b border-form-border bg-form-overlay text-form-text-muted">
+            <thead className="sticky top-0 z-10 border-b border-form-border bg-form-overlay text-form-text-muted">
               <tr>
                 <th className="px-3 py-3 font-medium">Rapport</th>
                 <th className="px-3 py-3 font-medium">ID rapport</th>
@@ -168,7 +180,8 @@ export const MentorSubmissionsPage: React.FC<Props> = ({ lng }) => {
               })}
             </tbody>
           </table>
-        </div>
+          </ScrollableTablePanel>
+        </section>
       ) : null}
 
       <ActionButton

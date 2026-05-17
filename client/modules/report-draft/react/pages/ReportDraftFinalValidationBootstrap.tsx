@@ -9,11 +9,13 @@ import { useAppDispatch, useAppSelector } from "@store/redux/store";
 type Props = {
   draftId: string;
   teamsHref: string;
+  lng: string;
 };
 
 export const ReportDraftFinalValidationBootstrap: React.FC<Props> = ({
   draftId,
   teamsHref,
+  lng,
 }) => {
   const dispatch = useAppDispatch();
   const load = useAppSelector((s) => s.reportDrafts.load);
@@ -35,7 +37,9 @@ export const ReportDraftFinalValidationBootstrap: React.FC<Props> = ({
     return <ErrorState message={message} backHref={teamsHref} />;
   }
 
-  return <ReportDraftFinalValidationWorkspacePage draft={draft} teamsHref={teamsHref} />;
+  return (
+    <ReportDraftFinalValidationWorkspacePage draft={draft} teamsHref={teamsHref} lng={lng} />
+  );
 };
 
 const LoadingState: React.FC = () => (

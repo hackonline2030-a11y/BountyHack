@@ -1,4 +1,5 @@
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
+import { isGlobalStepStatus } from "@modules/report-draft/core/model/global-step-status";
 import { reportDraftStepToStateKey } from "@modules/report-draft/core/model/report-draft-step-keys";
 
 /**
@@ -25,6 +26,7 @@ export function reconcileDraftStepStatusFromSubmissions(
 
     const key = reportDraftStepToStateKey(step);
     const stepState = next[key] as ReportDraftDomainModel.StepState<unknown>;
+    if (isGlobalStepStatus(stepState.status)) continue;
     if (stepState.status === "awaiting-review") {
       stepState.status = "needs-revision";
     }

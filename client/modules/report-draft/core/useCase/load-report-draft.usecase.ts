@@ -45,6 +45,19 @@ export const loadReportDraft =
         }
       }
 
+      const globalSubmissions = await deps.globalSubmissionRepository.findByDraftId(
+        draft.id,
+      );
+      for (const globalSubmission of globalSubmissions) {
+        dispatch(reportDraftsSlice.actions.globalSubmissionUpserted(globalSubmission));
+        const comments = await deps.globalSubmissionRepository.listComments(
+          globalSubmission.id,
+        );
+        if (comments.length > 0) {
+          dispatch(reportDraftsSlice.actions.globalReviewerCommentsUpserted(comments));
+        }
+      }
+
       const reconciled = reconcileDraftStepStatusFromSubmissions(draft, submissions);
       if (reconciled.version !== draft.version || reconciled.meta.status !== draft.meta.status) {
         dispatch(reportDraftsSlice.actions.draftUpserted(reconciled));

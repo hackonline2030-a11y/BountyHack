@@ -22,6 +22,8 @@ import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-
 export type ReportDraftsState = {
   byId: Record<string, ReportDraftDomainModel.ReportDraft>;
   submissionsById: Record<string, ReportDraftDomainModel.Submission<unknown>>;
+  globalSubmissionsById: Record<string, ReportDraftDomainModel.GlobalSubmission>;
+  globalReviewerCommentsById: Record<string, ReportDraftDomainModel.GlobalReviewerComment>;
   commentsById: Record<string, ReportDraftDomainModel.ReviewerComment>;
 
   /** Id of the draft currently being edited by the wizard. */
@@ -32,6 +34,8 @@ export type ReportDraftsState = {
   pendingSubmissionIds: string[];
   /** Mentor advisory threads visible on the QC board (same teams). */
   mentorPeerSubmissionIds: string[];
+  /** Global submissions for QC/mentor boards (newest list from last fetch). */
+  pendingGlobalSubmissionIds: string[];
   /** Submission currently open on the QC review board. */
   currentSubmissionId: string | null;
 
@@ -43,6 +47,7 @@ export type ReportDraftsState = {
   list: OperationStatus;
   reviewList: OperationStatus;
   mentorPeerList: OperationStatus;
+  globalReviewList: OperationStatus;
   /** Shared status for every aggregate transition (submit / approve / request / resume / giveUp / reject). */
   transition: OperationStatus;
 };
@@ -62,11 +67,14 @@ export type OperationStatus =
 export const reportDraftsInitialState: ReportDraftsState = {
   byId: {},
   submissionsById: {},
+  globalSubmissionsById: {},
+  globalReviewerCommentsById: {},
   commentsById: {},
   currentDraftId: null,
   myDraftIds: [],
   pendingSubmissionIds: [],
   mentorPeerSubmissionIds: [],
+  pendingGlobalSubmissionIds: [],
   currentSubmissionId: null,
   creation: { status: "idle" },
   load: { status: "idle" },
@@ -74,6 +82,7 @@ export const reportDraftsInitialState: ReportDraftsState = {
   list: { status: "idle" },
   reviewList: { status: "idle" },
   mentorPeerList: { status: "idle" },
+  globalReviewList: { status: "idle" },
   transition: { status: "idle" },
 };
 
@@ -102,6 +111,20 @@ export const reportDraftsSlice = createSlice({
       action: PayloadAction<ReportDraftDomainModel.Submission<unknown>>,
     ) => {
       state.submissionsById[action.payload.id] = action.payload;
+    },
+    globalSubmissionUpserted: (
+      state,
+      action: PayloadAction<ReportDraftDomainModel.GlobalSubmission>,
+    ) => {
+      state.globalSubmissionsById[action.payload.id] = action.payload;
+    },
+    globalReviewerCommentsUpserted: (
+      state,
+      action: PayloadAction<ReportDraftDomainModel.GlobalReviewerComment[]>,
+    ) => {
+      for (const comment of action.payload) {
+        state.globalReviewerCommentsById[comment.id] = comment;
+      }
     },
     /** Append (or replace by id) a batch of reviewer comments. */
     commentsUpserted: (
@@ -204,6 +227,20 @@ export const reportDraftsSlice = createSlice({
     },
     mentorPeerListFailed: (state, action: PayloadAction<{ message: string }>) => {
       state.mentorPeerList = { status: "error", message: action.payload.message };
+    },
+
+    globalReviewListStarted: (state) => {
+      state.globalReviewList = { status: "loading" };
+    },
+    globalReviewListSucceeded: (
+      state,
+      action: PayloadAction<{ globalSubmissionIds: string[] }>,
+    ) => {
+      state.pendingGlobalSubmissionIds = action.payload.globalSubmissionIds;
+      state.globalReviewList = { status: "success" };
+    },
+    globalReviewListFailed: (state, action: PayloadAction<{ message: string }>) => {
+      state.globalReviewList = { status: "error", message: action.payload.message };
     },
 
     // ──────────────────────────────────────────────────────────────────

@@ -33,6 +33,7 @@ export default async function FinalValidationDraftPage({ params }: PageProps) {
         <ReportDraftFinalValidationBootstrap
           draftId={draftId}
           teamsHref={teamsHref}
+          lng={lng}
         />
       </Section>
     </main>

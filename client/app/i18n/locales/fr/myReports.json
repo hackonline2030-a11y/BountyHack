@@ -6,6 +6,108 @@
       "backToReports": "← Retour à mes rapports",
       "backToReportsAria": "Retour à la liste de mes brouillons"
     },
+    "qcSubmissions": {
+      "filteredHeading": "Soumissions de ce rapport",
+      "filteredSubheading": "Soumissions hunter vers le QC pour ce rapport uniquement.",
+      "superAdminSectionTitle": "Retours super-admin (révision globale)",
+      "superAdminSectionHint": "Lecture seule — le hunter corrige ensuite étape par étape ou demande une validation totale.",
+      "globalRevisionTableTitle": "Révisions globales super-admin",
+      "globalRevisionTableHint": "Une ligne par demande de révision du super-admin (pas une soumission hunter). « Consulter » ouvre le brouillon complet en lecture seule avec l’onglet retours super-admin.",
+      "openGlobalRevision": "Ouvrir la révision",
+      "globalSubmissionsTitle": "Soumissions globales (révision super-admin)",
+      "globalSubmissionsEmpty": "Aucune soumission globale pour l’instant.",
+      "globalSubmissionStepLabel": "Révision globale",
+      "openGlobalSubmissionReview": "Revoir le brouillon",
+      "hunterSubmissionsTitle": "Soumissions hunter → QC (par étape)",
+      "emptyFiltered": "Aucune soumission hunter pour ce rapport.",
+      "globalRevisionOnReportHint": "Une révision globale super-admin est ouverte sur ce rapport.",
+      "openGlobalRevisionDraft": "Consulter le brouillon et les retours super-admin"
+    },
+    "globalRevisionEvent": {
+      "awaitingReviewers": {
+        "short": "Soumission globale n°{{revision}} — en attente QC et super-admin."
+      },
+      "changesRequested": {
+        "short": "Révisions demandées (n°{{revision}})."
+      },
+      "partiallyApproved": {
+        "short": "Validée QC ou SA (n°{{revision}}) — resoumission globale possible."
+      },
+      "openCommentsTab": "Commentaires",
+      "openSuperAdminTab": "Retours super-admin"
+    },
+    "globalComments": {
+      "sectionTitle": "Commentaires globaux",
+      "revisionHeading": "Révision globale n°{{revision}}"
+    },
+    "globalSubmissionReview": {
+      "hint": "Validez la révision globale (pas le rapport final). Le super-admin valide ensuite le rapport.",
+      "actionsTitle": "Décision sur cette révision",
+      "revisionCommentLabel": "Commentaire pour le hunter",
+      "revisionCommentPlaceholder": "Décrivez les corrections attendues…",
+      "approveRevision": "Valider la révision globale",
+      "requestRevision": "Demander des révisions au hunter",
+      "alreadyDecided": "Cette soumission globale a déjà été traitée.",
+      "readOnlyClosedCycle": "Cycle de révision globale terminé (lecture seule). Validez le rapport depuis la validation finale si le brouillon est prêt à soumettre.",
+      "commentsTitle": "Commentaires enregistrés",
+      "superAdminReportHint": "Après validation de la révision globale, validez le rapport (ou demandez une nouvelle révision globale) depuis",
+      "openFinalValidation": "la page validation finale",
+      "hunterFeedbackTitle": "Retours révision globale",
+      "hunterFeedbackHint": "Révision n°{{revision}} — corrigez puis resoumettez globalement."
+    },
+    "globalRevisionReview": {
+      "back": "← Retour aux soumissions",
+      "badge": "Révision globale super-admin",
+      "requestedAt": "Demandée le {{date}}",
+      "readOnlyHint": "Lecture seule — dernier état du brouillon (toutes les étapes), tel qu’il est enregistré actuellement.",
+      "tablistAria": "Revue révision globale",
+      "tabs": {
+        "reportPreview": "Aperçu du rapport",
+        "superAdminFeedback": "Retours super-admin"
+      },
+      "table": {
+        "report": "Rapport",
+        "requestedAt": "Demandée le",
+        "status": "Statut",
+        "consult": "Consulter le brouillon"
+      }
+    },
+    "teamReports": {
+      "back": "Accueil",
+      "heading": "Rapports d’équipe",
+      "subheading": "Un rapport par équipe. Ouvre une carte pour voir les soumissions et les retours super-admin de ce brouillon uniquement.",
+      "loading": "Chargement…",
+      "empty": "Aucun rapport d’équipe pour l’instant.",
+      "globalRevisionBadge": "Révision globale super-admin en cours",
+      "openSubmissions": "Voir les soumissions de ce rapport"
+    },
+    "wizard": {
+      "finalStep": {
+        "awaitingLeadValidation": "Dernière étape validée : en attente de validation finale.",
+        "leadValidated": "Rapport validé par le Lead.",
+        "globalRevisionInProgress": "Révision globale en cours — consulte l’onglet « Retours super-admin »."
+      },
+      "globalSubmit": {
+        "button": "Soumettre le brouillon globalement",
+        "hint": "Envoie toutes les étapes encore modifiables au quality checker en une fois.",
+        "disabledNone": "Toutes les étapes sont déjà soumises ou validées."
+      }
+    },
+    "superAdminFeedback": {
+      "noDraft": "Aucun brouillon chargé.",
+      "empty": "Aucun retour super-admin pour ce rapport.",
+      "revisionBannerShort": "Révision globale ouverte par le super-admin.",
+      "steps": {
+        "meta": "Métadonnées",
+        "description": "Description",
+        "collection": "Collecte",
+        "exploitation": "Exploitation",
+        "proofOfConcept": "Preuve de concept",
+        "risks": "Risques",
+        "remediation": "Remédiation",
+        "final": "Finalisation"
+      }
+    },
     "subheading": "Retrouvez ici tous vos rapports de vulnérabilité en cours de rédaction et leur état d'avancement.",
     "actions": {
       "newReport": "Nouveau rapport",
@@ -31,11 +133,14 @@
       "updatedAt": "Mis à jour le {{date}}",
       "stepsProgress": "{{approved}} / {{total}} étapes validées",
       "stepsProgressAria": "{{approved}} étapes validées sur {{total}}",
+      "globalRevisionNumber": "Révision globale n°{{n}}",
       "open": "Ouvrir"
     },
     "status": {
       "draft": "Brouillon",
       "under-review": "En relecture",
+      "under-global-review": "En relecture globale",
+      "globalRevisionInProgress": "En cours de relecture globale",
       "ready-to-program": "Prêt à soumettre",
       "submitted-to-program": "Soumis au programme",
       "given-up": "Abandonné",

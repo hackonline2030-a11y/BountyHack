@@ -11,6 +11,7 @@
           "all": "Tous les statuts",
           "ready-to-program": "Prêt à soumettre (défaut)",
           "under-review": "En relecture",
+          "under-global-review": "En relecture globale",
           "draft": "Brouillon",
           "submitted-to-program": "Soumis au programme",
           "rejected": "Rejeté",
@@ -38,7 +39,44 @@
         "backToTeams": "← Retour aux équipes",
         "tablistAria": "Validation finale du rapport",
         "tabs": {
-          "generalPreview": "Aperçu général"
+          "generalPreview": "Aperçu général",
+          "superAdminComments": "Commentaires"
+        },
+        "actions": {
+          "heading": "Décision finale",
+          "hint": "La validation finale est disponible lorsque toutes les étapes sont approuvées par le quality checker (statut prêt à soumettre). Pour demander une révision globale, enregistrez d’abord vos commentaires par étape.",
+          "status": {
+            "roleQualityChecker": "quality checker",
+            "roleSuperAdmin": "super-admin",
+            "globalCycleClosed": "Révision globale n°{{revision}} validée par le {{role}}. Le brouillon ne peut plus être renvoyé en révision globale. Seul le super-admin peut valider définitivement ce brouillon.",
+            "globalCycleOpenPendingSa": "Révision globale n°{{revision}} en cours — votre validation ou vos retours sont attendus avant la validation finale.",
+            "globalCycleOpen": "Révision globale n°{{revision}} en cours — en attente des décisions QC / super-admin.",
+            "readyNoGlobalYet": "Brouillon prêt à soumettre. Vous pouvez demander une révision globale (une seule fois) ou valider définitivement le brouillon.",
+            "awaitingReady": "Validation finale indisponible tant que le brouillon n’est pas prêt à soumettre.",
+            "submitted": "Brouillon déjà soumis au programme."
+          },
+          "approve": "Validation finale",
+          "requestRevision": "Demander révision",
+          "approveDisabledTitle": "Requiert le statut prêt à soumettre et l’étape Finalisation validée par le quality checker",
+          "revisionDisabledTitle": "Enregistrez au moins un commentaire super-admin avant de demander une révision",
+          "revisionAlreadyUsedTitle": "La révision globale a déjà été demandée une fois pour ce rapport",
+          "pendingGlobalReviewHint": "Une soumission globale est en attente de revue (QC ou super-admin) avant la validation finale du rapport.",
+          "openGlobalSubmissionReview": "Ouvrir la revue de la soumission globale"
+        },
+        "comments": {
+          "intro": "Un commentaire général par étape. L’équipe (hunter, mentor, quality checker) les consulte dans l’onglet « Retours super-admin ».",
+          "placeholder": "Retour pour cette étape…",
+          "save": "Enregistrer les commentaires",
+          "steps": {
+            "meta": "Métadonnées",
+            "description": "Description",
+            "collection": "Collecte",
+            "exploitation": "Exploitation",
+            "proofOfConcept": "Preuve de concept",
+            "risks": "Risques",
+            "remediation": "Remédiation",
+            "final": "Finalisation"
+          }
         }
       }
     }

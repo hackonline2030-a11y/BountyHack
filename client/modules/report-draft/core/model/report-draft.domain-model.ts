@@ -121,14 +121,18 @@ export namespace ReportDraftDomainModel {
     | "super_admin";
 
   export type StepStatus =
-    | "in-progress"      // le hunter édite
-    | "awaiting-review"  // soumis, en attente d'un reviewer
-    | "needs-revision"   // reviewer a demandé des changements
-    | "approved";        // step validé par le reviewer
+    | "in-progress"              // le hunter édite (workflow par étape)
+    | "awaiting-review"          // soumis, en attente QC/mentor par étape
+    | "needs-revision"           // révisions demandées par étape
+    | "approved"                 // étape validée par le QC
+    | "in-global-progress"       // révision globale super-admin — hunter édite
+    | "needs-global-revision"      // QC a demandé des changements sur la soumission globale
+    | "awaiting-global-review";    // soumission globale en attente QC
 
   export type AggregateStatus =
     | "draft"
     | "under-review"
+    | "under-global-review"
     | "ready-to-program"
     | "submitted-to-program"
     | "given-up"
@@ -198,6 +202,10 @@ export namespace ReportDraftDomainModel {
     updatedAt: string;
     /** Titre équipe coordinateur + roster (réponse API) — pas le titre contenu META. */
     reportTeam?: ReportDraftTeamSummary | null;
+    /** Set when super-admin requests a global revision (cleared on final approval). */
+    superAdminRevisionRequestedAt?: string | null;
+    /** Monotonic count of super-admin global revision requests. */
+    superAdminGlobalRevisionCount?: number;
     // TODO V2 (dette consciente) : terminationReason / terminatedBy /
     // terminatedByRole / terminatedAt pour audit des given-up et rejected
   }
@@ -218,6 +226,32 @@ export namespace ReportDraftDomainModel {
     decision: "pending" | "approve" | "request-changes" | "endorse";
     decidedAt?: string;
     decidedBy?: string;
+  }
+
+  /** Whole-draft submission after super-admin global revision (not tied to one step). */
+  export interface GlobalSubmission {
+    id: string;
+    reportDraftId: ReportDraftId;
+    revisionNumber: number;
+    payload: Record<string, unknown>;
+    submittedAt: string;
+    submittedBy: string;
+    reviewerRole: ReviewerRole;
+    decision: "pending" | "approve" | "request-changes" | "endorse";
+    decidedAt?: string;
+    decidedBy?: string;
+  }
+
+  /** Comment on a global submission (QC or super-admin). */
+  export interface GlobalReviewerComment {
+    id: string;
+    globalSubmissionId: string;
+    authorId: string;
+    authorRole: ReviewerRole;
+    anchor?: { field: string } | null;
+    body: string;
+    createdAt: string;
+    resolvedAt?: string;
   }
 
   // ============================================================

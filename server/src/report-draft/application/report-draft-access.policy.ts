@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { AppRoleCode } from '../../shared/rbac/app-role.code';
 import type { Identity } from '../../auth/domain/models/identity';
+import type { GlobalSubmissionWire } from '../models/global-submission-api.types';
 import type {
   ReviewerRoleWire,
   SubmissionWire,
@@ -162,6 +163,60 @@ export class ReportDraftAccessPolicy {
       throw new ForbiddenException('Cannot access comments for submission');
     }
     await this.assertCanReadSubmission(identity, submission);
+  }
+
+  async assertCanDecideGlobalSubmission(
+    identity: Identity,
+    globalSubmission: GlobalSubmissionWire,
+  ): Promise<void> {
+    if (globalSubmission.decision !== 'pending') {
+      throw new ForbiddenException('Global submission is already decided');
+    }
+    const draft = await this.reportDraftRepository.findById(
+      globalSubmission.reportDraftId,
+    );
+    if (draft === null) {
+      throw new ForbiddenException('Cannot access this global submission');
+    }
+    await this.assertCanReadDraft(identity, draft);
+
+    if (!draft.superAdminRevisionRequestedAt?.trim()) {
+      throw new ForbiddenException('Global revision cycle is closed');
+    }
+
+    if (!this.identityMatchesReviewerRole(identity, globalSubmission.reviewerRole)) {
+      throw new ForbiddenException(
+        'Cannot decide a global submission assigned to another reviewer role',
+      );
+    }
+  }
+
+  async assertCanReadGlobalSubmission(
+    identity: Identity,
+    globalSubmission: GlobalSubmissionWire,
+  ): Promise<void> {
+    const draft = await this.reportDraftRepository.findById(
+      globalSubmission.reportDraftId,
+    );
+    if (draft === null) {
+      throw new ForbiddenException('Cannot access this global submission');
+    }
+    await this.assertCanReadDraft(identity, draft);
+  }
+
+  async assertCanCommentOnGlobalSubmission(
+    identity: Identity,
+    globalSubmission: GlobalSubmissionWire,
+  ): Promise<void> {
+    await this.assertCanReadGlobalSubmission(identity, globalSubmission);
+    if (
+      identity.roleCode !== AppRoleCode.QUALITY_CHECKER &&
+      identity.roleCode !== AppRoleCode.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException(
+        'Only quality checker or super admin can comment on global submissions',
+      );
+    }
   }
 
   async assertCanSaveComments(

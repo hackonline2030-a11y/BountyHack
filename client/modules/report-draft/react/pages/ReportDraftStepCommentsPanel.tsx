@@ -4,6 +4,7 @@ import { type FC, useMemo } from "react";
 import { useT } from "next-i18next/client";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { ReportDraftMentorEndorsementsSection } from "@modules/report-draft/react/components/ReportDraftMentorEndorsementsSection";
+import { ReportDraftGlobalCommentsSection } from "@modules/report-draft/react/components/ReportDraftGlobalCommentsSection";
 import {
   GENERAL_REVIEW_COMMENT_FIELD,
   isGeneralReviewComment,
@@ -57,6 +58,9 @@ export const ReportDraftStepCommentsPanel: FC = () => {
 
   return (
     <div className="flex flex-col gap-8">
+      {draftId ? (
+        <ReportDraftGlobalCommentsSection draftId={draftId} placement="quality_checker" />
+      ) : null}
       <ReportDraftMentorEndorsementsSection step={step} />
 
       <section className="flex flex-col gap-3" aria-labelledby="step-review-comments-heading">

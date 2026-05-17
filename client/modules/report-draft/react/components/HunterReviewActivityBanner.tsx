@@ -85,7 +85,7 @@ export const HunterReviewActivityBanner: React.FC = () => {
   }
 
   return (
-    <div className="mb-3 flex flex-col gap-2">
+    <div className="flex flex-col gap-2">
       {endorseLine ? (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50/95 px-3 py-2 text-sm text-emerald-950 shadow-sm">
           <p className="font-medium leading-snug">{endorseLine}</p>

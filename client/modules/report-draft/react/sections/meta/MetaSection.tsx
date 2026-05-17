@@ -2,7 +2,10 @@
 
 import { type FC, type ReactNode } from "react";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
+import { ReportDraftGlobalSubmitButton } from "@modules/report-draft/react/components/ReportDraftGlobalSubmitButton";
 import { useMetaSection } from "@modules/report-draft/react/sections/meta/use-meta-section";
+
+const META_STEP = ReportDraftDomainModel.ReportDraftStep.META;
 
 /** META step UI — **Soumettre pour revue** persiste à la soumission ; **Suivant** après validation QC. */
 export const MetaSection: FC = () => {
@@ -10,6 +13,7 @@ export const MetaSection: FC = () => {
     draft,
     setField,
     editable,
+    hidePerStepSubmit,
     canNavigateNext,
     reviewerRole,
     setReviewerRole,
@@ -310,14 +314,17 @@ export const MetaSection: FC = () => {
         >
           Suivant
         </button>
-        <button
-          type="button"
-          className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
-          onClick={() => void onSubmitForReview()}
-          disabled={transitionBusy || !editable}
-        >
-          Soumettre cette étape pour revue
-        </button>
+        {!hidePerStepSubmit ? (
+          <button
+            type="button"
+            className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
+            onClick={() => void onSubmitForReview()}
+            disabled={transitionBusy || !editable}
+          >
+            Soumettre cette étape pour revue
+          </button>
+        ) : null}
+        <ReportDraftGlobalSubmitButton currentStep={META_STEP} currentPayload={draft} />
       </div>
     </form>
   );

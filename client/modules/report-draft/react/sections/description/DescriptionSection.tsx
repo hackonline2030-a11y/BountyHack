@@ -4,7 +4,10 @@ import { type FC, type ReactNode } from "react";
 import type { CvssMetricOption } from "@modules/report-draft/core/catalog/cvss-metrics.catalog";
 import type { CvssSeverity } from "@modules/report-draft/core/cvss/cvss-3.1";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
+import { ReportDraftGlobalSubmitButton } from "@modules/report-draft/react/components/ReportDraftGlobalSubmitButton";
 import { useDescriptionSection } from "@modules/report-draft/react/sections/description/use-description-section";
+
+const DESCRIPTION_STEP = ReportDraftDomainModel.ReportDraftStep.DESCRIPTION;
 
 /**
  * DESCRIPTION step UI. The 8 CVSS 3.1 base metric selects, plus a derived
@@ -20,6 +23,7 @@ export const DescriptionSection: FC = () => {
     draft,
     setField,
     editable,
+    hidePerStepSubmit,
     canNavigateNext,
     reviewerRole,
     setReviewerRole,
@@ -193,14 +197,20 @@ export const DescriptionSection: FC = () => {
         >
           Suivant
         </button>
-        <button
-          type="button"
-          className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
-          onClick={() => void onSubmitForReview()}
-          disabled={transitionBusy || !editable}
-        >
-          Soumettre cette étape pour revue
-        </button>
+        {!hidePerStepSubmit ? (
+          <button
+            type="button"
+            className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
+            onClick={() => void onSubmitForReview()}
+            disabled={transitionBusy || !editable}
+          >
+            Soumettre cette étape pour revue
+          </button>
+        ) : null}
+        <ReportDraftGlobalSubmitButton
+          currentStep={DESCRIPTION_STEP}
+          currentPayload={draft}
+        />
       </div>
     </form>
   );

@@ -9,8 +9,14 @@ import { reportDraftSlice } from "@modules/report-draft/core/store/report-draft.
 import { submitMentorAdvice } from "@modules/report-draft/core/useCase/submit-mentor-advice.usecase";
 import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-step-for-review.usecase";
 import { isStepValidationReviewerRole } from "@modules/report-draft/core/model/step-validation-reviewer";
+import { ReportDraftFinalStepStatusBanner } from "@modules/report-draft/react/components/ReportDraftFinalStepStatusBanner";
+import { ReportDraftGlobalSubmitButton } from "@modules/report-draft/react/components/ReportDraftGlobalSubmitButton";
 import { SectionBlocRepeater } from "@modules/report-draft/react/components/section-bloc/SectionBlocRepeater";
 import { reviewerRoleFromDraftStep } from "@modules/report-draft/react/wizard/reviewer-role-from-draft";
+import {
+  canWizardNavigateNext,
+  isSuperAdminGlobalRevisionMode,
+} from "@modules/report-draft/core/model/super-admin-final-validation";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
@@ -31,6 +37,13 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
     currentDraftId ? s.reportDrafts.byId[currentDraftId] : undefined,
   );
   const transition = useAppSelector((s) => s.reportDrafts.transition);
+  const globalSubmissions = useAppSelector((s) =>
+    currentDraftId
+      ? Object.values(s.reportDrafts.globalSubmissionsById).filter(
+          (g) => g.reportDraftId === currentDraftId,
+        )
+      : [],
+  );
 
   const stateKey = useMemo(() => reportDraftStepToStateKey(step), [step]);
   const rawPayload = draftRow?.[stateKey]?.payload;
@@ -57,8 +70,12 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
     setDraft(persistedPayload);
   }, [step, persistedPayload]);
 
-  const editable = isWizardStepEditable(stepStatus);
-  const canNavigateNext = stepStatus === "approved";
+  const editable = isWizardStepEditable(stepStatus, {
+    draft: draftRow,
+    globalSubmissions,
+  });
+  const hidePerStepSubmit = isSuperAdminGlobalRevisionMode(draftRow);
+  const canNavigateNext = canWizardNavigateNext(draftRow, stepStatus);
   const isLast = step === Step.FINAL;
 
   const onNext = useCallback(() => {
@@ -122,12 +139,11 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
           ) : null}
         </p>
       ) : null}
-      {isLast && canNavigateNext ? (
-        <p className="rounded-md border border-emerald-200 bg-emerald-50 p-2 text-sm text-emerald-950">
-          Dernière étape validée. Tu peux encore enrichir le brouillon si le workflow le permet, ou
-          quitter le wizard.
-        </p>
-      ) : null}
+      <ReportDraftFinalStepStatusBanner
+        draft={draftRow}
+        isLastStep={isLast}
+        stepApproved={stepStatus === "approved" || canNavigateNext}
+      />
 
       <div aria-label={label}>
         <SectionBlocRepeater
@@ -184,14 +200,17 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
             Suivant
           </button>
         ) : null}
-        <button
-          type="button"
-          className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
-          onClick={() => void submitForReview()}
-          disabled={transitionBusy || !editable || !submittedBy}
-        >
-          Soumettre cette étape pour revue
-        </button>
+        {!hidePerStepSubmit ? (
+          <button
+            type="button"
+            className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
+            onClick={() => void submitForReview()}
+            disabled={transitionBusy || !editable || !submittedBy}
+          >
+            Soumettre cette étape pour revue
+          </button>
+        ) : null}
+        <ReportDraftGlobalSubmitButton currentStep={step} currentPayload={draft} />
       </div>
     </>
   );

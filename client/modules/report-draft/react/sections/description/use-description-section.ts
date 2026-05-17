@@ -22,6 +22,10 @@ import { submitMentorAdvice } from "@modules/report-draft/core/useCase/submit-me
 import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-step-for-review.usecase";
 import { isStepValidationReviewerRole } from "@modules/report-draft/core/model/step-validation-reviewer";
 import { reviewerRoleFromDraftStep } from "@modules/report-draft/react/wizard/reviewer-role-from-draft";
+import {
+  canWizardNavigateNext,
+  isSuperAdminGlobalRevisionMode,
+} from "@modules/report-draft/core/model/super-admin-final-validation";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
@@ -34,6 +38,13 @@ export const useDescriptionSection = () => {
     currentDraftId ? s.reportDrafts.byId[currentDraftId] : undefined,
   );
   const transition = useAppSelector((s) => s.reportDrafts.transition);
+  const globalSubmissions = useAppSelector((s) =>
+    currentDraftId
+      ? Object.values(s.reportDrafts.globalSubmissionsById).filter(
+          (g) => g.reportDraftId === currentDraftId,
+        )
+      : [],
+  );
 
   const persistedDescription = draftRow?.description.payload ?? null;
   const stepStatus = draftRow?.description.status ?? "in-progress";
@@ -72,8 +83,12 @@ export const useDescriptionSection = () => {
   );
 
   const isSubmitable = useMemo(() => form.isSubmitable(draft), [form, draft]);
-  const editable = isWizardStepEditable(stepStatus);
-  const canNavigateNext = stepStatus === "approved";
+  const editable = isWizardStepEditable(stepStatus, {
+    draft: draftRow,
+    globalSubmissions,
+  });
+  const hidePerStepSubmit = isSuperAdminGlobalRevisionMode(draftRow);
+  const canNavigateNext = canWizardNavigateNext(draftRow, stepStatus);
   const transitionBusy = transition.status === "loading";
   const transitionErr =
     transition.status === "error" ? transition.message : null;
@@ -125,6 +140,7 @@ export const useDescriptionSection = () => {
     setField,
     isSubmitable,
     editable,
+    hidePerStepSubmit,
     stepStatus,
     canNavigateNext,
     reviewerRole,

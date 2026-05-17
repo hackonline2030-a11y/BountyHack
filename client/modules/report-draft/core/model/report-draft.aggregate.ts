@@ -6,6 +6,11 @@ import {
   reportDraftStepToStateKey,
   type ReportDraftStepStateKey,
 } from "./report-draft-step-keys";
+import {
+  isGlobalStepEditable,
+  isGlobalStepEligibleForSubmit,
+  isGlobalStepStatus,
+} from "./global-step-status";
 import { isStepValidationReviewerRole } from "./step-validation-reviewer";
 
 export interface ReportDraftAggregateDeps {
@@ -123,6 +128,18 @@ export class ReportDraftAggregate {
       );
     }
 
+    if (
+      this._state.aggregateStatus === "under-global-review" ||
+      isGlobalStepStatus(
+        (this._state[reportDraftStepToStateKey(input.step)] as ReportDraftDomainModel.StepState<unknown>)
+          .status,
+      )
+    ) {
+      throw new Error(
+        "ReportDraftAggregate: per-step submit is disabled during super-admin global revision; use global submit.",
+      );
+    }
+
     const stepKey = reportDraftStepToStateKey(input.step);
     const stepState = this._state[stepKey] as ReportDraftDomainModel.StepState<unknown>;
 
@@ -172,6 +189,44 @@ export class ReportDraftAggregate {
   }
 
   /**
+   * @deprecated Prefer server global submission API. Marks eligible global steps
+   * as awaiting-global-review (no per-step QC submissions).
+   */
+  submitAllStepsForGlobalRevision(input: {
+    submittedBy: string;
+  }): ReportDraftDomainModel.Submission<unknown>[] {
+    void input.submittedBy;
+    if (
+      this._state.aggregateStatus !== "under-global-review" ||
+      !this._state.superAdminRevisionRequestedAt?.trim()
+    ) {
+      throw new Error(
+        "ReportDraftAggregate: global batch submit is only allowed while under-global-review.",
+      );
+    }
+
+    const now = this.deps.clock.now();
+    let moved = 0;
+    for (const key of REPORT_DRAFT_STEP_STATE_KEYS) {
+      const stepState = this._state[key] as ReportDraftDomainModel.StepState<unknown>;
+      if (!isGlobalStepEligibleForSubmit(stepState.status)) continue;
+      stepState.status = "awaiting-global-review";
+      stepState.assignedReviewerRole = "quality_checker";
+      moved += 1;
+    }
+
+    if (moved === 0) {
+      throw new Error(
+        "ReportDraftAggregate: no steps eligible for global submit.",
+      );
+    }
+
+    this._state.updatedAt = now;
+    this._state.version += 1;
+    return [];
+  }
+
+  /**
    * Replace a step's in-progress payload (typing autosave / "Continuer"
    * button). Pure edit, no transition: bumps `updatedAt` + `version` but
    * leaves status, round and reviewer assignment untouched.
@@ -188,10 +243,14 @@ export class ReportDraftAggregate {
 
     const stepKey = reportDraftStepToStateKey(input.step);
     const stepState = this._state[stepKey] as ReportDraftDomainModel.StepState<unknown>;
-    if (stepState.status !== "in-progress" && stepState.status !== "needs-revision") {
+    const editable =
+      stepState.status === "in-progress" ||
+      stepState.status === "needs-revision" ||
+      isGlobalStepEditable(stepState.status);
+    if (!editable) {
       throw new Error(
         `ReportDraftAggregate: cannot edit step ${ReportDraftDomainModel.ReportDraftStep[input.step]}: ` +
-          `current status is '${stepState.status}', expected 'in-progress' or 'needs-revision'.`,
+          `current status is '${stepState.status}'.`,
       );
     }
 
@@ -210,10 +269,17 @@ export class ReportDraftAggregate {
 
     const stepKey = reportDraftStepToStateKey(step);
     const stepState = this._state[stepKey] as ReportDraftDomainModel.StepState<unknown>;
+    if (stepState.status === "needs-global-revision") {
+      stepState.status = "in-global-progress";
+      this._state.updatedAt = this.deps.clock.now();
+      this._state.version += 1;
+      return;
+    }
+
     if (stepState.status !== "needs-revision") {
       throw new Error(
         `ReportDraftAggregate: cannot resume editing step ${ReportDraftDomainModel.ReportDraftStep[step]}: ` +
-          `current status is '${stepState.status}', expected 'needs-revision'.`,
+          `current status is '${stepState.status}', expected 'needs-revision' or 'needs-global-revision'.`,
       );
     }
 

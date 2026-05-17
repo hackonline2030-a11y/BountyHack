@@ -7,18 +7,31 @@ import { ReportDraftController } from './controllers/report-draft.controller';
 import { ReportDraftAdminController } from './controllers/report-draft-admin.controller';
 import { ReportDraftCoordinationController } from './controllers/report-draft-coordination.controller';
 import { SubmissionController } from './controllers/submission.controller';
+import { GlobalSubmissionController } from './controllers/global-submission.controller';
 import { ReviewerCommentController } from './controllers/reviewer-comment.controller';
 import { I_REPORT_DRAFT_REPOSITORY } from './ports/report-draft-repository.interface';
 import { I_SUBMISSION_REPOSITORY } from './ports/submission-repository.interface';
 import { I_REVIEWER_COMMENT_REPOSITORY } from './ports/reviewer-comment-repository.interface';
+import { I_GLOBAL_SUBMISSION_REPOSITORY } from './ports/global-submission-repository.interface';
+import { I_GLOBAL_REVIEWER_COMMENT_REPOSITORY } from './ports/global-reviewer-comment-repository.interface';
 import { PrismaReportDraftRepository } from './adapters/postgre-prisma/prisma-report-draft.repository';
 import { PrismaSubmissionRepository } from './adapters/postgre-prisma/prisma-submission.repository';
 import { PrismaReviewerCommentRepository } from './adapters/postgre-prisma/prisma-reviewer-comment.repository';
+import { PrismaGlobalSubmissionRepository } from './adapters/postgre-prisma/prisma-global-submission.repository';
+import { PrismaGlobalReviewerCommentRepository } from './adapters/postgre-prisma/prisma-global-reviewer-comment.repository';
+import { CreateGlobalSubmissionCommand } from './application/commands/create-global-submission.command';
+import { ApproveGlobalSubmissionCommand } from './application/commands/approve-global-submission.command';
+import { RequestGlobalSubmissionChangesCommand } from './application/commands/request-global-submission-changes.command';
+import { ListGlobalSubmissionsQuery } from './application/queries/list-global-submissions.query';
+import { GetGlobalSubmissionByIdQuery } from './application/queries/get-global-submission-by-id.query';
+import { ListGlobalReviewerCommentsQuery } from './application/queries/list-global-reviewer-comments.query';
 import { SaveReportDraftCommand } from './application/commands/save-report-draft.command';
 import { GetReportDraftByIdQuery } from './application/queries/get-report-draft-by-id.query';
 import { ListReportDraftsByHunterQuery } from './application/queries/list-report-drafts-by-hunter.query';
 import { ListReportDraftsForFinalValidationQuery } from './application/queries/list-report-drafts-for-final-validation.query';
 import { ListOrphanReportDraftsQuery } from './application/queries/list-orphan-report-drafts.query';
+import { SuperAdminFinalValidationService } from './application/admin/super-admin-final-validation.service';
+import { PrismaService } from '../core/infrastructure/database/prisma/prisma.service';
 import { SaveSubmissionCommand } from './application/commands/save-submission.command';
 import { GetSubmissionByIdQuery } from './application/queries/get-submission-by-id.query';
 import { ListSubmissionsQuery } from './application/queries/list-submissions.query';
@@ -34,6 +47,7 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
     ReportDraftAdminController,
     ReportDraftCoordinationController,
     SubmissionController,
+    GlobalSubmissionController,
     ReviewerCommentController,
   ],
   providers: [
@@ -48,6 +62,14 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
     {
       provide: I_REVIEWER_COMMENT_REPOSITORY,
       useClass: PrismaReviewerCommentRepository,
+    },
+    {
+      provide: I_GLOBAL_SUBMISSION_REPOSITORY,
+      useClass: PrismaGlobalSubmissionRepository,
+    },
+    {
+      provide: I_GLOBAL_REVIEWER_COMMENT_REPOSITORY,
+      useClass: PrismaGlobalReviewerCommentRepository,
     },
     {
       provide: ReportDraftAccessPolicy,
@@ -100,6 +122,30 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
       inject: [I_REPORT_DRAFT_REPOSITORY],
       useFactory: (repository: PrismaReportDraftRepository) =>
         new ListOrphanReportDraftsQuery(repository),
+    },
+    {
+      provide: SuperAdminFinalValidationService,
+      inject: [
+        PrismaService,
+        I_REPORT_DRAFT_REPOSITORY,
+        I_GLOBAL_SUBMISSION_REPOSITORY,
+        I_SUBMISSION_REPOSITORY,
+        I_REVIEWER_COMMENT_REPOSITORY,
+      ],
+      useFactory: (
+        prisma: PrismaService,
+        reportDraftRepository: PrismaReportDraftRepository,
+        globalSubmissionRepository: PrismaGlobalSubmissionRepository,
+        submissionRepository: PrismaSubmissionRepository,
+        commentRepository: PrismaReviewerCommentRepository,
+      ) =>
+        new SuperAdminFinalValidationService(
+          prisma,
+          reportDraftRepository,
+          globalSubmissionRepository,
+          submissionRepository,
+          commentRepository,
+        ),
     },
     {
       provide: SaveSubmissionCommand,
@@ -155,6 +201,113 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
       ) => new ListReviewerCommentsQuery(repository, access),
     },
     {
+      provide: CreateGlobalSubmissionCommand,
+      inject: [
+        I_GLOBAL_SUBMISSION_REPOSITORY,
+        I_REPORT_DRAFT_REPOSITORY,
+        ReportDraftAccessPolicy,
+      ],
+      useFactory: (
+        globalSubmissionRepository: PrismaGlobalSubmissionRepository,
+        reportDraftRepository: PrismaReportDraftRepository,
+        access: ReportDraftAccessPolicy,
+      ) =>
+        new CreateGlobalSubmissionCommand(
+          globalSubmissionRepository,
+          reportDraftRepository,
+          access,
+        ),
+    },
+    {
+      provide: ApproveGlobalSubmissionCommand,
+      inject: [
+        I_GLOBAL_SUBMISSION_REPOSITORY,
+        I_REPORT_DRAFT_REPOSITORY,
+        ReportDraftAccessPolicy,
+      ],
+      useFactory: (
+        globalSubmissionRepository: PrismaGlobalSubmissionRepository,
+        reportDraftRepository: PrismaReportDraftRepository,
+        access: ReportDraftAccessPolicy,
+      ) =>
+        new ApproveGlobalSubmissionCommand(
+          globalSubmissionRepository,
+          reportDraftRepository,
+          access,
+        ),
+    },
+    {
+      provide: RequestGlobalSubmissionChangesCommand,
+      inject: [
+        I_GLOBAL_SUBMISSION_REPOSITORY,
+        I_GLOBAL_REVIEWER_COMMENT_REPOSITORY,
+        I_REPORT_DRAFT_REPOSITORY,
+        ReportDraftAccessPolicy,
+      ],
+      useFactory: (
+        globalSubmissionRepository: PrismaGlobalSubmissionRepository,
+        commentRepository: PrismaGlobalReviewerCommentRepository,
+        reportDraftRepository: PrismaReportDraftRepository,
+        access: ReportDraftAccessPolicy,
+      ) =>
+        new RequestGlobalSubmissionChangesCommand(
+          globalSubmissionRepository,
+          commentRepository,
+          reportDraftRepository,
+          access,
+        ),
+    },
+    {
+      provide: ListGlobalReviewerCommentsQuery,
+      inject: [
+        I_GLOBAL_SUBMISSION_REPOSITORY,
+        I_GLOBAL_REVIEWER_COMMENT_REPOSITORY,
+        ReportDraftAccessPolicy,
+      ],
+      useFactory: (
+        globalSubmissionRepository: PrismaGlobalSubmissionRepository,
+        commentRepository: PrismaGlobalReviewerCommentRepository,
+        access: ReportDraftAccessPolicy,
+      ) =>
+        new ListGlobalReviewerCommentsQuery(
+          globalSubmissionRepository,
+          commentRepository,
+          access,
+        ),
+    },
+    {
+      provide: ListGlobalSubmissionsQuery,
+      inject: [
+        I_GLOBAL_SUBMISSION_REPOSITORY,
+        I_REPORT_DRAFT_REPOSITORY,
+        ReportDraftAccessPolicy,
+      ],
+      useFactory: (
+        repository: PrismaGlobalSubmissionRepository,
+        reportDraftRepository: PrismaReportDraftRepository,
+        access: ReportDraftAccessPolicy,
+      ) =>
+        new ListGlobalSubmissionsQuery(repository, reportDraftRepository, access),
+    },
+    {
+      provide: GetGlobalSubmissionByIdQuery,
+      inject: [
+        I_GLOBAL_SUBMISSION_REPOSITORY,
+        I_REPORT_DRAFT_REPOSITORY,
+        ReportDraftAccessPolicy,
+      ],
+      useFactory: (
+        globalSubmissionRepository: PrismaGlobalSubmissionRepository,
+        reportDraftRepository: PrismaReportDraftRepository,
+        access: ReportDraftAccessPolicy,
+      ) =>
+        new GetGlobalSubmissionByIdQuery(
+          globalSubmissionRepository,
+          reportDraftRepository,
+          access,
+        ),
+    },
+    {
       provide: ListReviewerCommentsForStepQuery,
       inject: [
         I_REVIEWER_COMMENT_REPOSITORY,
@@ -176,6 +329,8 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
   exports: [
     I_REPORT_DRAFT_REPOSITORY,
     I_SUBMISSION_REPOSITORY,
+    I_GLOBAL_SUBMISSION_REPOSITORY,
+    I_GLOBAL_REVIEWER_COMMENT_REPOSITORY,
     I_REVIEWER_COMMENT_REPOSITORY,
   ],
 })

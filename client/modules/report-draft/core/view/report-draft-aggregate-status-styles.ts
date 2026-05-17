@@ -9,6 +9,8 @@ export function reportDraftAggregateStatusRowClass(
       return "bg-slate-100/90 hover:bg-slate-200/90";
     case "under-review":
       return "bg-amber-50/95 hover:bg-amber-100/95";
+    case "under-global-review":
+      return "bg-violet-50/95 hover:bg-violet-100/95";
     case "ready-to-program":
       return "bg-emerald-50/95 hover:bg-emerald-100/95";
     case "submitted-to-program":
@@ -29,6 +31,8 @@ export function reportDraftAggregateStatusBadgeClass(
       return "bg-slate-200 text-slate-900";
     case "under-review":
       return "bg-amber-200 text-amber-950";
+    case "under-global-review":
+      return "bg-violet-200 text-violet-950";
     case "ready-to-program":
       return "bg-emerald-200 text-emerald-950";
     case "submitted-to-program":

@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -13,7 +13,13 @@ import {
   ApiHttpUnauthorized,
 } from '../../core/dto/api-http-responses';
 import type { ReportDraftFinalValidationSummary } from '../models/report-draft-final-validation-summary.model';
+import { RequestWithIdentity } from '../../auth/adapters/http/request-with-identity';
 import { ListReportDraftsForFinalValidationQuery } from '../application/queries/list-report-drafts-for-final-validation.query';
+import {
+  SuperAdminFinalValidationService,
+  type SuperAdminStepCommentInput,
+} from '../application/admin/super-admin-final-validation.service';
+import type { ReportDraftWire, ReviewerCommentWire } from '../models/report-draft-api.types';
 
 @ApiTags('report-drafts-admin')
 @ApiBearerAuth()
@@ -21,6 +27,7 @@ import { ListReportDraftsForFinalValidationQuery } from '../application/queries/
 export class ReportDraftAdminController {
   constructor(
     private readonly listForFinalValidation: ListReportDraftsForFinalValidationQuery,
+    private readonly superAdminFinalValidation: SuperAdminFinalValidationService,
   ) {}
 
   @Get('final-validation-queue')
@@ -36,5 +43,51 @@ export class ReportDraftAdminController {
   @ApiHttpInternalServerError('Unexpected error while listing validation queue.')
   async listFinalValidationQueue(): Promise<ReportDraftFinalValidationSummary[]> {
     return this.listForFinalValidation.execute();
+  }
+
+  @Post('drafts/:draftId/final-validate')
+  @AuthRoles(AppRoleCode.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Approve final validation and submit draft to program' })
+  @ApiOkResponse({ description: 'Updated report draft' })
+  async approveFinalValidation(
+    @Req() request: RequestWithIdentity,
+    @Param('draftId') draftId: string,
+  ): Promise<ReportDraftWire> {
+    return this.superAdminFinalValidation.approveFinalValidation(
+      request.user,
+      draftId,
+    );
+  }
+
+  @Post('drafts/:draftId/request-final-revision')
+  @AuthRoles(AppRoleCode.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Request a global revision from the whole report team',
+  })
+  @ApiOkResponse({ description: 'Updated report draft' })
+  async requestFinalRevision(
+    @Req() request: RequestWithIdentity,
+    @Param('draftId') draftId: string,
+  ): Promise<ReportDraftWire> {
+    return this.superAdminFinalValidation.requestFinalRevision(
+      request.user,
+      draftId,
+    );
+  }
+
+  @Post('drafts/:draftId/super-admin-comments')
+  @AuthRoles(AppRoleCode.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Save super-admin general comments per wizard step' })
+  @ApiOkResponse({ description: 'Saved comments' })
+  async saveSuperAdminComments(
+    @Req() request: RequestWithIdentity,
+    @Param('draftId') draftId: string,
+    @Body() body: { comments: SuperAdminStepCommentInput[] },
+  ): Promise<ReviewerCommentWire[]> {
+    return this.superAdminFinalValidation.saveStepComments(
+      request.user,
+      draftId,
+      body.comments ?? [],
+    );
   }
 }

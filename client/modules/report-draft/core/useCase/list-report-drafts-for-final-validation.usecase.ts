@@ -27,6 +27,9 @@ const STEP_STATUSES: readonly ReportDraftDomainModel.StepStatus[] = [
   "awaiting-review",
   "needs-revision",
   "approved",
+  "in-global-progress",
+  "needs-global-revision",
+  "awaiting-global-review",
 ] as const;
 
 const STEP_KEYS = [
