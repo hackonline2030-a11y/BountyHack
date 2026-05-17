@@ -52,4 +52,35 @@ describe("normalizeLongFormPayload", () => {
     expect(out.sectionBlocs).toHaveLength(1);
     expect(out.sectionBlocs[0]?.body).toBe("legacy prose");
   });
+
+  it("normalizes heading format and lists on section blocs", () => {
+    const out = normalizeLongFormPayload(
+      ReportDraftDomainModel.ReportDraftStep.COLLECTION,
+      {
+        sectionBlocs: [
+          {
+            id: "b1",
+            heading: "Titre",
+            headingFormat: { style: "bold", fontSize: "large", color: "#ff0000" },
+            body: "Texte",
+            lists: [
+              {
+                id: "l1",
+                ordered: true,
+                title: "Étapes",
+                titleBold: true,
+                items: ["Un", "Deux"],
+              },
+            ],
+          },
+        ],
+      },
+    );
+    const bloc = out.sectionBlocs[0];
+    expect(bloc?.headingFormat.style).toBe("bold");
+    expect(bloc?.headingFormat.fontSize).toBe("large");
+    expect(bloc?.lists).toHaveLength(1);
+    expect(bloc?.lists[0]?.ordered).toBe(true);
+    expect(bloc?.lists[0]?.items).toEqual(["Un", "Deux"]);
+  });
 });

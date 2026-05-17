@@ -44,8 +44,10 @@
     "activity": {
       "endorseBanner": "Avis favorable du mentor · étape {{step}} · {{name}} ({{date}})",
       "mentorEndorsementsTitle": "Avis favorables du mentor",
+      "mentorEndorsementsTitleStep": "Avis favorables du mentor — {{step}}",
       "mentorEndorsementsEmpty": "Aucun avis favorable enregistré pour ce rapport.",
       "mentorEndorsementItem": "Étape {{step}} · {{name}} ({{date}})",
+      "mentorEndorsementItemStep": "{{name}} ({{date}})",
       "stepCommentsTitle": "Commentaires de relecture (étape courante)",
       "commentBanner": "Nouveau commentaire de {{name}} ({{role}}) · {{date}}",
       "commentPreview": "« {{preview}} »",

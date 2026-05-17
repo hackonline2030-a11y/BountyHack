@@ -7,13 +7,18 @@ import {
   listMentorEndorsements,
   reviewerDisplayNameFromTeam,
 } from "@modules/report-draft/core/view/hunter-draft-review-activity";
+import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { reportDraftStepLabel } from "@modules/report-draft/react/wizard/report-draft-step-labels";
 import { useAppSelector } from "@store/redux/store";
 
+type Props = {
+  step: ReportDraftDomainModel.ReportDraftStep;
+};
+
 /**
- * Lists every mentor « avis favorable » on the draft (all steps), with step and mentor name.
+ * Mentor « avis favorable » for the active wizard step only (onglet Commentaires).
  */
-export const ReportDraftMentorEndorsementsSection: FC = () => {
+export const ReportDraftMentorEndorsementsSection: FC<Props> = ({ step }) => {
   const params = useParams<{ lng?: string }>();
   const lng = typeof params?.lng === "string" ? params.lng : "fr";
   const { t } = useT("myReports");
@@ -28,8 +33,8 @@ export const ReportDraftMentorEndorsementsSection: FC = () => {
     const submissions = Object.values(submissionsById).filter(
       (s) => s.reportDraftId === draft.id,
     );
-    return listMentorEndorsements(draft, submissions);
-  }, [draft, submissionsById]);
+    return listMentorEndorsements(draft, submissions).filter((e) => e.step === step);
+  }, [draft, submissionsById, step]);
 
   const dateFmt = useMemo(
     () =>
@@ -42,7 +47,9 @@ export const ReportDraftMentorEndorsementsSection: FC = () => {
     [lng],
   );
 
-  if (!draft) return null;
+  if (!draft || endorsements.length === 0) return null;
+
+  const stepLabel = reportDraftStepLabel(step, lng);
 
   return (
     <section className="flex flex-col gap-2" aria-labelledby="mentor-endorsements-heading">
@@ -50,29 +57,22 @@ export const ReportDraftMentorEndorsementsSection: FC = () => {
         id="mentor-endorsements-heading"
         className="text-sm font-semibold text-form-text"
       >
-        {t("myReports.activity.mentorEndorsementsTitle")}
+        {t("myReports.activity.mentorEndorsementsTitleStep", { step: stepLabel })}
       </h2>
-      {endorsements.length === 0 ? (
-        <p className="text-sm text-form-text-muted">
-          {t("myReports.activity.mentorEndorsementsEmpty")}
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-2">
-          {endorsements.map((e, index) => {
-            const name = reviewerDisplayNameFromTeam(draft, e.decidedBy);
-            const step = reportDraftStepLabel(e.step, lng);
-            const dateStr = dateFmt.format(new Date(e.decidedAt));
-            return (
-              <li
-                key={`${e.step}-${e.decidedAt}-${e.decidedBy}-${index}`}
-                className="rounded-md border border-emerald-200 bg-emerald-50/95 px-3 py-2 text-sm text-emerald-950"
-              >
-                {t("myReports.activity.mentorEndorsementItem", { step, name, date: dateStr })}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      <ul className="flex flex-col gap-2">
+        {endorsements.map((e, index) => {
+          const name = reviewerDisplayNameFromTeam(draft, e.decidedBy);
+          const dateStr = dateFmt.format(new Date(e.decidedAt));
+          return (
+            <li
+              key={`${e.step}-${e.decidedAt}-${e.decidedBy}-${index}`}
+              className="rounded-md border border-emerald-200 bg-emerald-50/95 px-3 py-2 text-sm text-emerald-950"
+            >
+              {t("myReports.activity.mentorEndorsementItemStep", { name, date: dateStr })}
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 };

@@ -57,7 +57,7 @@ export const ReportDraftStepCommentsPanel: FC = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      <ReportDraftMentorEndorsementsSection />
+      <ReportDraftMentorEndorsementsSection step={step} />
 
       <section className="flex flex-col gap-3" aria-labelledby="step-review-comments-heading">
         <h2

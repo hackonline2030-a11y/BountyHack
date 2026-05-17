@@ -64,6 +64,24 @@ export namespace ReportDraftDomainModel {
     availability: string;
   };
 
+  export type SectionHeadingStyle = "normal" | "italic" | "bold";
+  export type SectionFontSize = "small" | "medium" | "large" | "huge";
+
+  export type SectionHeadingFormat = {
+    style: SectionHeadingStyle;
+    fontSize: SectionFontSize;
+    /** HTML color (e.g. `#1e293b`). */
+    color: string;
+  };
+
+  export type SectionBlocList = {
+    id: string;
+    ordered: boolean;
+    title: string;
+    titleBold: boolean;
+    items: string[];
+  };
+
   /**
    * Free-form section inside a long-form wizard step (COLLECTION → FINAL).
    * Order in `sectionBlocs[]` = PDF order. Images use `attachmentId` (phase 2).
@@ -72,7 +90,10 @@ export namespace ReportDraftDomainModel {
     id: string;
     heading: string;
     subheading: string;
+    headingFormat: SectionHeadingFormat;
+    subheadingFormat: SectionHeadingFormat;
     body: string;
+    lists: SectionBlocList[];
     attachmentId: string | null;
   };
 

@@ -44,8 +44,10 @@
     "activity": {
       "endorseBanner": "Mentor endorsement · step {{step}} · {{name}} ({{date}})",
       "mentorEndorsementsTitle": "Mentor endorsements",
+      "mentorEndorsementsTitleStep": "Mentor endorsements — {{step}}",
       "mentorEndorsementsEmpty": "No mentor endorsements recorded for this report yet.",
       "mentorEndorsementItem": "Step {{step}} · {{name}} ({{date}})",
+      "mentorEndorsementItemStep": "{{name}} ({{date}})",
       "stepCommentsTitle": "Review comments (current step)",
       "commentBanner": "New comment from {{name}} ({{role}}) · {{date}}",
       "commentPreview": "“{{preview}}”",
