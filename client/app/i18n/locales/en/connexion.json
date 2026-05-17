@@ -20,6 +20,16 @@
     "afterPasswordReset": "Your password was updated. You can sign in with your new password.",
     "errorLogin": "Login failed",
     "errorRoleNotAllowed": "Your role does not grant access to the application yet. Please contact an administrator.",
-    "successLogin": "Logged in successfully"
+    "successLogin": "Logged in successfully",
+    "errors": {
+      "generic": "We could not sign you in. Please try again in a moment.",
+      "invalidCredentials": "Incorrect email or password. Check your details or use “Forgot password?”.",
+      "emailRequired": "Enter your email address.",
+      "emailInvalid": "Enter a valid email address (for example you@example.com).",
+      "passwordRequired": "Enter your password.",
+      "invalidTotp": "Incorrect or expired code. Check your authenticator app and try again.",
+      "totpMisconfigured": "Two-factor authentication is not set up correctly on this account. Contact an administrator.",
+      "checkFields": "Some fields are invalid. Check your email and password, then try again."
+    }
   }
 }

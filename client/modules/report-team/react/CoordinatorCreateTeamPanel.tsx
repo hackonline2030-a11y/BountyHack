@@ -8,8 +8,9 @@ import type {
   ReportTeamJoinRequest,
   ReportTeamMemberRole,
 } from "@modules/report-team/model/report-team.types";
+import { ActionButton } from "@modules/app/nextjs/components/buttons/ActionButton";
 import { ReportTeamValidityBadge } from "@modules/report-team/react/ReportTeamValidityBadge";
-import { computeTeamValidityFromRoles } from "@modules/report-team/react/team-validity";
+import { computeTeamValidityFromRoles } from "@modules/report-team/core/validity";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
 type SelectedMember = {
@@ -129,7 +130,7 @@ export const CoordinatorCreateTeamPanel: FC<Props> = ({
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="dashboard-card p-4 sm:p-5" aria-labelledby="coord-applicants">
+      <section aria-labelledby="coord-applicants">
         <h2 id="coord-applicants" className="text-base font-semibold text-dashboard-text">
           {t("reportTeams.coordinator.applicantsTitle")}
         </h2>
@@ -195,7 +196,10 @@ export const CoordinatorCreateTeamPanel: FC<Props> = ({
         )}
       </section>
 
-      <section className="dashboard-card p-4 sm:p-5" aria-labelledby="coord-create">
+      <section
+        className="border-t border-dashboard-divider pt-6"
+        aria-labelledby="coord-create"
+      >
         <h2 id="coord-create" className="text-base font-semibold text-dashboard-text">
           {t("reportTeams.coordinator.create.title")}
         </h2>
@@ -265,10 +269,11 @@ export const CoordinatorCreateTeamPanel: FC<Props> = ({
             </p>
           ) : null}
 
-          <button
+          <ActionButton
             type="submit"
+            variant="primary"
             disabled={isBusy}
-            className="btn-common-styles btn-primary inline-flex w-fit items-center gap-2 disabled:opacity-50"
+            className="inline-flex w-fit items-center gap-2"
           >
             {mutationStatus === "loading" ? (
               <>
@@ -281,7 +286,7 @@ export const CoordinatorCreateTeamPanel: FC<Props> = ({
             ) : (
               t("reportTeams.coordinator.create.submit")
             )}
-          </button>
+          </ActionButton>
         </form>
       </section>
     </div>

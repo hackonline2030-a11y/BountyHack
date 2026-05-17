@@ -8,7 +8,7 @@
     "validity": {
       "valid": "Valid team",
       "incomplete": "Incomplete team",
-      "hint": "A report team is valid when it has at least one hunter, one quality checker, and one mentor."
+      "hint": "A report team is valid when it has at least one hunter and either a mentor or a quality checker (you may add more members as needed)."
     },
     "roles": {
       "hunter": "Hunter",
@@ -98,7 +98,7 @@
       },
       "create": {
         "title": "Create a report team",
-        "description": "A report draft is created automatically. The team must include one hunter, one quality checker, and one mentor.",
+        "description": "A report draft is created automatically. The team must include one hunter and either a mentor or a quality checker. You may add more members freely.",
         "labelField": "Team title",
         "labelPlaceholder": "e.g. Report #1042 — XSS comments module",
         "membersField": "Selected members",

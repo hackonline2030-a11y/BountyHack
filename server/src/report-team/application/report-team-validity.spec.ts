@@ -7,7 +7,21 @@ describe('computeTeamValidity', () => {
     ).toBe('valid');
   });
 
-  it('returns incomplete when a required role is missing', () => {
-    expect(computeTeamValidity(['hunter', 'quality_checker'])).toBe('incomplete');
+  it('returns valid with hunter and quality checker only', () => {
+    expect(computeTeamValidity(['hunter', 'quality_checker'])).toBe('valid');
+  });
+
+  it('returns valid with hunter and mentor only', () => {
+    expect(computeTeamValidity(['hunter', 'mentor'])).toBe('valid');
+  });
+
+  it('returns incomplete when hunter is missing', () => {
+    expect(computeTeamValidity(['quality_checker', 'mentor'])).toBe(
+      'incomplete',
+    );
+  });
+
+  it('returns incomplete when hunter has no mentor or QC', () => {
+    expect(computeTeamValidity(['hunter'])).toBe('incomplete');
   });
 });

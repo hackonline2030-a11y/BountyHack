@@ -21,7 +21,7 @@ export const reportTeamsFixture: ReadonlyArray<ReportTeam> = [
     id: "rt-2b8e1d40-6a7c-4f9e-b2d1-8e4f5a6b7c8d",
     reportDraftId: "draft-1039",
     label: "Rapport #1039 — SSRF webhook",
-    validity: "incomplete",
+    validity: "valid",
     updatedAt: "2026-05-12T09:15:00.000Z",
     members: [
       { userId: "u-h2", displayName: "Léa P.", role: "hunter" },
@@ -63,8 +63,5 @@ export const coordinatorPendingRequestsFixture: ReadonlyArray<ReportTeamJoinRequ
   },
 ];
 
-export const roleSlotRequirements: ReadonlyArray<ReportTeamMemberRole> = [
-  "hunter",
-  "quality_checker",
-  "mentor",
-];
+/** Mirrors {@link REPORT_TEAM_VALIDITY_RULES} for fixtures — hunter + (mentor | QC). */
+export { REPORT_TEAM_VALIDITY_RULES as roleSlotRequirements } from "@modules/report-team/core/validity/report-team-validity.rules";

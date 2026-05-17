@@ -64,7 +64,10 @@ export const CoordinatorCoordinationPanel: FC = () => {
         pendingJoinRequests={pendingJoinRequests}
         isReady={isReady}
       />
-      <section className="dashboard-card p-4 sm:p-5" aria-labelledby="coord-teams">
+      <section
+        className="border-t border-dashboard-divider pt-6"
+        aria-labelledby="coord-teams"
+      >
         <h2 id="coord-teams" className="text-base font-semibold text-dashboard-text">
           {t("reportTeams.coordinator.teamsTitle")}
         </h2>
