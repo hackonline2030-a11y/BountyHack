@@ -14,8 +14,8 @@ import {
 import { SubmissionStepPreview } from "@modules/report-draft/react/components/SubmissionStepPreview";
 import { SubmissionStepFieldCommentsPanel } from "@modules/report-draft/react/components/review/SubmissionStepFieldCommentsPanel";
 import {
-  SubmissionReviewCumulativeDummyPreview,
-  SubmissionReviewStepDummyPreview,
+  SubmissionReviewCumulativePreview,
+  SubmissionReviewStepPreview,
 } from "@modules/report-draft/react/components/SubmissionReviewDummyPreview";
 import { approveStep } from "@modules/report-draft/core/useCase/approve-step.usecase";
 import { listReviewerSubmissions } from "@modules/report-draft/core/useCase/list-reviewer-submissions.usecase";
@@ -329,7 +329,13 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
         hidden={activeTab !== "stepPreview"}
         aria-labelledby={tabButtonId("stepPreview")}
       >
-        <SubmissionReviewStepDummyPreview step={submission.step} />
+        {draft ? (
+          <SubmissionReviewStepPreview
+            step={submission.step}
+            draft={draft}
+            submissionPayload={submission.payload}
+          />
+        ) : null}
       </div>
 
       <div
@@ -338,10 +344,13 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
         hidden={activeTab !== "cumulativePreview"}
         aria-labelledby={tabButtonId("cumulativePreview")}
       >
-        <SubmissionReviewCumulativeDummyPreview
-          submissionStep={submission.step}
-          draft={draft}
-        />
+        {draft ? (
+          <SubmissionReviewCumulativePreview
+            submissionStep={submission.step}
+            draft={draft}
+            submissionPayload={submission.payload}
+          />
+        ) : null}
       </div>
 
       {canDecide ? (
