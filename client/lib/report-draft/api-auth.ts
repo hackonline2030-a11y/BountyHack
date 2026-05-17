@@ -28,6 +28,8 @@ const COORDINATOR_OR_SUPER_ADMIN_ROLES: readonly AppRoleCode[] = [
   AppRoleCode.SUPER_ADMIN,
 ];
 
+const SUPER_ADMIN_ONLY_ROLES: readonly AppRoleCode[] = [AppRoleCode.SUPER_ADMIN];
+
 function unauthorizedResponse() {
   return NextResponse.json(
     { error: "Unauthorized" },
@@ -117,6 +119,13 @@ export async function requireCoordinatorReportDraftBearer(): Promise<
     COORDINATOR_OR_SUPER_ADMIN_ROLES,
     "Coordinator or super admin required",
   );
+}
+
+/** Super-admin final validation actions (approve, request revision, comments). */
+export async function requireSuperAdminReportDraftBearer(): Promise<
+  { token: string } | { response: NextResponse }
+> {
+  return requireBearerWithRoles(SUPER_ADMIN_ONLY_ROLES, "Super admin required");
 }
 
 export function jsonFromNestResponse(nestRes: Response, body: string) {

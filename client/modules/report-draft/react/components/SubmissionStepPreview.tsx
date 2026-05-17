@@ -7,6 +7,7 @@ import {
   STEP_TITLE_FR,
   stepFieldsFromPayload,
 } from "@modules/report-draft/core/model/step-field-catalog";
+import { SectionBlocDisplay } from "@modules/report-draft/react/components/section-bloc/SectionBlocDisplay";
 
 const Step = ReportDraftDomainModel.ReportDraftStep;
 
@@ -40,21 +41,7 @@ export const SubmissionStepPreview: FC<Props> = ({ step, payload, reportTitle })
         ) : (
           <div className="flex flex-col gap-6">
             {sectionBlocs.map((bloc, index) => (
-              <section key={bloc.id} className="border-b border-form-border pb-4 last:border-0">
-                {bloc.heading.trim() ? (
-                  <h3 className="text-base font-semibold text-form-text">{bloc.heading}</h3>
-                ) : (
-                  <p className="text-xs text-form-text-muted">Section {index + 1}</p>
-                )}
-                {bloc.subheading.trim() ? (
-                  <h4 className="mt-1 text-sm font-medium text-form-text">{bloc.subheading}</h4>
-                ) : null}
-                {bloc.body.trim() ? (
-                  <p className="mt-2 whitespace-pre-wrap text-sm text-form-text">{bloc.body}</p>
-                ) : (
-                  <p className="mt-2 text-sm text-form-text-muted">—</p>
-                )}
-              </section>
+              <SectionBlocDisplay key={bloc.id} bloc={bloc} index={index} />
             ))}
           </div>
         )}

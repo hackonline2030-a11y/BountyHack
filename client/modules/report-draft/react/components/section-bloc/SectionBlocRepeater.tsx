@@ -3,11 +3,11 @@
 import { type FC } from "react";
 import type { SectionBloc } from "@modules/report-draft/core/model/section-bloc";
 import { createEmptySectionBloc } from "@modules/report-draft/core/model/section-bloc";
+import { SectionBlocHeadingFields } from "@modules/report-draft/react/components/section-bloc/SectionBlocHeadingFields";
+import { SectionBlocListsEditor } from "@modules/report-draft/react/components/section-bloc/SectionBlocListsEditor";
 
 const fieldLabel =
   "text-xs font-medium uppercase tracking-wide text-form-text-muted";
-const fieldInput =
-  "w-full rounded-md border border-form-border bg-form-surface px-3 py-2 text-sm text-form-text placeholder:text-form-placeholder focus:border-form-border-strong focus:outline-none focus:ring-2 focus:ring-form-accent/40 disabled:cursor-not-allowed disabled:opacity-60";
 const fieldTextarea =
   "min-h-[120px] w-full rounded-md border border-form-border bg-form-surface p-3 text-sm text-form-text placeholder:text-form-placeholder focus:border-form-border-strong focus:outline-none focus:ring-2 focus:ring-form-accent/40 disabled:cursor-not-allowed disabled:opacity-60";
 
@@ -37,8 +37,8 @@ export const SectionBlocRepeater: FC<Props> = ({ blocs, editable, onChange }) =>
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium text-form-text">Sections libres</p>
         <p className="text-sm text-form-text-muted">
-          Ajoutez une ou plusieurs sections (titre, sous-titre, texte). L’ordre sera respecté
-          dans le rapport PDF. Les images par section arrivent dans une prochaine version.
+          Ajoutez une ou plusieurs sections (titre, sous-titre, texte, listes). L’ordre sera
+          respecté dans le rapport PDF. Les images par section arrivent dans une prochaine version.
         </p>
       </div>
 
@@ -70,29 +70,33 @@ export const SectionBlocRepeater: FC<Props> = ({ blocs, editable, onChange }) =>
               ) : null}
             </div>
 
-            <div className="flex flex-col gap-3">
-              <label className="flex flex-col gap-1">
-                <span className={fieldLabel}>Titre (H2 dans le PDF)</span>
-                <input
-                  type="text"
-                  className={fieldInput}
-                  value={bloc.heading}
-                  onChange={(e) => updateBloc(bloc.id, { heading: e.target.value })}
-                  disabled={!editable}
-                  placeholder="Ex. Collecte et reconnaissance"
-                />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className={fieldLabel}>Sous-titre (H3 dans le PDF)</span>
-                <input
-                  type="text"
-                  className={fieldInput}
-                  value={bloc.subheading}
-                  onChange={(e) => updateBloc(bloc.id, { subheading: e.target.value })}
-                  disabled={!editable}
-                  placeholder="Ex. API d’administration"
-                />
-              </label>
+            <div className="flex flex-col gap-4">
+              <SectionBlocHeadingFields
+                label="Titre (H2 dans le PDF)"
+                placeholder="Ex. Collecte et reconnaissance"
+                text={bloc.heading}
+                format={bloc.headingFormat}
+                editable={editable}
+                onTextChange={(heading) => updateBloc(bloc.id, { heading })}
+                onFormatChange={(patch) =>
+                  updateBloc(bloc.id, {
+                    headingFormat: { ...bloc.headingFormat, ...patch },
+                  })
+                }
+              />
+              <SectionBlocHeadingFields
+                label="Sous-titre (H3 dans le PDF)"
+                placeholder="Ex. API d’administration"
+                text={bloc.subheading}
+                format={bloc.subheadingFormat}
+                editable={editable}
+                onTextChange={(subheading) => updateBloc(bloc.id, { subheading })}
+                onFormatChange={(patch) =>
+                  updateBloc(bloc.id, {
+                    subheadingFormat: { ...bloc.subheadingFormat, ...patch },
+                  })
+                }
+              />
               <label className="flex flex-col gap-1">
                 <span className={fieldLabel}>Contenu</span>
                 <textarea
@@ -103,6 +107,11 @@ export const SectionBlocRepeater: FC<Props> = ({ blocs, editable, onChange }) =>
                   placeholder="Paragraphe(s)…"
                 />
               </label>
+              <SectionBlocListsEditor
+                lists={bloc.lists}
+                editable={editable}
+                onChange={(lists) => updateBloc(bloc.id, { lists })}
+              />
             </div>
           </li>
         ))}

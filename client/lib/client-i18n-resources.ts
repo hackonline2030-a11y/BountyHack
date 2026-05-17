@@ -2,6 +2,7 @@ import type { Resource } from "i18next";
 import enAdministration from "@/app/i18n/locales/en/administration.json";
 import enCommon from "@/app/i18n/locales/en/common.json";
 import enConnexion from "@/app/i18n/locales/en/connexion.json";
+import enReportDraft from "@/app/i18n/locales/en/reportDraft.json";
 import enCredits from "@/app/i18n/locales/en/credits.json";
 import enLegal from "@/app/i18n/locales/en/legal.json";
 import enMyReports from "@/app/i18n/locales/en/myReports.json";
@@ -18,6 +19,7 @@ import enWelcomeQualityChecker from "@/app/i18n/locales/en/welcomeQualityChecker
 import frAdministration from "@/app/i18n/locales/fr/administration.json";
 import frCommon from "@/app/i18n/locales/fr/common.json";
 import frConnexion from "@/app/i18n/locales/fr/connexion.json";
+import frReportDraft from "@/app/i18n/locales/fr/reportDraft.json";
 import frCredits from "@/app/i18n/locales/fr/credits.json";
 import frLegal from "@/app/i18n/locales/fr/legal.json";
 import frMyReports from "@/app/i18n/locales/fr/myReports.json";
@@ -54,6 +56,7 @@ export const clientI18nNamespaces = [
   "legal",
   "credits",
   "myReports",
+  "reportDraft",
 ] as const;
 
 export type ClientI18nNamespace = (typeof clientI18nNamespaces)[number];
@@ -76,6 +79,7 @@ export const clientI18nResources = {
     legal: enLegal,
     credits: enCredits,
     myReports: enMyReports,
+    reportDraft: enReportDraft,
   },
   fr: {
     common: frCommon,
@@ -94,5 +98,6 @@ export const clientI18nResources = {
     legal: frLegal,
     credits: frCredits,
     myReports: frMyReports,
+    reportDraft: frReportDraft,
   },
 } satisfies Resource;

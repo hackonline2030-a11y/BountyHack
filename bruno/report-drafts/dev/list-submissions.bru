@@ -1,0 +1,11 @@
+meta {
+  name: [DEV] List submissions by draft (no auth)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/dev/report-drafts/submissions?draftId={{draftId}}
+  body: none
+  auth: none
+}

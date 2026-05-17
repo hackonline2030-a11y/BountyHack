@@ -19,6 +19,14 @@ import {
 } from "@modules/report-draft/react/wizard/step-status-fr";
 import { ReportDraftTeamContextBanner } from "@modules/report-draft/react/components/ReportDraftTeamContextBanner";
 import { HunterReviewActivityBanner } from "@modules/report-draft/react/components/HunterReviewActivityBanner";
+import { SuperAdminGlobalRevisionBanner } from "@modules/report-draft/react/components/SuperAdminGlobalRevisionBanner";
+import { GlobalRevisionEventBanner } from "@modules/report-draft/react/components/GlobalRevisionEventBanner";
+import { globalReviewerCommentsForPlacement } from "@modules/report-draft/core/model/global-submission-revision";
+import {
+  hasSuperAdminFeedback,
+  isSuperAdminGlobalRevisionMode,
+} from "@modules/report-draft/core/model/super-admin-final-validation";
+import { ReportDraftSuperAdminFeedbackPanel } from "@modules/report-draft/react/pages/ReportDraftSuperAdminFeedbackPanel";
 import { useAppSelector } from "@store/redux/store";
 
 /**
@@ -31,9 +39,10 @@ type WorkspaceTab =
   | "stepPreview"
   | "cumulativePreview"
   | "comments"
-  | "revisions";
+  | "revisions"
+  | "superAdminFeedback";
 
-const TAB_ORDER: readonly WorkspaceTab[] = [
+const BASE_TAB_ORDER: readonly WorkspaceTab[] = [
   "form",
   "stepPreview",
   "cumulativePreview",
@@ -47,6 +56,7 @@ const TAB_LABELS: Record<WorkspaceTab, string> = {
   cumulativePreview: "Aperçu",
   comments: "Commentaires",
   revisions: "Liste de mes demandes de révision",
+  superAdminFeedback: "Retours super-admin",
 };
 
 const STEP_LABELS: Record<ReportDraftDomainModel.ReportDraftStep, string> = {
@@ -96,7 +106,8 @@ const WorkspaceStepStatusPill: FC = () => {
         </span>
         <span className={stepStatusPillClassFr(status)}>{stepStatusLabelFr(status)}</span>
       </div>
-      {status === "needs-revision" && revisionHint ? (
+      {(status === "needs-revision" || status === "needs-global-revision") &&
+      revisionHint ? (
         <p className="font-mono text-xs italic text-form-text-muted">
           n° {revisionHint.submissionId} — round {revisionHint.round}
         </p>
@@ -122,6 +133,47 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
   const draft = useAppSelector((s) =>
     currentDraftId ? s.reportDrafts.byId[currentDraftId] : undefined,
   );
+  const submissionsById = useAppSelector((s) => s.reportDrafts.submissionsById);
+  const commentsById = useAppSelector((s) => s.reportDrafts.commentsById);
+  const globalSubmissionsById = useAppSelector((s) => s.reportDrafts.globalSubmissionsById);
+  const globalReviewerCommentsById = useAppSelector(
+    (s) => s.reportDrafts.globalReviewerCommentsById,
+  );
+
+  const showSuperAdminTab = useMemo(() => {
+    if (!draft) return false;
+    if (isSuperAdminGlobalRevisionMode(draft)) return true;
+    if (
+      globalReviewerCommentsForPlacement(
+        draft.id,
+        Object.values(globalSubmissionsById),
+        Object.values(globalReviewerCommentsById),
+        "super_admin",
+      ).length > 0
+    ) {
+      return true;
+    }
+    return hasSuperAdminFeedback(
+      draft.id,
+      Object.values(submissionsById),
+      Object.values(commentsById),
+    );
+  }, [
+    draft,
+    submissionsById,
+    commentsById,
+    globalSubmissionsById,
+    globalReviewerCommentsById,
+  ]);
+
+  const tabOrder = useMemo(
+    () =>
+      showSuperAdminTab
+        ? ([...BASE_TAB_ORDER, "superAdminFeedback"] as const)
+        : BASE_TAB_ORDER,
+    [showSuperAdminTab],
+  );
+
   const showHunterBack = Boolean(draft && draft.hunterId === viewerUserId);
   const reportsListHref = useMemo(() => `/${lng}/my-reports`, [lng]);
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("form");
@@ -131,14 +183,14 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
       if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
       event.preventDefault();
       setActiveTab((current) => {
-        const currentIndex = TAB_ORDER.indexOf(current);
+        const currentIndex = tabOrder.indexOf(current);
         const offset = event.key === "ArrowRight" ? 1 : -1;
         const nextIndex =
-          (currentIndex + offset + TAB_ORDER.length) % TAB_ORDER.length;
-        return TAB_ORDER[nextIndex];
+          (currentIndex + offset + tabOrder.length) % tabOrder.length;
+        return tabOrder[nextIndex];
       });
     },
-    [],
+    [tabOrder],
   );
 
   return (
@@ -159,7 +211,7 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
         aria-label="Espace de rédaction du rapport"
         className="flex w-full flex-wrap gap-4 border-b border-form-border sm:gap-6"
       >
-        {TAB_ORDER.map((key) => {
+        {tabOrder.map((key) => {
           const isActive = key === activeTab;
           return (
             <button
@@ -186,8 +238,6 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
 
       <WorkspaceTeamBanner />
 
-      <HunterReviewActivityBanner />
-
       <WorkspaceStepStatusPill />
 
       <div
@@ -196,6 +246,17 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
         aria-labelledby={tabButtonId("form")}
         hidden={activeTab !== "form"}
       >
+        <div className="mb-3 flex flex-col gap-2">
+          <SuperAdminGlobalRevisionBanner />
+          {currentDraftId ? (
+            <GlobalRevisionEventBanner
+              draftId={currentDraftId}
+              onOpenCommentsTab={() => setActiveTab("comments")}
+              onOpenSuperAdminTab={() => setActiveTab("superAdminFeedback")}
+            />
+          ) : null}
+          <HunterReviewActivityBanner />
+        </div>
         <ReportDraftWizardPage />
       </div>
 
@@ -236,6 +297,18 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
       >
         <ReportDraftStepRevisionsListPanel />
       </div>
+
+      {showSuperAdminTab ? (
+        <div
+          role="tabpanel"
+          id={tabPanelId("superAdminFeedback")}
+          aria-labelledby={tabButtonId("superAdminFeedback")}
+          hidden={activeTab !== "superAdminFeedback"}
+          className="min-h-[120px]"
+        >
+          <ReportDraftSuperAdminFeedbackPanel />
+        </div>
+      ) : null}
     </div>
   );
 };

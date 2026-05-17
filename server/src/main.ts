@@ -14,6 +14,8 @@ import * as express from 'express';
 import { HttpExceptionBodyDto } from './core/dto/http-exception-body.dto';
 import { HttpValidationErrorDto } from './core/dto/http-validation-error.dto';
 import { getHttpCorsOrigin, isCorsOpenToAll } from './shared/cors.util';
+import { isReportDraftDevRoutesEnabled } from './shared/dev-routes.util';
+import { isPrismaSqlMode } from './shared/database-mode';
 
 
 async function bootstrap() {
@@ -130,6 +132,11 @@ async function bootstrap() {
     const adminerPort = process.env.ADMINER_HOST_PORT?.trim() || '8088';
     Logger.log(
       `🧭 Adminer (UI SQL MySQL sur l’hôte) : http://localhost:${adminerPort}/ — service : mysql — port : ADMINER_HOST_PORT dans .env (défaut 8088)`,
+    );
+  }
+  if (isPrismaSqlMode() && isReportDraftDevRoutesEnabled()) {
+    Logger.warn(
+      `⚠️  Dev report-draft JSON routes ON : http://localhost:${variables.port}/${variables.globalPrefix}/dev/report-drafts — remove report-draft/dev/ before prod`,
     );
   }
 }

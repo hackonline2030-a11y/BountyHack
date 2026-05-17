@@ -63,7 +63,7 @@ export default async function WelcomeMentorPage({ params }: PageProps) {
 
   const navHrefs: DashboardNavHrefs = {
     emails: `${prefix}/emails`,
-    reports: `${prefix}/mentor-submissions`,
+    reports: `${prefix}/mentor-team-reports`,
     teams: `${prefix}/mentor-teams`,
     colleagues: `${prefix}/colleagues`,
     support: `${prefix}/support`,

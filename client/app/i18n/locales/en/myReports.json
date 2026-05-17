@@ -6,6 +6,108 @@
       "backToReports": "← Back to my reports",
       "backToReportsAria": "Go back to the list of my report drafts"
     },
+    "qcSubmissions": {
+      "filteredHeading": "Submissions for this report",
+      "filteredSubheading": "Hunter submissions and super-admin feedback for this draft only.",
+      "superAdminSectionTitle": "Super-admin feedback (global revision)",
+      "superAdminSectionHint": "Read-only — the hunter then fixes step by step or requests full validation.",
+      "globalRevisionTableTitle": "Super-admin global revisions",
+      "globalRevisionTableHint": "Requests issued by super-admin. Open a report to read the draft and comments.",
+      "openGlobalRevision": "Open revision",
+      "globalSubmissionsTitle": "Global submissions (super-admin revision)",
+      "globalSubmissionsEmpty": "No global submissions yet.",
+      "globalSubmissionStepLabel": "Global revision",
+      "openGlobalSubmissionReview": "Review draft",
+      "hunterSubmissionsTitle": "Hunter submissions → QC (per step)",
+      "emptyFiltered": "No hunter submissions for this report.",
+      "globalRevisionOnReportHint": "A super-admin global revision is open on this report.",
+      "openGlobalRevisionDraft": "View draft and super-admin feedback"
+    },
+    "globalRevisionEvent": {
+      "awaitingReviewers": {
+        "short": "Global submit #{{revision}} — awaiting QC and super-admin."
+      },
+      "changesRequested": {
+        "short": "Revisions requested (#{{revision}})."
+      },
+      "partiallyApproved": {
+        "short": "Approved by QC or SA (#{{revision}}) — global resubmit available."
+      },
+      "openCommentsTab": "Comments",
+      "openSuperAdminTab": "Super-admin feedback"
+    },
+    "globalComments": {
+      "sectionTitle": "Global comments",
+      "revisionHeading": "Global revision #{{revision}}"
+    },
+    "globalSubmissionReview": {
+      "hint": "Approve the global revision (not final report validation). Super-admin validates the report separately.",
+      "actionsTitle": "Decision on this revision",
+      "revisionCommentLabel": "Comment for the hunter",
+      "revisionCommentPlaceholder": "Describe required changes…",
+      "approveRevision": "Approve global revision",
+      "requestRevision": "Request revisions from hunter",
+      "alreadyDecided": "This global submission has already been decided.",
+      "readOnlyClosedCycle": "Global revision cycle is closed (read-only). Use final validation when the draft is ready to submit.",
+      "commentsTitle": "Recorded comments",
+      "superAdminReportHint": "After approving the global revision, validate the report (or request another global revision) from",
+      "openFinalValidation": "the final validation page",
+      "hunterFeedbackTitle": "Global revision feedback",
+      "hunterFeedbackHint": "Revision #{{revision}} — fix then submit globally again."
+    },
+    "globalRevisionReview": {
+      "back": "← Back to submissions",
+      "badge": "Super-admin global revision",
+      "requestedAt": "Requested on {{date}}",
+      "readOnlyHint": "Read-only — latest state of the draft (all steps), as currently saved.",
+      "tablistAria": "Global revision review",
+      "tabs": {
+        "reportPreview": "Report preview",
+        "superAdminFeedback": "Super-admin feedback"
+      },
+      "table": {
+        "report": "Report",
+        "requestedAt": "Requested",
+        "status": "Status",
+        "consult": "View draft"
+      }
+    },
+    "teamReports": {
+      "back": "Home",
+      "heading": "Team reports",
+      "subheading": "One card per team report. Open a card to see submissions and super-admin feedback for that draft only.",
+      "loading": "Loading…",
+      "empty": "No team reports yet.",
+      "globalRevisionBadge": "Super-admin global revision in progress",
+      "openSubmissions": "View this report’s submissions"
+    },
+    "wizard": {
+      "finalStep": {
+        "awaitingLeadValidation": "Last step validated: awaiting final validation.",
+        "leadValidated": "Report validated by the Lead.",
+        "globalRevisionInProgress": "Global revision in progress — see the “Super-admin feedback” tab."
+      },
+      "globalSubmit": {
+        "button": "Submit draft globally",
+        "hint": "Sends every step still editable to the quality checker in one action.",
+        "disabledNone": "All steps are already submitted or approved."
+      }
+    },
+    "superAdminFeedback": {
+      "noDraft": "No draft loaded.",
+      "empty": "No super-admin feedback on this report yet.",
+      "revisionBannerShort": "Global revision opened by super-admin.",
+      "steps": {
+        "meta": "Metadata",
+        "description": "Description",
+        "collection": "Collection",
+        "exploitation": "Exploitation",
+        "proofOfConcept": "Proof of concept",
+        "risks": "Risks",
+        "remediation": "Remediation",
+        "final": "Final"
+      }
+    },
     "subheading": "Track every vulnerability report you're currently drafting and where it stands in the review pipeline.",
     "actions": {
       "newReport": "New report",
@@ -31,18 +133,27 @@
       "updatedAt": "Updated on {{date}}",
       "stepsProgress": "{{approved}} / {{total}} steps approved",
       "stepsProgressAria": "{{approved}} steps approved out of {{total}}",
+      "globalRevisionNumber": "Global revision #{{n}}",
       "open": "Open"
     },
     "status": {
       "draft": "Draft",
       "under-review": "Under review",
+      "under-global-review": "Under global review",
+      "globalRevisionInProgress": "Global review in progress",
       "ready-to-program": "Ready to submit",
       "submitted-to-program": "Submitted to program",
       "given-up": "Given up",
       "rejected": "Rejected"
     },
     "activity": {
-      "endorseBanner": "Mentor endorsement · {{name}} ({{date}})",
+      "endorseBanner": "Mentor endorsement · step {{step}} · {{name}} ({{date}})",
+      "mentorEndorsementsTitle": "Mentor endorsements",
+      "mentorEndorsementsTitleStep": "Mentor endorsements — {{step}}",
+      "mentorEndorsementsEmpty": "No mentor endorsements recorded for this report yet.",
+      "mentorEndorsementItem": "Step {{step}} · {{name}} ({{date}})",
+      "mentorEndorsementItemStep": "{{name}} ({{date}})",
+      "stepCommentsTitle": "Review comments (current step)",
       "commentBanner": "New comment from {{name}} ({{role}}) · {{date}}",
       "commentPreview": "“{{preview}}”",
       "unknownReviewer": "Reviewer"

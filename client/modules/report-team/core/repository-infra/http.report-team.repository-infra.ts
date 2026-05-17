@@ -1,5 +1,6 @@
 import { fetchBff } from "@/lib/bff-fetch";
 import { readFriendlyHttpError } from "@/lib/http-error-message";
+import type { OrphanReportDraft } from "@modules/report-team/model/orphan-report-draft.types";
 import type {
   ReportTeam,
   ReportTeamJoinRequest,
@@ -36,6 +37,14 @@ export class HttpReportTeamRepository implements IReportTeamRepository {
     return parseJsonResponse(res);
   }
 
+  async findOrphanDrafts(): Promise<OrphanReportDraft[]> {
+    const res = await fetchBff("/api/report-draft/coordination/orphan-drafts", {
+      credentials: "include",
+      cache: "no-store",
+    });
+    return parseJsonResponse(res);
+  }
+
   async findById(id: string): Promise<ReportTeam | null> {
     const res = await fetchBff(`${teamsBase}/${encodeURIComponent(id)}`, {
       credentials: "include",
@@ -60,6 +69,7 @@ export class HttpReportTeamRepository implements IReportTeamRepository {
   async createTeam(input: {
     label: string;
     members: Array<{ userId: string; role: ReportTeamMemberRole }>;
+    reportDraftId?: string;
   }): Promise<ReportTeam> {
     const res = await fetchBff(teamsBase, {
       method: "POST",

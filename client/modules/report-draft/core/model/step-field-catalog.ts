@@ -2,13 +2,22 @@ import { ReportDraftDomainModel as M } from "./report-draft.domain-model";
 import { normalizeLongFormPayload } from "./long-form-steps.factory";
 import {
   sectionBlocFieldId,
-  sectionBlocPartLabel,
+  sectionBlocListFieldId,
+  type SectionBloc,
+  type SectionBlocList,
 } from "./section-bloc";
 
 export type StepFieldRow = {
   fieldId: string;
   label: string;
   value: string;
+};
+
+/** Comment targets grouped like the submitted preview (Section 1, 2, …). */
+export type StepSectionCommentGroup = {
+  sectionIndex: number;
+  sectionHeading: string;
+  fields: StepFieldRow[];
 };
 
 const META_LABELS: Record<keyof M.MetaFields, string> = {
@@ -37,23 +46,106 @@ const DESCRIPTION_LABELS: Record<keyof M.DescriptionFields, string> = {
   availability: "Availability (A)",
 };
 
-function longFormFieldsFromPayload(payload: unknown): StepFieldRow[] {
-  const normalized =
-    typeof payload === "object" && payload !== null && "sectionBlocs" in payload
-      ? (payload as M.LongFormStepPayload)
-      : { sectionBlocs: [] as M.SectionBloc[] };
+function listPreview(list: SectionBlocList): string {
+  const items = list.items.filter((i) => i.trim().length > 0);
+  const title = list.title.trim();
+  const parts: string[] = [];
+  if (title) parts.push(title);
+  if (items.length > 0) parts.push(items.join(" · "));
+  return parts.join("\n");
+}
 
+function listFieldLabel(list: SectionBlocList): string {
+  if (list.title.trim()) {
+    return `Liste — ${list.title.trim()}`;
+  }
+  return list.ordered ? "Liste numérotée" : "Liste à puces";
+}
+
+function sectionHasSubmittedContent(bloc: SectionBloc): boolean {
+  if (bloc.heading.trim() || bloc.subheading.trim() || bloc.body.trim()) {
+    return true;
+  }
+  return bloc.lists.some(
+    (l) => l.title.trim() || l.items.some((i) => i.trim().length > 0),
+  );
+}
+
+function fieldsForSectionBloc(bloc: SectionBloc): StepFieldRow[] {
   const rows: StepFieldRow[] = [];
-  for (const bloc of normalized.sectionBlocs) {
-    for (const part of ["heading", "subheading", "body"] as const) {
-      rows.push({
-        fieldId: sectionBlocFieldId(bloc.id, part),
-        label: sectionBlocPartLabel(bloc, part),
-        value: bloc[part],
-      });
-    }
+
+  if (bloc.heading.trim()) {
+    rows.push({
+      fieldId: sectionBlocFieldId(bloc.id, "heading"),
+      label: "Titre",
+      value: bloc.heading,
+    });
+  }
+  if (bloc.subheading.trim()) {
+    rows.push({
+      fieldId: sectionBlocFieldId(bloc.id, "subheading"),
+      label: "Sous-titre",
+      value: bloc.subheading,
+    });
+  }
+  if (bloc.body.trim()) {
+    rows.push({
+      fieldId: sectionBlocFieldId(bloc.id, "body"),
+      label: "Paragraphe",
+      value: bloc.body,
+    });
+  }
+  for (const list of bloc.lists) {
+    const hasContent =
+      list.title.trim() || list.items.some((i) => i.trim().length > 0);
+    if (!hasContent) continue;
+    rows.push({
+      fieldId: sectionBlocListFieldId(bloc.id, list.id),
+      label: listFieldLabel(list),
+      value: listPreview(list),
+    });
   }
   return rows;
+}
+
+function sectionHeadingLabel(bloc: SectionBloc, sectionIndex: number): string {
+  const title = bloc.heading.trim();
+  return title ? `Section ${sectionIndex} — ${title}` : `Section ${sectionIndex}`;
+}
+
+function longFormSectionGroupsFromPayload(
+  step: M.ReportDraftStep,
+  payload: unknown,
+): StepSectionCommentGroup[] {
+  const { sectionBlocs } = normalizeLongFormPayload(step, payload);
+  const groups: StepSectionCommentGroup[] = [];
+
+  sectionBlocs.forEach((bloc, index) => {
+    if (!sectionHasSubmittedContent(bloc)) return;
+    const fields = fieldsForSectionBloc(bloc);
+    if (fields.length === 0) return;
+    const sectionIndex = index + 1;
+    groups.push({
+      sectionIndex,
+      sectionHeading: sectionHeadingLabel(bloc, sectionIndex),
+      fields,
+    });
+  });
+
+  return groups;
+}
+
+function flatFieldsWithValues(
+  labels: Record<string, string>,
+  values: Record<string, string>,
+): StepFieldRow[] {
+  return Object.entries(labels)
+    .map(([fieldId, label]) => ({
+      fieldId,
+      label,
+      value: values[fieldId] ?? "",
+    }))
+    .filter((row) => row.value.trim().length > 0);
 }
 
 export const STEP_TITLE_FR: Record<M.ReportDraftStep, string> = {
@@ -78,32 +170,67 @@ export const STEP_TITLE_EN: Record<M.ReportDraftStep, string> = {
   [M.ReportDraftStep.FINAL]: "Finalization",
 };
 
+/**
+ * Comment targets for reviewer boards — grouped by section for long-form steps.
+ */
+export function stepCommentGroupsFromPayload(
+  step: M.ReportDraftStep,
+  payload: unknown,
+): StepSectionCommentGroup[] {
+  switch (step) {
+    case M.ReportDraftStep.META: {
+      const p = payload as M.MetaFields;
+      const fields = flatFieldsWithValues(
+        META_LABELS as Record<string, string>,
+        p as unknown as Record<string, string>,
+      );
+      return fields.length > 0
+        ? [{ sectionIndex: 1, sectionHeading: STEP_TITLE_FR[M.ReportDraftStep.META], fields }]
+        : [];
+    }
+    case M.ReportDraftStep.DESCRIPTION: {
+      const p = payload as M.DescriptionFields;
+      const fields = flatFieldsWithValues(
+        DESCRIPTION_LABELS as Record<string, string>,
+        p as unknown as Record<string, string>,
+      );
+      return fields.length > 0
+        ? [
+            {
+              sectionIndex: 1,
+              sectionHeading: STEP_TITLE_FR[M.ReportDraftStep.DESCRIPTION],
+              fields,
+            },
+          ]
+        : [];
+    }
+    default:
+      return longFormSectionGroupsFromPayload(step, payload);
+  }
+}
+
+/** Flat list (legacy); only non-empty submitted values. */
 export function stepFieldsFromPayload(
   step: M.ReportDraftStep,
   payload: unknown,
 ): StepFieldRow[] {
-  switch (step) {
-    case M.ReportDraftStep.META: {
-      const p = payload as M.MetaFields;
-      return (Object.keys(META_LABELS) as Array<keyof M.MetaFields>).map((key) => ({
-        fieldId: key,
-        label: META_LABELS[key],
-        value: p[key] ?? "",
-      }));
-    }
-    case M.ReportDraftStep.DESCRIPTION: {
-      const p = payload as M.DescriptionFields;
-      return (Object.keys(DESCRIPTION_LABELS) as Array<keyof M.DescriptionFields>).map(
-        (key) => ({
-          fieldId: key,
-          label: DESCRIPTION_LABELS[key],
-          value: p[key] ?? "",
-        }),
-      );
-    }
-    default: {
-      const normalized = normalizeLongFormPayload(step, payload);
-      return longFormFieldsFromPayload(normalized);
+  return stepCommentGroupsFromPayload(step, payload).flatMap((g) =>
+    g.fields.map((f) => ({
+      ...f,
+      label: `${g.sectionHeading} — ${f.label}`,
+    })),
+  );
+}
+
+export function stepFieldLabelFromGroups(
+  groups: readonly StepSectionCommentGroup[],
+  fieldId: string,
+): string {
+  for (const group of groups) {
+    const field = group.fields.find((f) => f.fieldId === fieldId);
+    if (field) {
+      return `${group.sectionHeading} — ${field.label}`;
     }
   }
+  return fieldId;
 }

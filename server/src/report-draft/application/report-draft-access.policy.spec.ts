@@ -54,6 +54,8 @@ describe('ReportDraftAccessPolicy', () => {
     save: jest.fn(),
     findById: jest.fn(),
     findByHunterId: jest.fn(),
+    findAll: jest.fn(),
+    findOrphanSummaries: jest.fn(),
   };
   const submissionRepository: jest.Mocked<ISubmissionRepository> = {
     save: jest.fn(),
@@ -74,7 +76,7 @@ describe('ReportDraftAccessPolicy', () => {
   const policy = new ReportDraftAccessPolicy(
     reportDraftRepository,
     submissionRepository,
-    reportTeamRepository as IReportTeamRepository,
+    reportTeamRepository as unknown as IReportTeamRepository,
   );
 
   beforeEach(() => {
@@ -158,6 +160,33 @@ describe('ReportDraftAccessPolicy', () => {
           decidedBy: 'qc-1',
           decidedAt: '2026-05-15T13:00:00.000Z',
         }),
+      ),
+    ).resolves.toBeUndefined();
+  });
+
+  it('allows super admin to read another hunters draft', async () => {
+    await expect(
+      policy.assertCanReadDraft(
+        {
+          uid: 'admin-1',
+          email: 'admin@example.com',
+          roleCode: AppRoleCode.SUPER_ADMIN,
+        },
+        { id: 'draft-1', hunterId: 'hunter-1' },
+      ),
+    ).resolves.toBeUndefined();
+  });
+
+  it('allows super admin to read submissions on another hunters draft', async () => {
+    reportDraftRepository.findById.mockResolvedValue(minimalDraft());
+    await expect(
+      policy.assertCanReadSubmission(
+        {
+          uid: 'admin-1',
+          email: 'admin@example.com',
+          roleCode: AppRoleCode.SUPER_ADMIN,
+        },
+        minimalSubmission(),
       ),
     ).resolves.toBeUndefined();
   });

@@ -19,7 +19,12 @@ export class SaveReportDraftCommand {
       throw new NotFoundException('Report draft not found');
     }
 
-    const { reportTeam: _readOnlyTeam, ...toPersist } = draft;
+    const {
+      reportTeam: _readOnlyTeam,
+      superAdminRevisionRequestedAt: _revisionMarker,
+      superAdminGlobalRevisionCount: _revisionCount,
+      ...toPersist
+    } = draft;
     await this.repository.save(toPersist);
   }
 }

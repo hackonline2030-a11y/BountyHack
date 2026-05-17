@@ -141,6 +141,25 @@ describe("submitStepForReview use case", () => {
     });
   });
 
+  it("rejects mentor reviewer role (mentor advice is a separate use case)", async () => {
+    const { store } = await setup();
+
+    await store.dispatch(
+      submitStepForReview({
+        draftId: DRAFT_ID,
+        step: ReportDraftDomainModel.ReportDraftStep.META,
+        reviewerRole: "mentor",
+        submittedBy: HUNTER_ID,
+      }),
+    );
+
+    const transition = store.getState().reportDrafts.transition;
+    expect(transition.status).toBe("error");
+    if (transition.status === "error") {
+      expect(transition.message).toMatch(/submitMentorAdvice/);
+    }
+  });
+
   it("persists an optional payload before creating the submission snapshot", async () => {
     const reportDraftRepository = new InMemoryReportDraftRepository();
     const submissionRepository = new InMemorySubmissionRepository();
@@ -165,7 +184,7 @@ describe("submitStepForReview use case", () => {
       submitStepForReview({
         draftId: DRAFT_ID,
         step: ReportDraftDomainModel.ReportDraftStep.META,
-        reviewerRole: "mentor",
+        reviewerRole: "quality_checker",
         submittedBy: HUNTER_ID,
         payload: nextMeta,
       }),

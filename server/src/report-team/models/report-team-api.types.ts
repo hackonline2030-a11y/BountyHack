@@ -1,3 +1,5 @@
+import type { AggregateStatusWire } from '../../report-draft/models/report-draft-api.types';
+
 export type ReportTeamMemberRoleWire =
   | 'hunter'
   | 'quality_checker'
@@ -18,6 +20,8 @@ export interface ReportTeamWire {
   reportDraftId: string;
   label: string;
   validity: ReportTeamValidityWire;
+  /** Linked report draft workflow status (1 team ↔ 1 draft). */
+  draftAggregateStatus: AggregateStatusWire;
   members: ReportTeamMemberWire[];
   updatedAt: string;
 }
@@ -43,6 +47,12 @@ export interface ReportTeamMemberAssignmentWire {
 export interface CreateReportTeamInput {
   label: string;
   members: ReportTeamMemberAssignmentWire[];
+  /**
+   * When set, attach the team to this existing draft (must have no team).
+   * The draft owner is always the team hunter; `members` are additional roles
+   * from approved join/enrollment requests (mentor, QC, etc.).
+   */
+  reportDraftId?: string;
 }
 
 export interface UpdateReportTeamInput {

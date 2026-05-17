@@ -42,6 +42,12 @@
         "subtitle": "Team oversight",
         "body": "Create and manage report teams (composition, coordinator, assignments).",
         "cta": "Manage teams"
+      },
+      "finalValidation": {
+        "title": "Final validation",
+        "subtitle": "Drafts ready for sign-off",
+        "body": "Review all report drafts and validate those ready to submit to the program.",
+        "cta": "Open validation queue"
       }
     }
   }
