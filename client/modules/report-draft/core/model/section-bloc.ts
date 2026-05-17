@@ -117,6 +117,19 @@ const SECTION_PART_LABEL_FR: Record<"heading" | "subheading" | "body", string> =
   body: "Paragraphe",
 };
 
+export function sectionBlocHasSubmittedContent(bloc: SectionBloc): boolean {
+  if (bloc.heading.trim() || bloc.subheading.trim() || bloc.body.trim()) {
+    return true;
+  }
+  return bloc.lists.some(
+    (l) => l.title.trim() || l.items.some((i) => i.trim().length > 0),
+  );
+}
+
+export function sectionBlocsHaveSubmittedContent(sectionBlocs: SectionBloc[]): boolean {
+  return sectionBlocs.some(sectionBlocHasSubmittedContent);
+}
+
 export function sectionBlocPartLabel(
   bloc: SectionBloc,
   part: "heading" | "subheading" | "body",

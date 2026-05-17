@@ -1,4 +1,5 @@
 import { ReportDraftDomainModel as M } from "./report-draft.domain-model";
+import { normalizeDescriptionPayload } from "./description.factory";
 import { normalizeLongFormPayload } from "./long-form-steps.factory";
 import {
   sectionBlocFieldId,
@@ -35,7 +36,9 @@ const META_LABELS: Record<keyof M.MetaFields, string> = {
   ipsUsed: "IPs utilisées",
 };
 
-const DESCRIPTION_LABELS: Record<keyof M.DescriptionFields, string> = {
+type DescriptionCvssKey = Exclude<keyof M.DescriptionFields, "sectionBlocs">;
+
+const DESCRIPTION_CVSS_LABELS: Record<DescriptionCvssKey, string> = {
   attackVector: "Attack Vector (AV)",
   attackComplexity: "Attack Complexity (AC)",
   privilegesRequired: "Privileges Required (PR)",
@@ -113,18 +116,17 @@ function sectionHeadingLabel(bloc: SectionBloc, sectionIndex: number): string {
   return title ? `Section ${sectionIndex} — ${title}` : `Section ${sectionIndex}`;
 }
 
-function longFormSectionGroupsFromPayload(
-  step: M.ReportDraftStep,
-  payload: unknown,
+function sectionGroupsFromSectionBlocs(
+  sectionBlocs: SectionBloc[],
+  sectionIndexOffset = 0,
 ): StepSectionCommentGroup[] {
-  const { sectionBlocs } = normalizeLongFormPayload(step, payload);
   const groups: StepSectionCommentGroup[] = [];
 
   sectionBlocs.forEach((bloc, index) => {
     if (!sectionHasSubmittedContent(bloc)) return;
     const fields = fieldsForSectionBloc(bloc);
     if (fields.length === 0) return;
-    const sectionIndex = index + 1;
+    const sectionIndex = index + 1 + sectionIndexOffset;
     groups.push({
       sectionIndex,
       sectionHeading: sectionHeadingLabel(bloc, sectionIndex),
@@ -133,6 +135,14 @@ function longFormSectionGroupsFromPayload(
   });
 
   return groups;
+}
+
+function longFormSectionGroupsFromPayload(
+  step: M.ReportDraftStep,
+  payload: unknown,
+): StepSectionCommentGroup[] {
+  const { sectionBlocs } = normalizeLongFormPayload(step, payload);
+  return sectionGroupsFromSectionBlocs(sectionBlocs);
 }
 
 function flatFieldsWithValues(
@@ -189,20 +199,21 @@ export function stepCommentGroupsFromPayload(
         : [];
     }
     case M.ReportDraftStep.DESCRIPTION: {
-      const p = payload as M.DescriptionFields;
-      const fields = flatFieldsWithValues(
-        DESCRIPTION_LABELS as Record<string, string>,
+      const p = normalizeDescriptionPayload(payload);
+      const groups: StepSectionCommentGroup[] = [];
+      const cvssFields = flatFieldsWithValues(
+        DESCRIPTION_CVSS_LABELS as Record<string, string>,
         p as unknown as Record<string, string>,
       );
-      return fields.length > 0
-        ? [
-            {
-              sectionIndex: 1,
-              sectionHeading: STEP_TITLE_FR[M.ReportDraftStep.DESCRIPTION],
-              fields,
-            },
-          ]
-        : [];
+      if (cvssFields.length > 0) {
+        groups.push({
+          sectionIndex: 1,
+          sectionHeading: "Métriques CVSS",
+          fields: cvssFields,
+        });
+      }
+      groups.push(...sectionGroupsFromSectionBlocs(p.sectionBlocs, groups.length));
+      return groups;
     }
     default:
       return longFormSectionGroupsFromPayload(step, payload);
