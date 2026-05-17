@@ -10,6 +10,7 @@ export const reportTeamsFixture: ReadonlyArray<ReportTeam> = [
     reportDraftId: "draft-1042",
     label: "Rapport #1042 — XSS module commentaires",
     validity: "valid",
+    draftAggregateStatus: "under-review",
     updatedAt: "2026-05-14T16:30:00.000Z",
     members: [
       { userId: "u-h1", displayName: "Maya R.", role: "hunter" },
@@ -22,6 +23,7 @@ export const reportTeamsFixture: ReadonlyArray<ReportTeam> = [
     reportDraftId: "draft-1039",
     label: "Rapport #1039 — SSRF webhook",
     validity: "valid",
+    draftAggregateStatus: "draft",
     updatedAt: "2026-05-12T09:15:00.000Z",
     members: [
       { userId: "u-h2", displayName: "Léa P.", role: "hunter" },
