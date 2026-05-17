@@ -1,0 +1,15 @@
+meta {
+  name: [DEV] Inspect draft bundle (no auth)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/dev/report-drafts/draft/{{draftId}}/inspect
+  body: none
+  auth: none
+}
+
+docs {
+  Retourne draft + submissions + commentsBySubmissionId + commentsByStep.
+}

@@ -148,5 +148,10 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
         ),
     },
   ],
+  exports: [
+    I_REPORT_DRAFT_REPOSITORY,
+    I_SUBMISSION_REPOSITORY,
+    I_REVIEWER_COMMENT_REPOSITORY,
+  ],
 })
 export class ReportDraftModule {}

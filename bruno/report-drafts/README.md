@@ -23,3 +23,14 @@ Collection pour lire le JSON des brouillons et soumissions (contenu des **aperç
 | QC — cumulatif | draft (étapes `approved`) + submission courante pour l’étape en revue |
 
 Auth : en-tête `Authorization: Bearer <token>` (JWT après login).
+
+## Routes DEV (sans auth)
+
+Dossier `dev/` — uniquement si l’API tourne avec `NODE_ENV=development` (désactivé en production).
+
+Pas besoin de **Login** : renseigner `draftId` / `hunterId` dans l’environnement local, puis exécuter les requêtes `[DEV] …`.
+
+- `GET /api/dev/report-drafts/draft/:draftId` — même corps que la route protégée
+- `GET /api/dev/report-drafts/draft/:draftId/inspect` — bundle draft + submissions + commentaires
+
+Voir `server/src/report-draft/dev/README.md`.
