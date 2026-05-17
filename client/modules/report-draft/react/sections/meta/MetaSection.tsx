@@ -4,10 +4,7 @@ import { type FC, type ReactNode } from "react";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { useMetaSection } from "@modules/report-draft/react/sections/meta/use-meta-section";
 
-/**
- * META step UI. Chaque action est explicite : **Suivant** (brouillon + navigation)
- * vs **Soumettre pour revue** (soumission reviewer), conformément au produit.
- */
+/** META step UI — **Soumettre pour revue** persiste à la soumission ; **Suivant** après validation QC. */
 export const MetaSection: FC = () => {
   const {
     draft,
@@ -17,9 +14,7 @@ export const MetaSection: FC = () => {
     reviewerRole,
     setReviewerRole,
     onNext,
-    onSaveDraft,
     onSubmitForReview,
-    onReset,
     transitionBusy,
     transitionErr,
     catalogs,
@@ -62,8 +57,8 @@ export const MetaSection: FC = () => {
       {!editable ? (
         <p className="rounded-md border border-amber-200 bg-amber-50 p-2 text-sm text-amber-950">
           Cette étape est en attente de revue ou figée. Consulte l’onglet « Commentaires » pour les
-          retours. « Suivant » vers l’étape suivante n’est actif qu’après validation (pastille
-          « Validée »).
+          retours. « Suivant » vers l’étape suivante n’est actif qu’après validation par le quality
+          checker (pastille « Validée »).
         </p>
       ) : null}
       <Field
@@ -271,8 +266,12 @@ export const MetaSection: FC = () => {
       </Field>
 
       <div className="flex flex-col gap-2 border-t border-form-border pt-4">
-        <label className="text-sm text-form-text-muted" htmlFor="meta-reviewer-role">
-          Soumission pour revue — assigner à
+        <p className="text-sm text-form-text-muted">
+          Seule la validation par le quality checker active le bouton « Suivant ». L’avis mentor est
+          facultatif et n’empêche pas de continuer sur cette étape.
+        </p>
+        <label className="text-sm font-medium text-form-text-muted" htmlFor="meta-reviewer-role">
+          Soumettre pour revue à
         </label>
         <select
           id="meta-reviewer-role"
@@ -283,8 +282,8 @@ export const MetaSection: FC = () => {
           }
           disabled={lockedOff}
         >
-          <option value="mentor">Mentor</option>
           <option value="quality_checker">Quality checker</option>
+          <option value="mentor">Mentor</option>
           <option value="hunter">Hunter (pair review)</option>
         </select>
       </div>
@@ -301,20 +300,12 @@ export const MetaSection: FC = () => {
         <button
           type="button"
           className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={() => void onSaveDraft()}
-          disabled={transitionBusy || !editable}
-        >
-          Enregistrer le brouillon
-        </button>
-        <button
-          type="button"
-          className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
           onClick={onNext}
           disabled={transitionBusy || !canNavigateNext}
           title={
             canNavigateNext
               ? undefined
-              : "Disponible uniquement après validation de cette étape par le reviewer."
+              : "Disponible uniquement après validation de cette étape par le quality checker."
           }
         >
           Suivant
@@ -326,14 +317,6 @@ export const MetaSection: FC = () => {
           disabled={transitionBusy || !editable}
         >
           Soumettre cette étape pour revue
-        </button>
-        <button
-          type="button"
-          className="ml-auto rounded-md border border-form-border px-3 py-2 text-sm text-form-text-muted hover:bg-form-overlay"
-          onClick={onReset}
-          disabled={lockedOff}
-        >
-          Réinitialiser
         </button>
       </div>
     </form>

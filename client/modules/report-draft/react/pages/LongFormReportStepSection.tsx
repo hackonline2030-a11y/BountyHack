@@ -6,8 +6,9 @@ import type { LongFormWizardStep } from "@modules/report-draft/core/model/long-f
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { reportDraftStepToStateKey } from "@modules/report-draft/core/model/report-draft-step-keys";
 import { reportDraftSlice } from "@modules/report-draft/core/store/report-draft.slice";
-import { saveStepPayload } from "@modules/report-draft/core/useCase/save-step-payload.usecase";
+import { submitMentorAdvice } from "@modules/report-draft/core/useCase/submit-mentor-advice.usecase";
 import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-step-for-review.usecase";
+import { isStepValidationReviewerRole } from "@modules/report-draft/core/model/step-validation-reviewer";
 import { SectionBlocRepeater } from "@modules/report-draft/react/components/section-bloc/SectionBlocRepeater";
 import { reviewerRoleFromDraftStep } from "@modules/report-draft/react/wizard/reviewer-role-from-draft";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
@@ -42,11 +43,11 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
 
   const submittedBy = draftRow?.hunterId ?? "";
   const [reviewerRole, setReviewerRole] =
-    useState<ReportDraftDomainModel.ReviewerRole>("mentor");
+    useState<ReportDraftDomainModel.ReviewerRole>("quality_checker");
 
   useEffect(() => {
     const fromDraft = reviewerRoleFromDraftStep(draftRow, step);
-    setReviewerRole(fromDraft ?? "mentor");
+    setReviewerRole(fromDraft ?? "quality_checker");
   }, [currentDraftId, draftRow, step]);
 
   const [draft, setDraft] =
@@ -66,15 +67,20 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
     dispatch(reportDraftSlice.actions.setStep(next));
   }, [dispatch, step, isLast, canNavigateNext]);
 
-  const onSaveDraft = useCallback(async () => {
-    if (!currentDraftId || !editable) return;
-    await dispatch(
-      saveStepPayload({ draftId: currentDraftId, step, payload: draft }),
-    );
-  }, [dispatch, currentDraftId, editable, draft, step]);
-
   const submitForReview = useCallback(async () => {
     if (!currentDraftId || !submittedBy) return;
+    if (reviewerRole === "mentor") {
+      await dispatch(
+        submitMentorAdvice({
+          draftId: currentDraftId,
+          step,
+          submittedBy,
+          payload: draft,
+        }),
+      );
+      return;
+    }
+    if (!isStepValidationReviewerRole(reviewerRole)) return;
     await dispatch(
       submitStepForReview({
         draftId: currentDraftId,
@@ -111,7 +117,7 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
           {!isLast ? (
             <>
               {" "}
-              « Suivant » n’est actif qu’après validation (« Validée »).
+              « Suivant » n’est actif qu’après validation par le quality checker (« Validée »).
             </>
           ) : null}
         </p>
@@ -132,8 +138,12 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm text-form-text-muted" htmlFor={`reviewer-${step}`}>
-          Revue demandée à
+        <p className="text-sm text-form-text-muted">
+          Seule la validation par le quality checker active le bouton « Suivant ». L’avis mentor est
+          facultatif et n’empêche pas de continuer sur cette étape.
+        </p>
+        <label className="text-sm font-medium text-form-text-muted" htmlFor={`reviewer-${step}`}>
+          Soumettre pour revue à
         </label>
         <select
           id={`reviewer-${step}`}
@@ -144,8 +154,8 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
           }
           disabled={!editable || transitionBusy}
         >
-          <option value="mentor">Mentor</option>
           <option value="quality_checker">Quality checker</option>
+          <option value="mentor">Mentor</option>
           <option value="hunter">Hunter (pair review)</option>
         </select>
       </div>
@@ -159,14 +169,6 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
         >
           Retour
         </button>
-        <button
-          type="button"
-          className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={() => void onSaveDraft()}
-          disabled={transitionBusy || !editable}
-        >
-          Enregistrer le brouillon
-        </button>
         {!isLast ? (
           <button
             type="button"
@@ -176,7 +178,7 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
             title={
               canNavigateNext
                 ? undefined
-                : "Disponible uniquement après validation de cette étape par le reviewer."
+                : "Disponible uniquement après validation de cette étape par le quality checker."
             }
           >
             Suivant
@@ -189,14 +191,6 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
           disabled={transitionBusy || !editable || !submittedBy}
         >
           Soumettre cette étape pour revue
-        </button>
-        <button
-          type="button"
-          className="ml-auto rounded-md border border-form-border px-3 py-2 text-sm text-form-text-muted hover:bg-form-overlay"
-          onClick={() => setDraft(persistedPayload)}
-          disabled={transitionBusy || !editable}
-        >
-          Réinitialiser
         </button>
       </div>
     </>

@@ -5,20 +5,14 @@ import { Dependencies } from "@store/dependencies";
 import { AppDispatch, AppGetState } from "@store/redux/store";
 
 /**
- * Use case: hunter submits one step for QC validation. Loads the aggregate,
- * runs `submitStepForReview` (which freezes
- * the current payload + attachments into a {@link ReportDraftDomainModel.Submission}
- * snapshot and flips the step to `awaiting-review`), then persists both
- * the updated draft and the new submission before mirroring the changes
- * into the slice.
+ * Optional mentor advice — snapshots the step for the mentor without locking
+ * the hunter form or gating « Suivant » (only QC approval does).
  */
-export const submitStepForReview =
+export const submitMentorAdvice =
   (input: {
     draftId: string;
     step: ReportDraftDomainModel.ReportDraftStep;
-    reviewerRole: ReportDraftDomainModel.ReviewerRole;
     submittedBy: string;
-    /** When set, persisted on the draft before the submission snapshot. */
     payload?: unknown;
   }) =>
   async (
@@ -46,9 +40,8 @@ export const submitStepForReview =
       if (input.payload !== undefined) {
         aggregate.updateStepPayload({ step: input.step, payload: input.payload });
       }
-      const submission = aggregate.submitStepForReview({
+      const submission = aggregate.submitMentorAdvice({
         step: input.step,
-        reviewerRole: input.reviewerRole,
         submittedBy: input.submittedBy,
       });
 

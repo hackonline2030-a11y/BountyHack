@@ -28,6 +28,14 @@ import {
 
 type PageProps = { params: Promise<{ lng: string }> };
 
+const MISSION_KEYS = [
+  "reproducibility",
+  "scope",
+  "duplicates",
+  "harmonization",
+  "finalValidation",
+] as const;
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { lng } = await params;
   const { t } = await getT("welcomeQualityChecker", { lng });
@@ -145,8 +153,25 @@ export default async function WelcomeQualityCheckerPage({ params }: PageProps) {
             <DashboardSidebar labels={navLabels} hrefs={navHrefs} />
 
             <div className="grid min-w-0 flex-1 gap-4 sm:gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-              {/* ─── Primary content: 2x2 grid of cards ─── */}
-              <div className="grid gap-4 sm:gap-5 sm:grid-cols-2">
+              <div className="flex flex-col gap-4 sm:gap-5">
+                <DashboardCard
+                  titleId="card-mission"
+                  title={t("welcomeQualityChecker.mission.title")}
+                >
+                  <p className="text-sm text-dashboard-text">
+                    {t("welcomeQualityChecker.mission.intro")}
+                  </p>
+                  <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-dashboard-text-muted">
+                    {t("welcomeQualityChecker.mission.responsibilitiesTitle")}
+                  </p>
+                  <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-dashboard-text-muted">
+                    {MISSION_KEYS.map((key) => (
+                      <li key={key}>{t(`welcomeQualityChecker.mission.items.${key}`)}</li>
+                    ))}
+                  </ul>
+                </DashboardCard>
+
+                <div className="grid gap-4 sm:gap-5 sm:grid-cols-2">
                 {/* Rapports à vérifier */}
                 <DashboardCard
                   titleId="card-reports"
@@ -346,6 +371,7 @@ export default async function WelcomeQualityCheckerPage({ params }: PageProps) {
                     </Link>
                   </div>
                 </DashboardCard>
+                </div>
               </div>
 
               {/* ─── Side column: chat above agenda, single column on xl ─── */}

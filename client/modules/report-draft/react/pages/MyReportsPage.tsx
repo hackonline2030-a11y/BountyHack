@@ -9,6 +9,7 @@ import {
   hunterDraftActivityHints,
   reviewerDisplayNameFromTeam,
 } from "@modules/report-draft/core/view/hunter-draft-review-activity";
+import { reportDraftStepLabel } from "@modules/report-draft/react/wizard/report-draft-step-labels";
 import { HunterReviewHistoryTable } from "@modules/report-draft/react/components/HunterReviewHistoryTable";
 import { reviewerRoleLabelFr } from "@modules/report-draft/react/review/reviewer-role-label";
 import { useAppSelector } from "@store/redux/store";
@@ -207,6 +208,7 @@ const MyReportsDraftCard: React.FC<{
       {activity.latestMentorEndorse ? (
         <div className="rounded-md border border-emerald-200/80 bg-emerald-50/90 px-2 py-1.5 text-[11px] font-medium leading-snug text-emerald-950">
           {t("myReports.activity.endorseBanner", {
+            step: reportDraftStepLabel(activity.latestMentorEndorse.step, lng),
             name: reviewerDisplayNameFromTeam(draft, activity.latestMentorEndorse.decidedBy),
             date: shortWhen.format(new Date(activity.latestMentorEndorse.decidedAt)),
           })}

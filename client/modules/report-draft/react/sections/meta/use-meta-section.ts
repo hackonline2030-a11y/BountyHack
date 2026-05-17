@@ -11,8 +11,9 @@ import { MetaForm } from "@modules/report-draft/core/form/meta.form";
 import { MetaFactory } from "@modules/report-draft/core/model/meta.factory";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { reportDraftSlice } from "@modules/report-draft/core/store/report-draft.slice";
-import { saveStepPayload } from "@modules/report-draft/core/useCase/save-step-payload.usecase";
+import { submitMentorAdvice } from "@modules/report-draft/core/useCase/submit-mentor-advice.usecase";
 import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-step-for-review.usecase";
+import { isStepValidationReviewerRole } from "@modules/report-draft/core/model/step-validation-reviewer";
 import { reviewerRoleFromDraftStep } from "@modules/report-draft/react/wizard/reviewer-role-from-draft";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
@@ -20,8 +21,8 @@ import { useAppDispatch, useAppSelector } from "@store/redux/store";
 const META_STEP = ReportDraftDomainModel.ReportDraftStep.META;
 
 /**
- * META : **Enregistrer le brouillon** (persiste sans revue), **Soumettre pour revue**,
- * **Suivant** uniquement après `approved` sur cette étape (validation reviewer).
+ * META : **Soumettre pour revue** (persiste le payload à la soumission),
+ * **Suivant** uniquement après `approved` sur cette étape (validation QC).
  */
 export const useMetaSection = () => {
   const dispatch = useAppDispatch();
@@ -36,11 +37,11 @@ export const useMetaSection = () => {
   const submittedBy = draftRow?.hunterId ?? "";
 
   const [reviewerRole, setReviewerRole] =
-    useState<ReportDraftDomainModel.ReviewerRole>("mentor");
+    useState<ReportDraftDomainModel.ReviewerRole>("quality_checker");
 
   useEffect(() => {
     const fromDraft = reviewerRoleFromDraftStep(draftRow, META_STEP);
-    setReviewerRole(fromDraft ?? "mentor");
+    setReviewerRole(fromDraft ?? "quality_checker");
   }, [currentDraftId, draftRow]);
 
   const form = useMemo(() => new MetaForm(), []);
@@ -79,15 +80,20 @@ export const useMetaSection = () => {
     );
   }, [dispatch, canNavigateNext]);
 
-  const onSaveDraft = useCallback(async () => {
-    if (!currentDraftId || !editable) return;
-    await dispatch(
-      saveStepPayload({ draftId: currentDraftId, step: META_STEP, payload: draft }),
-    );
-  }, [dispatch, currentDraftId, editable, draft]);
-
   const onSubmitForReview = useCallback(async () => {
     if (!currentDraftId || !submittedBy) return;
+    if (reviewerRole === "mentor") {
+      await dispatch(
+        submitMentorAdvice({
+          draftId: currentDraftId,
+          step: META_STEP,
+          submittedBy,
+          payload: draft,
+        }),
+      );
+      return;
+    }
+    if (!isStepValidationReviewerRole(reviewerRole)) return;
     await dispatch(
       submitStepForReview({
         draftId: currentDraftId,
@@ -99,10 +105,6 @@ export const useMetaSection = () => {
     );
   }, [dispatch, currentDraftId, submittedBy, reviewerRole, draft]);
 
-  const onReset = useCallback(() => {
-    setDraft(initialDraft);
-  }, [initialDraft]);
-
   return {
     draft,
     setField,
@@ -113,9 +115,7 @@ export const useMetaSection = () => {
     reviewerRole,
     setReviewerRole,
     onNext,
-    onSaveDraft,
     onSubmitForReview,
-    onReset,
     transitionBusy,
     transitionErr,
     catalogs: {

@@ -6,6 +6,7 @@ import {
   reportDraftStepToStateKey,
   type ReportDraftStepStateKey,
 } from "./report-draft-step-keys";
+import { isStepValidationReviewerRole } from "./step-validation-reviewer";
 
 export interface ReportDraftAggregateDeps {
   idProvider: IIdProvider;
@@ -57,6 +58,57 @@ export class ReportDraftAggregate {
    * and freezes the current payload + attachments into an immutable
    * Submission snapshot returned to the caller.
    */
+  /**
+   * Optional mentor advice — creates a pending submission but keeps the step
+   * editable. Does not gate the hunter « Suivant » button.
+   */
+  submitMentorAdvice(input: {
+    step: ReportDraftDomainModel.ReportDraftStep;
+    submittedBy: string;
+  }): ReportDraftDomainModel.Submission<unknown> {
+    this.guardAggregateNotTerminal("request mentor advice on");
+
+    const stepKey = reportDraftStepToStateKey(input.step);
+    const stepState = this._state[stepKey] as ReportDraftDomainModel.StepState<unknown>;
+    if (stepState.status !== "in-progress" && stepState.status !== "needs-revision") {
+      throw new Error(
+        `ReportDraftAggregate: cannot request mentor advice on step ${ReportDraftDomainModel.ReportDraftStep[input.step]}: ` +
+          `current status is '${stepState.status}', expected 'in-progress' or 'needs-revision'.`,
+      );
+    }
+
+    const now = this.deps.clock.now();
+    const nextRound = stepState.currentRound + 1;
+
+    const submission: ReportDraftDomainModel.Submission<unknown> = {
+      id: this.deps.idProvider.next(),
+      reportDraftId: this._state.id,
+      step: input.step,
+      round: nextRound,
+      payload: snapshot(stepState.payload),
+      attachmentsSnapshot: [...stepState.attachments],
+      submittedAt: now,
+      submittedBy: input.submittedBy,
+      reviewerRole: "mentor",
+      decision: "pending",
+    };
+
+    stepState.currentRound = nextRound;
+    stepState.assignedReviewerRole = null;
+
+    if (this._state.aggregateStatus === "draft") {
+      this._state.aggregateStatus = "under-review";
+    }
+    this._state.updatedAt = now;
+    this._state.version += 1;
+
+    return submission;
+  }
+
+  /**
+   * Hunter submits for QC (or super-admin) validation — locks the step until
+   * `approveStep`. Mentor advice uses {@link submitMentorAdvice} instead.
+   */
   submitStepForReview(input: {
     step: ReportDraftDomainModel.ReportDraftStep;
     reviewerRole: ReportDraftDomainModel.ReviewerRole;
@@ -64,13 +116,29 @@ export class ReportDraftAggregate {
   }): ReportDraftDomainModel.Submission<unknown> {
     this.guardAggregateNotTerminal("submit a step on");
 
+    if (!isStepValidationReviewerRole(input.reviewerRole)) {
+      throw new Error(
+        "ReportDraftAggregate: step validation must be requested from a quality checker (or super admin). " +
+          "Use submitMentorAdvice for optional mentor feedback.",
+      );
+    }
+
     const stepKey = reportDraftStepToStateKey(input.step);
     const stepState = this._state[stepKey] as ReportDraftDomainModel.StepState<unknown>;
-    if (stepState.status !== "in-progress" && stepState.status !== "needs-revision") {
+
+    const escalatesFromMentorQueue =
+      stepState.status === "awaiting-review" &&
+      stepState.assignedReviewerRole === "mentor";
+
+    if (
+      stepState.status !== "in-progress" &&
+      stepState.status !== "needs-revision" &&
+      !escalatesFromMentorQueue
+    ) {
       throw new Error(
         `ReportDraftAggregate: cannot submit step ${ReportDraftDomainModel.ReportDraftStep[input.step]} ` +
           `for review: current status is '${stepState.status}', ` +
-          `expected 'in-progress' or 'needs-revision'.`,
+          `expected 'in-progress', 'needs-revision', or mentor-queue escalation to QC.`,
       );
     }
 
@@ -179,7 +247,9 @@ export class ReportDraftAggregate {
         "ReportDraftAggregate: endorseSubmission applies only to mentor-targeted submissions.",
       );
     }
-    const stepKey = this.guardSubmissionMatchesPendingStep(submission, "endorse");
+    const stepKey = this.guardSubmissionMatchesPendingStep(submission, "endorse", {
+      allowedStatuses: ["awaiting-review", "in-progress"],
+    });
 
     const stepState = this._state[stepKey] as ReportDraftDomainModel.StepState<unknown>;
     const now = this.deps.clock.now();
@@ -348,6 +418,7 @@ export class ReportDraftAggregate {
   private guardSubmissionMatchesPendingStep(
     submission: ReportDraftDomainModel.Submission<unknown>,
     actionVerb: string,
+    options?: { allowedStatuses?: ReadonlyArray<ReportDraftDomainModel.StepStatus> },
   ): ReportDraftStepStateKey {
     if (submission.reportDraftId !== this._state.id) {
       throw new Error(
@@ -371,11 +442,12 @@ export class ReportDraftAggregate {
           `step is now at round ${stepState.currentRound}).`,
       );
     }
-    if (stepState.status !== "awaiting-review") {
+    const allowedStatuses = options?.allowedStatuses ?? ["awaiting-review"];
+    if (!allowedStatuses.includes(stepState.status)) {
       throw new Error(
         `ReportDraftAggregate: cannot ${actionVerb} step ` +
           `${ReportDraftDomainModel.ReportDraftStep[submission.step]}: ` +
-          `current status is '${stepState.status}', expected 'awaiting-review'.`,
+          `current status is '${stepState.status}', expected one of: ${allowedStatuses.join(", ")}.`,
       );
     }
     return stepKey;

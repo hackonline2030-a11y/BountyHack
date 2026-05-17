@@ -18,8 +18,9 @@ import { DescriptionForm } from "@modules/report-draft/core/form/description.for
 import { DescriptionFactory } from "@modules/report-draft/core/model/description.factory";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { reportDraftSlice } from "@modules/report-draft/core/store/report-draft.slice";
-import { saveStepPayload } from "@modules/report-draft/core/useCase/save-step-payload.usecase";
+import { submitMentorAdvice } from "@modules/report-draft/core/useCase/submit-mentor-advice.usecase";
 import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-step-for-review.usecase";
+import { isStepValidationReviewerRole } from "@modules/report-draft/core/model/step-validation-reviewer";
 import { reviewerRoleFromDraftStep } from "@modules/report-draft/react/wizard/reviewer-role-from-draft";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
@@ -40,11 +41,11 @@ export const useDescriptionSection = () => {
   const submittedBy = draftRow?.hunterId ?? "";
 
   const [reviewerRole, setReviewerRole] =
-    useState<ReportDraftDomainModel.ReviewerRole>("mentor");
+    useState<ReportDraftDomainModel.ReviewerRole>("quality_checker");
 
   useEffect(() => {
     const fromDraft = reviewerRoleFromDraftStep(draftRow, DESCRIPTION_STEP);
-    setReviewerRole(fromDraft ?? "mentor");
+    setReviewerRole(fromDraft ?? "quality_checker");
   }, [currentDraftId, draftRow]);
 
   const form = useMemo(() => new DescriptionForm(), []);
@@ -88,19 +89,20 @@ export const useDescriptionSection = () => {
     );
   }, [dispatch, canNavigateNext]);
 
-  const onSaveDraft = useCallback(async () => {
-    if (!currentDraftId || !editable) return;
-    await dispatch(
-      saveStepPayload({
-        draftId: currentDraftId,
-        step: DESCRIPTION_STEP,
-        payload: draft,
-      }),
-    );
-  }, [dispatch, currentDraftId, editable, draft]);
-
   const onSubmitForReview = useCallback(async () => {
     if (!currentDraftId || !submittedBy) return;
+    if (reviewerRole === "mentor") {
+      await dispatch(
+        submitMentorAdvice({
+          draftId: currentDraftId,
+          step: DESCRIPTION_STEP,
+          submittedBy,
+          payload: draft,
+        }),
+      );
+      return;
+    }
+    if (!isStepValidationReviewerRole(reviewerRole)) return;
     await dispatch(
       submitStepForReview({
         draftId: currentDraftId,
@@ -118,10 +120,6 @@ export const useDescriptionSection = () => {
     );
   }, [dispatch]);
 
-  const onReset = useCallback(() => {
-    setDraft(initialDraft);
-  }, [initialDraft]);
-
   return {
     draft,
     setField,
@@ -132,10 +130,8 @@ export const useDescriptionSection = () => {
     reviewerRole,
     setReviewerRole,
     onNext,
-    onSaveDraft,
     onSubmitForReview,
     onBack,
-    onReset,
     transitionBusy,
     transitionErr,
     derived: {

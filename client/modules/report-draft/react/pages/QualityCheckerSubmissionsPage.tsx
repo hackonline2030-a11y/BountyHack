@@ -13,6 +13,7 @@ import {
   isUnauthorizedHttpError,
   sessionExpiredUserMessage,
 } from "@/lib/session-refresh";
+import { ActionButton } from "@modules/app/nextjs/components/buttons/ActionButton";
 import { SubmissionReviewDraftTitleCell } from "@modules/report-draft/react/components/SubmissionReviewDraftTitleCell";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
@@ -224,16 +225,16 @@ export const QualityCheckerSubmissionsPage: React.FC<Props> = ({ lng }) => {
         </section>
       ) : null}
 
-      <button
-        type="button"
-        className="mt-4 rounded-md border border-dashboard-card-border px-4 py-2 text-sm text-dashboard-text hover:bg-dashboard-accent-soft/40"
+      <ActionButton
+        variant="secondary"
+        className="mt-4 self-start"
         onClick={() => {
           void dispatch(listReviewerSubmissions({ reviewerRole: "quality_checker" }));
           void dispatch(listMentorPeerSubmissionsForQc());
         }}
       >
         Rafraîchir la liste
-      </button>
+      </ActionButton>
       </div>
     </div>
   );

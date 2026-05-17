@@ -186,8 +186,6 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
 
       <WorkspaceTeamBanner />
 
-      <HunterReviewActivityBanner />
-
       <WorkspaceStepStatusPill />
 
       <div
@@ -196,6 +194,7 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
         aria-labelledby={tabButtonId("form")}
         hidden={activeTab !== "form"}
       >
+        <HunterReviewActivityBanner />
         <ReportDraftWizardPage />
       </div>
 

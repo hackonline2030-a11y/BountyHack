@@ -1,19 +1,23 @@
 "use client";
 
 import { useMemo } from "react";
+import { useParams } from "next/navigation";
 import { useT } from "next-i18next/client";
 import {
   hunterDraftActivityHints,
   reviewerDisplayNameFromTeam,
 } from "@modules/report-draft/core/view/hunter-draft-review-activity";
 import { reviewerRoleLabelFr } from "@modules/report-draft/react/review/reviewer-role-label";
+import { reportDraftStepLabel } from "@modules/report-draft/react/wizard/report-draft-step-labels";
 import { useAppSelector } from "@store/redux/store";
 
 /**
- * Hunter-only banner: surfaces latest mentor endorsement and latest staff comment
- * so a return to “draft” mode does not look like “nothing happened”.
+ * Hunter-only banner (onglet Édition) : dernier avis mentor favorable (avec étape)
+ * et dernier commentaire staff.
  */
 export const HunterReviewActivityBanner: React.FC = () => {
+  const params = useParams<{ lng?: string }>();
+  const lng = typeof params?.lng === "string" ? params.lng : "fr";
   const { t } = useT(["myReports", "reportTeams"]);
   const draftId = useAppSelector((s) => s.reportDrafts.currentDraftId);
   const draft = useAppSelector((s) =>
@@ -44,9 +48,12 @@ export const HunterReviewActivityBanner: React.FC = () => {
 
     let endorseLine: string | null = null;
     if (hints.latestMentorEndorse) {
-      const name = reviewerDisplayNameFromTeam(draft, hints.latestMentorEndorse.decidedBy);
-      const dateStr = dateFmt.format(new Date(hints.latestMentorEndorse.decidedAt));
+      const e = hints.latestMentorEndorse;
+      const name = reviewerDisplayNameFromTeam(draft, e.decidedBy);
+      const dateStr = dateFmt.format(new Date(e.decidedAt));
+      const step = reportDraftStepLabel(e.step, lng);
       endorseLine = t("myReports.activity.endorseBanner", {
+        step,
         name,
         date: dateStr,
       });
@@ -71,7 +78,7 @@ export const HunterReviewActivityBanner: React.FC = () => {
     }
 
     return { endorseLine, commentLine };
-  }, [draft, submissionsById, commentsById, t]);
+  }, [draft, submissionsById, commentsById, t, lng]);
 
   if (!draft || (!endorseLine && !commentLine)) {
     return null;
