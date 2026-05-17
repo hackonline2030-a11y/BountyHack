@@ -1,7 +1,8 @@
 import { ReportDraftDomainModel as M } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { normalizeLongFormPayload } from "@modules/report-draft/core/model/long-form-steps.factory";
 import { MetaFactory } from "@modules/report-draft/core/model/meta.factory";
-import { DescriptionFactory } from "@modules/report-draft/core/model/description.factory";
+import { normalizeDescriptionPayload } from "@modules/report-draft/core/model/description.factory";
+import { sectionBlocsHaveSubmittedContent } from "@modules/report-draft/core/model/section-bloc";
 import { cvssBaseScore } from "@modules/report-draft/core/cvss/cvss-3.1";
 import { reviewerDisplayNameFromTeam } from "@modules/report-draft/core/view/hunter-draft-review-activity";
 
@@ -31,12 +32,10 @@ export function stepHasPdfChapterContent(step: M.ReportDraftStep, payload: unkno
     case M.ReportDraftStep.META:
       return false;
     case M.ReportDraftStep.DESCRIPTION: {
-      const desc = DescriptionFactory.create(
-        payload && typeof payload === "object"
-          ? (payload as Partial<M.DescriptionFields>)
-          : undefined,
+      const desc = normalizeDescriptionPayload(payload);
+      return (
+        cvssBaseScore(desc) != null || sectionBlocsHaveSubmittedContent(desc.sectionBlocs)
       );
-      return cvssBaseScore(desc) != null;
     }
     default: {
       const { sectionBlocs } = normalizeLongFormPayload(step, payload);

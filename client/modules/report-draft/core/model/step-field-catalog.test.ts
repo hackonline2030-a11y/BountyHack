@@ -86,6 +86,24 @@ describe("stepCommentGroupsFromPayload", () => {
   });
 });
 
+describe("stepCommentGroupsFromPayload — description", () => {
+  it("groups CVSS metrics and free section blocs separately", () => {
+    const groups = stepCommentGroupsFromPayload(
+      ReportDraftDomainModel.ReportDraftStep.DESCRIPTION,
+      {
+        attackVector: "N",
+        sectionBlocs: [
+          { id: "a", heading: "", subheading: "", body: "Contexte", lists: [] },
+        ],
+      },
+    );
+    expect(groups).toHaveLength(2);
+    expect(groups[0]?.sectionHeading).toBe("Métriques CVSS");
+    expect(groups[1]?.sectionHeading).toBe("Section 2");
+    expect(groups[1]?.fields[0]?.value).toBe("Contexte");
+  });
+});
+
 describe("stepFieldsFromPayload", () => {
   it("prefixes flat labels with section heading", () => {
     const rows = stepFieldsFromPayload(

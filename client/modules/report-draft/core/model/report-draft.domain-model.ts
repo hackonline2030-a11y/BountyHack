@@ -62,6 +62,8 @@ export namespace ReportDraftDomainModel {
     confidentiality: string;
     integrity: string;
     availability: string;
+    /** Free-form sections after CVSS metrics (same bloc model as long-form steps). */
+    sectionBlocs: SectionBloc[];
   };
 
   export type SectionHeadingStyle = "normal" | "italic" | "bold";
@@ -83,7 +85,7 @@ export namespace ReportDraftDomainModel {
   };
 
   /**
-   * Free-form section inside a long-form wizard step (COLLECTION → FINAL).
+   * Free-form section inside DESCRIPTION or long-form wizard steps (COLLECTION → FINAL).
    * Order in `sectionBlocs[]` = PDF order. Images use `attachmentId` (phase 2).
    */
   export type SectionBloc = {

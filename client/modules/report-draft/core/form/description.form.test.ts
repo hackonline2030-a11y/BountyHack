@@ -213,7 +213,9 @@ describe("DescriptionForm", () => {
       expect(cvssSeverity(cvssBaseScore(tampered))).toBeNull();
     });
   
-    it.each<keyof ReportDraftDomainModel.DescriptionFields>([
+    it.each<
+      Exclude<keyof ReportDraftDomainModel.DescriptionFields, "sectionBlocs">
+    >([
       "attackVector",
       "attackComplexity",
       "privilegesRequired",

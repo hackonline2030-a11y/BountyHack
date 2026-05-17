@@ -15,7 +15,10 @@ import {
   cvssVector,
 } from "@modules/report-draft/core/cvss/cvss-3.1";
 import { DescriptionForm } from "@modules/report-draft/core/form/description.form";
-import { DescriptionFactory } from "@modules/report-draft/core/model/description.factory";
+import {
+  DescriptionFactory,
+  normalizeDescriptionPayload,
+} from "@modules/report-draft/core/model/description.factory";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { reportDraftSlice } from "@modules/report-draft/core/store/report-draft.slice";
 import { submitMentorAdvice } from "@modules/report-draft/core/useCase/submit-mentor-advice.usecase";
@@ -62,7 +65,10 @@ export const useDescriptionSection = () => {
   const form = useMemo(() => new DescriptionForm(), []);
 
   const initialDraft = useMemo<ReportDraftDomainModel.DescriptionFields>(
-    () => persistedDescription ?? DescriptionFactory.create(),
+    () =>
+      persistedDescription != null
+        ? normalizeDescriptionPayload(persistedDescription)
+        : DescriptionFactory.create(),
     [persistedDescription],
   );
   const [draft, setDraft] =
