@@ -1,41 +1,49 @@
 import { ReportDataInvalidError } from '../errors/pdf-application.errors';
+import { REPORT_DRAFT_STEP_STATE_KEYS } from '../../../report-draft/models/report-draft-api.types';
 import type {
   FrozenReportDocumentReadModel,
   FrozenReportSectionReadModel,
+  FrozenReportTocEntryReadModel,
 } from '../read-models/frozen-report-document.read-model';
 
 const DEFAULT_TEMPLATE_NAME = 'report-final';
 const TEMPLATE_ASSETS_BASE = '/template-assets';
 
-const DRAFT_STEP_KEYS = [
-  'meta',
-  'description',
-  'collection',
-  'exploitation',
-  'proofOfConcept',
-  'risks',
-  'remediation',
-  'final',
-] as const;
+const CVSS_METRIC_KEYS = new Set([
+  'scope',
+  'integrity',
+  'attackVector',
+  'availability',
+  'confidentiality',
+  'userInteraction',
+  'attackComplexity',
+  'privilegesRequired',
+]);
 
-const LONG_FORM_SECTIONS: ReadonlyArray<{ key: string; titleKey: string }> = [
-  { key: 'collection', titleKey: 'collection' },
-  { key: 'exploitation', titleKey: 'exploitation' },
-  { key: 'proofOfConcept', titleKey: 'proofOfConcept' },
-  { key: 'risks', titleKey: 'risks' },
-  { key: 'remediation', titleKey: 'remediation' },
-];
+/** PDF chapter title keys (meta / team / CVSS stay on the dashboard only). */
+const PDF_CHAPTER_TITLE_KEY: Record<string, string> = {
+  description: 'descriptionSectionTitle',
+  collection: 'collection',
+  exploitation: 'exploitation',
+  proofOfConcept: 'proofOfConcept',
+  risks: 'risks',
+  remediation: 'remediation',
+  final: 'final',
+};
 
 const DEFAULT_LABELS_FR: Record<string, string> = {
   reportTitle: 'Rapport de sécurité',
+  tableOfContentsTitle: 'Table des matières',
   metaSectionTitle: 'Métadonnées',
   cvssSectionTitle: 'Évaluation CVSS',
   teamSectionTitle: 'Équipe rapport',
-  collection: 'Collecte d’informations',
+  descriptionSectionTitle: 'Description du challenge',
+  collection: 'Collectes d’informations',
   exploitation: 'Exploitation',
-  proofOfConcept: 'Preuve de concept (PoC)',
-  risks: 'Risques',
+  proofOfConcept: 'PoC',
+  risks: 'Risque',
   remediation: 'Remédiation',
+  final: 'Finalisation',
   fieldReportTitle: 'Titre du rapport',
   fieldScope: 'Scope',
   fieldBugType: 'Type de vulnérabilité',
@@ -81,7 +89,7 @@ function resolveSteps(root: Record<string, unknown>): Record<string, unknown> | 
 
   const fromRoot: Record<string, unknown> = {};
   let found = false;
-  for (const key of DRAFT_STEP_KEYS) {
+  for (const key of REPORT_DRAFT_STEP_STATE_KEYS) {
     if (root[key] !== undefined) {
       fromRoot[key] = root[key];
       found = true;
@@ -90,6 +98,7 @@ function resolveSteps(root: Record<string, unknown>): Record<string, unknown> | 
   return found ? fromRoot : null;
 }
 
+/** Resolves step payload from frozen `steps.*` (StepStateWire or raw payload). */
 function stepPayload(
   steps: Record<string, unknown>,
   stepKey: string,
@@ -102,8 +111,26 @@ function stepPayload(
   if (payload) {
     return payload;
   }
-  // Raw step payload (e.g. `report_draft_steps.payload` only).
-  return step;
+  if ('sectionBlocs' in step || !('status' in step)) {
+    return step;
+  }
+  return {};
+}
+
+function extractCvssPayload(
+  descriptionPayload: Record<string, unknown>,
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const key of CVSS_METRIC_KEYS) {
+    if (
+      descriptionPayload[key] !== undefined &&
+      descriptionPayload[key] !== null &&
+      String(descriptionPayload[key]).trim() !== ''
+    ) {
+      out[key] = descriptionPayload[key];
+    }
+  }
+  return out;
 }
 
 function sectionBlocsFromPayload(
@@ -119,15 +146,35 @@ function sectionBlocsFromPayload(
   );
 }
 
-function buildSections(
+function isCvssOnlyPayload(payload: Record<string, unknown>): boolean {
+  const keys = Object.keys(payload).filter(
+    (k) => payload[k] !== undefined && payload[k] !== null && String(payload[k]).trim() !== '',
+  );
+  if (keys.length === 0) {
+    return false;
+  }
+  return keys.every((k) => CVSS_METRIC_KEYS.has(k));
+}
+
+function buildPdfSections(
   steps: Record<string, unknown>,
   labels: Record<string, string>,
 ): FrozenReportSectionReadModel[] {
   const out: FrozenReportSectionReadModel[] = [];
-  for (const { key, titleKey } of LONG_FORM_SECTIONS) {
+  for (const key of REPORT_DRAFT_STEP_STATE_KEYS) {
+    if (key === 'meta') {
+      continue;
+    }
+    const titleKey = PDF_CHAPTER_TITLE_KEY[key];
+    if (!titleKey) {
+      continue;
+    }
     const payload = stepPayload(steps, key);
     const blocs = sectionBlocsFromPayload(payload);
-    if (blocs.length === 0 && Object.keys(payload).length === 0) {
+    if (key === 'description' && blocs.length === 0 && isCvssOnlyPayload(payload)) {
+      continue;
+    }
+    if (blocs.length === 0) {
       continue;
     }
     out.push({
@@ -139,15 +186,49 @@ function buildSections(
   return out;
 }
 
-function resolveTitle(meta: Record<string, unknown>, teamLabel: string | null): string {
+function resolveTitle(meta: Record<string, unknown>): string {
   const fromMeta = String(meta['reportTitle'] ?? '').trim();
   if (fromMeta) {
     return fromMeta;
   }
-  if (teamLabel?.trim()) {
-    return teamLabel.trim();
-  }
   return DEFAULT_LABELS_FR.reportTitle ?? 'Rapport de sécurité';
+}
+
+function resolveAuthorName(
+  hunterId: string,
+  reportTeam: FrozenReportDocumentReadModel['reportTeam'],
+): string {
+  if (!reportTeam?.members.length) {
+    return hunterId;
+  }
+  const owner = reportTeam.members.find((m) => m.userId === hunterId);
+  if (owner?.displayName.trim()) {
+    return owner.displayName.trim();
+  }
+  const hunterMember = reportTeam.members.find((m) =>
+    m.role.toLowerCase().includes('hunter'),
+  );
+  if (hunterMember?.displayName.trim()) {
+    return hunterMember.displayName.trim();
+  }
+  return hunterId;
+}
+
+/** Cover TOC: report title on page 1, then one page per PDF chapter. */
+function buildPdfTableOfContents(
+  reportTitle: string,
+  chapterLabels: readonly string[],
+): FrozenReportTocEntryReadModel[] {
+  const entries: FrozenReportTocEntryReadModel[] = [
+    { label: reportTitle, page: 1, bold: true },
+  ];
+  let page = 2;
+  for (const label of chapterLabels) {
+    const withColon = label.endsWith(':') ? label : `${label} :`;
+    entries.push({ label: withColon, page });
+    page += 1;
+  }
+  return entries;
 }
 
 export type MapFrozenContentInput = {
@@ -189,7 +270,7 @@ export function mapFrozenContentToDocument(
 
   const labels = { ...DEFAULT_LABELS_FR };
   const meta = stepPayload(steps, 'meta');
-  const cvss = stepPayload(steps, 'description');
+  const cvss = extractCvssPayload(stepPayload(steps, 'description'));
 
   const teamRaw = asRecord(root['reportTeam']);
   const reportTeam =
@@ -207,7 +288,14 @@ export function mapFrozenContentToDocument(
         }
       : null;
 
-  const title = resolveTitle(meta, reportTeam?.label ?? null);
+  const title = resolveTitle(meta);
+  const sections = buildPdfSections(steps, labels);
+  const hunterId = String(root['hunterId'] ?? input.hunterId);
+  const authorName = resolveAuthorName(hunterId, reportTeam);
+  const tableOfContents = buildPdfTableOfContents(
+    title,
+    sections.map((s) => s.title),
+  );
 
   return {
     htmlLang: locale,
@@ -221,9 +309,11 @@ export function mapFrozenContentToDocument(
     hunterId: String(root['hunterId'] ?? input.hunterId),
     frozenAt: String(root['frozenAt'] ?? ''),
     title,
+    authorName,
+    tableOfContents,
     meta,
     cvss,
-    sections: buildSections(steps, labels),
+    sections,
     reportTeam,
     labels,
   };

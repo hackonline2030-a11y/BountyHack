@@ -1,3 +1,10 @@
+/** One line on the cover table of contents (thesis-style dotted leaders). */
+export type FrozenReportTocEntryReadModel = {
+  label: string;
+  page: number;
+  bold?: boolean;
+};
+
 /** One long-form wizard step rendered as a PDF section. */
 export type FrozenReportSectionReadModel = {
   key: string;
@@ -24,6 +31,9 @@ export interface FrozenReportDocumentReadModel {
   hunterId: string;
   frozenAt: string;
   title: string;
+  /** Display name for « par … » on the cover page. */
+  authorName: string;
+  tableOfContents: FrozenReportTocEntryReadModel[];
   meta: Record<string, unknown>;
   cvss: Record<string, unknown>;
   sections: FrozenReportSectionReadModel[];

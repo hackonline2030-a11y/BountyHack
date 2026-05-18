@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Req } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -19,6 +19,7 @@ import {
   SuperAdminFinalValidationService,
   type SuperAdminStepCommentInput,
 } from '../application/admin/super-admin-final-validation.service';
+import { DeleteReportDraftCommand } from '../application/commands/delete-report-draft.command';
 import type { ReportDraftWire, ReviewerCommentWire } from '../models/report-draft-api.types';
 
 @ApiTags('report-drafts-admin')
@@ -28,6 +29,7 @@ export class ReportDraftAdminController {
   constructor(
     private readonly listForFinalValidation: ListReportDraftsForFinalValidationQuery,
     private readonly superAdminFinalValidation: SuperAdminFinalValidationService,
+    private readonly deleteReportDraft: DeleteReportDraftCommand,
   ) {}
 
   @Get('final-validation-queue')
@@ -45,9 +47,28 @@ export class ReportDraftAdminController {
     return this.listForFinalValidation.execute();
   }
 
+  @Delete('drafts/:draftId')
+  @AuthRoles(AppRoleCode.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Permanently delete a report draft and all related data',
+    description:
+      'Removes the draft, its team (cascade), steps, submissions, global submissions, comments, and any legacy `reports` row for this draft. Irreversible. SUPER_ADMIN only.',
+  })
+  @ApiOkResponse({ schema: { example: { ok: true } } })
+  @ApiHttpUnauthorized('Missing or invalid bearer token.')
+  @ApiHttpForbidden('Authenticated user is not SUPER_ADMIN.')
+  @ApiHttpInternalServerError('Unexpected error while deleting report draft.')
+  async deleteDraft(
+    @Req() request: RequestWithIdentity,
+    @Param('draftId') draftId: string,
+  ): Promise<{ ok: true }> {
+    await this.deleteReportDraft.execute(request.user, draftId);
+    return { ok: true };
+  }
+
   @Post('drafts/:draftId/final-validate')
   @AuthRoles(AppRoleCode.SUPER_ADMIN)
-  @ApiOperation({ summary: 'Approve final validation and submit draft to program' })
+  @ApiOperation({ summary: 'Approve final validation and publish draft' })
   @ApiOkResponse({ description: 'Updated report draft' })
   async approveFinalValidation(
     @Req() request: RequestWithIdentity,

@@ -14,6 +14,7 @@
           "under-global-review": "En relecture globale",
           "draft": "Brouillon",
           "submitted-to-program": "Soumis au programme",
+          "published": "Publié",
           "rejected": "Rejeté",
           "given-up": "Abandonné"
         }
@@ -61,7 +62,10 @@
           "revisionDisabledTitle": "Enregistrez au moins un commentaire super-admin avant de demander une révision",
           "revisionAlreadyUsedTitle": "La révision globale a déjà été demandée une fois pour ce rapport",
           "pendingGlobalReviewHint": "Une soumission globale est en attente de revue (QC ou super-admin) avant la validation finale du rapport.",
-          "openGlobalSubmissionReview": "Ouvrir la revue de la soumission globale"
+          "openGlobalSubmissionReview": "Ouvrir la revue de la soumission globale",
+          "generatePdf": "Générer le PDF",
+          "generatePdfLoading": "Génération du PDF…",
+          "generatePdfDisabledTitle": "Disponible après validation finale (brouillon publié)"
         },
         "comments": {
           "intro": "Un commentaire général par étape. L’équipe (hunter, mentor, quality checker) les consulte dans l’onglet « Retours super-admin ».",

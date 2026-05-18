@@ -179,7 +179,10 @@ enum ReportDraftAggregateStatus {
   /// Super-admin global revision cycle (team rework / global QC submission).
   UNDER_GLOBAL_REVIEW
   READY_TO_PROGRAM
+  /// @deprecated Legacy — prefer PUBLISHED. Kept for existing rows until migrated.
   SUBMITTED_TO_PROGRAM
+  /// Super-admin validated: draft is the canonical artefact for PDF preview/export.
+  PUBLISHED
   GIVEN_UP
   REJECTED
 }

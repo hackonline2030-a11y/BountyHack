@@ -7,7 +7,6 @@ import { variables } from './shared/variables.config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import type { Application } from 'express';
-import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import cookieParser from 'cookie-parser';
 import * as express from 'express';
@@ -38,21 +37,6 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('ejs');
 
-  const pdfsDir = join(process.cwd(), 'pdfs');
-  if (!existsSync(pdfsDir)) {
-    mkdirSync(pdfsDir, { recursive: true });
-  }
-  // Served at /pdfs/* (outside GLOBAL_PREFIX, same as /template-assets).
-  app.use(
-    '/pdfs',
-    express.static(pdfsDir, {
-      setHeaders: (res, filePath) => {
-        if (filePath.endsWith('.pdf')) {
-          res.setHeader('Content-Type', 'application/pdf');
-        }
-      },
-    }),
-  );
   app.use('/template-assets', express.static(join(process.cwd(), 'templates')));
 
   app.setGlobalPrefix(variables.globalPrefix);

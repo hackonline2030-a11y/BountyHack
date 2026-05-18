@@ -8,12 +8,10 @@ import { randomUUID } from 'crypto';
 import {
   DraftStep,
   ReportDraftAggregateStatus,
-  ReportStatus,
   ReviewerRole,
   StepStatus,
   SubmissionDecision,
 } from '../../../generated/prisma/enums';
-import { buildFrozenContentFromDraft } from './promote-draft-to-report';
 import { PrismaService } from '../../../core/infrastructure/database/prisma/prisma.service';
 import { AppRoleCode } from '../../../shared/rbac/app-role.code';
 import type { Identity } from '../../../auth/domain/models/identity';
@@ -30,6 +28,11 @@ import { IGlobalSubmissionRepository } from '../../ports/global-submission-repos
 import { ISubmissionRepository } from '../../ports/submission-repository.interface';
 import { IReviewerCommentRepository } from '../../ports/reviewer-comment-repository.interface';
 const GENERAL_COMMENT_FIELD = '__general__';
+
+const PUBLISHED_WIRE_STATUSES = new Set([
+  'published',
+  'submitted-to-program',
+]);
 
 const STEP_BY_KEY: Record<ReportDraftStepStateKeyWire, DraftStep> = {
   meta: DraftStep.META,
@@ -87,20 +90,9 @@ export class SuperAdminFinalValidationService {
   ): Promise<ReportDraftWire> {
     this.assertSuperAdmin(identity);
     const draft = await this.requireDraft(draftId);
-    const draftRow = await this.prisma.reportDraft.findUnique({
-      where: { id: draftId },
-      select: { pendingReportId: true, aggregateStatus: true },
-    });
-    if (draftRow === null) {
-      throw new NotFoundException('Report draft not found');
-    }
 
-    if (draft.aggregateStatus === 'submitted-to-program') {
-      if (draftRow.pendingReportId) {
-        return draft;
-      }
-      await this.promoteDraftToPendingReport(draft, identity.uid);
-      return (await this.reportDraftRepository.findById(draftId))!;
+    if (PUBLISHED_WIRE_STATUSES.has(draft.aggregateStatus)) {
+      return draft;
     }
 
     if (!this.canApproveFinalValidation(draft)) {
@@ -109,56 +101,21 @@ export class SuperAdminFinalValidationService {
       );
     }
 
-    await this.promoteDraftToPendingReport(draft, identity.uid);
+    await this.publishDraft(draftId);
     return (await this.reportDraftRepository.findById(draftId))!;
   }
 
-  /** Creates a pending `reports` row and links it on the draft (idempotent if already linked). */
-  private async promoteDraftToPendingReport(
-    draft: ReportDraftWire,
-    promotedBy: string,
-  ): Promise<void> {
+  /** Marks the draft as published — live steps become the PDF source of truth. */
+  private async publishDraft(draftId: string): Promise<void> {
     const now = new Date();
-    const existing = await this.prisma.reportDraft.findUnique({
-      where: { id: draft.id },
-      select: { pendingReportId: true },
-    });
-    if (existing?.pendingReportId) {
-      await this.prisma.reportDraft.update({
-        where: { id: draft.id },
-        data: {
-          aggregateStatus: ReportDraftAggregateStatus.SUBMITTED_TO_PROGRAM,
-          superAdminRevisionRequestedAt: null,
-          updatedAt: now,
-        },
-      });
-      return;
-    }
-
-    const reportId = randomUUID();
-    const frozenContent = buildFrozenContentFromDraft(draft, now);
-
-    await this.prisma.$transaction(async (tx) => {
-      await tx.report.create({
-        data: {
-          id: reportId,
-          hunterId: draft.hunterId,
-          sourceDraftId: draft.id,
-          status: ReportStatus.PENDING,
-          frozenContent: frozenContent as object,
-          contentSyncedAt: now,
-          promotedBy,
-        },
-      });
-      await tx.reportDraft.update({
-        where: { id: draft.id },
-        data: {
-          aggregateStatus: ReportDraftAggregateStatus.SUBMITTED_TO_PROGRAM,
-          pendingReportId: reportId,
-          superAdminRevisionRequestedAt: null,
-          updatedAt: now,
-        },
-      });
+    await this.prisma.reportDraft.update({
+      where: { id: draftId },
+      data: {
+        aggregateStatus: ReportDraftAggregateStatus.PUBLISHED,
+        superAdminRevisionRequestedAt: null,
+        pendingReportId: null,
+        updatedAt: now,
+      },
     });
   }
 
@@ -207,16 +164,6 @@ export class SuperAdminFinalValidationService {
     });
 
     return (await this.reportDraftRepository.findById(draftId))!;
-  }
-
-  private async resetAllStepsToInProgress(draftId: string): Promise<void> {
-    await this.prisma.$transaction(async (tx) => {
-      await this.resetAllStepsToInProgressInTx(tx, draftId);
-      await tx.reportDraft.update({
-        where: { id: draftId },
-        data: { updatedAt: new Date() },
-      });
-    });
   }
 
   private async resetAllStepsToInProgressInTx(

@@ -136,7 +136,9 @@ export namespace ReportDraftDomainModel {
     | "under-review"
     | "under-global-review"
     | "ready-to-program"
+    /** @deprecated Prefer `published`. */
     | "submitted-to-program"
+    | "published"
     | "given-up"
     | "rejected";
 
@@ -208,7 +210,7 @@ export namespace ReportDraftDomainModel {
     superAdminRevisionRequestedAt?: string | null;
     /** Monotonic count of super-admin global revision requests. */
     superAdminGlobalRevisionCount?: number;
-    /** Pending program report id once super-admin submits to the program. */
+    /** @deprecated Legacy link to `reports` row — PDF uses the draft after `published`. */
     pendingReportId?: string | null;
     // TODO V2 (dette consciente) : terminationReason / terminatedBy /
     // terminatedByRole / terminatedAt pour audit des given-up et rejected

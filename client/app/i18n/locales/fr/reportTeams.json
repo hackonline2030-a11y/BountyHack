@@ -100,9 +100,13 @@
         "openFinalValidation": "Validation finale du rapport"
       },
       "edit": "Modifier",
-      "delete": "Supprimer",
-      "deleteConfirm": "Supprimer cette équipe (maquette) ?",
-      "mockAction": "maquette — aucune API"
+      "deleteTeam": "Supprimer l'équipe",
+      "deleteTeamConfirm": "Supprimer l'équipe « {{label}} » ? Le brouillon de rapport restera visible dans « Brouillons sans équipe ».",
+      "deleteDraft": "Supprimer le brouillon de rapport",
+      "deleteDraftModalTitle": "Supprimer définitivement ce rapport ?",
+      "deleteDraftModalBody": "Cette action efface le brouillon « {{label}} » (ID {{draftId}}), toutes les étapes, soumissions, commentaires et l'équipe associée. Elle est irréversible.",
+      "deleteDraftModalConfirm": "Supprimer définitivement",
+      "cancel": "Annuler"
     },
     "coordinator": {
       "metaTitle": "Coordination des équipes rapport",

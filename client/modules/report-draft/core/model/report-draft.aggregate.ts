@@ -463,7 +463,8 @@ export class ReportDraftAggregate {
     if (
       status === "given-up" ||
       status === "rejected" ||
-      status === "submitted-to-program"
+      status === "submitted-to-program" ||
+      status === "published"
     ) {
       throw new Error(
         `ReportDraftAggregate: cannot ${actionVerb} a '${status}' draft (terminal state).`,

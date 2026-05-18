@@ -16,7 +16,10 @@ export type AggregateStatusWire =
   | 'under-review'
   | 'under-global-review'
   | 'ready-to-program'
+  /** @deprecated Prefer `published`. */
   | 'submitted-to-program'
+  /** Super-admin validated — source of truth for PDF generation. */
+  | 'published'
   | 'given-up'
   | 'rejected';
 
