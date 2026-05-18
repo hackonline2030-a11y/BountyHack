@@ -100,9 +100,13 @@
         "openFinalValidation": "Final report validation"
       },
       "edit": "Edit",
-      "delete": "Delete",
-      "deleteConfirm": "Delete this team (mockup)?",
-      "mockAction": "mockup — no API yet"
+      "deleteTeam": "Delete team",
+      "deleteTeamConfirm": "Delete team « {{label}} »? The report draft will remain and appear under « Drafts without team ».",
+      "deleteDraft": "Delete report draft",
+      "deleteDraftModalTitle": "Permanently delete this report?",
+      "deleteDraftModalBody": "This will erase draft « {{label}} » (ID {{draftId}}), all steps, submissions, comments, and the linked team. This cannot be undone.",
+      "deleteDraftModalConfirm": "Delete permanently",
+      "cancel": "Cancel"
     },
     "coordinator": {
       "metaTitle": "Report team coordination",

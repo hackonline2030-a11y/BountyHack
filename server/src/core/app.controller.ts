@@ -12,9 +12,9 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { variables } from '../shared/variables.config';
 import {
-  I_REPORT_REPOSITORY,
-  IReportRepository,
-} from '../document-rendering/application/ports/report-repository.port';
+  I_REPORT_DRAFT_DOCUMENT_REPOSITORY,
+  IReportDraftDocumentRepository,
+} from '../document-rendering/application/ports/report-draft-document-repository.port';
 import {
   ReportDataInvalidError,
   ReportIdInvalidError,
@@ -22,7 +22,7 @@ import {
   ReportNotFoundError,
 } from '../document-rendering/application/errors/pdf-application.errors';
 
-const REPORT_ID_ROUTE =
+const DRAFT_ID_ROUTE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const LOCALE_ROUTE_CODE = /^[a-z]{2}$/;
 
@@ -31,8 +31,8 @@ const LOCALE_ROUTE_CODE = /^[a-z]{2}$/;
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    @Inject(I_REPORT_REPOSITORY)
-    private readonly reportRepository: IReportRepository,
+    @Inject(I_REPORT_DRAFT_DOCUMENT_REPOSITORY)
+    private readonly documentRepository: IReportDraftDocumentRepository,
   ) {}
 
   @Get('/')
@@ -67,17 +67,17 @@ export class AppController {
   @Get('/dashboard')
   @Render('dashboard')
   @ApiOperation({
-    summary: 'Choose a promoted report for PDF preview',
-    description: 'Lists rows from `reports` with frozen_content.',
+    summary: 'Choose a published report draft for PDF preview',
+    description: 'Lists `report_drafts` with aggregate status published.',
   })
   async getDashboardReportPickerPage() {
     const apiPrefix = `/${variables.globalPrefix.replace(/^\/+|\/+$/g, '')}`;
     const texts = this.appService.getDashboardTexts();
-    const reports = await this.reportRepository.listReports();
+    const drafts = await this.documentRepository.listPublishedDrafts();
 
-    if (!reports.length) {
+    if (!drafts.length) {
       throw new NotFoundException(
-        'No promoted reports with frozen_content found in the database.',
+        'No published report drafts found in the database.',
       );
     }
 
@@ -85,32 +85,32 @@ export class AppController {
       ...texts,
       mode: 'pick' as const,
       dashboardBaseUrl: `${apiPrefix}/dashboard`,
-      pickerItems: reports.map((report) => ({
-        href: `${apiPrefix}/dashboard/${report.id}`,
-        label: `${report.title} (${report.status})`,
+      pickerItems: drafts.map((draft) => ({
+        href: `${apiPrefix}/dashboard/${draft.id}`,
+        label: `${draft.title} (${draft.status})`,
       })),
       homeUrl: `${apiPrefix}`,
     };
   }
 
-  @Get('/dashboard/:reportId')
+  @Get('/dashboard/:draftId')
   @Render('dashboard')
   @ApiOperation({
-    summary: 'Render report dashboard for one promoted report',
-    description: 'Preview and PDF actions use `reportId` and optional `lang`.',
+    summary: 'Render report dashboard for one published draft',
+    description: 'Preview and PDF actions use `draftId` and optional `lang`.',
   })
   async getDashboardReportPage(
-    @Param('reportId') reportIdParam: string,
+    @Param('draftId') draftIdParam: string,
     @Query('lang') lang?: string,
   ) {
     const apiPrefix = `/${variables.globalPrefix.replace(/^\/+|\/+$/g, '')}`;
     const texts = this.appService.getDashboardTexts();
-    const reportId =
-      typeof reportIdParam === 'string' ? reportIdParam.trim() : '';
+    const draftId =
+      typeof draftIdParam === 'string' ? draftIdParam.trim() : '';
 
-    if (!REPORT_ID_ROUTE.test(reportId)) {
+    if (!DRAFT_ID_ROUTE.test(draftId)) {
       throw new BadRequestException(
-        `Invalid report id '${reportIdParam}'. Expected a UUID.`,
+        `Invalid draft id '${draftIdParam}'. Expected a UUID.`,
       );
     }
 
@@ -127,17 +127,19 @@ export class AppController {
 
     const effectiveLang = trimmed !== '' ? trimmed : 'fr';
 
+    let reportDoc;
     try {
-      await this.reportRepository.getReportTemplateData(
-        reportId,
+      reportDoc = await this.documentRepository.getDocumentTemplateData(
+        draftId,
         effectiveLang,
       );
     } catch (e) {
       this.mapRepositoryErrors(e);
     }
 
+    const data = reportDoc!.toReadModel();
     const params = new URLSearchParams();
-    params.set('reportId', reportId);
+    params.set('draftId', draftId);
     params.set('lang', effectiveLang);
     const query = `?${params.toString()}`;
     const pdfBase = `${apiPrefix}/pdf`;
@@ -145,17 +147,27 @@ export class AppController {
     return {
       ...texts,
       mode: 'preview' as const,
+      title: data.title,
       dashboardBaseUrl: `${apiPrefix}/dashboard`,
       pickerItems: [] as { href: string; label: string }[],
-      currentReportId: reportId,
+      currentReportId: draftId,
       currentLang: effectiveLang,
       localeOptions: [
         { code: 'fr', label: 'Français' },
         { code: 'en', label: 'English' },
       ],
       previewUrl: `${pdfBase}/previewHtml${query}`,
-      generateUrl: `${pdfBase}/htmlToPDF${query}`,
+      generateUrl: `${pdfBase}/export${query}`,
       homeUrl: `${apiPrefix}`,
+      reportContext: {
+        meta: data.meta,
+        cvss: data.cvss,
+        reportTeam: data.reportTeam,
+        reportId: data.reportId,
+        reportStatus: data.reportStatus,
+        frozenAt: data.frozenAt,
+        labels: data.labels,
+      },
     };
   }
 

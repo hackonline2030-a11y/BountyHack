@@ -31,6 +31,7 @@ import { ListReportDraftsByHunterQuery } from './application/queries/list-report
 import { ListReportDraftsForFinalValidationQuery } from './application/queries/list-report-drafts-for-final-validation.query';
 import { ListOrphanReportDraftsQuery } from './application/queries/list-orphan-report-drafts.query';
 import { SuperAdminFinalValidationService } from './application/admin/super-admin-final-validation.service';
+import { DeleteReportDraftCommand } from './application/commands/delete-report-draft.command';
 import { PrismaService } from '../core/infrastructure/database/prisma/prisma.service';
 import { SaveSubmissionCommand } from './application/commands/save-submission.command';
 import { GetSubmissionByIdQuery } from './application/queries/get-submission-by-id.query';
@@ -122,6 +123,12 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
       inject: [I_REPORT_DRAFT_REPOSITORY],
       useFactory: (repository: PrismaReportDraftRepository) =>
         new ListOrphanReportDraftsQuery(repository),
+    },
+    {
+      provide: DeleteReportDraftCommand,
+      inject: [I_REPORT_DRAFT_REPOSITORY],
+      useFactory: (repository: PrismaReportDraftRepository) =>
+        new DeleteReportDraftCommand(repository),
     },
     {
       provide: SuperAdminFinalValidationService,

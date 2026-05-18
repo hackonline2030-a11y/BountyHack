@@ -16,7 +16,10 @@ export type AggregateStatusWire =
   | 'under-review'
   | 'under-global-review'
   | 'ready-to-program'
+  /** @deprecated Prefer `published`. */
   | 'submitted-to-program'
+  /** Super-admin validated — source of truth for PDF generation. */
+  | 'published'
   | 'given-up'
   | 'rejected';
 
@@ -95,7 +98,6 @@ export interface ReportDraftWire {
   /** Associated report-team (label + members) when one exists — read-only from client saves. */
   reportTeam?: ReportDraftTeamWire | null;
   /** Pending program report created when super-admin submits to the program. */
-  pendingReportId?: string | null;
 }
 
 export const REPORT_DRAFT_STEP_STATE_KEYS: readonly ReportDraftStepStateKeyWire[] =

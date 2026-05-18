@@ -18,6 +18,7 @@ const AGGREGATE_STATUSES: readonly ReportDraftDomainModel.AggregateStatus[] = [
   "under-review",
   "ready-to-program",
   "submitted-to-program",
+  "published",
   "given-up",
   "rejected",
 ] as const;

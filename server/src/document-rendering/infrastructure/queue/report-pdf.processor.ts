@@ -21,10 +21,13 @@ export class ReportPdfProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<ReportPdfJobPayload, { url: string }>): Promise<{ url: string }> {
+  async process(
+    job: Job<ReportPdfJobPayload, { fileName: string }>,
+  ): Promise<{ fileName: string }> {
     const { requestedByUid: _auditUid, ...request } = job.data;
     void _auditUid;
 
-    return this.generateReportPdfCommand.execute(request);
+    const { fileName } = await this.generateReportPdfCommand.execute(request);
+    return { fileName };
   }
 }

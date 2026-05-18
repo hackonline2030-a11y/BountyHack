@@ -252,7 +252,7 @@ const StatusBadge: React.FC<{
       ? "bg-violet-100 text-violet-900"
       : status === "ready-to-program"
       ? "bg-emerald-100 text-emerald-900"
-      : status === "submitted-to-program"
+      : status === "published" || status === "submitted-to-program"
       ? "bg-sky-100 text-sky-900"
       : status === "rejected"
       ? "bg-rose-100 text-rose-900"

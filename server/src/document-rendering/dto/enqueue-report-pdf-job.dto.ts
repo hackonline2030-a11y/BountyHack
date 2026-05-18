@@ -3,12 +3,12 @@ import { IsOptional, IsString, IsUUID, Matches, MaxLength } from 'class-validato
 
 export class EnqueueReportPdfJobDto {
   @ApiProperty({
-    description: 'Promoted report UUID (`reports.id`).',
-    example: 'bbbbbbbb-0002-4000-8000-000000000001',
+    description: 'Published report draft UUID (`report_drafts.id`).',
+    example: 'bbbbbbbb-0001-4000-8000-000000000001',
   })
   @IsString()
   @IsUUID()
-  reportId!: string;
+  draftId!: string;
 
   @ApiPropertyOptional({
     description: 'Two-letter locale for labels (default `fr`).',

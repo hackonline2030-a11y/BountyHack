@@ -38,9 +38,9 @@ describe('PdfJobsController', () => {
   it('enqueues job with requestedByUid from JWT identity', async () => {
     addMock.mockResolvedValue({ id: 'job-99' });
 
-    const reportId = 'bbbbbbbb-0002-4000-8000-000000000001';
+    const draftId = 'bbbbbbbb-0001-4000-8000-000000000001';
     const out = await controller.enqueueReportPdf(
-      { reportId, lang: 'fr' },
+      { draftId, lang: 'fr' },
       reqUser('user-1'),
     );
 
@@ -48,7 +48,7 @@ describe('PdfJobsController', () => {
       'generate-report-pdf',
       expect.objectContaining({
         requestedByUid: 'user-1',
-        reportId,
+        draftId,
         locale: 'fr',
       }),
     );
@@ -58,19 +58,19 @@ describe('PdfJobsController', () => {
     });
   });
 
-  it('getJobStatus returns url when completed', async () => {
+  it('getJobStatus returns fileName when completed', async () => {
     getJobMock.mockResolvedValue({
       id: 'job-1',
       data: { requestedByUid: 'user-1' },
       getState: jest.fn().mockResolvedValue('completed'),
-      returnvalue: { url: '/pdfs/x.pdf' },
+      returnvalue: { fileName: 'report-final-bbbbbbbb.pdf' },
       failedReason: undefined,
     });
 
     const out = await controller.getJobStatus('job-1', reqUser('user-1'));
 
     expect(out.state).toBe('completed');
-    expect(out.url).toBe('/pdfs/x.pdf');
+    expect(out.fileName).toBe('report-final-bbbbbbbb.pdf');
   });
 
   it('getJobStatus throws when job belongs to another user', async () => {

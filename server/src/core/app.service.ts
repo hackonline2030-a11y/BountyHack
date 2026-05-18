@@ -32,7 +32,7 @@ export class AppService {
       description:
         'Prévisualise le rapport HTML et génère un PDF en réutilisant les endpoints API existants.',
       pickerHint:
-        'Choisis un rapport promu en base (frozen_content), puis prévisualise ou génère le PDF.',
+        'Choisis un brouillon publié (validation super-admin), puis prévisualise ou génère le PDF.',
       previewTitle: 'Aperçu HTML',
       generateButton: 'Générer le PDF',
       backButton: 'Retour à l’accueil',

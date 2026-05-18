@@ -75,6 +75,7 @@ const AGGREGATE_STATUS_TO_WIRE: Record<
   [ReportDraftAggregateStatus.UNDER_GLOBAL_REVIEW]: 'under-global-review',
   [ReportDraftAggregateStatus.READY_TO_PROGRAM]: 'ready-to-program',
   [ReportDraftAggregateStatus.SUBMITTED_TO_PROGRAM]: 'submitted-to-program',
+  [ReportDraftAggregateStatus.PUBLISHED]: 'published',
   [ReportDraftAggregateStatus.GIVEN_UP]: 'given-up',
   [ReportDraftAggregateStatus.REJECTED]: 'rejected',
 };
@@ -88,6 +89,7 @@ const AGGREGATE_STATUS_FROM_WIRE: Record<
   'under-global-review': ReportDraftAggregateStatus.UNDER_GLOBAL_REVIEW,
   'ready-to-program': ReportDraftAggregateStatus.READY_TO_PROGRAM,
   'submitted-to-program': ReportDraftAggregateStatus.SUBMITTED_TO_PROGRAM,
+  published: ReportDraftAggregateStatus.PUBLISHED,
   'given-up': ReportDraftAggregateStatus.GIVEN_UP,
   rejected: ReportDraftAggregateStatus.REJECTED,
 };
@@ -158,7 +160,6 @@ export class ReportDraftPrismaMapper {
       superAdminRevisionRequestedAt:
         row.superAdminRevisionRequestedAt?.toISOString() ?? null,
       superAdminGlobalRevisionCount: row.superAdminGlobalRevisionCount ?? 0,
-      pendingReportId: row.pendingReportId,
     };
 
     for (const stepRow of row.steps) {
