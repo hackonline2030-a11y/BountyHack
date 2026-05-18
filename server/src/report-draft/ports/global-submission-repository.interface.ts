@@ -8,8 +8,16 @@ export interface IGlobalSubmissionRepository {
   findPendingForReviewerRole(
     reviewerRole: ReviewerRoleWire,
   ): Promise<GlobalSubmissionWire[]>;
+  findPendingForReviewerRoleInDrafts(
+    reviewerRole: ReviewerRoleWire,
+    draftIds: readonly string[] | null,
+  ): Promise<GlobalSubmissionWire[]>;
   findAllForReviewerRole(
     reviewerRole: ReviewerRoleWire,
+  ): Promise<GlobalSubmissionWire[]>;
+  findAllForReviewerRoleInDrafts(
+    reviewerRole: ReviewerRoleWire,
+    draftIds: readonly string[] | null,
   ): Promise<GlobalSubmissionWire[]>;
 
   /** Persist global submission + set all steps to awaiting-review (single transaction). */

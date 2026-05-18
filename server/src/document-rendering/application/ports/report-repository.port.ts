@@ -2,13 +2,18 @@ import { ReportTemplate } from '../../domain/entities/report-template.entity';
 
 export const I_REPORT_REPOSITORY = 'I_REPORT_REPOSITORY';
 
+export type ReportListItemReadModel = {
+  id: string;
+  status: string;
+  title: string;
+  sourceDraftId: string;
+  updatedAt: string;
+};
+
 export interface IReportRepository {
-  listReportStyles(): Promise<string[]>;
-  listReportVersions(style: string): Promise<string[]>;
-  listReportLocales(style: string, version: string): Promise<string[]>;
+  listReports(): Promise<ReportListItemReadModel[]>;
   getReportTemplateData(
-    style?: string,
-    version?: string,
+    reportId: string,
     locale?: string,
   ): Promise<ReportTemplate>;
 }

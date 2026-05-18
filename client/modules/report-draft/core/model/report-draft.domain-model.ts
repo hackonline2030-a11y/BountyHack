@@ -208,6 +208,8 @@ export namespace ReportDraftDomainModel {
     superAdminRevisionRequestedAt?: string | null;
     /** Monotonic count of super-admin global revision requests. */
     superAdminGlobalRevisionCount?: number;
+    /** Pending program report id once super-admin submits to the program. */
+    pendingReportId?: string | null;
     // TODO V2 (dette consciente) : terminationReason / terminatedBy /
     // terminatedByRole / terminatedAt pour audit des given-up et rejected
   }

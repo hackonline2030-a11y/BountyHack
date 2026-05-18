@@ -10,8 +10,7 @@ import {
 } from '../ports/template-renderer.port';
 
 export type ReportPreviewRequest = {
-  style?: string;
-  version?: string;
+  reportId: string;
   locale?: string;
 };
 type Response = string;
@@ -26,10 +25,9 @@ export class PreviewReportHtmlQuery
     private readonly templateRenderer: ITemplateRenderer,
   ) {}
 
-  async execute(request: ReportPreviewRequest = {}): Promise<Response> {
+  async execute(request: ReportPreviewRequest): Promise<Response> {
     const reportData = await this.reportRepository.getReportTemplateData(
-      request.style,
-      request.version,
+      request.reportId,
       request.locale,
     );
     return this.templateRenderer.renderReport(reportData);

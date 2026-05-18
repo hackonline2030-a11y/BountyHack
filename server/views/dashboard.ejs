@@ -14,9 +14,9 @@
             <% if (typeof dashboardBaseUrl !== 'undefined') { %>
                 <a href="<%= dashboardBaseUrl %>" class="dashboard-breadcrumb-link">Dashboard rapport</a>
             <% } %>
-            <% if (typeof currentStyle !== 'undefined' && currentStyle) { %>
+            <% if (typeof currentReportId !== 'undefined' && currentReportId) { %>
                 <span class="dashboard-breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
-                <span class="dashboard-breadcrumb-current"><%= currentStyle %></span>
+                <span class="dashboard-breadcrumb-current"><%= currentReportId %></span>
             <% } %>
         </nav>
         <h1 class="dashboard-title"><%= title %></h1>
@@ -40,12 +40,10 @@
             <% if (typeof dashboardBaseUrl !== 'undefined') { %>
                 <a href="<%= dashboardBaseUrl %>" class="dashboard-breadcrumb-link">Dashboard rapport</a>
             <% } %>
-            <% if (typeof currentStyle !== 'undefined' && currentStyle) { %>
+            <% if (typeof currentReportId !== 'undefined' && currentReportId) { %>
                 <span class="dashboard-breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
-                <a href="<%= dashboardBaseUrl %>/<%= currentStyle %>" class="dashboard-breadcrumb-link"><%= currentStyle %></a>
+                <span class="dashboard-breadcrumb-current"><%= currentReportId %></span>
             <% } %>
-            <span class="dashboard-breadcrumb-sep" aria-hidden="true">&rsaquo;</span>
-            <span class="dashboard-breadcrumb-current"><%= typeof currentVersion !== 'undefined' ? currentVersion : '' %></span>
         </nav>
         <% if (typeof localeOptions !== 'undefined' && localeOptions.length > 1) { %>
         <div class="dashboard-lang-row">
@@ -138,8 +136,14 @@
           if (!payload || !payload.url) {
             throw new Error('URL PDF manquante');
           }
-          setStatus('PDF généré. Ouverture dans un nouvel onglet.', false);
-          window.open(payload.url, '_blank', 'noopener,noreferrer');
+          setStatus('PDF généré. Téléchargement…', false);
+          const link = document.createElement('a');
+          link.href = payload.url;
+          link.download = payload.url.split('/').pop() || 'report.pdf';
+          link.rel = 'noopener noreferrer';
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
         } catch (error) {
           setStatus('Erreur lors de la génération du PDF.', true);
         } finally {

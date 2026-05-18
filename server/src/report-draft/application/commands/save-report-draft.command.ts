@@ -12,7 +12,7 @@ export class SaveReportDraftCommand {
   ) {}
 
   async execute(identity: Identity, draft: ReportDraftWire): Promise<void> {
-    this.access.assertCanSaveDraft(identity, draft);
+    await this.access.assertCanSaveDraft(identity, draft);
 
     const existing = await this.repository.findById(draft.id);
     if (!existing) {

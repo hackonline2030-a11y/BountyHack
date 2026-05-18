@@ -86,7 +86,7 @@ export class PdfJobsController {
   @ApiOperation({
     summary: 'Queue report PDF generation',
     description:
-      'Accepts style/version/lang, enqueues BullMQ work, returns immediately with `jobId`. Poll GET /pdf/jobs/:jobId until `state` is `completed` or `failed`.',
+      'Accepts reportId (and optional lang), enqueues BullMQ work, returns immediately with `jobId`. Poll GET /pdf/jobs/:jobId until `state` is `completed` or `failed`.',
   })
   @ApiResponse({
     status: 202,
@@ -99,8 +99,7 @@ export class PdfJobsController {
   ): Promise<EnqueueReportPdfResponseDto> {
     const payload: ReportPdfJobPayload = {
       requestedByUid: req.user.uid,
-      ...(body.style !== undefined ? { style: body.style } : {}),
-      ...(body.version !== undefined ? { version: body.version } : {}),
+      reportId: body.reportId,
       ...(body.lang !== undefined ? { locale: body.lang } : {}),
     };
 

@@ -17,20 +17,14 @@ import {
 } from '../document-rendering/application/ports/report-repository.port';
 import {
   ReportDataInvalidError,
-  ReportDataMissingError,
+  ReportIdInvalidError,
   ReportLocaleInvalidError,
-  ReportLocaleNotFoundError,
-  ReportVersionInvalidError,
-  ReportVersionNotFoundError,
+  ReportNotFoundError,
 } from '../document-rendering/application/errors/pdf-application.errors';
 
-const REPORT_VERSION_ROUTE = /^v\d+$/i;
-const REPORT_STYLE_ROUTE = /^[a-z0-9_-]+$/i;
+const REPORT_ID_ROUTE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const LOCALE_ROUTE_CODE = /^[a-z]{2}$/;
-const LANG_LABELS: Record<string, string> = {
-  fr: 'Français',
-  en: 'English',
-};
 
 @ApiTags('root')
 @Controller()
@@ -73,29 +67,17 @@ export class AppController {
   @Get('/dashboard')
   @Render('dashboard')
   @ApiOperation({
-    summary: 'Choose report dashboard style',
-    description:
-      'Lists available report styles (folders under `src/document-rendering/data` with `report.json`); each opens `/dashboard/:style`.',
+    summary: 'Choose a promoted report for PDF preview',
+    description: 'Lists rows from `reports` with frozen_content.',
   })
-  @ApiOkResponse({
-    description: 'HTML dashboard page returned.',
-    content: {
-      'text/html': {
-        schema: {
-          type: 'string',
-          example:
-            '<!doctype html><html><head><title>Dashboard</title></head><body>...</body></html>',
-        },
-      },
-    },
-  })
-  async getDashboardVersionPickerPage() {
+  async getDashboardReportPickerPage() {
     const apiPrefix = `/${variables.globalPrefix.replace(/^\/+|\/+$/g, '')}`;
     const texts = this.appService.getDashboardTexts();
-    const styles = await this.reportRepository.listReportStyles();
-    if (!styles.length) {
+    const reports = await this.reportRepository.listReports();
+
+    if (!reports.length) {
       throw new NotFoundException(
-        'No report style folders found. Add data under `src/document-rendering/data/<style>/v1/` with `report.json` (and optional `report.<lang>.json`).',
+        'No promoted reports with frozen_content found in the database.',
       );
     }
 
@@ -103,111 +85,32 @@ export class AppController {
       ...texts,
       mode: 'pick' as const,
       dashboardBaseUrl: `${apiPrefix}/dashboard`,
-      pickerItems: styles.map((style) => ({
-        href: `${apiPrefix}/dashboard/${style}`,
-        label: `${texts.openVersionPrefix}${style}`,
+      pickerItems: reports.map((report) => ({
+        href: `${apiPrefix}/dashboard/${report.id}`,
+        label: `${report.title} (${report.status})`,
       })),
       homeUrl: `${apiPrefix}`,
     };
   }
 
-  @Get('/dashboard/:style')
+  @Get('/dashboard/:reportId')
   @Render('dashboard')
   @ApiOperation({
-    summary: 'Choose report dashboard version for one style',
-    description: 'Lists available versions for one style (`/dashboard/:style/:version`).',
+    summary: 'Render report dashboard for one promoted report',
+    description: 'Preview and PDF actions use `reportId` and optional `lang`.',
   })
-  @ApiOkResponse({
-    description: 'HTML dashboard page returned.',
-    content: {
-      'text/html': {
-        schema: {
-          type: 'string',
-          example:
-            '<!doctype html><html><head><title>Dashboard</title></head><body>...</body></html>',
-        },
-      },
-    },
-  })
-  async getDashboardStylePage(@Param('style') styleParam: string) {
-    const apiPrefix = `/${variables.globalPrefix.replace(/^\/+|\/+$/g, '')}`;
-    const texts = this.appService.getDashboardTexts();
-    const style = typeof styleParam === 'string' ? styleParam.trim().toLowerCase() : '';
-
-    if (!REPORT_STYLE_ROUTE.test(style)) {
-      throw new BadRequestException(
-        `Invalid report style '${styleParam}'. Expected a slug like report-final.`,
-      );
-    }
-
-    const versions = await this.reportRepository.listReportVersions(style);
-    if (!versions.length) {
-      throw new NotFoundException(
-        `No populated version folders found for style '${style}'. Add report.json under src/document-rendering/data/${style}/v1/ (or another v* folder).`,
-      );
-    }
-
-    return {
-      ...texts,
-      mode: 'pick' as const,
-      dashboardBaseUrl: `${apiPrefix}/dashboard`,
-      pickerItems: versions.map((version) => ({
-        href: `${apiPrefix}/dashboard/${style}/${version}`,
-        label: `${texts.openVersionPrefix}${version}`,
-      })),
-      currentStyle: style,
-      homeUrl: `${apiPrefix}`,
-    };
-  }
-
-  @Get('/dashboard/:style/:version')
-  @Render('dashboard')
-  @ApiOperation({
-    summary: 'Render report dashboard for one style/version',
-    description:
-      'Preview and PDF actions use matching `style`, `version`, and `lang` query parameters.',
-  })
-  @ApiOkResponse({
-    description: 'HTML dashboard page returned.',
-    content: {
-      'text/html': {
-        schema: {
-          type: 'string',
-          example:
-            '<!doctype html><html><head><title>Dashboard</title></head><body>...</body></html>',
-        },
-      },
-    },
-  })
-  async getDashboardVersionPage(
-    @Param('style') styleParam: string,
-    @Param('version') versionParam: string,
+  async getDashboardReportPage(
+    @Param('reportId') reportIdParam: string,
     @Query('lang') lang?: string,
   ) {
     const apiPrefix = `/${variables.globalPrefix.replace(/^\/+|\/+$/g, '')}`;
     const texts = this.appService.getDashboardTexts();
-    const style = typeof styleParam === 'string' ? styleParam.trim().toLowerCase() : '';
-    const slug = typeof versionParam === 'string' ? versionParam.trim() : '';
+    const reportId =
+      typeof reportIdParam === 'string' ? reportIdParam.trim() : '';
 
-    if (!REPORT_STYLE_ROUTE.test(style)) {
+    if (!REPORT_ID_ROUTE.test(reportId)) {
       throw new BadRequestException(
-        `Invalid report style '${styleParam}'. Expected a slug like report-final.`,
-      );
-    }
-
-    if (!REPORT_VERSION_ROUTE.test(slug)) {
-      throw new BadRequestException(
-        `Invalid report version '${slug}'. Expected a slug like v1 or v2.`,
-      );
-    }
-
-    const version = slug.toLowerCase();
-
-    const locales = await this.reportRepository.listReportLocales(style, version);
-
-    if (!locales.length) {
-      throw new NotFoundException(
-        `No report locale files found for '${style}/${version}'. Add report.json / report.<lang>.json under that folder.`,
+        `Invalid report id '${reportIdParam}'. Expected a UUID.`,
       );
     }
 
@@ -222,53 +125,20 @@ export class AppController {
       );
     }
 
-    if (trimmed !== '' && !locales.includes(trimmed)) {
-      throw new NotFoundException(
-        `Language '${trimmed}' is not available for version ${version}.`,
-      );
-    }
+    const effectiveLang = trimmed !== '' ? trimmed : 'fr';
 
     try {
       await this.reportRepository.getReportTemplateData(
-        style,
-        version,
-        trimmed === '' ? undefined : trimmed,
+        reportId,
+        effectiveLang,
       );
     } catch (e) {
-      if (
-        e instanceof ReportLocaleInvalidError ||
-        e instanceof ReportDataInvalidError ||
-        e instanceof ReportVersionInvalidError
-      ) {
-        throw new BadRequestException(e.message);
-      }
-      if (
-        e instanceof ReportLocaleNotFoundError ||
-        e instanceof ReportVersionNotFoundError ||
-        e instanceof ReportDataMissingError
-      ) {
-        throw new NotFoundException(e.message);
-      }
-      throw e;
+      this.mapRepositoryErrors(e);
     }
 
-    let effectiveLang: string;
-    if (trimmed !== '') {
-      effectiveLang = trimmed;
-    } else {
-      const primary = locales[0];
-      if (primary === undefined) {
-        throw new NotFoundException(
-          `No report locale files found for '${style}/${version}'.`,
-        );
-      }
-      effectiveLang = primary;
-    }
     const params = new URLSearchParams();
-    params.set('style', style);
-    params.set('version', version);
+    params.set('reportId', reportId);
     params.set('lang', effectiveLang);
-
     const query = `?${params.toString()}`;
     const pdfBase = `${apiPrefix}/pdf`;
 
@@ -277,17 +147,29 @@ export class AppController {
       mode: 'preview' as const,
       dashboardBaseUrl: `${apiPrefix}/dashboard`,
       pickerItems: [] as { href: string; label: string }[],
-      currentStyle: style,
-      currentVersion: version,
-      locales,
+      currentReportId: reportId,
       currentLang: effectiveLang,
-      localeOptions: locales.map((code) => ({
-        code,
-        label: LANG_LABELS[code] ?? code.toUpperCase(),
-      })),
+      localeOptions: [
+        { code: 'fr', label: 'Français' },
+        { code: 'en', label: 'English' },
+      ],
       previewUrl: `${pdfBase}/previewHtml${query}`,
       generateUrl: `${pdfBase}/htmlToPDF${query}`,
       homeUrl: `${apiPrefix}`,
     };
+  }
+
+  private mapRepositoryErrors(err: unknown): never {
+    if (
+      err instanceof ReportIdInvalidError ||
+      err instanceof ReportLocaleInvalidError ||
+      err instanceof ReportDataInvalidError
+    ) {
+      throw new BadRequestException(err.message);
+    }
+    if (err instanceof ReportNotFoundError) {
+      throw new NotFoundException(err.message);
+    }
+    throw err;
   }
 }

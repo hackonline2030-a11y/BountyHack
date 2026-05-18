@@ -38,7 +38,9 @@ describe('ListSubmissionsQuery', () => {
     findById: jest.fn(),
     findByDraftId: jest.fn(),
     findPendingForReviewerRole: jest.fn(),
+    findPendingForReviewerRoleInDrafts: jest.fn(),
     findAllForReviewerRole: jest.fn(),
+    findAllForReviewerRoleInDrafts: jest.fn(),
     findMentorSubmissionsForDraftIds: jest.fn(),
   };
   const reportDraftRepository: jest.Mocked<IReportDraftRepository> = {
@@ -49,10 +51,16 @@ describe('ListSubmissionsQuery', () => {
     findOrphanSummaries: jest.fn(),
   };
   const reportTeamRepository: jest.Mocked<
-    Pick<IReportTeamRepository, 'isMemberOfDraft' | 'findDraftIdsForMember'>
+    Pick<
+      IReportTeamRepository,
+      | 'isMemberOfDraft'
+      | 'findDraftIdsForMember'
+      | 'findByReportDraftId'
+    >
   > = {
     isMemberOfDraft: jest.fn().mockResolvedValue(false),
     findDraftIdsForMember: jest.fn().mockResolvedValue([]),
+    findByReportDraftId: jest.fn().mockResolvedValue(null),
   };
 
   const access = new ReportDraftAccessPolicy(
@@ -101,5 +109,59 @@ describe('ListSubmissionsQuery', () => {
 
     expect(result).toEqual(submissions);
     expect(submissionRepository.findByDraftId).toHaveBeenCalledWith('draft-1');
+  });
+
+  it('scopes pendingForReviewer to team drafts for mentor', async () => {
+    reportTeamRepository.findDraftIdsForMember.mockResolvedValue(['draft-m1']);
+    submissionRepository.findPendingForReviewerRoleInDrafts.mockResolvedValue([]);
+
+    await query.execute(
+      {
+        uid: 'mentor-1',
+        email: 'm@example.com',
+        roleCode: AppRoleCode.MENTOR,
+      },
+      { kind: 'pendingForReviewer', reviewerRole: 'mentor' },
+    );
+
+    expect(
+      submissionRepository.findPendingForReviewerRoleInDrafts,
+    ).toHaveBeenCalledWith('mentor', ['draft-m1']);
+  });
+
+  it('scopes pendingForReviewer to team drafts for quality checker', async () => {
+    const submissions: SubmissionWire[] = [
+      {
+        id: 'sub-1',
+        reportDraftId: 'draft-team',
+        step: 0,
+        round: 1,
+        payload: {},
+        attachmentsSnapshot: [],
+        submittedAt: '2026-05-15T12:00:00.000Z',
+        submittedBy: 'hunter-1',
+        reviewerRole: 'quality_checker',
+        decision: 'pending',
+      },
+    ];
+    reportTeamRepository.findDraftIdsForMember.mockResolvedValue(['draft-team']);
+    submissionRepository.findPendingForReviewerRoleInDrafts.mockResolvedValue(
+      submissions,
+    );
+
+    const result = await query.execute(
+      {
+        uid: 'qc-1',
+        email: 'qc@example.com',
+        roleCode: AppRoleCode.QUALITY_CHECKER,
+      },
+      { kind: 'pendingForReviewer', reviewerRole: 'quality_checker' },
+    );
+
+    expect(result).toEqual(submissions);
+    expect(
+      submissionRepository.findPendingForReviewerRoleInDrafts,
+    ).toHaveBeenCalledWith('quality_checker', ['draft-team']);
+    expect(submissionRepository.findPendingForReviewerRole).not.toHaveBeenCalled();
   });
 });

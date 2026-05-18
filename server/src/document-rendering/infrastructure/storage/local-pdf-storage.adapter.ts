@@ -14,13 +14,13 @@ export class LocalPdfStorageAdapter implements IPdfStorage {
     await mkdir(this.outputDir, { recursive: true });
     const safeTemplateName =
       (templateName || '').replace(/[^a-zA-Z0-9_-]/g, '') || 'default';
-    const fileName = `report-${safeTemplateName}-${Date.now()}.pdf`;
+    const fileName = `${safeTemplateName}-${Date.now()}.pdf`;
     const pdfFilePath = path.resolve(this.outputDir, fileName);
     await writeFile(pdfFilePath, pdfBuffer);
 
     return {
       fileName,
-      /** Path reference only — not exposed via express.static until auth download exists. */
+      /** Root path `/pdfs/*` (see main.ts static mount). */
       publicUrl: `/pdfs/${fileName}`,
     };
   }

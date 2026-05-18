@@ -17,11 +17,9 @@ import { PreviewReportHtmlQuery } from '../application/queries/preview-report-ht
 import { GenerateReportPdfCommand } from '../application/commands/generate-report-pdf.command';
 import {
   ReportDataInvalidError,
-  ReportDataMissingError,
+  ReportIdInvalidError,
   ReportLocaleInvalidError,
-  ReportLocaleNotFoundError,
-  ReportVersionInvalidError,
-  ReportVersionNotFoundError,
+  ReportNotFoundError,
 } from '../application/errors/pdf-application.errors';
 
 @ApiTags('pdf')
@@ -35,25 +33,18 @@ export class PdfController {
   @ApiOperation({
     summary: 'Render report template as HTML preview',
     description:
-      'Renders the EJS report template for the requested report content version (`v1`, `v2`, … under `src/document-rendering/data`) and returns raw HTML.',
+      'Loads `reports.frozen_content` from the database and renders `templates/report-final/index.ejs`.',
   })
   @ApiQuery({
-    name: 'style',
-    required: false,
-    description: 'Report data style folder (e.g. `report-final`).',
-    example: 'report-final',
-  })
-  @ApiQuery({
-    name: 'version',
-    required: false,
-    description: 'Report content folder slug (`v1`, `v2`, …).',
-    example: 'v1',
+    name: 'reportId',
+    required: true,
+    description: 'Promoted report UUID (`reports.id`).',
+    example: 'bbbbbbbb-0002-4000-8000-000000000001',
   })
   @ApiQuery({
     name: 'lang',
     required: false,
-    description:
-      'Locale file to load (`fr` maps to `report.json`, `en` to `report.en.json`, …).',
+    description: 'Two-letter locale for labels (default `fr`).',
     example: 'fr',
   })
   @ApiProduces('text/html')
@@ -64,14 +55,16 @@ export class PdfController {
   @Get('/previewHtml')
   @Header('Content-Type', 'text/html; charset=utf-8')
   async previewReportHtml(
-    @Query('style') style?: string,
-    @Query('version') version?: string,
+    @Query('reportId') reportId?: string,
     @Query('lang') lang?: string,
   ) {
+    const id = reportId?.trim();
+    if (!id) {
+      throw new BadRequestException('Query parameter reportId is required.');
+    }
     try {
       return await this.previewReportHtmlQuery.execute({
-        ...(style !== undefined ? { style } : {}),
-        ...(version !== undefined ? { version } : {}),
+        reportId: id,
         ...(lang !== undefined ? { locale: lang } : {}),
       });
     } catch (e) {
@@ -82,24 +75,17 @@ export class PdfController {
   @ApiOperation({
     summary: 'Generate report PDF file',
     description:
-      'Generates a PDF on disk and returns a storage path reference (`/pdfs/...`). Files are not served publicly until a secured download endpoint exists.',
+      'Generates a PDF from `reports.frozen_content` and returns a storage path reference (`/pdfs/...`).',
   })
   @ApiQuery({
-    name: 'style',
-    required: false,
-    description: 'Report data style folder (e.g. `report-final`).',
-    example: 'report-final',
-  })
-  @ApiQuery({
-    name: 'version',
-    required: false,
-    description: 'Report content folder slug (`v1`, `v2`, …).',
-    example: 'v1',
+    name: 'reportId',
+    required: true,
+    description: 'Promoted report UUID (`reports.id`).',
   })
   @ApiQuery({
     name: 'lang',
     required: false,
-    description: 'Locale file to load (`fr` ↔ `report.json`, `en` ↔ `report.en.json`, …).',
+    description: 'Two-letter locale (default `fr`).',
     example: 'fr',
   })
   @ApiOkResponse({
@@ -110,7 +96,7 @@ export class PdfController {
       properties: {
         url: {
           type: 'string',
-          example: '/pdfs/report-final-1714291500000.pdf',
+          example: '/pdfs/report-final-bbbbbbbb-1714291500000.pdf',
         },
       },
       required: ['url'],
@@ -118,14 +104,16 @@ export class PdfController {
   })
   @Get('/htmlToPDF')
   async exportReportPDF(
-    @Query('style') style?: string,
-    @Query('version') version?: string,
+    @Query('reportId') reportId?: string,
     @Query('lang') lang?: string,
   ) {
+    const id = reportId?.trim();
+    if (!id) {
+      throw new BadRequestException('Query parameter reportId is required.');
+    }
     try {
       return await this.generateReportPdfCommand.execute({
-        ...(style !== undefined ? { style } : {}),
-        ...(version !== undefined ? { version } : {}),
+        reportId: id,
         ...(lang !== undefined ? { locale: lang } : {}),
       });
     } catch (e) {
@@ -135,19 +123,13 @@ export class PdfController {
 
   private mapRepositoryErrors(err: unknown): never {
     if (
-      err instanceof ReportVersionInvalidError ||
+      err instanceof ReportIdInvalidError ||
       err instanceof ReportLocaleInvalidError ||
       err instanceof ReportDataInvalidError
     ) {
       throw new BadRequestException(err.message);
     }
-    if (err instanceof ReportVersionNotFoundError) {
-      throw new NotFoundException(err.message);
-    }
-    if (err instanceof ReportDataMissingError) {
-      throw new NotFoundException(err.message);
-    }
-    if (err instanceof ReportLocaleNotFoundError) {
+    if (err instanceof ReportNotFoundError) {
       throw new NotFoundException(err.message);
     }
     throw err;

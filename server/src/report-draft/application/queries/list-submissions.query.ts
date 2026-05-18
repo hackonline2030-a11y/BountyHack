@@ -38,12 +38,22 @@ export class ListSubmissionsQuery {
         await this.access.assertCanReadDraft(identity, draft);
         return this.repository.findByDraftId(input.draftId);
       }
-      case 'pendingForReviewer':
+      case 'pendingForReviewer': {
         this.access.assertCanQueryReviewerRole(identity, input.reviewerRole);
-        return this.repository.findPendingForReviewerRole(input.reviewerRole);
-      case 'forReviewer':
+        const draftIds = await this.access.draftIdsForScopedReviewerList(identity);
+        return this.repository.findPendingForReviewerRoleInDrafts(
+          input.reviewerRole,
+          draftIds,
+        );
+      }
+      case 'forReviewer': {
         this.access.assertCanQueryReviewerRole(identity, input.reviewerRole);
-        return this.repository.findAllForReviewerRole(input.reviewerRole);
+        const draftIds = await this.access.draftIdsForScopedReviewerList(identity);
+        return this.repository.findAllForReviewerRoleInDrafts(
+          input.reviewerRole,
+          draftIds,
+        );
+      }
       case 'mentorPeerForQc':
         if (
           identity.roleCode !== AppRoleCode.QUALITY_CHECKER &&

@@ -10,15 +10,16 @@ describe('PreviewReportHtmlQuery', () => {
       renderReport: jest.fn().mockResolvedValue('<html>report</html>'),
     };
     const query = new PreviewReportHtmlQuery(
-      reportRepository as any,
-      templateRenderer as any,
+      reportRepository as never,
+      templateRenderer as never,
     );
 
-    const result = await query.execute();
+    const result = await query.execute({
+      reportId: 'bbbbbbbb-0002-4000-8000-000000000001',
+    });
 
     expect(reportRepository.getReportTemplateData).toHaveBeenCalledWith(
-      undefined,
-      undefined,
+      'bbbbbbbb-0002-4000-8000-000000000001',
       undefined,
     );
     expect(templateRenderer.renderReport).toHaveBeenCalledWith(reportData);

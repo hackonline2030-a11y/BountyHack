@@ -21,9 +21,7 @@ describe('AppController', () => {
         {
           provide: I_REPORT_REPOSITORY,
           useValue: {
-            listReportStyles: jest.fn().mockResolvedValue(['report-final']),
-            listReportVersions: jest.fn().mockResolvedValue(['v1']),
-            listReportLocales: jest.fn().mockResolvedValue(['fr']),
+            listReports: jest.fn().mockResolvedValue([]),
             getReportTemplateData: jest.fn().mockResolvedValue({}),
           },
         },

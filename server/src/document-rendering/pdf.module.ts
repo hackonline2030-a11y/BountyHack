@@ -2,12 +2,13 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from '../auth/auth.module';
+import { PrismaModule } from '../core/infrastructure/database/prisma/prisma.module';
 import { PdfController } from './controllers/pdf.controller';
 import { PdfJobsController } from './controllers/pdf-jobs.controller';
 import { I_TEMPLATE_RENDERER } from './application/ports/template-renderer.port';
 import { I_PDF_GENERATOR } from './application/ports/pdf-generator.port';
 import { I_PDF_STORAGE } from './application/ports/pdf-storage.port';
-import { JsonReportRepositoryAdapter } from './infrastructure/repositories/json-report.repository';
+import { PrismaReportRepository } from './infrastructure/repositories/prisma-report.repository';
 import { EjsTemplateRendererAdapter } from './infrastructure/template/ejs-template-renderer.adapter';
 import { PuppeteerPdfGeneratorAdapter } from './infrastructure/pdf/puppeteer-pdf-generator.adapter';
 import { LocalPdfStorageAdapter } from './infrastructure/storage/local-pdf-storage.adapter';
@@ -26,6 +27,7 @@ import { PDF_GENERATION_QUEUE } from './infrastructure/queue/pdf-generation.cons
 @Module({
   imports: [
     AuthModule,
+    PrismaModule,
     ConfigModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
@@ -59,7 +61,7 @@ import { PDF_GENERATION_QUEUE } from './infrastructure/queue/pdf-generation.cons
     ReportPdfProcessor,
     {
       provide: I_REPORT_REPOSITORY,
-      useClass: JsonReportRepositoryAdapter,
+      useClass: PrismaReportRepository,
     },
     {
       provide: I_TEMPLATE_RENDERER,

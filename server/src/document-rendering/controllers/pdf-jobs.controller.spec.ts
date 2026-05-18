@@ -38,8 +38,9 @@ describe('PdfJobsController', () => {
   it('enqueues job with requestedByUid from JWT identity', async () => {
     addMock.mockResolvedValue({ id: 'job-99' });
 
+    const reportId = 'bbbbbbbb-0002-4000-8000-000000000001';
     const out = await controller.enqueueReportPdf(
-      { style: 'report-final', version: 'v1', lang: 'fr' },
+      { reportId, lang: 'fr' },
       reqUser('user-1'),
     );
 
@@ -47,8 +48,7 @@ describe('PdfJobsController', () => {
       'generate-report-pdf',
       expect.objectContaining({
         requestedByUid: 'user-1',
-        style: 'report-final',
-        version: 'v1',
+        reportId,
         locale: 'fr',
       }),
     );

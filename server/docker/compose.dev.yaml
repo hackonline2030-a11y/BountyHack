@@ -133,7 +133,6 @@ services:
     # Dev : même contenu que le dépôt hôte (dashboard rapport + assets templates) — évite un rebuild à chaque changement.
     # L’image inclut aussi ces dossiers (Dockerfile) pour les environnements sans montage.
     volumes:
-      - ../src/document-rendering/data:/usr/src/app/src/document-rendering/data:ro
       - ../templates:/usr/src/app/templates:ro
     # Pas de depends_on mongodb : le profil mongodb peut être désactivé (IN-MEMORY).
 

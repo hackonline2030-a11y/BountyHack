@@ -23,18 +23,20 @@ describe('GenerateReportPdfCommand', () => {
     };
 
     const command = new GenerateReportPdfCommand(
-      reportRepository as any,
-      templateRenderer as any,
-      pdfGenerator as any,
-      pdfStorage as any,
+      reportRepository as never,
+      templateRenderer as never,
+      pdfGenerator as never,
+      pdfStorage as never,
     );
 
-    const result = await command.execute();
+    const result = await command.execute({
+      reportId: 'bbbbbbbb-0002-4000-8000-000000000001',
+      locale: 'fr',
+    });
 
     expect(reportRepository.getReportTemplateData).toHaveBeenCalledWith(
-      undefined,
-      undefined,
-      undefined,
+      'bbbbbbbb-0002-4000-8000-000000000001',
+      'fr',
     );
     expect(templateRenderer.renderReport).toHaveBeenCalledWith(reportData);
     expect(pdfGenerator.generateFromHtml).toHaveBeenCalledWith(
@@ -42,7 +44,7 @@ describe('GenerateReportPdfCommand', () => {
     );
     expect(pdfStorage.savePdf).toHaveBeenCalledWith(
       expect.any(Buffer),
-      'report-final',
+      'report-final-bbbbbbbb',
     );
     expect(result).toEqual({ url: '/pdfs/report-final-1.pdf' });
   });

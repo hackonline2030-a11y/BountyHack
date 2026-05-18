@@ -18,8 +18,7 @@ import {
 } from '../ports/pdf-storage.port';
 
 export type ReportPdfRequest = {
-  style?: string;
-  version?: string;
+  reportId: string;
   locale?: string;
 };
 type Response = { url: string };
@@ -38,17 +37,16 @@ export class GenerateReportPdfCommand
     private readonly pdfStorage: IPdfStorage,
   ) {}
 
-  async execute(request: ReportPdfRequest = {}): Promise<Response> {
+  async execute(request: ReportPdfRequest): Promise<Response> {
     const reportData = await this.reportRepository.getReportTemplateData(
-      request.style,
-      request.version,
+      request.reportId,
       request.locale,
     );
     const html = await this.templateRenderer.renderReport(reportData);
     const pdfBuffer = await this.pdfGenerator.generateFromHtml(html);
     const { publicUrl } = await this.pdfStorage.savePdf(
       pdfBuffer,
-      reportData.templateName,
+      `${reportData.templateName}-${request.reportId.slice(0, 8)}`,
     );
     return { url: publicUrl };
   }

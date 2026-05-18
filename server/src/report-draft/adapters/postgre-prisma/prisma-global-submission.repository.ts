@@ -308,10 +308,23 @@ export class PrismaGlobalSubmissionRepository implements IGlobalSubmissionReposi
   async findPendingForReviewerRole(
     reviewerRole: ReviewerRoleWire,
   ): Promise<GlobalSubmissionWire[]> {
+    return this.findPendingForReviewerRoleInDrafts(reviewerRole, null);
+  }
+
+  async findPendingForReviewerRoleInDrafts(
+    reviewerRole: ReviewerRoleWire,
+    draftIds: readonly string[] | null,
+  ): Promise<GlobalSubmissionWire[]> {
+    if (draftIds !== null && draftIds.length === 0) {
+      return [];
+    }
     const rows = await this.prisma.globalSubmission.findMany({
       where: {
         reviewerRole: ReportDraftEnumMapper.reviewerRoleFromWire(reviewerRole),
         decision: SubmissionDecision.PENDING,
+        ...(draftIds !== null
+          ? { reportDraftId: { in: [...draftIds] } }
+          : {}),
       },
       orderBy: { submittedAt: 'desc' },
     });
@@ -321,9 +334,22 @@ export class PrismaGlobalSubmissionRepository implements IGlobalSubmissionReposi
   async findAllForReviewerRole(
     reviewerRole: ReviewerRoleWire,
   ): Promise<GlobalSubmissionWire[]> {
+    return this.findAllForReviewerRoleInDrafts(reviewerRole, null);
+  }
+
+  async findAllForReviewerRoleInDrafts(
+    reviewerRole: ReviewerRoleWire,
+    draftIds: readonly string[] | null,
+  ): Promise<GlobalSubmissionWire[]> {
+    if (draftIds !== null && draftIds.length === 0) {
+      return [];
+    }
     const rows = await this.prisma.globalSubmission.findMany({
       where: {
         reviewerRole: ReportDraftEnumMapper.reviewerRoleFromWire(reviewerRole),
+        ...(draftIds !== null
+          ? { reportDraftId: { in: [...draftIds] } }
+          : {}),
       },
       orderBy: { submittedAt: 'desc' },
     });

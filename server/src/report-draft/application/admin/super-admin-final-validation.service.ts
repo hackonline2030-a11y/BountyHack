@@ -8,10 +8,12 @@ import { randomUUID } from 'crypto';
 import {
   DraftStep,
   ReportDraftAggregateStatus,
+  ReportStatus,
   ReviewerRole,
   StepStatus,
   SubmissionDecision,
 } from '../../../generated/prisma/enums';
+import { buildFrozenContentFromDraft } from './promote-draft-to-report';
 import { PrismaService } from '../../../core/infrastructure/database/prisma/prisma.service';
 import { AppRoleCode } from '../../../shared/rbac/app-role.code';
 import type { Identity } from '../../../auth/domain/models/identity';
@@ -85,23 +87,79 @@ export class SuperAdminFinalValidationService {
   ): Promise<ReportDraftWire> {
     this.assertSuperAdmin(identity);
     const draft = await this.requireDraft(draftId);
+    const draftRow = await this.prisma.reportDraft.findUnique({
+      where: { id: draftId },
+      select: { pendingReportId: true, aggregateStatus: true },
+    });
+    if (draftRow === null) {
+      throw new NotFoundException('Report draft not found');
+    }
+
+    if (draft.aggregateStatus === 'submitted-to-program') {
+      if (draftRow.pendingReportId) {
+        return draft;
+      }
+      await this.promoteDraftToPendingReport(draft, identity.uid);
+      return (await this.reportDraftRepository.findById(draftId))!;
+    }
+
     if (!this.canApproveFinalValidation(draft)) {
       throw new BadRequestException(
         'Draft is not ready for final validation (requires ready-to-program status and approved final step)',
       );
     }
 
-    const now = new Date();
-    await this.prisma.reportDraft.update({
-      where: { id: draftId },
-      data: {
-        aggregateStatus: ReportDraftAggregateStatus.SUBMITTED_TO_PROGRAM,
-        superAdminRevisionRequestedAt: null,
-        updatedAt: now,
-      },
-    });
-
+    await this.promoteDraftToPendingReport(draft, identity.uid);
     return (await this.reportDraftRepository.findById(draftId))!;
+  }
+
+  /** Creates a pending `reports` row and links it on the draft (idempotent if already linked). */
+  private async promoteDraftToPendingReport(
+    draft: ReportDraftWire,
+    promotedBy: string,
+  ): Promise<void> {
+    const now = new Date();
+    const existing = await this.prisma.reportDraft.findUnique({
+      where: { id: draft.id },
+      select: { pendingReportId: true },
+    });
+    if (existing?.pendingReportId) {
+      await this.prisma.reportDraft.update({
+        where: { id: draft.id },
+        data: {
+          aggregateStatus: ReportDraftAggregateStatus.SUBMITTED_TO_PROGRAM,
+          superAdminRevisionRequestedAt: null,
+          updatedAt: now,
+        },
+      });
+      return;
+    }
+
+    const reportId = randomUUID();
+    const frozenContent = buildFrozenContentFromDraft(draft, now);
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.report.create({
+        data: {
+          id: reportId,
+          hunterId: draft.hunterId,
+          sourceDraftId: draft.id,
+          status: ReportStatus.PENDING,
+          frozenContent: frozenContent as object,
+          contentSyncedAt: now,
+          promotedBy,
+        },
+      });
+      await tx.reportDraft.update({
+        where: { id: draft.id },
+        data: {
+          aggregateStatus: ReportDraftAggregateStatus.SUBMITTED_TO_PROGRAM,
+          pendingReportId: reportId,
+          superAdminRevisionRequestedAt: null,
+          updatedAt: now,
+        },
+      });
+    });
   }
 
   async requestFinalRevision(

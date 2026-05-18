@@ -38,12 +38,21 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('ejs');
 
-  // Generated PDFs (process.cwd()/pdfs) — write-only on disk; no public HTTP static mount.
-  // Download will go through an authenticated route later (see document-rendering).
   const pdfsDir = join(process.cwd(), 'pdfs');
   if (!existsSync(pdfsDir)) {
     mkdirSync(pdfsDir, { recursive: true });
   }
+  // Served at /pdfs/* (outside GLOBAL_PREFIX, same as /template-assets).
+  app.use(
+    '/pdfs',
+    express.static(pdfsDir, {
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.pdf')) {
+          res.setHeader('Content-Type', 'application/pdf');
+        }
+      },
+    }),
+  );
   app.use('/template-assets', express.static(join(process.cwd(), 'templates')));
 
   app.setGlobalPrefix(variables.globalPrefix);

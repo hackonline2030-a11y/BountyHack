@@ -287,7 +287,11 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
         reportDraftRepository: PrismaReportDraftRepository,
         access: ReportDraftAccessPolicy,
       ) =>
-        new ListGlobalSubmissionsQuery(repository, reportDraftRepository, access),
+        new ListGlobalSubmissionsQuery(
+          repository,
+          reportDraftRepository,
+          access,
+        ),
     },
     {
       provide: GetGlobalSubmissionByIdQuery,
