@@ -129,3 +129,106 @@ mysql -u bugbountyapp -p -h 127.0.0.1 bugbountyapp -e \
 Connexion : front → login avec **email** `hackonline2030@gmail.com` et le mot de passe choisi. Ensuite création d’autres comptes via **Administration → Inscription** (réservée aux super-admins).
 
 Si l’email existe déjà, le script met à jour le mot de passe et force le rôle `SUPER_ADMIN`.
+
+---
+
+## PM2 — Next standalone + API + login
+
+Le client a `output: "standalone"` dans `next.config.ts`. **Ne pas** lancer `pnpm start` (`next start`) en prod : PM2 doit exécuter **`node .next/standalone/server.js`** après `pnpm build` (le script `postbuild` copie `public/` et `.next/static`).
+
+### Variables obligatoires avant `client` build
+
+Fichier `client/.env.production` ou `client/.env` (lu au build) :
+
+```env
+NEXT_PUBLIC_SITE_URL=https://hackthebounty.fr
+NEXT_PUBLIC_AUTH_API=https://api.hackthebounty.fr
+NEXT_PUBLIC_AUTH_API_PREFIX=api
+JWT_SECRET=<identique à server/.env>
+```
+
+`server/.env` (redémarrer l’API après modification) :
+
+```env
+CORS_ORIGIN=https://hackthebounty.fr,https://www.hackthebounty.fr
+NODE_ENV=production
+CHROMIUM_PATH=/usr/bin/chromium
+```
+
+### Nginx — CSP et login
+
+Le login navigateur appelle **`https://api.hackthebounty.fr/api/auth/login`** depuis **`https://hackthebounty.fr`**. Si la CSP front contient seulement `connect-src 'self'`, le navigateur bloque l’API → « Erreur réseau ».
+
+Dans le `server` HTTPS du front, inclure :
+
+```nginx
+connect-src 'self' https://api.hackthebounty.fr;
+```
+
+### Déploiement (sur le VPS)
+
+```bash
+cd ~/bugbountyapp
+git pull
+
+# API
+cd server
+pnpm install
+pnpm exec prisma generate   # DATABASE_NAME=MYSQL_PRISMA dans .env
+pnpm run build              # nx → dist/main.js
+pm2 restart api
+
+# Front
+cd ../client
+pnpm install
+pnpm run build              # postbuild copie les assets standalone
+pm2 delete next-app 2>/dev/null || true
+cd ~/bugbountyapp/client
+PORT=3001 HOSTNAME=127.0.0.1 NODE_ENV=production \
+  pm2 start .next/standalone/server.js --name next-app
+# ou : cp ../ecosystem.config.example.cjs ../ecosystem.config.cjs && pm2 start ../ecosystem.config.cjs
+pm2 save
+```
+
+Variables d’env PM2 pour Next : `PORT=3001`, `HOSTNAME=127.0.0.1`, `NODE_ENV=production`.
+
+### Chromium (export PDF)
+
+```bash
+sudo apt update
+sudo apt install -y chromium
+which chromium || which chromium-browser
+```
+
+Aligner `CHROMIUM_PATH` dans `server/.env` sur le chemin réel, puis `pm2 restart api`.
+
+Alternative sans paquet système : `IS_PUPETTEER_WITH_CHROMIUM=true` dans `server/.env` (Puppeteer télécharge son Chromium — plus lourd).
+
+### Logs utiles
+
+```bash
+pm2 list
+pm2 logs api --lines 80
+pm2 logs next-app --lines 80
+sudo tail -f /var/log/nginx/error.log
+```
+
+Test login (CORS) depuis le VPS :
+
+```bash
+curl -sS -i -X POST https://api.hackthebounty.fr/api/auth/login \
+  -H "Origin: https://hackthebounty.fr" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"x"}'
+```
+
+Attendu : HTTP **401** ou **200**, pas « connection refused ».
+
+### Erreurs PM2 fréquentes
+
+| Log | Cause | Action |
+|-----|--------|--------|
+| `next start` does not work with output: standalone | Mauvaise commande PM2 | `node .next/standalone/server.js` |
+| Failed to find Server Action | Build / PM2 incohérents | `pnpm build` puis redémarrer next-app |
+| Browser was not found at CHROMIUM_PATH | Chromium absent | `apt install chromium` + `CHROMIUM_PATH` |
+| Erreur réseau (UI login) | CORS, CSP, ou `NEXT_PUBLIC_AUTH_API` localhost | Voir sections ci-dessus + rebuild client |

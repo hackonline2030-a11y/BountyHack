@@ -9,7 +9,9 @@
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
+    "postbuild": "node scripts/copy-standalone-assets.mjs",
     "start": "next start -p 3001",
+    "start:standalone": "node .next/standalone/server.js",
     "lint": "eslint",
     "test": "jest",
     "test:unit": "jest --testPathIgnorePatterns=int --testPathIgnorePatterns=e2e",
