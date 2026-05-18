@@ -52,7 +52,7 @@ export class ReportDraftAdminController {
   @ApiOperation({
     summary: 'Permanently delete a report draft and all related data',
     description:
-      'Removes the draft, its team (cascade), steps, submissions, global submissions, comments, and any legacy `reports` row for this draft. Irreversible. SUPER_ADMIN only.',
+      'Removes the draft, its team (cascade), steps, submissions, global submissions, and comments. Irreversible. SUPER_ADMIN only.',
   })
   @ApiOkResponse({ schema: { example: { ok: true } } })
   @ApiHttpUnauthorized('Missing or invalid bearer token.')

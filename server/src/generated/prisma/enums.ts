@@ -88,14 +88,6 @@ export const SubmissionDecision = {
 export type SubmissionDecision = (typeof SubmissionDecision)[keyof typeof SubmissionDecision]
 
 
-export const ReportStatus = {
-  PENDING: 'PENDING',
-  PUBLISHED: 'PUBLISHED'
-} as const
-
-export type ReportStatus = (typeof ReportStatus)[keyof typeof ReportStatus]
-
-
 export const ReportTeamMemberRole = {
   HUNTER: 'HUNTER',
   QUALITY_CHECKER: 'QUALITY_CHECKER',

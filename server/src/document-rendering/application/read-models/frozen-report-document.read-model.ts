@@ -18,7 +18,7 @@ export type FrozenReportTeamMemberReadModel = {
   role: string;
 };
 
-/** View model passed to `templates/report-final/index.ejs` (from `reports.frozen_content`). */
+/** View model passed to `templates/report-final/index.ejs` (from published `report_drafts` steps). */
 export interface FrozenReportDocumentReadModel {
   htmlLang: string;
   language: string;

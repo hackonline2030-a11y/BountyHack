@@ -30,10 +30,7 @@ export class PrismaReportDraftRepository implements IReportDraftRepository {
     await this.prisma.$transaction(async (tx) => {
       await tx.reportDraft.upsert({
         where: { id: header.id },
-        create: {
-          ...header,
-          pendingReportId: null,
-        },
+        create: header,
         update: {
           hunterId: header.hunterId,
           version: header.version,
@@ -172,26 +169,11 @@ export class PrismaReportDraftRepository implements IReportDraftRepository {
       await this.prisma.$transaction(async (tx) => {
         const draft = await tx.reportDraft.findUnique({
           where: { id },
-          select: { pendingReportId: true },
+          select: { id: true },
         });
         if (draft === null) {
           throw new NotFoundException('Report draft not found');
         }
-
-        const linkedReportIds = draft.pendingReportId
-          ? [draft.pendingReportId]
-          : [];
-
-        await tx.report.deleteMany({
-          where: {
-            OR: [
-              { sourceDraftId: id },
-              ...(linkedReportIds.length > 0
-                ? [{ id: { in: linkedReportIds } }]
-                : []),
-            ],
-          },
-        });
 
         await tx.reportDraft.delete({ where: { id } });
       });

@@ -326,12 +326,12 @@ SET @payload_final = CAST('{"sectionBlocs": []}' AS JSON);
 INSERT INTO `report_drafts` (
   `id`, `hunter_id`, `version`, `aggregate_status`,
   `super_admin_revision_requested_at`, `super_admin_global_revision_count`,
-  `pending_report_id`, `created_at`, `updated_at`
+  `created_at`, `updated_at`
 )
 SELECT
   @draft_id, @hunter1_id, 36, 'PUBLISHED',
   NULL, 2,
-  NULL, @t0, @t7
+  @t0, @t7
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM `report_drafts` WHERE `id` = @draft_id);
 
@@ -554,7 +554,6 @@ WHERE `id` = @team_id;
 
 UPDATE `report_drafts`
 SET `aggregate_status` = 'PUBLISHED',
-    `pending_report_id` = NULL,
     `updated_at` = @t7
 WHERE `id` = @draft_id;
 

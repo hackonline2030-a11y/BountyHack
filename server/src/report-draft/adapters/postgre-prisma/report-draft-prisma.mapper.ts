@@ -160,7 +160,6 @@ export class ReportDraftPrismaMapper {
       superAdminRevisionRequestedAt:
         row.superAdminRevisionRequestedAt?.toISOString() ?? null,
       superAdminGlobalRevisionCount: row.superAdminGlobalRevisionCount ?? 0,
-      pendingReportId: row.pendingReportId,
     };
 
     for (const stepRow of row.steps) {

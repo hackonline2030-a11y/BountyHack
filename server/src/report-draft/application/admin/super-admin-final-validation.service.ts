@@ -113,7 +113,6 @@ export class SuperAdminFinalValidationService {
       data: {
         aggregateStatus: ReportDraftAggregateStatus.PUBLISHED,
         superAdminRevisionRequestedAt: null,
-        pendingReportId: null,
         updatedAt: now,
       },
     });

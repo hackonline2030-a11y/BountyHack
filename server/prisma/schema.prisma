@@ -34,7 +34,6 @@ model User {
   passwordResetTokens PasswordResetToken[]
   role       Role?   @relation(fields: [roleId], references: [id], onDelete: SetNull)
   reportDrafts ReportDraft[]
-  reports      Report[]
   reportTeamMembers ReportTeamMember[]
   reportTeamJoinRequests ReportTeamJoinRequest[] @relation("JoinRequestUser")
   reportTeamJoinRequestsDecided ReportTeamJoinRequest[] @relation("JoinRequestDecider")
@@ -210,12 +209,7 @@ enum SubmissionDecision {
   ENDORSE
 }
 
-enum ReportStatus {
-  PENDING
-  PUBLISHED
-}
-
-/// Hunter workspace: 8 wizard steps until promotion to a pending Report.
+/// Hunter workspace: 8 wizard steps until super-admin publishes the draft.
 model ReportDraft {
   id              String                     @id @default(uuid())
   hunterId        String                     @map("hunter_id")
@@ -225,13 +219,10 @@ model ReportDraft {
   superAdminRevisionRequestedAt DateTime? @map("super_admin_revision_requested_at")
   /// Incremented on each super-admin global revision request (never decremented).
   superAdminGlobalRevisionCount Int @default(0) @map("super_admin_global_revision_count")
-  /// Set when super-admin promotes draft → pending report (draft still exists).
-  pendingReportId String?                    @unique @map("pending_report_id")
   createdAt       DateTime                   @default(now()) @map("created_at")
   updatedAt       DateTime                   @updatedAt @map("updated_at")
 
   hunter        User              @relation(fields: [hunterId], references: [id], onDelete: Cascade)
-  pendingReport Report?           @relation("DraftPendingReport", fields: [pendingReportId], references: [id], onDelete: SetNull)
   steps             ReportDraftStep[]
   submissions       Submission[]
   globalSubmissions GlobalSubmission[]
@@ -392,28 +383,6 @@ model SubmissionContentSnapshot {
 
   @@index([submissionId])
   @@map("submission_content_snapshots")
-}
-
-/// Promoted artefact after full step validation; super-admin pending → published.
-model Report {
-  id              String       @id @default(uuid())
-  hunterId        String       @map("hunter_id")
-  sourceDraftId   String       @unique @map("source_draft_id")
-  status          ReportStatus @default(PENDING)
-  frozenContent   Json?        @map("frozen_content")
-  contentSyncedAt DateTime?    @map("content_synced_at")
-  promotedBy      String?      @map("promoted_by")
-  publishedBy     String?      @map("published_by")
-  publishedAt     DateTime?    @map("published_at")
-  createdAt       DateTime     @default(now()) @map("created_at")
-  updatedAt       DateTime     @updatedAt @map("updated_at")
-
-  hunter          User         @relation(fields: [hunterId], references: [id], onDelete: Cascade)
-  pendingForDraft ReportDraft? @relation("DraftPendingReport")
-
-  @@index([hunterId])
-  @@index([status])
-  @@map("reports")
 }
 
 /// Workflow role on a report team (distinct from global `Role`).

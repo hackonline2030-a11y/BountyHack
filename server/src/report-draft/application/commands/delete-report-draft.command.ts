@@ -9,8 +9,7 @@ import { IReportDraftRepository } from '../../ports/report-draft-repository.inte
 
 /**
  * Hard-deletes a report draft and all DB rows that cascade from it (steps,
- * submissions, global submissions, team, etc.). Also removes legacy `reports`
- * rows linked by `source_draft_id` or `pending_report_id`.
+ * submissions, global submissions, team, etc.).
  *
  * Does not purge future object-storage blobs referenced by `storage_key` yet.
  */

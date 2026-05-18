@@ -98,7 +98,6 @@ export interface ReportDraftWire {
   /** Associated report-team (label + members) when one exists — read-only from client saves. */
   reportTeam?: ReportDraftTeamWire | null;
   /** Pending program report created when super-admin submits to the program. */
-  pendingReportId?: string | null;
 }
 
 export const REPORT_DRAFT_STEP_STATE_KEYS: readonly ReportDraftStepStateKeyWire[] =

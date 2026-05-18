@@ -211,7 +211,6 @@ export namespace ReportDraftDomainModel {
     /** Monotonic count of super-admin global revision requests. */
     superAdminGlobalRevisionCount?: number;
     /** @deprecated Legacy link to `reports` row — PDF uses the draft after `published`. */
-    pendingReportId?: string | null;
     // TODO V2 (dette consciente) : terminationReason / terminatedBy /
     // terminatedByRole / terminatedAt pour audit des given-up et rejected
   }
