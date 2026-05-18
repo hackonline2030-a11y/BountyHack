@@ -5,7 +5,10 @@ import {
   Header,
   NotFoundException,
   Query,
+  StreamableFile,
 } from '@nestjs/common';
+import { AuthRoles } from '../../auth/rbac/roles.decorator';
+import { AppRoleCode } from '../../shared/rbac/app-role.code';
 import {
   ApiOkResponse,
   ApiOperation,
@@ -23,6 +26,7 @@ import {
 } from '../application/errors/pdf-application.errors';
 
 @ApiTags('pdf')
+@AuthRoles(AppRoleCode.SUPER_ADMIN)
 @Controller('pdf')
 export class PdfController {
   constructor(
@@ -33,13 +37,13 @@ export class PdfController {
   @ApiOperation({
     summary: 'Render report template as HTML preview',
     description:
-      'Loads `reports.frozen_content` from the database and renders `templates/report-final/index.ejs`.',
+      'Loads a published `report_draft` and renders `templates/report-final/index.ejs`.',
   })
   @ApiQuery({
-    name: 'reportId',
+    name: 'draftId',
     required: true,
-    description: 'Promoted report UUID (`reports.id`).',
-    example: 'bbbbbbbb-0002-4000-8000-000000000001',
+    description: 'Published report draft UUID (`report_drafts.id`).',
+    example: 'bbbbbbbb-0001-4000-8000-000000000001',
   })
   @ApiQuery({
     name: 'lang',
@@ -55,16 +59,16 @@ export class PdfController {
   @Get('/previewHtml')
   @Header('Content-Type', 'text/html; charset=utf-8')
   async previewReportHtml(
-    @Query('reportId') reportId?: string,
+    @Query('draftId') draftId?: string,
     @Query('lang') lang?: string,
   ) {
-    const id = reportId?.trim();
+    const id = draftId?.trim();
     if (!id) {
-      throw new BadRequestException('Query parameter reportId is required.');
+      throw new BadRequestException('Query parameter draftId is required.');
     }
     try {
       return await this.previewReportHtmlQuery.execute({
-        reportId: id,
+        draftId: id,
         ...(lang !== undefined ? { locale: lang } : {}),
       });
     } catch (e) {
@@ -73,14 +77,14 @@ export class PdfController {
   }
 
   @ApiOperation({
-    summary: 'Generate report PDF file',
+    summary: 'Generate and download report PDF (super-admin)',
     description:
-      'Generates a PDF from `reports.frozen_content` and returns a storage path reference (`/pdfs/...`).',
+      'Renders a published report draft with Puppeteer and streams the PDF from memory (no disk storage).',
   })
   @ApiQuery({
-    name: 'reportId',
+    name: 'draftId',
     required: true,
-    description: 'Promoted report UUID (`reports.id`).',
+    description: 'Published report draft UUID (`report_drafts.id`).',
   })
   @ApiQuery({
     name: 'lang',
@@ -88,37 +92,35 @@ export class PdfController {
     description: 'Two-letter locale (default `fr`).',
     example: 'fr',
   })
+  @ApiProduces('application/pdf')
   @ApiOkResponse({
-    description:
-      'Report PDF storage path returned (not publicly downloadable yet).',
-    schema: {
-      type: 'object',
-      properties: {
-        url: {
-          type: 'string',
-          example: '/pdfs/report-final-bbbbbbbb-1714291500000.pdf',
-        },
-      },
-      required: ['url'],
-    },
+    description: 'Report PDF file stream.',
+    schema: { type: 'string', format: 'binary' },
   })
-  @Get('/htmlToPDF')
-  async exportReportPDF(
-    @Query('reportId') reportId?: string,
+  @Get('/export')
+  @Header('Content-Type', 'application/pdf')
+  async exportReportPdfDownload(
+    @Query('draftId') draftId?: string,
     @Query('lang') lang?: string,
-  ) {
-    const id = reportId?.trim();
+  ): Promise<StreamableFile> {
+    const id = draftId?.trim();
     if (!id) {
-      throw new BadRequestException('Query parameter reportId is required.');
+      throw new BadRequestException('Query parameter draftId is required.');
     }
+    let result: { buffer: Buffer; fileName: string };
     try {
-      return await this.generateReportPdfCommand.execute({
-        reportId: id,
+      result = await this.generateReportPdfCommand.execute({
+        draftId: id,
         ...(lang !== undefined ? { locale: lang } : {}),
       });
     } catch (e) {
       this.mapRepositoryErrors(e);
     }
+
+    return new StreamableFile(result.buffer, {
+      type: 'application/pdf',
+      disposition: `attachment; filename="${result.fileName}"`,
+    });
   }
 
   private mapRepositoryErrors(err: unknown): never {

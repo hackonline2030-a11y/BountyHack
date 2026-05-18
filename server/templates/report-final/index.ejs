@@ -3,16 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= data.title || data.labels.reportTitle %></title>
+    <title><%= data.title %></title>
     <link rel="stylesheet" href="<%= data.templateStylesheetUrl %>" />
   </head>
   <body>
     <%
-      const labels = data.labels || {};
-      const meta = data.meta || {};
-      const cvss = data.cvss || {};
       const sections = Array.isArray(data.sections) ? data.sections : [];
-      const team = data.reportTeam;
+      const toc = Array.isArray(data.tableOfContents) ? data.tableOfContents : [];
 
       const escapeHtml = (s) =>
         String(s ?? '')
@@ -73,99 +70,27 @@
 
     <div class="report-page">
       <section class="cover-page page-frame">
-        <p class="cover-meta"><%= labels.reportTitle %></p>
-        <h1 class="cover-title"><%= escapeHtml(data.title) %></h1>
-        <% if (team && team.label) { %>
-          <p class="cover-author"><%= escapeHtml(team.label) %></p>
+        <header class="cover-header">
+          <h1 class="cover-title"><%= escapeHtml(data.title) %></h1>
+          <% if (data.authorName) { %>
+            <p class="cover-author">par <%= escapeHtml(data.authorName) %></p>
+          <% } %>
+        </header>
+
+        <% if (toc.length) { %>
+          <nav class="cover-toc" aria-label="<%= escapeHtml(data.labels && data.labels.tableOfContentsTitle ? data.labels.tableOfContentsTitle : 'Table des matières') %>">
+            <ol class="cover-toc-list toc-list">
+              <% toc.forEach(function (entry) { %>
+                <li class="toc-line<%= entry.bold ? ' toc-line--main' : '' %>">
+                  <span class="toc-label"><%= escapeHtml(entry.label) %></span>
+                  <span class="toc-dots" aria-hidden="true"></span>
+                  <span class="toc-page"><%= entry.page %></span>
+                </li>
+              <% }); %>
+            </ol>
+          </nav>
         <% } %>
-        <p class="cover-meta">
-          ID <%= escapeHtml(data.reportId) %><br />
-          <%= data.frozenAt ? new Date(data.frozenAt).toLocaleString(data.language || 'fr') : '' %>
-        </p>
       </section>
-
-      <section class="card section-card page-frame">
-        <h2><%= labels.metaSectionTitle %></h2>
-        <div class="fiche-grid">
-          <div class="fiche-field fiche-field--full">
-            <span class="fiche-label"><%= labels.fieldReportTitle %></span>
-            <span class="fiche-value"><%= escapeHtml(meta.reportTitle) %></span>
-          </div>
-          <div class="fiche-field">
-            <span class="fiche-label"><%= labels.fieldScope %></span>
-            <span class="fiche-value"><%= escapeHtml(meta.scopeSlug) %></span>
-          </div>
-          <div class="fiche-field">
-            <span class="fiche-label"><%= labels.fieldBugType %></span>
-            <span class="fiche-value"><%= escapeHtml(meta.bugType) %></span>
-          </div>
-          <div class="fiche-field fiche-field--full">
-            <span class="fiche-label"><%= labels.fieldEndpoint %></span>
-            <span class="fiche-value"><code class="kbd"><%= escapeHtml(meta.endpoint) %></code></span>
-          </div>
-          <div class="fiche-field">
-            <span class="fiche-label"><%= labels.fieldCve %></span>
-            <span class="fiche-value"><%= escapeHtml(meta.cve) %></span>
-          </div>
-          <div class="fiche-field">
-            <span class="fiche-label"><%= labels.fieldImpact %></span>
-            <span class="fiche-value"><%= escapeHtml(meta.impact) %></span>
-          </div>
-          <% if (meta.technicalEnvironment) { %>
-            <div class="fiche-field fiche-field--full">
-              <span class="fiche-label">Environnement technique</span>
-              <span class="fiche-value"><%= escapeHtml(meta.technicalEnvironment) %></span>
-            </div>
-          <% } %>
-          <% if (meta.applicationFingerprint) { %>
-            <div class="fiche-field fiche-field--full">
-              <span class="fiche-label">Empreinte application</span>
-              <span class="fiche-value"><%= escapeHtml(meta.applicationFingerprint) %></span>
-            </div>
-          <% } %>
-        </div>
-      </section>
-
-      <% if (Object.keys(cvss).length) { %>
-        <section class="card section-card page-frame section-card--page-break">
-          <h2><%= labels.cvssSectionTitle %></h2>
-          <div class="fiche-grid">
-            <% [
-              ['attackVector', 'Vecteur d’attaque'],
-              ['attackComplexity', 'Complexité'],
-              ['privilegesRequired', 'Privilèges requis'],
-              ['userInteraction', 'Interaction utilisateur'],
-              ['scope', 'Scope'],
-              ['confidentiality', 'Confidentialité'],
-              ['integrity', 'Intégrité'],
-              ['availability', 'Disponibilité'],
-            ].forEach(function (pair) {
-              const key = pair[0];
-              const label = pair[1];
-              if (cvss[key] === undefined || cvss[key] === null || cvss[key] === '') return;
-            %>
-              <div class="fiche-field">
-                <span class="fiche-label"><%= label %></span>
-                <span class="fiche-value"><%= escapeHtml(cvss[key]) %></span>
-              </div>
-            <% }); %>
-          </div>
-        </section>
-      <% } %>
-
-      <% if (team && Array.isArray(team.members) && team.members.length) { %>
-        <section class="card section-card page-frame">
-          <h2><%= labels.teamSectionTitle %></h2>
-          <ul class="team-list">
-            <% team.members.forEach(function (member) { %>
-              <li>
-                <strong><%= escapeHtml(member.displayName) %></strong>
-                — <%= escapeHtml(member.role) %>
-              </li>
-            <% }); %>
-          </ul>
-        </section>
-      <% } %>
 
       <% sections.forEach(function (section) { %>
         <section

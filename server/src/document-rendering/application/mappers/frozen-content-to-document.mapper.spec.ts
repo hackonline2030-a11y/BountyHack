@@ -72,5 +72,42 @@ describe('mapFrozenContentToDocument', () => {
     expect(doc.sections).toHaveLength(1);
     expect(doc.sections[0]?.key).toBe('collection');
     expect(doc.reportTeam?.label).toBe('Rapport SQL Injection (dev seed)');
+    expect(doc.authorName).toBe('dev-hunter-1');
+    expect(doc.tableOfContents[0]).toEqual({
+      label: 'Rapport challenge n°50',
+      page: 1,
+      bold: true,
+    });
+    expect(doc.tableOfContents[1]?.page).toBe(2);
+    expect(doc.tableOfContents[1]?.label).toMatch(/Collectes d.informations :/);
+  });
+
+  it('uses meta reportTitle for PDF title, not team label', () => {
+    const doc = mapFrozenContentToDocument({
+      reportId: 'report-1',
+      reportStatus: 'PENDING',
+      hunterId: 'hunter-1',
+      frozenContent: {
+        ...frozenContent,
+        steps: {
+          meta: { payload: { reportTitle: '' } },
+          collection: frozenContent.steps.collection,
+        },
+      },
+    });
+
+    expect(doc.title).toBe('Rapport de sécurité');
+    expect(doc.title).not.toBe('Rapport SQL Injection (dev seed)');
+  });
+
+  it('omits CVSS-only description step from PDF chapters', () => {
+    const doc = mapFrozenContentToDocument({
+      reportId: 'report-1',
+      reportStatus: 'PENDING',
+      hunterId: 'hunter-1',
+      frozenContent,
+    });
+
+    expect(doc.sections.every((s) => s.key !== 'description')).toBe(true);
   });
 });

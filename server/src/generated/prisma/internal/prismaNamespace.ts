@@ -402,7 +402,6 @@ export const ModelName = {
   ReviewerComment: 'ReviewerComment',
   SubmissionAttachmentSnapshot: 'SubmissionAttachmentSnapshot',
   SubmissionContentSnapshot: 'SubmissionContentSnapshot',
-  Report: 'Report',
   ReportTeam: 'ReportTeam',
   ReportTeamMember: 'ReportTeamMember',
   ReportTeamJoinRequest: 'ReportTeamJoinRequest'
@@ -421,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "globalSubmission" | "globalReviewerComment" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "report" | "reportTeam" | "reportTeamMember" | "reportTeamJoinRequest"
+    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "globalSubmission" | "globalReviewerComment" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "reportTeam" | "reportTeamMember" | "reportTeamJoinRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1613,72 +1612,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    Report: {
-      payload: Prisma.$ReportPayload<ExtArgs>
-      fields: Prisma.ReportFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.ReportFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.ReportFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload>
-        }
-        findFirst: {
-          args: Prisma.ReportFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.ReportFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload>
-        }
-        findMany: {
-          args: Prisma.ReportFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload>[]
-        }
-        create: {
-          args: Prisma.ReportCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload>
-        }
-        createMany: {
-          args: Prisma.ReportCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        delete: {
-          args: Prisma.ReportDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload>
-        }
-        update: {
-          args: Prisma.ReportUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload>
-        }
-        deleteMany: {
-          args: Prisma.ReportDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.ReportUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        upsert: {
-          args: Prisma.ReportUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload>
-        }
-        aggregate: {
-          args: Prisma.ReportAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateReport>
-        }
-        groupBy: {
-          args: Prisma.ReportGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.ReportGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.ReportCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.ReportCountAggregateOutputType> | number
-        }
-      }
-    }
     ReportTeam: {
       payload: Prisma.$ReportTeamPayload<ExtArgs>
       fields: Prisma.ReportTeamFieldRefs
@@ -2014,7 +1947,6 @@ export const ReportDraftScalarFieldEnum = {
   aggregateStatus: 'aggregateStatus',
   superAdminRevisionRequestedAt: 'superAdminRevisionRequestedAt',
   superAdminGlobalRevisionCount: 'superAdminGlobalRevisionCount',
-  pendingReportId: 'pendingReportId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2138,23 +2070,6 @@ export const SubmissionContentSnapshotScalarFieldEnum = {
 } as const
 
 export type SubmissionContentSnapshotScalarFieldEnum = (typeof SubmissionContentSnapshotScalarFieldEnum)[keyof typeof SubmissionContentSnapshotScalarFieldEnum]
-
-
-export const ReportScalarFieldEnum = {
-  id: 'id',
-  hunterId: 'hunterId',
-  sourceDraftId: 'sourceDraftId',
-  status: 'status',
-  frozenContent: 'frozenContent',
-  contentSyncedAt: 'contentSyncedAt',
-  promotedBy: 'promotedBy',
-  publishedBy: 'publishedBy',
-  publishedAt: 'publishedAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type ReportScalarFieldEnum = (typeof ReportScalarFieldEnum)[keyof typeof ReportScalarFieldEnum]
 
 
 export const ReportTeamScalarFieldEnum = {
@@ -2293,8 +2208,7 @@ export type TwoFactorTotpOrderByRelevanceFieldEnum = (typeof TwoFactorTotpOrderB
 
 export const ReportDraftOrderByRelevanceFieldEnum = {
   id: 'id',
-  hunterId: 'hunterId',
-  pendingReportId: 'pendingReportId'
+  hunterId: 'hunterId'
 } as const
 
 export type ReportDraftOrderByRelevanceFieldEnum = (typeof ReportDraftOrderByRelevanceFieldEnum)[keyof typeof ReportDraftOrderByRelevanceFieldEnum]
@@ -2398,17 +2312,6 @@ export const SubmissionContentSnapshotOrderByRelevanceFieldEnum = {
 } as const
 
 export type SubmissionContentSnapshotOrderByRelevanceFieldEnum = (typeof SubmissionContentSnapshotOrderByRelevanceFieldEnum)[keyof typeof SubmissionContentSnapshotOrderByRelevanceFieldEnum]
-
-
-export const ReportOrderByRelevanceFieldEnum = {
-  id: 'id',
-  hunterId: 'hunterId',
-  sourceDraftId: 'sourceDraftId',
-  promotedBy: 'promotedBy',
-  publishedBy: 'publishedBy'
-} as const
-
-export type ReportOrderByRelevanceFieldEnum = (typeof ReportOrderByRelevanceFieldEnum)[keyof typeof ReportOrderByRelevanceFieldEnum]
 
 
 export const ReportTeamOrderByRelevanceFieldEnum = {
@@ -2541,13 +2444,6 @@ export type EnumStepStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
  * Reference to a field of type 'SubmissionKind'
  */
 export type EnumSubmissionKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubmissionKind'>
-    
-
-
-/**
- * Reference to a field of type 'ReportStatus'
- */
-export type EnumReportStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReportStatus'>
     
 
 
@@ -2699,7 +2595,6 @@ export type GlobalOmitConfig = {
   reviewerComment?: Prisma.ReviewerCommentOmit
   submissionAttachmentSnapshot?: Prisma.SubmissionAttachmentSnapshotOmit
   submissionContentSnapshot?: Prisma.SubmissionContentSnapshotOmit
-  report?: Prisma.ReportOmit
   reportTeam?: Prisma.ReportTeamOmit
   reportTeamMember?: Prisma.ReportTeamMemberOmit
   reportTeamJoinRequest?: Prisma.ReportTeamJoinRequestOmit

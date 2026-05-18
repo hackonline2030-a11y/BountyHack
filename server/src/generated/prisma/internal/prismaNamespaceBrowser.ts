@@ -69,7 +69,6 @@ export const ModelName = {
   ReviewerComment: 'ReviewerComment',
   SubmissionAttachmentSnapshot: 'SubmissionAttachmentSnapshot',
   SubmissionContentSnapshot: 'SubmissionContentSnapshot',
-  Report: 'Report',
   ReportTeam: 'ReportTeam',
   ReportTeamMember: 'ReportTeamMember',
   ReportTeamJoinRequest: 'ReportTeamJoinRequest'
@@ -189,7 +188,6 @@ export const ReportDraftScalarFieldEnum = {
   aggregateStatus: 'aggregateStatus',
   superAdminRevisionRequestedAt: 'superAdminRevisionRequestedAt',
   superAdminGlobalRevisionCount: 'superAdminGlobalRevisionCount',
-  pendingReportId: 'pendingReportId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -313,23 +311,6 @@ export const SubmissionContentSnapshotScalarFieldEnum = {
 } as const
 
 export type SubmissionContentSnapshotScalarFieldEnum = (typeof SubmissionContentSnapshotScalarFieldEnum)[keyof typeof SubmissionContentSnapshotScalarFieldEnum]
-
-
-export const ReportScalarFieldEnum = {
-  id: 'id',
-  hunterId: 'hunterId',
-  sourceDraftId: 'sourceDraftId',
-  status: 'status',
-  frozenContent: 'frozenContent',
-  contentSyncedAt: 'contentSyncedAt',
-  promotedBy: 'promotedBy',
-  publishedBy: 'publishedBy',
-  publishedAt: 'publishedAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type ReportScalarFieldEnum = (typeof ReportScalarFieldEnum)[keyof typeof ReportScalarFieldEnum]
 
 
 export const ReportTeamScalarFieldEnum = {
@@ -468,8 +449,7 @@ export type TwoFactorTotpOrderByRelevanceFieldEnum = (typeof TwoFactorTotpOrderB
 
 export const ReportDraftOrderByRelevanceFieldEnum = {
   id: 'id',
-  hunterId: 'hunterId',
-  pendingReportId: 'pendingReportId'
+  hunterId: 'hunterId'
 } as const
 
 export type ReportDraftOrderByRelevanceFieldEnum = (typeof ReportDraftOrderByRelevanceFieldEnum)[keyof typeof ReportDraftOrderByRelevanceFieldEnum]
@@ -573,17 +553,6 @@ export const SubmissionContentSnapshotOrderByRelevanceFieldEnum = {
 } as const
 
 export type SubmissionContentSnapshotOrderByRelevanceFieldEnum = (typeof SubmissionContentSnapshotOrderByRelevanceFieldEnum)[keyof typeof SubmissionContentSnapshotOrderByRelevanceFieldEnum]
-
-
-export const ReportOrderByRelevanceFieldEnum = {
-  id: 'id',
-  hunterId: 'hunterId',
-  sourceDraftId: 'sourceDraftId',
-  promotedBy: 'promotedBy',
-  publishedBy: 'publishedBy'
-} as const
-
-export type ReportOrderByRelevanceFieldEnum = (typeof ReportOrderByRelevanceFieldEnum)[keyof typeof ReportOrderByRelevanceFieldEnum]
 
 
 export const ReportTeamOrderByRelevanceFieldEnum = {

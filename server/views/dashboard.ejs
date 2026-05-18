@@ -65,8 +65,91 @@
         <p id="dashboardStatus" class="dashboard-status" aria-live="polite"></p>
     </section>
 
+    <% if (typeof reportContext !== 'undefined' && reportContext) {
+      const ctx = reportContext;
+      const labels = ctx.labels || {};
+      const meta = ctx.meta || {};
+      const cvss = ctx.cvss || {};
+      const team = ctx.reportTeam;
+      const esc = (s) => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const cvssRows = [
+        ['attackVector', 'Vecteur d’attaque'],
+        ['attackComplexity', 'Complexité'],
+        ['privilegesRequired', 'Privilèges requis'],
+        ['userInteraction', 'Interaction utilisateur'],
+        ['scope', 'Scope'],
+        ['confidentiality', 'Confidentialité'],
+        ['integrity', 'Intégrité'],
+        ['availability', 'Disponibilité'],
+      ];
+      const hasCvss = cvssRows.some(function (pair) {
+        const v = cvss[pair[0]];
+        return v !== undefined && v !== null && String(v).trim() !== '';
+      });
+    %>
+    <section class="dashboard-context" aria-label="Contexte du rapport (hors PDF)">
+        <h2 class="dashboard-context-title">Contexte (non inclus dans le PDF)</h2>
+        <p class="dashboard-context-hint">Métadonnées, CVSS et équipe restent ici. Le PDF ne contient que le titre du rapport et les chapitres.</p>
+        <div class="dashboard-context-grid">
+            <article class="dashboard-context-card">
+                <h3><%= esc(labels.metaSectionTitle || 'Métadonnées') %></h3>
+                <dl class="dashboard-dl">
+                    <dt><%= esc(labels.fieldReportTitle || 'Titre') %></dt><dd><%= esc(meta.reportTitle) %></dd>
+                    <dt><%= esc(labels.fieldScope || 'Scope') %></dt><dd><%= esc(meta.scopeSlug) %></dd>
+                    <dt><%= esc(labels.fieldBugType || 'Type') %></dt><dd><%= esc(meta.bugType) %></dd>
+                    <dt><%= esc(labels.fieldEndpoint || 'Endpoint') %></dt><dd><code><%= esc(meta.endpoint) %></code></dd>
+                    <dt><%= esc(labels.fieldCve || 'CVE') %></dt><dd><%= esc(meta.cve) %></dd>
+                    <dt><%= esc(labels.fieldImpact || 'Impact') %></dt><dd><%= esc(meta.impact) %></dd>
+                    <% if (meta.technicalEnvironment) { %>
+                    <dt>Environnement technique</dt><dd><%= esc(meta.technicalEnvironment) %></dd>
+                    <% } %>
+                    <% if (meta.applicationFingerprint) { %>
+                    <dt>Empreinte application</dt><dd><%= esc(meta.applicationFingerprint) %></dd>
+                    <% } %>
+                </dl>
+            </article>
+            <% if (hasCvss) { %>
+            <article class="dashboard-context-card">
+                <h3><%= esc(labels.cvssSectionTitle || 'Évaluation CVSS') %></h3>
+                <dl class="dashboard-dl">
+                    <% cvssRows.forEach(function (pair) {
+                      const val = cvss[pair[0]];
+                      if (val === undefined || val === null || String(val).trim() === '') return;
+                    %>
+                    <dt><%= esc(pair[1]) %></dt><dd><%= esc(val) %></dd>
+                    <% }); %>
+                </dl>
+            </article>
+            <% } %>
+            <% if (team && (team.label || (team.members && team.members.length))) { %>
+            <article class="dashboard-context-card">
+                <h3><%= esc(labels.teamSectionTitle || 'Équipe') %></h3>
+                <% if (team.label) { %><p class="dashboard-team-label"><%= esc(team.label) %></p><% } %>
+                <% if (team.members && team.members.length) { %>
+                <ul class="dashboard-team-list">
+                    <% team.members.forEach(function (m) { %>
+                    <li><strong><%= esc(m.displayName) %></strong> — <%= esc(m.role) %></li>
+                    <% }); %>
+                </ul>
+                <% } %>
+            </article>
+            <% } %>
+            <article class="dashboard-context-card dashboard-context-card--meta">
+                <h3>Référence</h3>
+                <dl class="dashboard-dl">
+                    <dt>ID rapport</dt><dd><code><%= esc(ctx.reportId) %></code></dd>
+                    <dt>Statut</dt><dd><%= esc(ctx.reportStatus) %></dd>
+                    <% if (ctx.frozenAt) { %>
+                    <dt>Gelé le</dt><dd><%= esc(new Date(ctx.frozenAt).toLocaleString('fr-FR')) %></dd>
+                    <% } %>
+                </dl>
+            </article>
+        </div>
+    </section>
+    <% } %>
+
     <section class="dashboard-preview">
-        <h2 class="dashboard-preview-title"><%= previewTitle %></h2>
+        <h2 class="dashboard-preview-title"><%= previewTitle %> (contenu PDF)</h2>
         <iframe
                 id="previewFrame"
                 class="dashboard-preview-frame"
@@ -132,18 +215,20 @@
           if (!response.ok) {
             throw new Error('Réponse API invalide');
           }
-          const payload = await response.json();
-          if (!payload || !payload.url) {
-            throw new Error('URL PDF manquante');
-          }
+          const blob = await response.blob();
+          const disposition = response.headers.get('Content-Disposition') || '';
+          const match = disposition.match(/filename="([^"]+)"/);
+          const downloadName = match ? match[1] : 'report.pdf';
           setStatus('PDF généré. Téléchargement…', false);
+          const objectUrl = URL.createObjectURL(blob);
           const link = document.createElement('a');
-          link.href = payload.url;
-          link.download = payload.url.split('/').pop() || 'report.pdf';
+          link.href = objectUrl;
+          link.download = downloadName;
           link.rel = 'noopener noreferrer';
           document.body.appendChild(link);
           link.click();
           link.remove();
+          URL.revokeObjectURL(objectUrl);
         } catch (error) {
           setStatus('Erreur lors de la génération du PDF.', true);
         } finally {

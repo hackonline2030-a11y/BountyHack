@@ -25,6 +25,7 @@ const FILTER_OPTIONS: readonly StatusFilter[] = [
   "under-review",
   "draft",
   "submitted-to-program",
+  "published",
   "rejected",
   "given-up",
 ] as const;

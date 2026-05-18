@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { type FC, useCallback, useMemo } from "react";
+import { type FC, useCallback, useMemo, useState } from "react";
 import { useT } from "next-i18next/client";
 import type { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import {
   canApproveFinalValidation,
+  canExportReportPdf,
   canRequestFinalRevision,
   findActivePendingGlobalSubmissionForSuperAdmin,
   resolveFinalValidationStatus,
 } from "@modules/report-draft/core/model/super-admin-final-validation";
 import { approveSuperAdminFinalValidation } from "@modules/report-draft/core/useCase/approve-super-admin-final-validation.usecase";
+import { exportReportPdf } from "@modules/report-draft/core/useCase/export-report-pdf.usecase";
 import { requestSuperAdminFinalRevision } from "@modules/report-draft/core/useCase/request-super-admin-final-revision.usecase";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
@@ -48,9 +50,13 @@ export const SuperAdminFinalValidationActions: FC<Props> = ({ draft, lng }) => {
     ? `/${lng}/administration/global-submissions/${encodeURIComponent(pendingGlobalSubmission.id)}`
     : null;
 
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
+
   const busy = transition.status === "loading";
   const canApprove = canApproveFinalValidation(draft);
   const canRevision = canRequestFinalRevision(draft, globalSubmissions);
+  const canGeneratePdf = canExportReportPdf(draft);
 
   const statusMessage = useMemo(() => {
     const base = "reportDraft.finalValidation.detail.actions.status";
@@ -89,6 +95,29 @@ export const SuperAdminFinalValidationActions: FC<Props> = ({ draft, lng }) => {
   const onRequestRevision = useCallback(() => {
     void dispatch(requestSuperAdminFinalRevision({ draftId: draft.id }));
   }, [dispatch, draft.id]);
+
+  const onGeneratePdf = useCallback(async () => {
+    setPdfError(null);
+    setPdfBusy(true);
+    try {
+      const result = await exportReportPdf({ draftId: draft.id, lang: lng });
+      if (!result.ok) {
+        setPdfError(result.message);
+        return;
+      }
+      const url = URL.createObjectURL(result.blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = result.filename;
+      link.rel = "noopener noreferrer";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } finally {
+      setPdfBusy(false);
+    }
+  }, [draft.id, lng]);
 
   const err = transition.status === "error" ? transition.message : null;
 
@@ -140,7 +169,27 @@ export const SuperAdminFinalValidationActions: FC<Props> = ({ draft, lng }) => {
         >
           {t("reportDraft.finalValidation.detail.actions.requestRevision")}
         </button>
+        <button
+          type="button"
+          disabled={!canGeneratePdf || busy || pdfBusy}
+          onClick={() => void onGeneratePdf()}
+          title={
+            canGeneratePdf
+              ? undefined
+              : t("reportDraft.finalValidation.detail.actions.generatePdfDisabledTitle")
+          }
+          className="rounded-md border border-emerald-700 bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+        >
+          {pdfBusy
+            ? t("reportDraft.finalValidation.detail.actions.generatePdfLoading")
+            : t("reportDraft.finalValidation.detail.actions.generatePdf")}
+        </button>
       </div>
+      {pdfError ? (
+        <p role="alert" className="text-sm text-rose-700">
+          {pdfError}
+        </p>
+      ) : null}
       {err ? (
         <p role="alert" className="text-sm text-rose-700">
           {err}

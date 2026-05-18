@@ -1,8 +1,9 @@
 -- =============================================================================
 -- DEV SEED — cycle report-draft autonome (MySQL)
 -- =============================================================================
--- Non destructif : aucun DELETE, aucun écrasement de lignes existantes.
--- Ré-exécution sûre : INSERT IGNORE / INSERT … WHERE NOT EXISTS uniquement.
+-- Non destructif : aucun DELETE.
+-- Ré-exécution sûre : INSERT IGNORE / WHERE NOT EXISTS + UPDATE du contenu Bucket Vault
+-- (étapes, snapshots globaux) pour le cycle dev bbbbbbbb-*.
 --
 -- Exécution (depuis bugbountyapp/server/) :
 --   Docker (recommandé) : pnpm docker:mysql:up && pnpm docker:prisma:seed:dev-draft
@@ -21,7 +22,7 @@
 -- État final du brouillon :
 --   • Soumissions QC par étape + commentaires
 --   • 2 révisions globales (QC+SA), count = 2
---   • SUBMITTED_TO_PROGRAM + report PENDING lié (`pending_report_id`)
+--   • PUBLISHED (brouillon = source de vérité PDF ; pas de ligne `reports` requise)
 -- =============================================================================
 
 -- Aligné sur les migrations Prisma (utf8mb4_unicode_ci), pas le défaut MySQL 8.4 (0900_ai_ci).
@@ -40,9 +41,8 @@ SET @qc2_id      = 'cccccccc-0021-4000-8000-000000000001';
 SET @mentor1_id  = 'cccccccc-0030-4000-8000-000000000001';
 SET @coord_id    = 'cccccccc-0040-4000-8000-000000000001';
 
--- ── Brouillon / report / équipe (namespace bbbbbbbb) ────────────────────────
+-- ── Brouillon / équipe (namespace bbbbbbbb) ─────────────────────────────────
 SET @draft_id   = 'bbbbbbbb-0001-4000-8000-000000000001';
-SET @report_id  = 'bbbbbbbb-0002-4000-8000-000000000001';
 SET @team_id    = 'bbbbbbbb-0003-4000-8000-000000000001';
 
 SET @step_meta  = 'bbbbbbbb-0010-4000-8000-000000000001';
@@ -113,80 +113,191 @@ SELECT CASE
     'RUN — création du cycle dev report-draft'
 END AS seed_workflow_guard;
 
--- ── Payloads (colonnes JSON des étapes — alignés Adminer / code actuel) ─────
--- META : champs plats (pas de sectionBlocs)
+-- ── Payloads — rapport Bucket Vault (challenge Dojo n°50, inspiré du modèle YWH) ─
+-- META : champs plats (hors PDF ; affichés sur le dashboard)
 SET @payload_meta = CAST('{
-  "cve": "CVE 2026-09608",
-  "impact": "Access unauthorized of http",
-  "bugType": "CWE-89",
-  "ipsUsed": "203.67.78.9",
-  "payload": "public",
-  "endpoint": "GET /?action=generate&filename=myfilename&signature=",
+  "cve": "",
+  "impact": "Lecture de fichier arbitraire et fuite de données (flag CTF)",
+  "bugType": "CWE-22",
+  "ipsUsed": "",
+  "payload": "public/.\\n./super_secret.txt",
+  "endpoint": "GET /?action=generate&filename=...&expires=...&signature=...",
   "scopeSlug": "dojo-50",
-  "reportTitle": "Rapport challenge n°50",
-  "vulnerablePartName": "mysecret.txt",
-  "technicalEnvironment": "Burp Suite, IA superdynamic",
-  "applicationFingerprint": "NodeJs - NestJs",
+  "reportTitle": "Rapport challenge n°50 Dojo YesWeHack",
+  "vulnerablePartName": "filename",
+  "technicalEnvironment": "Dojo YesWeHack — PHP, stockage signé",
+  "applicationFingerprint": "PHP — Bucket Vault",
   "vulnerablePartCategory": "GET_PARAMETER"
 }' AS JSON);
 
--- DESCRIPTION : métriques CVSS + sectionBlocs (vide par défaut côté app)
+-- DESCRIPTION : CVSS (dashboard) + sectionBlocs (chapitre PDF « Description du challenge »)
 SET @payload_desc = CAST('{
   "scope": "U",
   "integrity": "N",
   "attackVector": "N",
   "availability": "N",
-  "confidentiality": "L",
-  "userInteraction": "R",
+  "confidentiality": "H",
+  "userInteraction": "N",
   "attackComplexity": "L",
   "privilegesRequired": "N",
-  "sectionBlocs": []
+  "sectionBlocs": [
+    {
+      "id": "desc-bloc-01",
+      "body": "Le challenge 50, appelé **Bucket Vault**, consiste à récupérer un fichier secret `super_secret.txt` qui contient le flag permettant de valider ce CTF. Ce fichier est gardé dans un système de stockage sécurisé qui utilise des **liens d''accès temporaires** : des jetons valables une heure et une **signature numérique** vérifiée avant toute livraison.",
+      "lists": [],
+      "heading": "",
+      "subheading": "",
+      "attachmentId": null,
+      "headingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"},
+      "subheadingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"}
+    },
+    {
+      "id": "desc-bloc-02",
+      "body": "Le stockage est implémenté en **PHP** ; on interagit via des **requêtes GET** et l''application renvoie une page **HTML** décrivant le résultat (signature, téléchargement, erreurs).",
+      "lists": [],
+      "heading": "",
+      "subheading": "",
+      "attachmentId": null,
+      "headingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"},
+      "subheadingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"}
+    }
+  ]
 }' AS JSON);
 
--- Étapes long-form : uniquement { "sectionBlocs": [...] }
 SET @payload_coll = CAST('{
-  "sectionBlocs": [{
-    "id": "546a4a3f-8572-4bb0-ac45-645a5034a269",
-    "body": "Blabalabla",
-    "lists": [],
-    "heading": "",
-    "subheading": "",
-    "attachmentId": null,
-    "headingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"},
-    "subheadingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"}
-  }]
+  "sectionBlocs": [
+    {
+      "id": "coll-bloc-01",
+      "body": "Nous avons deux codes à analyser : le **code de setup** du challenge (engrenage au-dessus de la catégorie Input) et le code exécuté **après chaque requête**.",
+      "lists": [],
+      "heading": "",
+      "subheading": "",
+      "attachmentId": null,
+      "headingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"},
+      "subheadingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"}
+    },
+    {
+      "id": "coll-bloc-02",
+      "body": "Le setup décrit l''**architecture de la base** et les chemins des fichiers (`/public/document_alpha.txt`, `super_secret.txt`, etc.). Une requête sans paramètre renvoie une page HTML listant les actions **sign** et **download**.",
+      "lists": [],
+      "heading": "",
+      "subheading": "",
+      "attachmentId": null,
+      "headingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"},
+      "subheadingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"}
+    },
+    {
+      "id": "coll-bloc-03",
+      "body": "Flux nominal sur un fichier public : `action=sign` + `filename=public/document_alpha.txt`, puis `action=download` avec `expires` et `signature`. Le contenu renvoyé confirme l''accès au répertoire `/public`.",
+      "lists": [],
+      "heading": "",
+      "subheading": "",
+      "attachmentId": null,
+      "headingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"},
+      "subheadingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"}
+    },
+    {
+      "id": "coll-bloc-04",
+      "body": "Une tentative de signature sur `super_secret.txt` échoue : *« Accès refusé. La signature est réservée au préfixe public/ »*. La fonction `generatePresignedUrl()` impose le préfixe `/public` et rejette `..` **avant** assainissement, mais ne revérifie pas après `sanitizeFilename()`.",
+      "lists": [],
+      "heading": "",
+      "subheading": "",
+      "attachmentId": null,
+      "headingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"},
+      "subheadingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"}
+    }
+  ]
 }' AS JSON);
 
 SET @payload_expl = CAST('{
-  "sectionBlocs": [{
-    "id": "81ca702c-f341-480e-8070-afa9b7da4b79",
-    "body": "blabla 2",
-    "lists": [],
-    "heading": "",
-    "subheading": "",
-    "attachmentId": null,
-    "headingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"},
-    "subheadingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"}
-  }]
+  "sectionBlocs": [
+    {
+      "id": "expl-bloc-01",
+      "body": "D''après l''arborescence, `super_secret.txt` et le dossier `/public` sont à la **racine** du stockage. Pour lire le flag il faut d''abord obtenir une signature en respectant le préfixe `/public`, puis **remonter d''un niveau** (`..`) pour sortir du répertoire imposé.",
+      "lists": [],
+      "heading": "",
+      "subheading": "",
+      "attachmentId": null,
+      "headingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"},
+      "subheadingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"}
+    },
+    {
+      "id": "expl-bloc-02",
+      "body": "La vulnérabilité : le contrôle `str_contains($filename, ''..'')` s''applique **avant** `sanitizeFilename()`, qui supprime les caractères de contrôle. En insérant un saut de ligne entre les points (`./\\n.`), la chaîne passe le filtre puis recompose `..` après assainissement.",
+      "lists": [
+        {
+          "id": "expl-list-01",
+          "items": [
+            "La première condition échoue car les deux points ne sont pas adjacents.",
+            "Après assainissement, `\\n` est retiré et la chaîne devient `..`."
+          ],
+          "title": "Chaîne d''exemple : `./\\n.`",
+          "ordered": false,
+          "titleBold": false
+        }
+      ],
+      "heading": "",
+      "subheading": "",
+      "attachmentId": null,
+      "headingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"},
+      "subheadingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"}
+    }
+  ]
 }' AS JSON);
 
 SET @payload_poc = CAST('{
-  "sectionBlocs": [{
-    "id": "3f476b48-0d56-4084-ab2d-bf3d09f53802",
-    "body": "blabla 3",
-    "lists": [],
-    "heading": "",
-    "subheading": "",
-    "attachmentId": null,
-    "headingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"},
-    "subheadingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"}
-  }]
+  "sectionBlocs": [
+    {
+      "id": "poc-bloc-01",
+      "body": "Obtenir la signature du fichier secret :",
+      "lists": [
+        {
+          "id": "poc-list-sign",
+          "items": [
+            "Action : sign",
+            "Filename : public/.\\n./super_secret.txt"
+          ],
+          "title": "Requête de signature",
+          "ordered": false,
+          "titleBold": false
+        }
+      ],
+      "heading": "",
+      "subheading": "",
+      "attachmentId": null,
+      "headingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"},
+      "subheadingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"}
+    },
+    {
+      "id": "poc-bloc-02",
+      "body": "Télécharger le fichier avec la signature et la date d''expiration obtenues :",
+      "lists": [
+        {
+          "id": "poc-list-dl",
+          "items": [
+            "Action : download",
+            "Filename : public/../super_secret.txt",
+            "Expires : <valeur retournée>",
+            "Signature : <valeur retournée>"
+          ],
+          "title": "Requête de téléchargement",
+          "ordered": false,
+          "titleBold": false
+        }
+      ],
+      "heading": "",
+      "subheading": "",
+      "attachmentId": null,
+      "headingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"},
+      "subheadingFormat": {"color": "#1e293b", "style": "normal", "fontSize": "medium"}
+    }
+  ]
 }' AS JSON);
 
 SET @payload_risk = CAST('{
   "sectionBlocs": [{
-    "id": "c0c0a48e-ab8e-42b3-84c7-1c39eefd00bb",
-    "body": "risque ",
+    "id": "risk-bloc-01",
+    "body": "Le risque principal est la **lecture de fichier arbitraire** hors du répertoire autorisé, entraînant une fuite de données sensibles (ici le flag). Un attaquant non authentifié peut exploiter la faille sans privilège préalable ; selon les fichiers accessibles, cela peut faciliter une compromission plus large (secrets, clés, configuration).",
     "lists": [],
     "heading": "",
     "subheading": "",
@@ -198,8 +309,8 @@ SET @payload_risk = CAST('{
 
 SET @payload_remed = CAST('{
   "sectionBlocs": [{
-    "id": "84baec0a-b0d2-4934-bad6-1135f6942cdd",
-    "body": "nous remedions",
+    "id": "remed-bloc-01",
+    "body": "Recontrôler la présence de `..` **après** `sanitizeFilename()` (ou normaliser le chemin avec `realpath` dans un répertoire de confinement). Refuser toute résolution qui sort du préfixe `/public`. Journaliser et limiter les tentatives de traversal.",
     "lists": [],
     "heading": "",
     "subheading": "",
@@ -215,12 +326,12 @@ SET @payload_final = CAST('{"sectionBlocs": []}' AS JSON);
 INSERT INTO `report_drafts` (
   `id`, `hunter_id`, `version`, `aggregate_status`,
   `super_admin_revision_requested_at`, `super_admin_global_revision_count`,
-  `pending_report_id`, `created_at`, `updated_at`
+  `created_at`, `updated_at`
 )
 SELECT
-  @draft_id, @hunter1_id, 36, 'SUBMITTED_TO_PROGRAM',
+  @draft_id, @hunter1_id, 36, 'PUBLISHED',
   NULL, 2,
-  NULL, @t0, @t7
+  @t0, @t7
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM `report_drafts` WHERE `id` = @draft_id);
 
@@ -279,7 +390,7 @@ WHERE EXISTS (
 
 -- ── Équipe ────────────────────────────────────────────────────────────────────
 INSERT INTO `report_draft_teams` (`id`, `report_draft_id`, `label`, `created_at`, `updated_at`)
-SELECT @team_id, @draft_id, 'Rapport SQL Injection (dev seed)', @t0, @t7 FROM DUAL
+SELECT @team_id, @draft_id, 'Bucket Vault — équipe dev (seed)', @t0, @t7 FROM DUAL
 WHERE EXISTS (
     SELECT 1 FROM `report_drafts`
     WHERE `id` = @draft_id AND `hunter_id` = @hunter1_id
@@ -427,58 +538,32 @@ INSERT IGNORE INTO `global_reviewer_comments` (
   @t5
 );
 
--- ── Report PENDING (ce qui manquait dans ton dump Adminer) ────────────────────
-SET @frozen_content = JSON_OBJECT(
-  'schemaVersion', 1,
-  'sourceDraftId', @draft_id,
-  'draftVersion', 36,
-  'hunterId', @hunter1_id,
-  'frozenAt', '2026-05-17T21:08:25.731Z',
-  'reportTeam', JSON_OBJECT(
-    'label', 'Rapport SQL Injection (dev seed)',
-    'members', JSON_ARRAY(
-      JSON_OBJECT('userId', @hunter1_id, 'displayName', 'dev-hunter-1', 'role', 'hunter'),
-      JSON_OBJECT('userId', @qc1_id, 'displayName', 'dev-qc-1', 'role', 'quality_checker'),
-      JSON_OBJECT('userId', @mentor1_id, 'displayName', 'dev-mentor-1', 'role', 'mentor'),
-      JSON_OBJECT('userId', @hunter2_id, 'displayName', 'dev-hunter-2', 'role', 'hunter')
-    )
-  ),
-  'steps', @global_snapshot
-);
+-- ── Rafraîchissement contenu (ré-exécution : met à jour le cycle dev existant) ───
+UPDATE `report_draft_steps` SET `payload` = @payload_meta,  `updated_at` = @t7 WHERE `id` = @step_meta;
+UPDATE `report_draft_steps` SET `payload` = @payload_desc,  `updated_at` = @t7 WHERE `id` = @step_desc;
+UPDATE `report_draft_steps` SET `payload` = @payload_coll,  `updated_at` = @t7 WHERE `id` = @step_coll;
+UPDATE `report_draft_steps` SET `payload` = @payload_expl,  `updated_at` = @t7 WHERE `id` = @step_expl;
+UPDATE `report_draft_steps` SET `payload` = @payload_poc,   `updated_at` = @t7 WHERE `id` = @step_poc;
+UPDATE `report_draft_steps` SET `payload` = @payload_risk,  `updated_at` = @t7 WHERE `id` = @step_risk;
+UPDATE `report_draft_steps` SET `payload` = @payload_remed, `updated_at` = @t7 WHERE `id` = @step_remed;
+UPDATE `report_draft_steps` SET `payload` = @payload_final, `updated_at` = @t7 WHERE `id` = @step_final;
 
-INSERT INTO `reports` (
-  `id`, `hunter_id`, `source_draft_id`, `status`, `frozen_content`,
-  `content_synced_at`, `promoted_by`, `created_at`, `updated_at`
-)
-SELECT
-  @report_id, @hunter1_id, @draft_id, 'PENDING', @frozen_content,
-  @t7, @sa1_id, @t7, @t7
-FROM DUAL
-WHERE NOT EXISTS (SELECT 1 FROM `reports` WHERE `id` = @report_id)
-  AND EXISTS (
-    SELECT 1 FROM `report_drafts`
-    WHERE `id` = @draft_id AND `hunter_id` = @hunter1_id
-  );
+UPDATE `report_draft_teams`
+SET `label` = 'Bucket Vault — équipe dev (seed)', `updated_at` = @t7
+WHERE `id` = @team_id;
 
--- Compléter le lien draft → report uniquement si encore vide (ne remplace jamais un id existant)
 UPDATE `report_drafts`
-SET `pending_report_id` = @report_id,
+SET `aggregate_status` = 'PUBLISHED',
     `updated_at` = @t7
-WHERE `id` = @draft_id
-  AND `hunter_id` = @hunter1_id
-  AND (`pending_report_id` IS NULL OR `pending_report_id` = @report_id)
-  AND EXISTS (SELECT 1 FROM `reports` WHERE `id` = @report_id);
+WHERE `id` = @draft_id;
 
--- Repair dev report if an older row exists without nested `steps` (PDF mapper expects it).
-UPDATE `reports`
-SET `frozen_content` = @frozen_content,
-    `updated_at` = @t7
-WHERE `id` = @report_id
-  AND JSON_EXTRACT(`frozen_content`, '$.steps') IS NULL;
+UPDATE `global_submissions`
+SET `payload` = @global_snapshot
+WHERE `report_draft_id` = @draft_id
+  AND `revision_number` IN (1, 2);
 
 SELECT 'dev-report-draft-bucket-vault' AS seed,
   @draft_id AS report_draft_id,
-  @report_id AS pending_report_id,
   @hunter1_id AS hunter_id,
   @sa1_id AS super_admin_primary,
-  'SUBMITTED_TO_PROGRAM' AS aggregate_status;
+  'PUBLISHED' AS aggregate_status;

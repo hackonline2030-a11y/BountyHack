@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { ReportDraftAggregateStatus } from '../../../generated/prisma/enums';
 import { PrismaService } from '../../../core/infrastructure/database/prisma/prisma.service';
 import type { IReportDraftRepository } from '../../ports/report-draft-repository.interface';
 import type { ReportDraftOrphanSummary } from '../../models/report-draft-orphan-summary.model';
@@ -29,10 +30,7 @@ export class PrismaReportDraftRepository implements IReportDraftRepository {
     await this.prisma.$transaction(async (tx) => {
       await tx.reportDraft.upsert({
         where: { id: header.id },
-        create: {
-          ...header,
-          pendingReportId: null,
-        },
+        create: header,
         update: {
           hunterId: header.hunterId,
           version: header.version,
@@ -127,6 +125,27 @@ export class PrismaReportDraftRepository implements IReportDraftRepository {
     );
   }
 
+  async findPublished(): Promise<ReportDraftWire[]> {
+    const rows = await this.prisma.reportDraft.findMany({
+      where: {
+        aggregateStatus: {
+          in: [
+            ReportDraftAggregateStatus.PUBLISHED,
+            ReportDraftAggregateStatus.SUBMITTED_TO_PROGRAM,
+          ],
+        },
+      },
+      include: {
+        steps: { include: STEP_INCLUDE },
+        reportTeam: { include: TEAM_INCLUDE },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+    return rows.map((row) =>
+      ReportDraftPrismaMapper.toDomain(row as ReportDraftWithSteps),
+    );
+  }
+
   async findOrphanSummaries(): Promise<ReportDraftOrphanSummary[]> {
     const rows = await this.prisma.reportDraft.findMany({
       where: { reportTeam: null },
@@ -143,5 +162,26 @@ export class PrismaReportDraftRepository implements IReportDraftRepository {
       const hunterDisplayName = ReportTeamPrismaMapper.displayNameForUser(row.hunter);
       return toReportDraftOrphanSummary(draft, hunterDisplayName);
     });
+  }
+
+  async deleteById(id: string): Promise<void> {
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        const draft = await tx.reportDraft.findUnique({
+          where: { id },
+          select: { id: true },
+        });
+        if (draft === null) {
+          throw new NotFoundException('Report draft not found');
+        }
+
+        await tx.reportDraft.delete({ where: { id } });
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new NotFoundException('Report draft not found');
+    }
   }
 }

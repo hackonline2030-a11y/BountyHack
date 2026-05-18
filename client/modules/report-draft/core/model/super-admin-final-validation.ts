@@ -22,6 +22,7 @@ export function hasOpenSuperAdminRevisionCycle(
 ): boolean {
   return (
     Boolean(draft?.superAdminRevisionRequestedAt?.trim()) &&
+    draft?.aggregateStatus !== "published" &&
     draft?.aggregateStatus !== "submitted-to-program"
   );
 }
@@ -101,6 +102,16 @@ export function canApproveFinalValidation(
   draft: ReportDraftDomainModel.ReportDraft,
 ): boolean {
   return draft.aggregateStatus === "ready-to-program" && draft.final.status === "approved";
+}
+
+/** Published (or legacy submitted) — super-admin may export the final PDF. */
+export function canExportReportPdf(
+  draft: ReportDraftDomainModel.ReportDraft,
+): boolean {
+  return (
+    draft.aggregateStatus === "published" ||
+    draft.aggregateStatus === "submitted-to-program"
+  );
 }
 
 /** Super-admin may open the global revision cycle only once per draft. */
@@ -185,7 +196,10 @@ export function resolveFinalValidationStatus(
   revision?: number;
   validatorRole?: ReportDraftDomainModel.ReviewerRole;
 } {
-  if (draft.aggregateStatus === "submitted-to-program") {
+  if (
+    draft.aggregateStatus === "published" ||
+    draft.aggregateStatus === "submitted-to-program"
+  ) {
     return { kind: "submitted" };
   }
 

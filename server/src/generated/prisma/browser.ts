@@ -64,7 +64,7 @@ export type TwoFactor = Prisma.TwoFactorModel
 export type TwoFactorTotp = Prisma.TwoFactorTotpModel
 /**
  * Model ReportDraft
- * Hunter workspace: 8 wizard steps until promotion to a pending Report.
+ * Hunter workspace: 8 wizard steps until super-admin publishes the draft.
  */
 export type ReportDraft = Prisma.ReportDraftModel
 /**
@@ -107,11 +107,6 @@ export type SubmissionAttachmentSnapshot = Prisma.SubmissionAttachmentSnapshotMo
  * Optional payload history inside one submission (reserved for later).
  */
 export type SubmissionContentSnapshot = Prisma.SubmissionContentSnapshotModel
-/**
- * Model Report
- * Promoted artefact after full step validation; super-admin pending → published.
- */
-export type Report = Prisma.ReportModel
 /**
  * Model ReportTeam
  * Squad for one report draft (not org-wide teams).

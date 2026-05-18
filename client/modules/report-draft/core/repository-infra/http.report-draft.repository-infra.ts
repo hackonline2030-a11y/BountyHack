@@ -35,4 +35,18 @@ export class HttpReportDraftRepository implements IReportDraftRepository {
     const res = await fetchBff(url, { credentials: "include", cache: "no-store" });
     return parseJsonResponse(res);
   }
+
+  async deletePermanently(
+    draftId: ReportDraftDomainModel.ReportDraftId,
+  ): Promise<void> {
+    const res = await fetchBff(
+      `/api/report-draft/admin/drafts/${encodeURIComponent(draftId)}`,
+      { method: "DELETE", credentials: "include" },
+    );
+    if (!res.ok) {
+      throw new Error(
+        await readFriendlyHttpError(res, "Impossible de supprimer le brouillon de rapport."),
+      );
+    }
+  }
 }

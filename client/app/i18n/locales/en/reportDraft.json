@@ -14,6 +14,7 @@
           "under-global-review": "Under global review",
           "draft": "Draft",
           "submitted-to-program": "Submitted to program",
+          "published": "Published",
           "rejected": "Rejected",
           "given-up": "Given up"
         }
@@ -61,7 +62,10 @@
           "revisionDisabledTitle": "Save at least one super-admin comment before requesting revision",
           "revisionAlreadyUsedTitle": "Global revision was already requested once for this report",
           "pendingGlobalReviewHint": "A global submission is awaiting review (QC or super-admin) before you can finalize the report.",
-          "openGlobalSubmissionReview": "Open global submission review"
+          "openGlobalSubmissionReview": "Open global submission review",
+          "generatePdf": "Generate PDF",
+          "generatePdfLoading": "Generating PDF…",
+          "generatePdfDisabledTitle": "Available after final validation (published draft)"
         },
         "comments": {
           "intro": "One general comment per step. The team (hunter, mentor, quality checker) reads them in the “Super-admin feedback” tab.",

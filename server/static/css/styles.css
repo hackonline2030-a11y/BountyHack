@@ -237,3 +237,82 @@ body {
   background: #fff;
   color: #151941;
 }
+
+.dashboard-context {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.dashboard-context-title {
+  margin: 0 0 6px;
+  font-size: 1.15rem;
+  color: #151941;
+}
+
+.dashboard-context-hint {
+  margin: 0 0 14px;
+  color: #718096;
+  font-size: 0.92rem;
+}
+
+.dashboard-context-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.dashboard-context-card {
+  margin: 0;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+
+.dashboard-context-card h3 {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #c1121f;
+}
+
+.dashboard-dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 38%) 1fr;
+  gap: 6px 10px;
+  font-size: 0.9rem;
+}
+
+.dashboard-dl dt {
+  margin: 0;
+  color: #718096;
+  font-weight: 600;
+}
+
+.dashboard-dl dd {
+  margin: 0;
+  color: #1a202c;
+  word-break: break-word;
+}
+
+.dashboard-dl code {
+  font-size: 0.85em;
+  background: #edf2f7;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.dashboard-team-label {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.dashboard-team-list {
+  margin: 0;
+  padding-left: 18px;
+}

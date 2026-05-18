@@ -4,7 +4,7 @@ import { PdfController } from './pdf.controller';
 import { PreviewReportHtmlQuery } from '../application/queries/preview-report-html.query';
 import { GenerateReportPdfCommand } from '../application/commands/generate-report-pdf.command';
 
-const REPORT_ID = 'bbbbbbbb-0002-4000-8000-000000000001';
+const DRAFT_ID = 'bbbbbbbb-0001-4000-8000-000000000001';
 
 describe('PdfController', () => {
   let controller: PdfController;
@@ -37,38 +37,40 @@ describe('PdfController', () => {
   it('returns report preview html from use case', async () => {
     previewReportQueryMock.execute.mockResolvedValue('<html>report preview</html>');
 
-    const result = await controller.previewReportHtml(REPORT_ID, 'fr');
+    const result = await controller.previewReportHtml(DRAFT_ID, 'fr');
 
     expect(previewReportQueryMock.execute).toHaveBeenCalledWith({
-      reportId: REPORT_ID,
+      draftId: DRAFT_ID,
       locale: 'fr',
     });
     expect(result).toBe('<html>report preview</html>');
   });
 
-  it('throws when reportId is missing', async () => {
+  it('throws when draftId is missing', async () => {
     await expect(controller.previewReportHtml()).rejects.toBeInstanceOf(
       BadRequestException,
     );
   });
 
-  it('returns generated report pdf url from use case', async () => {
+  it('streams generated report pdf from in-memory buffer', async () => {
     generateReportCommandMock.execute.mockResolvedValue({
-      url: '/pdfs/report-final-1.pdf',
+      buffer: Buffer.from('pdf'),
+      fileName: 'report-final-bbbbbbbb.pdf',
     });
 
-    const result = await controller.exportReportPDF(REPORT_ID);
+    const streamable = await controller.exportReportPdfDownload(DRAFT_ID);
 
     expect(generateReportCommandMock.execute).toHaveBeenCalledWith({
-      reportId: REPORT_ID,
+      draftId: DRAFT_ID,
     });
-    expect(result).toEqual({
-      url: '/pdfs/report-final-1.pdf',
-    });
+    expect(streamable.options.type).toBe('application/pdf');
+    expect(streamable.options.disposition).toBe(
+      'attachment; filename="report-final-bbbbbbbb.pdf"',
+    );
   });
 
-  it('throws when reportId is missing for PDF export', async () => {
-    await expect(controller.exportReportPDF()).rejects.toBeInstanceOf(
+  it('throws when draftId is missing for PDF export', async () => {
+    await expect(controller.exportReportPdfDownload()).rejects.toBeInstanceOf(
       BadRequestException,
     );
   });

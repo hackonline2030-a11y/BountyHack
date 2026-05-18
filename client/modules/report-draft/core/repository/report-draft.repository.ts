@@ -14,4 +14,7 @@ export interface IReportDraftRepository {
   findByHunterId(
     hunterId: string,
   ): Promise<ReportDraftDomainModel.ReportDraft[]>;
+
+  /** Super-admin hard delete (steps, submissions, team, legacy reports). */
+  deletePermanently(draftId: ReportDraftDomainModel.ReportDraftId): Promise<void>;
 }

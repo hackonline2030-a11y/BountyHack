@@ -14,6 +14,7 @@ export function reportDraftAggregateStatusRowClass(
     case "ready-to-program":
       return "bg-emerald-50/95 hover:bg-emerald-100/95";
     case "submitted-to-program":
+    case "published":
       return "bg-sky-50/95 hover:bg-sky-100/95";
     case "rejected":
       return "bg-rose-50/95 hover:bg-rose-100/95";
@@ -36,6 +37,7 @@ export function reportDraftAggregateStatusBadgeClass(
     case "ready-to-program":
       return "bg-emerald-200 text-emerald-950";
     case "submitted-to-program":
+    case "published":
       return "bg-sky-200 text-sky-950";
     case "rejected":
       return "bg-rose-200 text-rose-950";

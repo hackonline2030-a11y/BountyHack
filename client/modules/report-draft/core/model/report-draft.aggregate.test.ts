@@ -326,6 +326,7 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
     ["given-up"],
     ["rejected"],
     ["submitted-to-program"],
+    ["published"],
   ] as const)(
     "throws when the aggregate is '%s' (terminal state)",
     (terminalStatus) => {
@@ -502,7 +503,7 @@ describe("ReportDraftAggregate.approveStep", () => {
     );
   });
 
-  it.each([["given-up"], ["rejected"], ["submitted-to-program"]] as const)(
+  it.each([["given-up"], ["rejected"], ["submitted-to-program"], ["published"]] as const)(
     "throws when the aggregate is '%s' (terminal state)",
     (terminalStatus) => {
       const { aggregate, draft, submission } = seededWithSubmission();
@@ -698,7 +699,7 @@ describe("ReportDraftAggregate.requestStepRevisions", () => {
     ).toThrow(/stale round/);
   });
 
-  it.each([["given-up"], ["rejected"], ["submitted-to-program"]] as const)(
+  it.each([["given-up"], ["rejected"], ["submitted-to-program"], ["published"]] as const)(
     "throws when the aggregate is '%s' (terminal state)",
     (terminalStatus) => {
       const { aggregate, draft, submission } = seededWithSubmission();
@@ -768,7 +769,7 @@ describe("ReportDraftAggregate.resumeEdit", () => {
     },
   );
 
-  it.each([["given-up"], ["rejected"], ["submitted-to-program"]] as const)(
+  it.each([["given-up"], ["rejected"], ["submitted-to-program"], ["published"]] as const)(
     "throws when the aggregate is '%s' (terminal state)",
     (terminalStatus) => {
       const { aggregate, draft } = makeAggregate();
@@ -804,7 +805,7 @@ describe("ReportDraftAggregate.giveUpDraft", () => {
     expect(draft.updatedAt).toEqual("2026-05-14T09:00:00.000Z");
   });
 
-  it.each([["given-up"], ["rejected"], ["submitted-to-program"]] as const)(
+  it.each([["given-up"], ["rejected"], ["submitted-to-program"], ["published"]] as const)(
     "throws when the aggregate is already '%s' (terminal state, no double-termination)",
     (terminalStatus) => {
       const { aggregate, draft } = makeAggregate();
@@ -852,7 +853,7 @@ describe("ReportDraftAggregate.rejectDraft", () => {
     expect(draft.updatedAt).toEqual("2026-05-14T09:00:00.000Z");
   });
 
-  it.each([["given-up"], ["rejected"], ["submitted-to-program"]] as const)(
+  it.each([["given-up"], ["rejected"], ["submitted-to-program"], ["published"]] as const)(
     "throws when the aggregate is already '%s' (terminal state)",
     (terminalStatus) => {
       const { aggregate, draft } = makeAggregate();
@@ -936,7 +937,7 @@ describe("ReportDraftAggregate.updateStepPayload", () => {
     ).toThrow(/cannot edit step/);
   });
 
-  it.each([["given-up"], ["rejected"], ["submitted-to-program"]] as const)(
+  it.each([["given-up"], ["rejected"], ["submitted-to-program"], ["published"]] as const)(
     "refuses to edit when the aggregate is '%s' (terminal state)",
     (terminalStatus) => {
       const { aggregate, draft } = makeAggregate();
