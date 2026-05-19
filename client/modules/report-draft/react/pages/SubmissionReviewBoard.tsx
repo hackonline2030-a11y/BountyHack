@@ -357,7 +357,7 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
         <div className="flex flex-wrap gap-3 border-t border-form-border pt-4">
           <button
             type="button"
-            className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+            className="cursor-pointer rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={transitionBusy}
             onClick={() => void onApprove()}
           >
@@ -365,7 +365,7 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
           </button>
           <button
             type="button"
-            className="rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50"
+            className="cursor-pointer rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={transitionBusy || !hasPendingRevisionComments}
             onClick={() => void onRequestRevisions()}
           >
@@ -373,7 +373,7 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
           </button>
           <button
             type="button"
-            className="rounded-md border border-rose-400 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-900 disabled:opacity-50"
+            className="cursor-pointer rounded-md border border-rose-400 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-900 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={transitionBusy}
             onClick={() => void onReject()}
           >

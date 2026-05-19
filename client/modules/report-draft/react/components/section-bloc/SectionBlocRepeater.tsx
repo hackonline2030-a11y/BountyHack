@@ -61,7 +61,7 @@ export const SectionBlocRepeater: FC<Props> = ({ blocs, editable, onChange }) =>
               {editable ? (
                 <button
                   type="button"
-                  className="rounded-md border border-form-border bg-form-surface px-2.5 py-1 text-xs font-medium text-form-text hover:bg-white disabled:opacity-50"
+                  className="cursor-pointer rounded-md border border-form-border bg-form-surface px-2.5 py-1 text-xs font-medium text-form-text hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => removeBloc(bloc.id)}
                   aria-label={`Supprimer la section ${index + 1}`}
                 >
@@ -120,7 +120,7 @@ export const SectionBlocRepeater: FC<Props> = ({ blocs, editable, onChange }) =>
       {editable ? (
         <button
           type="button"
-          className="inline-flex w-fit items-center gap-1 rounded-md border border-form-border bg-form-surface px-3 py-2 text-sm font-medium text-form-text hover:bg-white"
+          className="inline-flex w-fit cursor-pointer items-center gap-1 rounded-md border border-form-border bg-form-surface px-3 py-2 text-sm font-medium text-form-text hover:bg-white"
           onClick={addBloc}
         >
           + Ajouter une section

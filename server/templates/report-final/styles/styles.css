@@ -7,7 +7,7 @@
 }
 
 :root {
-  --bg: #f4f5f7;
+  --bg: #ffffff;
   --text: #1f2430;
   --muted: #5f6775;
   --card: #ffffff;
@@ -24,7 +24,7 @@
 body {
   margin: 0;
   font-family: Inter, Arial, sans-serif;
-  background: var(--bg);
+  background: #ffffff;
   color: var(--text);
   line-height: 1.45;
   font-size: 14px;
@@ -33,13 +33,14 @@ body {
 .report-page {
   max-width: none;
   margin: 0;
-  padding: 12px 0 24px;
+  padding: 0;
+  background: #ffffff;
 }
 
 .page-frame {
   width: 210mm;
   min-height: 297mm;
-  margin: 0 auto 12px;
+  margin: 0 auto;
   background: #ffffff;
   box-sizing: border-box;
 }
@@ -131,7 +132,7 @@ body {
   border-radius: 0;
   box-shadow: none;
   padding: 28mm 18mm 22mm;
-  margin-bottom: 12px;
+  margin-bottom: 0;
 }
 
 h2 {
@@ -451,6 +452,7 @@ li {
   .report-page {
     max-width: 100%;
     padding: 0;
+    background: #ffffff;
   }
 
   .page-frame {

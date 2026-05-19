@@ -104,7 +104,7 @@ export const GlobalSubmissionReviewBoard: FC<Props> = ({
           href={backHref}
           className="inline-flex text-sm font-medium text-form-accent hover:underline"
         >
-          ← {t("myReports.globalRevisionReview.back")}
+          {t("myReports.globalRevisionReview.back")}
         </Link>
       </div>
 
@@ -200,7 +200,7 @@ export const GlobalSubmissionReviewBoard: FC<Props> = ({
               type="button"
               disabled={busy}
               onClick={onApproveRevision}
-              className="rounded-md bg-form-accent px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-40"
+              className="cursor-pointer rounded-md bg-form-accent px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {t("myReports.globalSubmissionReview.approveRevision")}
             </button>
@@ -208,7 +208,7 @@ export const GlobalSubmissionReviewBoard: FC<Props> = ({
               type="button"
               disabled={busy || revisionComment.trim().length === 0}
               onClick={onRequestChanges}
-              className="rounded-md border border-form-border bg-form-surface px-4 py-2 text-sm font-semibold text-form-text hover:bg-white disabled:opacity-40"
+              className="cursor-pointer rounded-md border border-form-border bg-form-surface px-4 py-2 text-sm font-semibold text-form-text hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               {t("myReports.globalSubmissionReview.requestRevision")}
             </button>
