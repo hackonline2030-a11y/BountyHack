@@ -215,7 +215,7 @@ li {
 
 .markdown-body code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  background: #eef0f3;
+  background: #ffffff;
   border-radius: 4px;
   padding: 0 4px;
 }
@@ -247,8 +247,9 @@ li {
 }
 
 .code-block {
-  background: var(--code-bg);
-  color: var(--code-fg);
+  background: #ffffff;
+  color: var(--text);
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px;
   overflow-x: auto;
@@ -261,7 +262,7 @@ li {
 
 /* Blocs de commande / query : fond clair (rapport lisible, pas “console JSON”) */
 .code-block--light {
-  background: #f1f5f9;
+  background: #ffffff;
   color: #0f172a;
   border: 1px solid #e2e8f0;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -319,7 +320,8 @@ li {
 .kbd {
   font-family: ui-monospace, monospace;
   font-size: 13px;
-  background: #eef0f3;
+  background: #ffffff;
+  border: 1px solid var(--line);
   padding: 2px 8px;
   border-radius: 4px;
 }
@@ -389,7 +391,7 @@ li {
   display: block;
   font-size: 12px;
   padding: 8px 10px;
-  background: #f8fafc;
+  background: #ffffff;
   border: 1px solid var(--line);
   border-radius: 6px;
   word-break: break-all;
@@ -440,7 +442,7 @@ li {
   border-radius: 8px;
   padding: 12px 14px;
   margin-bottom: 10px;
-  background: #fafbfc;
+  background: #ffffff;
 }
 
 .bug-chain-title {

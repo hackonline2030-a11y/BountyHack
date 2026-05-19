@@ -38,6 +38,15 @@ function injectBaseHref(htmlContent: string, origin: string): string {
 }
 
 const PDF_LAYOUT_OVERRIDE_CSS = `
+  html,
+  body,
+  .report-page,
+  .page-frame,
+  .cover-page,
+  .section-card {
+    background: #ffffff !important;
+  }
+
   .report-page {
     box-shadow: none !important;
     margin: 0 !important;
@@ -53,8 +62,9 @@ const PDF_LAYOUT_OVERRIDE_CSS = `
 export class PuppeteerPdfGeneratorAdapter implements IPdfGenerator {
   private readonly cssPath = path.resolve(
     process.cwd(),
-    'static',
-    'css',
+    'templates',
+    'report-final',
+    'styles',
     'styles.css',
   );
 
