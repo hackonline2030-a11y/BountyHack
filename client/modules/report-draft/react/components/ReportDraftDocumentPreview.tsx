@@ -131,7 +131,7 @@ export const ReportDraftDocumentPreview: FC<ReportDraftDocumentPreviewProps> = (
   const chapterLabels = renderedChapterSteps
     .map((step) => pdfChapterTitle(step))
     .filter((t): t is string => t != null);
-  const toc = buildPdfTableOfContents(title, chapterLabels);
+  const toc = buildPdfTableOfContents(chapterLabels);
 
   const showCoverPage =
     showCover || (steps.length === 1 && steps[0] === M.ReportDraftStep.META);

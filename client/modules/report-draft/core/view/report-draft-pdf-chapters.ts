@@ -83,14 +83,9 @@ export function authorNameFromDraft(draft: M.ReportDraft): string {
   return reviewerDisplayNameFromTeam(draft, draft.hunterId);
 }
 
-/** Sommaire type PDF : titre du rapport (p.1) puis chapitres numérotés. */
-export function buildPdfTableOfContents(
-  reportTitle: string,
-  chapterLabels: readonly string[],
-): PdfTocEntry[] {
-  const entries: PdfTocEntry[] = [
-    { label: reportTitle, page: 1, bold: true },
-  ];
+/** Sommaire type PDF : uniquement les chapitres, la page de garde porte déjà le titre. */
+export function buildPdfTableOfContents(chapterLabels: readonly string[]): PdfTocEntry[] {
+  const entries: PdfTocEntry[] = [];
   let page = 2;
   for (const label of chapterLabels) {
     entries.push({
