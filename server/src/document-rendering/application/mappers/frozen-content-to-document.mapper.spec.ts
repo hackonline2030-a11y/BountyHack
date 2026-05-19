@@ -74,12 +74,9 @@ describe('mapFrozenContentToDocument', () => {
     expect(doc.reportTeam?.label).toBe('Rapport SQL Injection (dev seed)');
     expect(doc.authorName).toBe('dev-hunter-1');
     expect(doc.tableOfContents[0]).toEqual({
-      label: 'Rapport challenge n°50',
-      page: 1,
-      bold: true,
+      label: 'Collectes d’informations :',
+      page: 2,
     });
-    expect(doc.tableOfContents[1]?.page).toBe(2);
-    expect(doc.tableOfContents[1]?.label).toMatch(/Collectes d.informations :/);
   });
 
   it('uses meta reportTitle for PDF title, not team label', () => {

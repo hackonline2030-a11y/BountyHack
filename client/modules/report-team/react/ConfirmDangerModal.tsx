@@ -29,7 +29,7 @@ export const ConfirmDangerModal: FC<ConfirmDangerModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="presentation">
       <button
         type="button"
-        className="absolute inset-0 bg-slate-900/50"
+        className="absolute inset-0 cursor-pointer bg-slate-900/50 disabled:cursor-not-allowed"
         aria-label={cancelLabel}
         disabled={confirming}
         onClick={onCancel}
@@ -47,7 +47,7 @@ export const ConfirmDangerModal: FC<ConfirmDangerModalProps> = ({
         <div className="mt-6 flex flex-wrap justify-end gap-2">
           <button
             type="button"
-            className="rounded-md border border-dashboard-divider px-4 py-2 text-sm font-medium text-dashboard-text hover:bg-slate-50 disabled:opacity-50"
+            className="cursor-pointer rounded-md border border-dashboard-divider px-4 py-2 text-sm font-medium text-dashboard-text hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={confirming}
             onClick={onCancel}
           >
@@ -55,7 +55,7 @@ export const ConfirmDangerModal: FC<ConfirmDangerModalProps> = ({
           </button>
           <button
             type="button"
-            className="rounded-md border border-rose-600 bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
+            className="cursor-pointer rounded-md border border-rose-600 bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={confirming}
             onClick={onConfirm}
           >

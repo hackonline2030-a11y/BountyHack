@@ -50,7 +50,7 @@ export const ReportDraftGlobalSubmitButton: FC<Props> = ({
   return (
     <button
       type="button"
-      className="rounded-md border border-violet-700 bg-violet-50 px-4 py-2 font-medium text-violet-900 hover:bg-violet-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+      className="cursor-pointer rounded-md border border-violet-700 bg-violet-50 px-4 py-2 font-medium text-violet-900 hover:bg-violet-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       onClick={() => void onGlobalSubmit()}
       disabled={transitionBusy || eligible === 0}
       title={
