@@ -82,7 +82,7 @@ export const SectionBlocListsEditor: FC<Props> = ({ lists, editable, onChange })
                 {editable ? (
                   <button
                     type="button"
-                    className="text-xs font-medium text-form-text-muted hover:text-form-text"
+                    className="cursor-pointer text-xs font-medium text-form-text-muted hover:text-form-text"
                     onClick={() => removeList(list.id)}
                   >
                     Supprimer la liste
@@ -146,7 +146,7 @@ export const SectionBlocListsEditor: FC<Props> = ({ lists, editable, onChange })
                       {editable && list.items.length > 1 ? (
                         <button
                           type="button"
-                          className="shrink-0 rounded border border-form-border px-2 text-xs text-form-text-muted hover:bg-form-overlay"
+                          className="shrink-0 cursor-pointer rounded border border-form-border px-2 text-xs text-form-text-muted hover:bg-form-overlay"
                           onClick={() => removeListItem(list.id, itemIndex)}
                           aria-label={`Supprimer l'élément ${itemIndex + 1}`}
                         >
@@ -158,7 +158,7 @@ export const SectionBlocListsEditor: FC<Props> = ({ lists, editable, onChange })
                   {editable ? (
                     <button
                       type="button"
-                      className="self-start text-xs font-medium text-form-accent hover:underline"
+                      className="self-start cursor-pointer text-xs font-medium text-form-accent hover:underline"
                       onClick={() => addListItem(list.id)}
                     >
                       + Ajouter un élément
@@ -174,7 +174,7 @@ export const SectionBlocListsEditor: FC<Props> = ({ lists, editable, onChange })
       {editable ? (
         <button
           type="button"
-          className="self-start text-sm font-medium text-form-text hover:underline"
+          className="self-start cursor-pointer text-sm font-medium text-form-text hover:underline"
           onClick={addList}
         >
           + Ajouter une liste

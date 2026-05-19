@@ -150,7 +150,7 @@ export const SuperAdminFinalValidationActions: FC<Props> = ({ draft, lng }) => {
               ? undefined
               : t("reportDraft.finalValidation.detail.actions.approveDisabledTitle")
           }
-          className="rounded-md bg-form-accent px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent"
+          className="cursor-pointer rounded-md bg-form-accent px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent"
         >
           {t("reportDraft.finalValidation.detail.actions.approve")}
         </button>
@@ -165,7 +165,7 @@ export const SuperAdminFinalValidationActions: FC<Props> = ({ draft, lng }) => {
                 ? t("reportDraft.finalValidation.detail.actions.revisionAlreadyUsedTitle")
                 : t("reportDraft.finalValidation.detail.actions.revisionDisabledTitle")
           }
-          className="rounded-md border border-form-border bg-form-surface px-4 py-2 text-sm font-semibold text-form-text transition hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent"
+          className="cursor-pointer rounded-md border border-form-border bg-form-surface px-4 py-2 text-sm font-semibold text-form-text transition hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent"
         >
           {t("reportDraft.finalValidation.detail.actions.requestRevision")}
         </button>
@@ -178,7 +178,7 @@ export const SuperAdminFinalValidationActions: FC<Props> = ({ draft, lng }) => {
               ? undefined
               : t("reportDraft.finalValidation.detail.actions.generatePdfDisabledTitle")
           }
-          className="rounded-md border border-emerald-700 bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+          className="cursor-pointer rounded-md border border-emerald-700 bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
         >
           {pdfBusy
             ? t("reportDraft.finalValidation.detail.actions.generatePdfLoading")

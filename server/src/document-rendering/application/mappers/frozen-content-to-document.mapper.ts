@@ -214,14 +214,11 @@ function resolveAuthorName(
   return hunterId;
 }
 
-/** Cover TOC: report title on page 1, then one page per PDF chapter. */
+/** Cover TOC: first PDF chapter starts on page 2; the cover title is not listed. */
 function buildPdfTableOfContents(
-  reportTitle: string,
   chapterLabels: readonly string[],
 ): FrozenReportTocEntryReadModel[] {
-  const entries: FrozenReportTocEntryReadModel[] = [
-    { label: reportTitle, page: 1, bold: true },
-  ];
+  const entries: FrozenReportTocEntryReadModel[] = [];
   let page = 2;
   for (const label of chapterLabels) {
     const withColon = label.endsWith(':') ? label : `${label} :`;
@@ -293,7 +290,6 @@ export function mapFrozenContentToDocument(
   const hunterId = String(root['hunterId'] ?? input.hunterId);
   const authorName = resolveAuthorName(hunterId, reportTeam);
   const tableOfContents = buildPdfTableOfContents(
-    title,
     sections.map((s) => s.title),
   );
 
