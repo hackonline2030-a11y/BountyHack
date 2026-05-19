@@ -1,0 +1,49 @@
+{
+  "welcomePlatformManager": {
+    "metaTitle": "Tableau de bord — outils & contenus",
+    "heading": "Bienvenue",
+    "headingWithUsername": "Bienvenue, {{username}}",
+    "subheading": "Responsable outils et contenus pédagogiques — structurer et maintenir l’environnement d’apprentissage du projet.",
+    "nav": {
+      "label": "Navigation du tableau de bord",
+      "settings": "Paramètres",
+      "credits": "Crédits visuels"
+    },
+    "mission": {
+      "title": "Votre rôle",
+      "intro": "Ce rôle vise à structurer et maintenir l’environnement d’apprentissage et de capitalisation du projet.",
+      "items": {
+        "pedagogicalSite": "Gestion du site pédagogique interne",
+        "methodologicalResources": "Mise à disposition des ressources méthodologiques",
+        "internalDocs": "Centralisation des documents et write-ups internes",
+        "collaborativeTools": "Administration des outils collaboratifs",
+        "feedbackCapitalization": "Capitalisation des retours d’expérience"
+      },
+      "boundary": "Ce rôle garantit la pérennité et la cohérence du projet."
+    },
+    "cards": {
+      "comingSoon": "Bientôt disponible",
+      "pedagogicalSite": {
+        "title": "Site pédagogique interne",
+        "subtitle": "Espace d’apprentissage",
+        "body": "Pilotage des parcours, modules et contenus visibles par les participants."
+      },
+      "resources": {
+        "title": "Ressources & write-ups",
+        "subtitle": "Méthodologie et capitalisation",
+        "body": "Bibliothèque de guides, modèles et comptes rendus internes."
+      },
+      "tools": {
+        "title": "Outils collaboratifs",
+        "subtitle": "Administration",
+        "body": "Configuration et suivi des espaces de travail partagés du dispositif."
+      },
+      "settings": {
+        "title": "Paramètres du compte",
+        "subtitle": "Profil et sécurité",
+        "body": "Gérez votre profil, votre mot de passe et l’authentification à deux facteurs.",
+        "cta": "Ouvrir les paramètres"
+      }
+    }
+  }
+}

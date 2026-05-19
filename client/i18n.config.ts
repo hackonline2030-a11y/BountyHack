@@ -16,11 +16,13 @@ const i18nConfig: I18nConfig = {
     'welcomeMentor',
     'welcomeCoordinator',
     'welcomeAdmin',
+    'welcomePlatformManager',
     'reportTeams',
     'parameters',
     'legal',
     'credits',
     'myReports',
+    'reportDraft',
   ],
   resourceLoader: (language, namespace) =>
     import(`./app/i18n/locales/${language}/${namespace}.json`),

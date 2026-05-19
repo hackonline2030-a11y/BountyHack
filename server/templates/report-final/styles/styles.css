@@ -7,7 +7,7 @@
 }
 
 :root {
-  --bg: #f4f5f7;
+  --bg: #ffffff;
   --text: #1f2430;
   --muted: #5f6775;
   --card: #ffffff;
@@ -24,7 +24,7 @@
 body {
   margin: 0;
   font-family: Inter, Arial, sans-serif;
-  background: var(--bg);
+  background: #ffffff;
   color: var(--text);
   line-height: 1.45;
   font-size: 14px;
@@ -33,40 +33,72 @@ body {
 .report-page {
   max-width: none;
   margin: 0;
-  padding: 12px 0 24px;
+  padding: 0;
+  background: #ffffff;
 }
 
 .page-frame {
   width: 210mm;
   min-height: 297mm;
-  margin: 0 auto 12px;
+  margin: 0 auto;
   background: #ffffff;
   box-sizing: border-box;
 }
 
 .cover-page {
-  padding: 38mm 24mm 20mm;
+  display: flex;
+  flex-direction: column;
+  padding: 18mm 22mm 20mm;
+  min-height: 297mm;
+}
+
+.cover-header {
+  text-align: center;
+  margin-top: 12mm;
 }
 
 .cover-title {
   margin: 0;
   text-align: center;
-  font-size: 44px;
+  font-size: 2rem;
   font-weight: 700;
-  line-height: 1.2;
-  color: #111827;
+  line-height: 1.25;
+  color: #0f172a;
 }
 
 .cover-author {
-  margin: 28px 0 80px;
+  margin: 1.75rem 0 0;
   text-align: center;
-  font-size: 34px;
-  color: #111827;
+  font-size: 1.35rem;
+  font-weight: 400;
+  line-height: 1.3;
+  color: #0f172a;
+}
+
+.cover-toc {
+  margin-top: 5rem;
+  width: 100%;
 }
 
 .cover-toc-list {
   margin: 0;
   padding: 0;
+  list-style: none;
+}
+
+.cover-toc-list .toc-line {
+  font-size: 14px;
+  line-height: 1.55;
+  padding: 0.2rem 0;
+}
+
+.cover-toc-list .toc-label {
+  font-weight: 400;
+}
+
+.cover-toc-list .toc-line--main .toc-label,
+.cover-toc-list .toc-line--main .toc-page {
+  font-weight: 700;
 }
 
 .report-header {
@@ -100,7 +132,7 @@ body {
   border-radius: 0;
   box-shadow: none;
   padding: 28mm 18mm 22mm;
-  margin-bottom: 12px;
+  margin-bottom: 0;
 }
 
 h2 {
@@ -183,7 +215,7 @@ li {
 
 .markdown-body code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  background: #eef0f3;
+  background: #ffffff;
   border-radius: 4px;
   padding: 0 4px;
 }
@@ -215,8 +247,9 @@ li {
 }
 
 .code-block {
-  background: var(--code-bg);
-  color: var(--code-fg);
+  background: #ffffff;
+  color: var(--text);
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px;
   overflow-x: auto;
@@ -229,7 +262,7 @@ li {
 
 /* Blocs de commande / query : fond clair (rapport lisible, pas “console JSON”) */
 .code-block--light {
-  background: #f1f5f9;
+  background: #ffffff;
   color: #0f172a;
   border: 1px solid #e2e8f0;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -287,7 +320,8 @@ li {
 .kbd {
   font-family: ui-monospace, monospace;
   font-size: 13px;
-  background: #eef0f3;
+  background: #ffffff;
+  border: 1px solid var(--line);
   padding: 2px 8px;
   border-radius: 4px;
 }
@@ -357,7 +391,7 @@ li {
   display: block;
   font-size: 12px;
   padding: 8px 10px;
-  background: #f8fafc;
+  background: #ffffff;
   border: 1px solid var(--line);
   border-radius: 6px;
   word-break: break-all;
@@ -408,7 +442,7 @@ li {
   border-radius: 8px;
   padding: 12px 14px;
   margin-bottom: 10px;
-  background: #fafbfc;
+  background: #ffffff;
 }
 
 .bug-chain-title {
@@ -420,6 +454,7 @@ li {
   .report-page {
     max-width: 100%;
     padding: 0;
+    background: #ffffff;
   }
 
   .page-frame {

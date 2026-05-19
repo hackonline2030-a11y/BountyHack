@@ -3,22 +3,66 @@
     "metaTitle": "Tableau de bord coordinateur",
     "heading": "Bienvenue",
     "headingWithUsername": "Bienvenue, {{username}}",
-    "subheading": "Vous gérez les équipes rapport : affectations, demandes en attente et composition des équipes.",
+    "subheading": "Organisation des équipes rapport, des demandes d’affectation et de la fluidité du travail collectif.",
+    "nav": {
+      "label": "Navigation du tableau de bord",
+      "coordination": "Coordination",
+      "teams": "Équipes rapport",
+      "support": "Support",
+      "settings": "Paramètres"
+    },
+    "mission": {
+      "title": "Coordinateur opérationnel",
+      "intro": "Ce rôle facilite l’organisation et la fluidité du travail collectif, en particulier lorsque le nombre de participants augmente.",
+      "items": {
+        "workSessions": "Organisation des sessions de travail",
+        "taskDistribution": "Répartition des tâches entre les participants",
+        "contributions": "Suivi des contributions individuelles et collectives",
+        "community": "Animation de la communauté interne",
+        "mentorInterface": "Interface entre chercheurs juniors et mentors"
+      },
+      "boundary": "Ce rôle permet de développer des compétences organisationnelles et professionnelles. Vous affectez les équipes rapport et traitez les demandes d’adhésion — vous ne remplacez pas le mentor ni le quality checker sur la relecture technique."
+    },
     "cards": {
       "pending": {
         "title": "Demandes en attente",
         "subtitle": "{{n}} à traiter",
         "empty": "Aucune demande en attente.",
+        "kindJoin": "Demande d’adhésion",
+        "kindEnrollment": "Nouvelle inscription",
         "cta": "Ouvrir la coordination"
       },
       "teams": {
         "title": "Équipes rapport",
-        "subtitle": "{{n}} équipes",
+        "subtitle": "{{n}} équipes actives",
+        "empty": "Aucune équipe rapport pour le moment.",
+        "members": "{{n}} membres",
         "cta": "Gérer les équipes"
       },
       "rules": {
         "title": "Règles d’équipe valide",
-        "body": "Une équipe rapport doit comporter au moins un hunter, un quality checker et un mentor. Identifiant d’équipe unique obligatoire."
+        "body": "Une équipe rapport doit comporter au moins un hunter et un mentor ou un quality checker. Vous pouvez ajouter d’autres membres librement. Identifiant d’équipe unique obligatoire."
+      },
+      "participants": {
+        "title": "Participants à relancer",
+        "subtitle": "Pulse communauté",
+        "cta": "Ouvrir la coordination"
+      },
+      "messages": {
+        "title": "Messages récents",
+        "ago": "il y a {{value}}",
+        "cta": "Voir les messages"
+      },
+      "news": {
+        "title": "Actualités programme",
+        "tagAnnouncement": "Annonce",
+        "tagInfo": "Info",
+        "tagUpdate": "Mise à jour"
+      },
+      "agenda": {
+        "title": "Sessions de travail",
+        "subtitle": "À venir",
+        "cta": "Voir l’agenda"
       }
     }
   }

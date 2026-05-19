@@ -38,19 +38,28 @@ describe('SaveReportDraftCommand', () => {
     save: jest.fn(),
     findById: jest.fn(),
     findByHunterId: jest.fn(),
+    findAll: jest.fn(),
+    findOrphanSummaries: jest.fn(),
   };
   const submissionRepository: jest.Mocked<ISubmissionRepository> = {
     save: jest.fn(),
     findById: jest.fn(),
     findByDraftId: jest.fn(),
     findPendingForReviewerRole: jest.fn(),
+    findPendingForReviewerRoleInDrafts: jest.fn(),
     findAllForReviewerRole: jest.fn(),
+    findAllForReviewerRoleInDrafts: jest.fn(),
     findMentorSubmissionsForDraftIds: jest.fn(),
+  };
+  const reportTeamRepository = {
+    isMemberOfDraft: jest.fn().mockResolvedValue(false),
+    findDraftIdsForMember: jest.fn().mockResolvedValue([]),
+    findByReportDraftId: jest.fn().mockResolvedValue(null),
   };
   const access = new ReportDraftAccessPolicy(
     reportDraftRepository,
     submissionRepository,
-    { isMemberOfDraft: jest.fn(), findDraftIdsForMember: jest.fn() } as never,
+    reportTeamRepository as never,
   );
   const command = new SaveReportDraftCommand(reportDraftRepository, access);
 
@@ -59,7 +68,8 @@ describe('SaveReportDraftCommand', () => {
     reportDraftRepository.findById.mockResolvedValue(minimalDraft());
   });
 
-  it('persists when hunter updates an existing draft', async () => {
+  it('persists when hunter updates an existing orphan draft', async () => {
+    reportTeamRepository.findByReportDraftId.mockResolvedValue(null);
     await command.execute(
       {
         uid: 'hunter-1',
@@ -106,7 +116,8 @@ describe('SaveReportDraftCommand', () => {
     expect(arg).not.toHaveProperty('reportTeam');
   });
 
-  it('allows quality checker to persist hunter draft after review', async () => {
+  it('allows quality checker on team to persist hunter draft after review', async () => {
+    reportTeamRepository.isMemberOfDraft.mockResolvedValue(true);
     reportDraftRepository.findById.mockResolvedValue(
       minimalDraft({
         meta: {
@@ -138,9 +149,15 @@ describe('SaveReportDraftCommand', () => {
   });
 
   it('rejects unrelated user', async () => {
+    reportTeamRepository.isMemberOfDraft.mockResolvedValue(false);
+    reportTeamRepository.findByReportDraftId.mockResolvedValue(null);
     await expect(
       command.execute(
-        { uid: 'other-hunter', email: 'o@example.com' },
+        {
+          uid: 'other-hunter',
+          email: 'o@example.com',
+          roleCode: AppRoleCode.HUNTER,
+        },
         minimalDraft(),
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);

@@ -19,11 +19,18 @@ import { DATABASE_MODES, isPrismaSqlMode } from '../shared/database-mode';
 import { variables } from '../shared/variables.config';
 import { PrismaModule } from './infrastructure/database/prisma/prisma.module';
 import { ReportDraftModule } from '../report-draft/report-draft.module';
+import { ReportDraftDevModule } from '../report-draft/dev/report-draft-dev.module';
 import { ReportTeamModule } from '../report-team/report-team.module';
+import { isReportDraftDevRoutesEnabled } from '../shared/dev-routes.util';
 
 const prismaImports = isPrismaSqlMode() ? [PrismaModule] : [];
 
 const reportDraftImports = isPrismaSqlMode() ? [ReportDraftModule] : [];
+
+const reportDraftDevImports =
+  isPrismaSqlMode() && isReportDraftDevRoutesEnabled()
+    ? [ReportDraftDevModule]
+    : [];
 
 const reportTeamImports = isPrismaSqlMode() ? [ReportTeamModule] : [];
 
@@ -34,6 +41,7 @@ const baseImports = [
   DocumentRenderingModule,
   CommonModule,
   ...reportDraftImports,
+  ...reportDraftDevImports,
   ...reportTeamImports,
 ];
 

@@ -3,22 +3,66 @@
     "metaTitle": "Coordinator dashboard",
     "heading": "Welcome",
     "headingWithUsername": "Welcome, {{username}}",
-    "subheading": "You manage report teams: assignments, pending requests, and team composition.",
+    "subheading": "Organize report teams, assignment requests, and smooth collective work.",
+    "nav": {
+      "label": "Dashboard navigation",
+      "coordination": "Coordination",
+      "teams": "Report teams",
+      "support": "Support",
+      "settings": "Settings"
+    },
+    "mission": {
+      "title": "Operational coordinator",
+      "intro": "This role helps organize collective work and keep it flowing smoothly, especially as the number of participants grows.",
+      "items": {
+        "workSessions": "Organizing work sessions",
+        "taskDistribution": "Distributing tasks among participants",
+        "contributions": "Tracking individual and collective contributions",
+        "community": "Facilitating the internal community",
+        "mentorInterface": "Interface between junior researchers and mentors"
+      },
+      "boundary": "This role helps you build organizational and professional skills. You assign report teams and process join requests — you do not replace mentors or quality checkers on technical review."
+    },
     "cards": {
       "pending": {
         "title": "Pending requests",
         "subtitle": "{{n}} to process",
         "empty": "No pending requests.",
+        "kindJoin": "Join request",
+        "kindEnrollment": "New enrollment",
         "cta": "Open coordination"
       },
       "teams": {
         "title": "Report teams",
-        "subtitle": "{{n}} teams",
+        "subtitle": "{{n}} active teams",
+        "empty": "No report teams yet.",
+        "members": "{{n}} members",
         "cta": "Manage teams"
       },
       "rules": {
         "title": "Valid team rules",
-        "body": "A report team must include at least one hunter, one quality checker, and one mentor. A unique team ID is required."
+        "body": "A report team must include at least one hunter and either a mentor or a quality checker. You may add more members as needed. A unique team ID is required."
+      },
+      "participants": {
+        "title": "Participants to follow up",
+        "subtitle": "Community pulse",
+        "cta": "Open coordination"
+      },
+      "messages": {
+        "title": "Recent messages",
+        "ago": "{{value}} ago",
+        "cta": "View messages"
+      },
+      "news": {
+        "title": "Program news",
+        "tagAnnouncement": "Announcement",
+        "tagInfo": "Info",
+        "tagUpdate": "Update"
+      },
+      "agenda": {
+        "title": "Work sessions",
+        "subtitle": "Upcoming",
+        "cta": "View agenda"
       }
     }
   }

@@ -28,18 +28,28 @@ describe('SaveReviewerCommentsCommand', () => {
     save: jest.fn(),
     findById: jest.fn(),
     findByHunterId: jest.fn(),
+    findAll: jest.fn(),
+    findOrphanSummaries: jest.fn(),
   };
   const submissionRepository: jest.Mocked<ISubmissionRepository> = {
     save: jest.fn(),
     findById: jest.fn(),
     findByDraftId: jest.fn(),
     findPendingForReviewerRole: jest.fn(),
+    findPendingForReviewerRoleInDrafts: jest.fn(),
     findAllForReviewerRole: jest.fn(),
+    findAllForReviewerRoleInDrafts: jest.fn(),
+    findMentorSubmissionsForDraftIds: jest.fn(),
+  };
+  const reportTeamRepository = {
+    isMemberOfDraft: jest.fn().mockResolvedValue(true),
+    findDraftIdsForMember: jest.fn().mockResolvedValue([]),
+    findByReportDraftId: jest.fn().mockResolvedValue(null),
   };
   const access = new ReportDraftAccessPolicy(
     reportDraftRepository,
     submissionRepository,
-    { isMemberOfDraft: jest.fn(), findDraftIdsForMember: jest.fn() } as never,
+    reportTeamRepository as never,
   );
   const command = new SaveReviewerCommentsCommand(repository, access);
 

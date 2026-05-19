@@ -1,56 +1,26 @@
 "use client";
 
 import { type FC, useCallback, useEffect, useMemo, useState } from "react";
-import { longFormFormForStep } from "@modules/report-draft/core/form/long-form-steps.form";
 import { normalizeLongFormPayload } from "@modules/report-draft/core/model/long-form-steps.factory";
 import type { LongFormWizardStep } from "@modules/report-draft/core/model/long-form-steps.factory";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { reportDraftStepToStateKey } from "@modules/report-draft/core/model/report-draft-step-keys";
 import { reportDraftSlice } from "@modules/report-draft/core/store/report-draft.slice";
-import { saveStepPayload } from "@modules/report-draft/core/useCase/save-step-payload.usecase";
+import { submitMentorAdvice } from "@modules/report-draft/core/useCase/submit-mentor-advice.usecase";
 import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-step-for-review.usecase";
+import { isStepValidationReviewerRole } from "@modules/report-draft/core/model/step-validation-reviewer";
+import { ReportDraftFinalStepStatusBanner } from "@modules/report-draft/react/components/ReportDraftFinalStepStatusBanner";
+import { ReportDraftGlobalSubmitButton } from "@modules/report-draft/react/components/ReportDraftGlobalSubmitButton";
+import { SectionBlocRepeater } from "@modules/report-draft/react/components/section-bloc/SectionBlocRepeater";
 import { reviewerRoleFromDraftStep } from "@modules/report-draft/react/wizard/reviewer-role-from-draft";
+import {
+  canWizardNavigateNext,
+  isSuperAdminGlobalRevisionMode,
+} from "@modules/report-draft/core/model/super-admin-final-validation";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
 const Step = ReportDraftDomainModel.ReportDraftStep;
-
-const FIELD_LABELS_FR: Record<LongFormWizardStep, Record<string, string>> = {
-  [Step.COLLECTION]: {
-    hypothesis: "Hypothèse de travail",
-    reconNarrative: "Collecte et reconnaissance",
-    endpointsAndParameters: "Endpoints, paramètres et entrées observés",
-    evidenceSummary: "Synthèse des éléments collectés",
-  },
-  [Step.EXPLOITATION]: {
-    prerequisites: "Prérequis (auth, rôle, configuration…)",
-    attackPath: "Chemin d’attaque",
-    exploitationNarrative: "Scénario d’exploitation",
-    impactIfExploited: "Impact si exploité",
-  },
-  [Step.PROOF_OF_CONCEPT]: {
-    environment: "Environnement de test",
-    stepsToReproduce: "Étapes de reproduction",
-    proofArtifactsDescription: "Requêtes, payloads, captures (texte)",
-    expectedBehavior: "Comportement attendu vs observé",
-  },
-  [Step.RISKS]: {
-    confidentiality: "Risque pour la confidentialité",
-    integrity: "Risque pour l’intégrité",
-    availability: "Risque pour la disponibilité",
-    overallRiskStatement: "Synthèse du risque global",
-  },
-  [Step.REMEDIATION]: {
-    shortTermMitigation: "Atténuation court terme",
-    longTermFix: "Correctif durable",
-    verificationSteps: "Vérification après correctif",
-  },
-  [Step.FINAL]: {
-    conclusion: "Conclusion",
-    references: "Références (CVE, CWE, liens…)",
-    bugBountyNotes: "Notes finales / chaîne de bugs",
-  },
-};
 
 type Props = {
   step: LongFormWizardStep;
@@ -58,8 +28,7 @@ type Props = {
 };
 
 /**
- * Étapes structurées (COLLECTION → FINAL). Brouillon, soumission et « Suivant »
- * suivent la même machine d’état que META / DESCRIPTION.
+ * Long-form wizard steps (COLLECTION → FINAL) — free section blocs repeater only.
  */
 export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
   const dispatch = useAppDispatch();
@@ -68,6 +37,13 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
     currentDraftId ? s.reportDrafts.byId[currentDraftId] : undefined,
   );
   const transition = useAppSelector((s) => s.reportDrafts.transition);
+  const globalSubmissions = useAppSelector((s) =>
+    currentDraftId
+      ? Object.values(s.reportDrafts.globalSubmissionsById).filter(
+          (g) => g.reportDraftId === currentDraftId,
+        )
+      : [],
+  );
 
   const stateKey = useMemo(() => reportDraftStepToStateKey(step), [step]);
   const rawPayload = draftRow?.[stateKey]?.payload;
@@ -80,22 +56,26 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
 
   const submittedBy = draftRow?.hunterId ?? "";
   const [reviewerRole, setReviewerRole] =
-    useState<ReportDraftDomainModel.ReviewerRole>("mentor");
+    useState<ReportDraftDomainModel.ReviewerRole>("quality_checker");
 
   useEffect(() => {
     const fromDraft = reviewerRoleFromDraftStep(draftRow, step);
-    setReviewerRole(fromDraft ?? "mentor");
+    setReviewerRole(fromDraft ?? "quality_checker");
   }, [currentDraftId, draftRow, step]);
 
-  const form = useMemo(() => longFormFormForStep(step), [step]);
-  const [draft, setDraft] = useState<Record<string, string>>(persistedPayload);
+  const [draft, setDraft] =
+    useState<ReportDraftDomainModel.LongFormStepPayload>(persistedPayload);
 
   useEffect(() => {
     setDraft(persistedPayload);
   }, [step, persistedPayload]);
 
-  const editable = isWizardStepEditable(stepStatus);
-  const canNavigateNext = stepStatus === "approved";
+  const editable = isWizardStepEditable(stepStatus, {
+    draft: draftRow,
+    globalSubmissions,
+  });
+  const hidePerStepSubmit = isSuperAdminGlobalRevisionMode(draftRow);
+  const canNavigateNext = canWizardNavigateNext(draftRow, stepStatus);
   const isLast = step === Step.FINAL;
 
   const onNext = useCallback(() => {
@@ -104,15 +84,20 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
     dispatch(reportDraftSlice.actions.setStep(next));
   }, [dispatch, step, isLast, canNavigateNext]);
 
-  const onSaveDraft = useCallback(async () => {
-    if (!currentDraftId || !editable) return;
-    await dispatch(
-      saveStepPayload({ draftId: currentDraftId, step, payload: draft }),
-    );
-  }, [dispatch, currentDraftId, editable, draft, step]);
-
   const submitForReview = useCallback(async () => {
     if (!currentDraftId || !submittedBy) return;
+    if (reviewerRole === "mentor") {
+      await dispatch(
+        submitMentorAdvice({
+          draftId: currentDraftId,
+          step,
+          submittedBy,
+          payload: draft,
+        }),
+      );
+      return;
+    }
+    if (!isStepValidationReviewerRole(reviewerRole)) return;
     await dispatch(
       submitStepForReview({
         draftId: currentDraftId,
@@ -133,8 +118,6 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
   const transitionErr =
     transition.status === "error" ? transition.message : null;
 
-  const labelsForStep = FIELD_LABELS_FR[step];
-
   return (
     <>
       {transitionErr ? (
@@ -151,38 +134,32 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
           {!isLast ? (
             <>
               {" "}
-              « Suivant » n’est actif qu’après validation (« Validée »).
+              « Suivant » n’est actif qu’après validation par le quality checker (« Validée »).
             </>
           ) : null}
         </p>
       ) : null}
-      {isLast && canNavigateNext ? (
-        <p className="rounded-md border border-emerald-200 bg-emerald-50 p-2 text-sm text-emerald-950">
-          Dernière étape validée. Tu peux encore enrichir le brouillon si le workflow le permet, ou
-          quitter le wizard.
-        </p>
-      ) : null}
+      <ReportDraftFinalStepStatusBanner
+        draft={draftRow}
+        isLastStep={isLast}
+        stepApproved={stepStatus === "approved" || canNavigateNext}
+      />
 
-      <div className="flex flex-col gap-4" aria-label={label}>
-        {form.keys().map((fieldKey) => (
-          <label key={fieldKey} className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-form-text">
-              {labelsForStep[fieldKey] ?? fieldKey}
-            </span>
-            <textarea
-              className="min-h-[96px] rounded-md border border-form-border bg-form-surface p-3 text-form-text placeholder:text-form-placeholder focus:border-form-border-strong focus:outline-none focus:ring-2 focus:ring-form-accent/40 disabled:cursor-not-allowed disabled:opacity-60"
-              value={draft[fieldKey] ?? ""}
-              placeholder="…"
-              onChange={(e) => setDraft(form.setField(draft, fieldKey, e.target.value))}
-              disabled={!editable}
-            />
-          </label>
-        ))}
+      <div aria-label={label}>
+        <SectionBlocRepeater
+          blocs={draft.sectionBlocs}
+          editable={editable}
+          onChange={(sectionBlocs) => setDraft({ sectionBlocs })}
+        />
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm text-form-text-muted" htmlFor={`reviewer-${step}`}>
-          Revue demandée à
+        <p className="text-sm text-form-text-muted">
+          Seule la validation par le quality checker active le bouton « Suivant ». L’avis mentor est
+          facultatif et n’empêche pas de continuer sur cette étape.
+        </p>
+        <label className="text-sm font-medium text-form-text-muted" htmlFor={`reviewer-${step}`}>
+          Soumettre pour revue à
         </label>
         <select
           id={`reviewer-${step}`}
@@ -193,11 +170,12 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
           }
           disabled={!editable || transitionBusy}
         >
-          <option value="mentor">Mentor</option>
           <option value="quality_checker">Quality checker</option>
+          <option value="mentor">Mentor</option>
           <option value="hunter">Hunter (pair review)</option>
         </select>
       </div>
+
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
@@ -206,14 +184,6 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
           disabled={transitionBusy}
         >
           Retour
-        </button>
-        <button
-          type="button"
-          className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={() => void onSaveDraft()}
-          disabled={transitionBusy || !editable}
-        >
-          Enregistrer le brouillon
         </button>
         {!isLast ? (
           <button
@@ -224,28 +194,23 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
             title={
               canNavigateNext
                 ? undefined
-                : "Disponible uniquement après validation de cette étape par le reviewer."
+                : "Disponible uniquement après validation de cette étape par le quality checker."
             }
           >
             Suivant
           </button>
         ) : null}
-        <button
-          type="button"
-          className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
-          onClick={() => void submitForReview()}
-          disabled={transitionBusy || !editable || !submittedBy}
-        >
-          Soumettre cette étape pour revue
-        </button>
-        <button
-          type="button"
-          className="ml-auto rounded-md border border-form-border px-3 py-2 text-sm text-form-text-muted hover:bg-form-overlay"
-          onClick={() => setDraft(persistedPayload)}
-          disabled={transitionBusy || !editable}
-        >
-          Réinitialiser
-        </button>
+        {!hidePerStepSubmit ? (
+          <button
+            type="button"
+            className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
+            onClick={() => void submitForReview()}
+            disabled={transitionBusy || !editable || !submittedBy}
+          >
+            Soumettre cette étape pour revue
+          </button>
+        ) : null}
+        <ReportDraftGlobalSubmitButton currentStep={step} currentPayload={draft} />
       </div>
     </>
   );

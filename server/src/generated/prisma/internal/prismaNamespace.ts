@@ -394,13 +394,14 @@ export const ModelName = {
   TwoFactor: 'TwoFactor',
   TwoFactorTotp: 'TwoFactorTotp',
   ReportDraft: 'ReportDraft',
+  GlobalSubmission: 'GlobalSubmission',
+  GlobalReviewerComment: 'GlobalReviewerComment',
   ReportDraftStep: 'ReportDraftStep',
   ReportDraftAttachment: 'ReportDraftAttachment',
   Submission: 'Submission',
   ReviewerComment: 'ReviewerComment',
   SubmissionAttachmentSnapshot: 'SubmissionAttachmentSnapshot',
   SubmissionContentSnapshot: 'SubmissionContentSnapshot',
-  Report: 'Report',
   ReportTeam: 'ReportTeam',
   ReportTeamMember: 'ReportTeamMember',
   ReportTeamJoinRequest: 'ReportTeamJoinRequest'
@@ -419,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "report" | "reportTeam" | "reportTeamMember" | "reportTeamJoinRequest"
+    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "globalSubmission" | "globalReviewerComment" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "reportTeam" | "reportTeamMember" | "reportTeamJoinRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1083,6 +1084,138 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    GlobalSubmission: {
+      payload: Prisma.$GlobalSubmissionPayload<ExtArgs>
+      fields: Prisma.GlobalSubmissionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GlobalSubmissionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalSubmissionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GlobalSubmissionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalSubmissionPayload>
+        }
+        findFirst: {
+          args: Prisma.GlobalSubmissionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalSubmissionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GlobalSubmissionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalSubmissionPayload>
+        }
+        findMany: {
+          args: Prisma.GlobalSubmissionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalSubmissionPayload>[]
+        }
+        create: {
+          args: Prisma.GlobalSubmissionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalSubmissionPayload>
+        }
+        createMany: {
+          args: Prisma.GlobalSubmissionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.GlobalSubmissionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalSubmissionPayload>
+        }
+        update: {
+          args: Prisma.GlobalSubmissionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalSubmissionPayload>
+        }
+        deleteMany: {
+          args: Prisma.GlobalSubmissionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GlobalSubmissionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.GlobalSubmissionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalSubmissionPayload>
+        }
+        aggregate: {
+          args: Prisma.GlobalSubmissionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGlobalSubmission>
+        }
+        groupBy: {
+          args: Prisma.GlobalSubmissionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GlobalSubmissionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GlobalSubmissionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GlobalSubmissionCountAggregateOutputType> | number
+        }
+      }
+    }
+    GlobalReviewerComment: {
+      payload: Prisma.$GlobalReviewerCommentPayload<ExtArgs>
+      fields: Prisma.GlobalReviewerCommentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GlobalReviewerCommentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalReviewerCommentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GlobalReviewerCommentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalReviewerCommentPayload>
+        }
+        findFirst: {
+          args: Prisma.GlobalReviewerCommentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalReviewerCommentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GlobalReviewerCommentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalReviewerCommentPayload>
+        }
+        findMany: {
+          args: Prisma.GlobalReviewerCommentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalReviewerCommentPayload>[]
+        }
+        create: {
+          args: Prisma.GlobalReviewerCommentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalReviewerCommentPayload>
+        }
+        createMany: {
+          args: Prisma.GlobalReviewerCommentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.GlobalReviewerCommentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalReviewerCommentPayload>
+        }
+        update: {
+          args: Prisma.GlobalReviewerCommentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalReviewerCommentPayload>
+        }
+        deleteMany: {
+          args: Prisma.GlobalReviewerCommentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GlobalReviewerCommentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.GlobalReviewerCommentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GlobalReviewerCommentPayload>
+        }
+        aggregate: {
+          args: Prisma.GlobalReviewerCommentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGlobalReviewerComment>
+        }
+        groupBy: {
+          args: Prisma.GlobalReviewerCommentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GlobalReviewerCommentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GlobalReviewerCommentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GlobalReviewerCommentCountAggregateOutputType> | number
+        }
+      }
+    }
     ReportDraftStep: {
       payload: Prisma.$ReportDraftStepPayload<ExtArgs>
       fields: Prisma.ReportDraftStepFieldRefs
@@ -1479,72 +1612,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    Report: {
-      payload: Prisma.$ReportPayload<ExtArgs>
-      fields: Prisma.ReportFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.ReportFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.ReportFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload>
-        }
-        findFirst: {
-          args: Prisma.ReportFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.ReportFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload>
-        }
-        findMany: {
-          args: Prisma.ReportFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload>[]
-        }
-        create: {
-          args: Prisma.ReportCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload>
-        }
-        createMany: {
-          args: Prisma.ReportCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        delete: {
-          args: Prisma.ReportDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload>
-        }
-        update: {
-          args: Prisma.ReportUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload>
-        }
-        deleteMany: {
-          args: Prisma.ReportDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.ReportUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        upsert: {
-          args: Prisma.ReportUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportPayload>
-        }
-        aggregate: {
-          args: Prisma.ReportAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateReport>
-        }
-        groupBy: {
-          args: Prisma.ReportGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.ReportGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.ReportCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.ReportCountAggregateOutputType> | number
-        }
-      }
-    }
     ReportTeam: {
       payload: Prisma.$ReportTeamPayload<ExtArgs>
       fields: Prisma.ReportTeamFieldRefs
@@ -1878,12 +1945,43 @@ export const ReportDraftScalarFieldEnum = {
   hunterId: 'hunterId',
   version: 'version',
   aggregateStatus: 'aggregateStatus',
-  pendingReportId: 'pendingReportId',
+  superAdminRevisionRequestedAt: 'superAdminRevisionRequestedAt',
+  superAdminGlobalRevisionCount: 'superAdminGlobalRevisionCount',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type ReportDraftScalarFieldEnum = (typeof ReportDraftScalarFieldEnum)[keyof typeof ReportDraftScalarFieldEnum]
+
+
+export const GlobalSubmissionScalarFieldEnum = {
+  id: 'id',
+  reportDraftId: 'reportDraftId',
+  revisionNumber: 'revisionNumber',
+  payload: 'payload',
+  submittedAt: 'submittedAt',
+  submittedBy: 'submittedBy',
+  reviewerRole: 'reviewerRole',
+  decision: 'decision',
+  decidedAt: 'decidedAt',
+  decidedBy: 'decidedBy'
+} as const
+
+export type GlobalSubmissionScalarFieldEnum = (typeof GlobalSubmissionScalarFieldEnum)[keyof typeof GlobalSubmissionScalarFieldEnum]
+
+
+export const GlobalReviewerCommentScalarFieldEnum = {
+  id: 'id',
+  globalSubmissionId: 'globalSubmissionId',
+  authorId: 'authorId',
+  authorRole: 'authorRole',
+  anchor: 'anchor',
+  body: 'body',
+  createdAt: 'createdAt',
+  resolvedAt: 'resolvedAt'
+} as const
+
+export type GlobalReviewerCommentScalarFieldEnum = (typeof GlobalReviewerCommentScalarFieldEnum)[keyof typeof GlobalReviewerCommentScalarFieldEnum]
 
 
 export const ReportDraftStepScalarFieldEnum = {
@@ -1972,23 +2070,6 @@ export const SubmissionContentSnapshotScalarFieldEnum = {
 } as const
 
 export type SubmissionContentSnapshotScalarFieldEnum = (typeof SubmissionContentSnapshotScalarFieldEnum)[keyof typeof SubmissionContentSnapshotScalarFieldEnum]
-
-
-export const ReportScalarFieldEnum = {
-  id: 'id',
-  hunterId: 'hunterId',
-  sourceDraftId: 'sourceDraftId',
-  status: 'status',
-  frozenContent: 'frozenContent',
-  contentSyncedAt: 'contentSyncedAt',
-  promotedBy: 'promotedBy',
-  publishedBy: 'publishedBy',
-  publishedAt: 'publishedAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type ReportScalarFieldEnum = (typeof ReportScalarFieldEnum)[keyof typeof ReportScalarFieldEnum]
 
 
 export const ReportTeamScalarFieldEnum = {
@@ -2127,8 +2208,7 @@ export type TwoFactorTotpOrderByRelevanceFieldEnum = (typeof TwoFactorTotpOrderB
 
 export const ReportDraftOrderByRelevanceFieldEnum = {
   id: 'id',
-  hunterId: 'hunterId',
-  pendingReportId: 'pendingReportId'
+  hunterId: 'hunterId'
 } as const
 
 export type ReportDraftOrderByRelevanceFieldEnum = (typeof ReportDraftOrderByRelevanceFieldEnum)[keyof typeof ReportDraftOrderByRelevanceFieldEnum]
@@ -2149,6 +2229,26 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const GlobalSubmissionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  reportDraftId: 'reportDraftId',
+  submittedBy: 'submittedBy',
+  decidedBy: 'decidedBy'
+} as const
+
+export type GlobalSubmissionOrderByRelevanceFieldEnum = (typeof GlobalSubmissionOrderByRelevanceFieldEnum)[keyof typeof GlobalSubmissionOrderByRelevanceFieldEnum]
+
+
+export const GlobalReviewerCommentOrderByRelevanceFieldEnum = {
+  id: 'id',
+  globalSubmissionId: 'globalSubmissionId',
+  authorId: 'authorId',
+  body: 'body'
+} as const
+
+export type GlobalReviewerCommentOrderByRelevanceFieldEnum = (typeof GlobalReviewerCommentOrderByRelevanceFieldEnum)[keyof typeof GlobalReviewerCommentOrderByRelevanceFieldEnum]
 
 
 export const ReportDraftStepOrderByRelevanceFieldEnum = {
@@ -2212,17 +2312,6 @@ export const SubmissionContentSnapshotOrderByRelevanceFieldEnum = {
 } as const
 
 export type SubmissionContentSnapshotOrderByRelevanceFieldEnum = (typeof SubmissionContentSnapshotOrderByRelevanceFieldEnum)[keyof typeof SubmissionContentSnapshotOrderByRelevanceFieldEnum]
-
-
-export const ReportOrderByRelevanceFieldEnum = {
-  id: 'id',
-  hunterId: 'hunterId',
-  sourceDraftId: 'sourceDraftId',
-  promotedBy: 'promotedBy',
-  publishedBy: 'publishedBy'
-} as const
-
-export type ReportOrderByRelevanceFieldEnum = (typeof ReportOrderByRelevanceFieldEnum)[keyof typeof ReportOrderByRelevanceFieldEnum]
 
 
 export const ReportTeamOrderByRelevanceFieldEnum = {
@@ -2310,13 +2399,6 @@ export type EnumReportDraftAggregateStatusFieldRefInput<$PrismaModel> = FieldRef
 
 
 /**
- * Reference to a field of type 'DraftStep'
- */
-export type EnumDraftStepFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DraftStep'>
-    
-
-
-/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -2331,23 +2413,9 @@ export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
 
 
 /**
- * Reference to a field of type 'StepStatus'
- */
-export type EnumStepStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StepStatus'>
-    
-
-
-/**
  * Reference to a field of type 'ReviewerRole'
  */
 export type EnumReviewerRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReviewerRole'>
-    
-
-
-/**
- * Reference to a field of type 'SubmissionKind'
- */
-export type EnumSubmissionKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubmissionKind'>
     
 
 
@@ -2359,9 +2427,23 @@ export type EnumSubmissionDecisionFieldRefInput<$PrismaModel> = FieldRefInputTyp
 
 
 /**
- * Reference to a field of type 'ReportStatus'
+ * Reference to a field of type 'DraftStep'
  */
-export type EnumReportStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReportStatus'>
+export type EnumDraftStepFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DraftStep'>
+    
+
+
+/**
+ * Reference to a field of type 'StepStatus'
+ */
+export type EnumStepStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StepStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'SubmissionKind'
+ */
+export type EnumSubmissionKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubmissionKind'>
     
 
 
@@ -2505,13 +2587,14 @@ export type GlobalOmitConfig = {
   twoFactor?: Prisma.TwoFactorOmit
   twoFactorTotp?: Prisma.TwoFactorTotpOmit
   reportDraft?: Prisma.ReportDraftOmit
+  globalSubmission?: Prisma.GlobalSubmissionOmit
+  globalReviewerComment?: Prisma.GlobalReviewerCommentOmit
   reportDraftStep?: Prisma.ReportDraftStepOmit
   reportDraftAttachment?: Prisma.ReportDraftAttachmentOmit
   submission?: Prisma.SubmissionOmit
   reviewerComment?: Prisma.ReviewerCommentOmit
   submissionAttachmentSnapshot?: Prisma.SubmissionAttachmentSnapshotOmit
   submissionContentSnapshot?: Prisma.SubmissionContentSnapshotOmit
-  report?: Prisma.ReportOmit
   reportTeam?: Prisma.ReportTeamOmit
   reportTeamMember?: Prisma.ReportTeamMemberOmit
   reportTeamJoinRequest?: Prisma.ReportTeamJoinRequestOmit

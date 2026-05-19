@@ -72,8 +72,10 @@ const AGGREGATE_STATUS_TO_WIRE: Record<
 > = {
   [ReportDraftAggregateStatus.DRAFT]: 'draft',
   [ReportDraftAggregateStatus.UNDER_REVIEW]: 'under-review',
+  [ReportDraftAggregateStatus.UNDER_GLOBAL_REVIEW]: 'under-global-review',
   [ReportDraftAggregateStatus.READY_TO_PROGRAM]: 'ready-to-program',
   [ReportDraftAggregateStatus.SUBMITTED_TO_PROGRAM]: 'submitted-to-program',
+  [ReportDraftAggregateStatus.PUBLISHED]: 'published',
   [ReportDraftAggregateStatus.GIVEN_UP]: 'given-up',
   [ReportDraftAggregateStatus.REJECTED]: 'rejected',
 };
@@ -84,8 +86,10 @@ const AGGREGATE_STATUS_FROM_WIRE: Record<
 > = {
   draft: ReportDraftAggregateStatus.DRAFT,
   'under-review': ReportDraftAggregateStatus.UNDER_REVIEW,
+  'under-global-review': ReportDraftAggregateStatus.UNDER_GLOBAL_REVIEW,
   'ready-to-program': ReportDraftAggregateStatus.READY_TO_PROGRAM,
   'submitted-to-program': ReportDraftAggregateStatus.SUBMITTED_TO_PROGRAM,
+  published: ReportDraftAggregateStatus.PUBLISHED,
   'given-up': ReportDraftAggregateStatus.GIVEN_UP,
   rejected: ReportDraftAggregateStatus.REJECTED,
 };
@@ -95,6 +99,9 @@ const STEP_STATUS_TO_WIRE: Record<StepStatus, StepStatusWire> = {
   [StepStatus.AWAITING_REVIEW]: 'awaiting-review',
   [StepStatus.NEEDS_REVISION]: 'needs-revision',
   [StepStatus.APPROVED]: 'approved',
+  [StepStatus.IN_GLOBAL_PROGRESS]: 'in-global-progress',
+  [StepStatus.NEEDS_GLOBAL_REVISION]: 'needs-global-revision',
+  [StepStatus.AWAITING_GLOBAL_REVIEW]: 'awaiting-global-review',
 };
 
 const STEP_STATUS_FROM_WIRE: Record<StepStatusWire, StepStatus> = {
@@ -102,6 +109,9 @@ const STEP_STATUS_FROM_WIRE: Record<StepStatusWire, StepStatus> = {
   'awaiting-review': StepStatus.AWAITING_REVIEW,
   'needs-revision': StepStatus.NEEDS_REVISION,
   approved: StepStatus.APPROVED,
+  'in-global-progress': StepStatus.IN_GLOBAL_PROGRESS,
+  'needs-global-revision': StepStatus.NEEDS_GLOBAL_REVISION,
+  'awaiting-global-review': StepStatus.AWAITING_GLOBAL_REVIEW,
 };
 
 const REVIEWER_ROLE_TO_WIRE: Record<ReviewerRole, ReviewerRoleWire> = {
@@ -119,6 +129,18 @@ const REVIEWER_ROLE_FROM_WIRE: Record<ReviewerRoleWire, ReviewerRole> = {
 };
 
 export class ReportDraftPrismaMapper {
+  static aggregateStatusFromWire(
+    status: AggregateStatusWire,
+  ): ReportDraftAggregateStatus {
+    return AGGREGATE_STATUS_FROM_WIRE[status];
+  }
+
+  static aggregateStatusToWire(
+    status: ReportDraftAggregateStatus,
+  ): AggregateStatusWire {
+    return AGGREGATE_STATUS_TO_WIRE[status];
+  }
+
   static toDomain(row: ReportDraftWithSteps): ReportDraftWire {
     const draft: ReportDraftWire = {
       id: row.id,
@@ -135,6 +157,9 @@ export class ReportDraftPrismaMapper {
       final: emptyStepState(),
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
+      superAdminRevisionRequestedAt:
+        row.superAdminRevisionRequestedAt?.toISOString() ?? null,
+      superAdminGlobalRevisionCount: row.superAdminGlobalRevisionCount ?? 0,
     };
 
     for (const stepRow of row.steps) {
@@ -191,6 +216,8 @@ export class ReportDraftPrismaMapper {
     hunterId: string;
     version: number;
     aggregateStatus: ReportDraftAggregateStatus;
+    superAdminRevisionRequestedAt: Date | null;
+    superAdminGlobalRevisionCount: number;
     createdAt: Date;
     updatedAt: Date;
   } {
@@ -199,6 +226,10 @@ export class ReportDraftPrismaMapper {
       hunterId: draft.hunterId,
       version: draft.version,
       aggregateStatus: AGGREGATE_STATUS_FROM_WIRE[draft.aggregateStatus],
+      superAdminRevisionRequestedAt: draft.superAdminRevisionRequestedAt
+        ? new Date(draft.superAdminRevisionRequestedAt)
+        : null,
+      superAdminGlobalRevisionCount: draft.superAdminGlobalRevisionCount ?? 0,
       createdAt: new Date(draft.createdAt),
       updatedAt: new Date(draft.updatedAt),
     };

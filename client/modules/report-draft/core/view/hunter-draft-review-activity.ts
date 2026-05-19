@@ -13,12 +13,15 @@ export function reviewerDisplayNameFromTeam(
   return m?.displayName?.trim() || (userId.length <= 12 ? userId : `${userId.slice(0, 10)}…`);
 }
 
+export type MentorEndorsementEntry = {
+  step: ReportDraftDomainModel.ReportDraftStep;
+  decidedBy: string;
+  decidedAt: string;
+};
+
 export type HunterDraftActivityHints = {
   /** Latest mentor endorsement on this draft (any step). */
-  latestMentorEndorse?: {
-    decidedBy: string;
-    decidedAt: string;
-  };
+  latestMentorEndorse?: MentorEndorsementEntry;
   /** Most recent comment left by mentor or QC on a submission of this draft. */
   latestStaffComment?: {
     authorId: string;
@@ -79,6 +82,7 @@ export function hunterDraftActivityHints(
 
   if (bestEndorse?.decidedBy && bestEndorse.decidedAt) {
     out.latestMentorEndorse = {
+      step: bestEndorse.step,
       decidedBy: bestEndorse.decidedBy,
       decidedAt: bestEndorse.decidedAt,
     };
@@ -94,4 +98,26 @@ export function hunterDraftActivityHints(
   }
 
   return out;
+}
+
+/** All mentor endorsements on a draft, newest first. */
+export function listMentorEndorsements(
+  draft: ReportDraftDomainModel.ReportDraft,
+  submissions: readonly ReportDraftDomainModel.Submission<unknown>[],
+): MentorEndorsementEntry[] {
+  return submissions
+    .filter(
+      (s) =>
+        s.reportDraftId === draft.id &&
+        s.reviewerRole === "mentor" &&
+        s.decision === "endorse" &&
+        s.decidedBy &&
+        s.decidedAt,
+    )
+    .sort((a, b) => parseTime(b.decidedAt) - parseTime(a.decidedAt))
+    .map((s) => ({
+      step: s.step,
+      decidedBy: s.decidedBy!,
+      decidedAt: s.decidedAt!,
+    }));
 }

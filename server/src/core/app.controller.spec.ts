@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { I_REPORT_REPOSITORY } from '../document-rendering/application/ports/report-repository.port';
+import { I_REPORT_DRAFT_DOCUMENT_REPOSITORY } from '../document-rendering/application/ports/report-draft-document-repository.port';
 
 describe('AppController', () => {
   let controller: AppController;
@@ -19,12 +19,10 @@ describe('AppController', () => {
           },
         },
         {
-          provide: I_REPORT_REPOSITORY,
+          provide: I_REPORT_DRAFT_DOCUMENT_REPOSITORY,
           useValue: {
-            listReportStyles: jest.fn().mockResolvedValue(['report-final']),
-            listReportVersions: jest.fn().mockResolvedValue(['v1']),
-            listReportLocales: jest.fn().mockResolvedValue(['fr']),
-            getReportTemplateData: jest.fn().mockResolvedValue({}),
+            listPublishedDrafts: jest.fn().mockResolvedValue([]),
+            getDocumentTemplateData: jest.fn().mockResolvedValue({}),
           },
         },
       ],

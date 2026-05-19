@@ -27,6 +27,8 @@ function welcomeDashboardPathFromRoleCode(roleCode: string | null): string | nul
       return "welcome-quality-checker";
     case "COORDINATOR":
       return "welcome-coordinator";
+    case "QUALITY_CONTENT":
+      return "welcome-platform-manager";
     default:
       return null;
   }
@@ -44,6 +46,7 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
   const [currentUsername, setCurrentUsername] = useState<string | null>(null);
   const [currentRoleLabel, setCurrentRoleLabel] = useState<string | null>(null);
   const [currentRoleCode, setCurrentRoleCode] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { ref } = useElementHeightCssVar({
     cssVarName: "--header-height",
     initialPx: 0,
@@ -72,7 +75,7 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
       MENTOR: "Mentor",
       QUALITY_CHECKER: "Quality checker",
       COORDINATOR: "Coordinator",
-      QUALITY_CONTENT: "Quality content",
+      QUALITY_CONTENT: "Tools & content lead",
     };
     return labels[roleCode] ?? roleCode.toLowerCase().replace(/_/g, " ");
   };
@@ -135,6 +138,23 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
     };
   }, [pathname]);
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileMenuOpen]);
+
   async function handleLogout() {
     setLogoutBusy(true);
     try {
@@ -143,6 +163,7 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
       setCurrentUsername(null);
       setCurrentRoleLabel(null);
       setCurrentRoleCode(null);
+      setMobileMenuOpen(false);
       router.replace(localeHome);
       router.refresh();
     } finally {
@@ -158,21 +179,55 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
       <nav
         className={`header-container flex items-center justify-between gap-4 ${className}`.trim()}
       >
-        <div className="flex flex-col items-start gap-0.5">
+        <div className="min-w-0 flex flex-col items-start gap-0.5">
           <Link
             href={localeHome}
             className="text-lg font-bold tracking-tight text-black hover:text-black/70"
+            onClick={() => setMobileMenuOpen(false)}
           >
             {t("header.brand")}
           </Link>
           {currentUsername ? (
-            <span className="text-sm font-medium text-black/70">
+            <span className="max-w-[70vw] truncate text-sm font-medium text-black/70 md:max-w-none">
               {currentUsername}
               {currentRoleLabel ? ` - ${currentRoleLabel}` : ""}
             </span>
           ) : null}
         </div>
-        <div className="flex items-center gap-2 sm:gap-3">
+        <button
+          type="button"
+          className="inline-flex size-10 cursor-pointer items-center justify-center rounded-md border border-black/10 text-black/80 transition hover:bg-black/5 hover:text-black focus-visible:ring-2 focus-visible:ring-black/40 focus-visible:ring-offset-2 focus-visible:outline-none md:hidden"
+          aria-label={
+            mobileMenuOpen
+              ? t("header.closeMenu")
+              : t("header.openMenu")
+          }
+          aria-expanded={mobileMenuOpen}
+          aria-controls="mobile-header-menu"
+          onClick={() => setMobileMenuOpen((current) => !current)}
+        >
+          <span className="sr-only">
+            {mobileMenuOpen ? t("header.closeMenu") : t("header.openMenu")}
+          </span>
+          <span className="flex h-4 w-5 flex-col justify-between" aria-hidden>
+            <span
+              className={`h-0.5 rounded-full bg-current transition-transform ${
+                mobileMenuOpen ? "translate-y-[7px] rotate-45" : ""
+              }`}
+            />
+            <span
+              className={`h-0.5 rounded-full bg-current transition-opacity ${
+                mobileMenuOpen ? "opacity-0" : "opacity-100"
+              }`}
+            />
+            <span
+              className={`h-0.5 rounded-full bg-current transition-transform ${
+                mobileMenuOpen ? "-translate-y-[7px] -rotate-45" : ""
+              }`}
+            />
+          </span>
+        </button>
+        <div className="hidden items-center gap-2 md:flex lg:gap-3">
           <Link href={localeHome} className="header-nav-link">
             {t("header.home")}
           </Link>
@@ -215,6 +270,73 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
           )}
         </div>
       </nav>
+      {mobileMenuOpen ? (
+        <div
+          id="mobile-header-menu"
+          className="border-t border-black/10 bg-white shadow-lg md:hidden"
+        >
+          <div className="header-container flex flex-col gap-2 py-3">
+            <Link
+              href={localeHome}
+              className="header-mobile-nav-link"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t("header.home")}
+            </Link>
+            {dashboardHref ? (
+              <Link
+                href={dashboardHref}
+                aria-current={isDashboardActive ? "page" : undefined}
+                className={`header-mobile-nav-link${
+                  isDashboardActive ? " header-mobile-nav-link--active" : ""
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t("header.dashboard")}
+              </Link>
+            ) : null}
+            {isSuperAdmin ? (
+              <Link
+                href={adminHref}
+                aria-current={isAdminActive ? "page" : undefined}
+                className={`header-mobile-nav-link${
+                  isAdminActive ? " header-mobile-nav-link--active" : ""
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t("header.admin")}
+              </Link>
+            ) : null}
+            <div className="flex items-center justify-between rounded-md border border-black/10 px-3 py-2">
+              <span className="text-sm font-medium text-black/70">
+                {t("header.language")}
+              </span>
+              <LangLinks />
+            </div>
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={() => void handleLogout()}
+                disabled={logoutBusy}
+                className="header-mobile-nav-link text-left disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {logoutBusy ? t("header.logoutPending") : t("header.logout")}
+              </button>
+            ) : (
+              <Link
+                href={loginHref}
+                aria-current={isLoginActive ? "page" : undefined}
+                className={`header-mobile-nav-link${
+                  isLoginActive ? " header-mobile-nav-link--active" : ""
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t("header.login")}
+              </Link>
+            )}
+          </div>
+        </div>
+      ) : null}
     </header>
   );
 };

@@ -7,8 +7,16 @@ export interface ISubmissionRepository {
   findPendingForReviewerRole(
     reviewerRole: ReviewerRoleWire,
   ): Promise<SubmissionWire[]>;
+  findPendingForReviewerRoleInDrafts(
+    reviewerRole: ReviewerRoleWire,
+    draftIds: readonly string[] | null,
+  ): Promise<SubmissionWire[]>;
   findAllForReviewerRole(
     reviewerRole: ReviewerRoleWire,
+  ): Promise<SubmissionWire[]>;
+  findAllForReviewerRoleInDrafts(
+    reviewerRole: ReviewerRoleWire,
+    draftIds: readonly string[] | null,
   ): Promise<SubmissionWire[]>;
 
   findMentorSubmissionsForDraftIds(

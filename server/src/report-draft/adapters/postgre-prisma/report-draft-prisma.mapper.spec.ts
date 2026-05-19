@@ -8,7 +8,6 @@ function buildPrismaRow(overrides?: Partial<ReportDraftWithSteps>): ReportDraftW
     hunterId: 'hunter-1',
     version: 2,
     aggregateStatus: ReportDraftAggregateStatus.UNDER_REVIEW,
-    pendingReportId: null,
     createdAt: new Date('2026-05-15T10:00:00.000Z'),
     updatedAt: new Date('2026-05-15T11:00:00.000Z'),
     steps: [

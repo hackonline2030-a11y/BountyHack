@@ -2,22 +2,23 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from '../auth/auth.module';
+import { PrismaModule } from '../core/infrastructure/database/prisma/prisma.module';
+import { ReportDraftModule } from '../report-draft/report-draft.module';
 import { PdfController } from './controllers/pdf.controller';
 import { PdfJobsController } from './controllers/pdf-jobs.controller';
 import { I_TEMPLATE_RENDERER } from './application/ports/template-renderer.port';
 import { I_PDF_GENERATOR } from './application/ports/pdf-generator.port';
-import { I_PDF_STORAGE } from './application/ports/pdf-storage.port';
-import { JsonReportRepositoryAdapter } from './infrastructure/repositories/json-report.repository';
+import { PrismaReportDraftDocumentRepository } from './infrastructure/repositories/prisma-report-draft-document.repository';
 import { EjsTemplateRendererAdapter } from './infrastructure/template/ejs-template-renderer.adapter';
 import { PuppeteerPdfGeneratorAdapter } from './infrastructure/pdf/puppeteer-pdf-generator.adapter';
-import { LocalPdfStorageAdapter } from './infrastructure/storage/local-pdf-storage.adapter';
 import { ITemplateRenderer } from './application/ports/template-renderer.port';
 import { IPdfGenerator } from './application/ports/pdf-generator.port';
-import { IPdfStorage } from './application/ports/pdf-storage.port';
 import {
-  I_REPORT_REPOSITORY,
-  IReportRepository,
-} from './application/ports/report-repository.port';
+  I_REPORT_DRAFT_DOCUMENT_REPOSITORY,
+  IReportDraftDocumentRepository,
+} from './application/ports/report-draft-document-repository.port';
+import { I_REPORT_DRAFT_REPOSITORY } from '../report-draft/ports/report-draft-repository.interface';
+import type { IReportDraftRepository } from '../report-draft/ports/report-draft-repository.interface';
 import { PreviewReportHtmlQuery } from './application/queries/preview-report-html.query';
 import { GenerateReportPdfCommand } from './application/commands/generate-report-pdf.command';
 import { ReportPdfProcessor } from './infrastructure/queue/report-pdf.processor';
@@ -26,6 +27,8 @@ import { PDF_GENERATION_QUEUE } from './infrastructure/queue/pdf-generation.cons
 @Module({
   imports: [
     AuthModule,
+    PrismaModule,
+    ReportDraftModule,
     ConfigModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
@@ -54,12 +57,14 @@ import { PDF_GENERATION_QUEUE } from './infrastructure/queue/pdf-generation.cons
     BullModule.registerQueue({ name: PDF_GENERATION_QUEUE }),
   ],
   controllers: [PdfController, PdfJobsController],
-  exports: [I_REPORT_REPOSITORY],
+  exports: [I_REPORT_DRAFT_DOCUMENT_REPOSITORY],
   providers: [
     ReportPdfProcessor,
     {
-      provide: I_REPORT_REPOSITORY,
-      useClass: JsonReportRepositoryAdapter,
+      provide: I_REPORT_DRAFT_DOCUMENT_REPOSITORY,
+      inject: [I_REPORT_DRAFT_REPOSITORY],
+      useFactory: (reportDraftRepository: IReportDraftRepository) =>
+        new PrismaReportDraftDocumentRepository(reportDraftRepository),
     },
     {
       provide: I_TEMPLATE_RENDERER,
@@ -70,32 +75,29 @@ import { PDF_GENERATION_QUEUE } from './infrastructure/queue/pdf-generation.cons
       useClass: PuppeteerPdfGeneratorAdapter,
     },
     {
-      provide: I_PDF_STORAGE,
-      useClass: LocalPdfStorageAdapter,
-    },
-    {
       provide: PreviewReportHtmlQuery,
-      inject: [I_REPORT_REPOSITORY, I_TEMPLATE_RENDERER],
+      inject: [I_REPORT_DRAFT_DOCUMENT_REPOSITORY, I_TEMPLATE_RENDERER],
       useFactory: (
-        reportRepository: IReportRepository,
+        documentRepository: IReportDraftDocumentRepository,
         templateRenderer: ITemplateRenderer,
-      ) =>
-        new PreviewReportHtmlQuery(reportRepository, templateRenderer),
+      ) => new PreviewReportHtmlQuery(documentRepository, templateRenderer),
     },
     {
       provide: GenerateReportPdfCommand,
-      inject: [I_REPORT_REPOSITORY, I_TEMPLATE_RENDERER, I_PDF_GENERATOR, I_PDF_STORAGE],
+      inject: [
+        I_REPORT_DRAFT_DOCUMENT_REPOSITORY,
+        I_TEMPLATE_RENDERER,
+        I_PDF_GENERATOR,
+      ],
       useFactory: (
-        reportRepository: IReportRepository,
+        documentRepository: IReportDraftDocumentRepository,
         templateRenderer: ITemplateRenderer,
         pdfGenerator: IPdfGenerator,
-        pdfStorage: IPdfStorage,
       ) =>
         new GenerateReportPdfCommand(
-          reportRepository,
+          documentRepository,
           templateRenderer,
           pdfGenerator,
-          pdfStorage,
         ),
     },
   ],

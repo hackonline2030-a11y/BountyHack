@@ -7,13 +7,14 @@ import { variables } from './shared/variables.config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import type { Application } from 'express';
-import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import cookieParser from 'cookie-parser';
 import * as express from 'express';
 import { HttpExceptionBodyDto } from './core/dto/http-exception-body.dto';
 import { HttpValidationErrorDto } from './core/dto/http-validation-error.dto';
 import { getHttpCorsOrigin, isCorsOpenToAll } from './shared/cors.util';
+import { isReportDraftDevRoutesEnabled } from './shared/dev-routes.util';
+import { isPrismaSqlMode } from './shared/database-mode';
 
 
 async function bootstrap() {
@@ -36,12 +37,6 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('ejs');
 
-  // Generated PDFs (process.cwd()/pdfs) — write-only on disk; no public HTTP static mount.
-  // Download will go through an authenticated route later (see document-rendering).
-  const pdfsDir = join(process.cwd(), 'pdfs');
-  if (!existsSync(pdfsDir)) {
-    mkdirSync(pdfsDir, { recursive: true });
-  }
   app.use('/template-assets', express.static(join(process.cwd(), 'templates')));
 
   app.setGlobalPrefix(variables.globalPrefix);
@@ -130,6 +125,11 @@ async function bootstrap() {
     const adminerPort = process.env.ADMINER_HOST_PORT?.trim() || '8088';
     Logger.log(
       `🧭 Adminer (UI SQL MySQL sur l’hôte) : http://localhost:${adminerPort}/ — service : mysql — port : ADMINER_HOST_PORT dans .env (défaut 8088)`,
+    );
+  }
+  if (isPrismaSqlMode() && isReportDraftDevRoutesEnabled()) {
+    Logger.warn(
+      `⚠️  Dev report-draft JSON routes ON : http://localhost:${variables.port}/${variables.globalPrefix}/dev/report-drafts — remove report-draft/dev/ before prod`,
     );
   }
 }

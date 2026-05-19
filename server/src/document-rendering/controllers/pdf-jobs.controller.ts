@@ -21,7 +21,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Queue } from 'bullmq';
-import { Auth } from '../../auth/auth.decorator';
+import { AuthRoles } from '../../auth/rbac/roles.decorator';
+import { AppRoleCode } from '../../shared/rbac/app-role.code';
 import type { RequestWithIdentity } from '../../auth/adapters/http/request-with-identity';
 import { EnqueueReportPdfJobDto } from '../dto/enqueue-report-pdf-job.dto';
 import type { ReportPdfJobPayload } from '../application/models/report-pdf-job-payload';
@@ -56,8 +57,11 @@ class ReportPdfJobStatusDto {
   })
   state!: string;
 
-  @ApiPropertyOptional({ description: 'Public PDF path when completed' })
-  url?: string;
+  @ApiPropertyOptional({
+    description:
+      'Suggested download filename when completed. Use `GET /pdf/export` with the same draftId to download the PDF.',
+  })
+  fileName?: string;
 
   @ApiPropertyOptional()
   failedReason?: string;
@@ -73,6 +77,7 @@ class ReportPdfJobStatusDto {
  */
 @ApiTags('pdf')
 @ApiBearerAuth('bearer')
+@AuthRoles(AppRoleCode.SUPER_ADMIN)
 @Controller('pdf/jobs')
 export class PdfJobsController {
   constructor(
@@ -81,12 +86,11 @@ export class PdfJobsController {
   ) {}
 
   @Post()
-  @Auth()
   @HttpCode(202)
   @ApiOperation({
     summary: 'Queue report PDF generation',
     description:
-      'Accepts style/version/lang, enqueues BullMQ work, returns immediately with `jobId`. Poll GET /pdf/jobs/:jobId until `state` is `completed` or `failed`.',
+      'Accepts draftId (and optional lang), enqueues BullMQ work, returns immediately with `jobId`. Poll GET /pdf/jobs/:jobId until `state` is `completed` or `failed`.',
   })
   @ApiResponse({
     status: 202,
@@ -99,8 +103,7 @@ export class PdfJobsController {
   ): Promise<EnqueueReportPdfResponseDto> {
     const payload: ReportPdfJobPayload = {
       requestedByUid: req.user.uid,
-      ...(body.style !== undefined ? { style: body.style } : {}),
-      ...(body.version !== undefined ? { version: body.version } : {}),
+      draftId: body.draftId,
       ...(body.lang !== undefined ? { locale: body.lang } : {}),
     };
 
@@ -113,11 +116,10 @@ export class PdfJobsController {
   }
 
   @Get(':jobId')
-  @Auth()
   @ApiOperation({
     summary: 'Report PDF job status',
     description:
-      'Returns BullMQ state and, when completed, the public PDF URL from the job result. Only the user who enqueued the job may read it.',
+      'Returns BullMQ state and, when completed, the generated file name. Download via `GET /pdf/export`. Only the user who enqueued the job may read it.',
   })
   @ApiOkResponse({ type: ReportPdfJobStatusDto })
   async getJobStatus(
@@ -140,9 +142,9 @@ export class PdfJobsController {
     };
 
     if (state === 'completed') {
-      const rv = job.returnvalue as { url?: string } | undefined;
-      if (rv?.url) {
-        dto.url = rv.url;
+      const rv = job.returnvalue as { fileName?: string } | undefined;
+      if (rv?.fileName) {
+        dto.fileName = rv.fileName;
       }
     }
 

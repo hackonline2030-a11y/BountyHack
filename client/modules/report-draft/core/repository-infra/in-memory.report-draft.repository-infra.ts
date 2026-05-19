@@ -31,6 +31,12 @@ export class InMemoryReportDraftRepository implements IReportDraftRepository {
       })
       .map(clone);
   }
+
+  async deletePermanently(
+    id: ReportDraftDomainModel.ReportDraftId,
+  ): Promise<void> {
+    this.store.delete(id);
+  }
 }
 
 function clone<T>(value: T): T {

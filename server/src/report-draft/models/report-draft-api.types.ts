@@ -14,8 +14,12 @@ export interface ReportDraftTeamWire {
 export type AggregateStatusWire =
   | 'draft'
   | 'under-review'
+  | 'under-global-review'
   | 'ready-to-program'
+  /** @deprecated Prefer `published`. */
   | 'submitted-to-program'
+  /** Super-admin validated — source of truth for PDF generation. */
+  | 'published'
   | 'given-up'
   | 'rejected';
 
@@ -23,7 +27,10 @@ export type StepStatusWire =
   | 'in-progress'
   | 'awaiting-review'
   | 'needs-revision'
-  | 'approved';
+  | 'approved'
+  | 'in-global-progress'
+  | 'needs-global-revision'
+  | 'awaiting-global-review';
 
 export type ReviewerRoleWire =
   | 'hunter'
@@ -84,8 +91,13 @@ export interface ReportDraftWire {
   final: StepStateWire;
   createdAt: string;
   updatedAt: string;
+  /** ISO timestamp when super-admin requested a global final-validation revision. */
+  superAdminRevisionRequestedAt?: string | null;
+  /** Number of super-admin global revision cycles requested (monotonic). */
+  superAdminGlobalRevisionCount?: number;
   /** Associated report-team (label + members) when one exists — read-only from client saves. */
   reportTeam?: ReportDraftTeamWire | null;
+  /** Pending program report created when super-admin submits to the program. */
 }
 
 export const REPORT_DRAFT_STEP_STATE_KEYS: readonly ReportDraftStepStateKeyWire[] =

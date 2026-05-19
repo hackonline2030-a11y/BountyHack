@@ -1,16 +1,21 @@
 "use client";
 
-import { useEffect, type FC } from "react";
+import { useEffect, useMemo, useState, type FC } from "react";
+import { useParams } from "next/navigation";
 import { useT } from "next-i18next/client";
 import { loadCoordinatorTeams } from "@modules/report-team/core/useCase/load-coordinator-teams.usecase";
 import type { ReportTeamMemberRole } from "@modules/report-team/model/report-team.types";
 import { CoordinatorCreateTeamPanel } from "@modules/report-team/react/CoordinatorCreateTeamPanel";
+import { CoordinatorAttachOrphanTeamPanel } from "@modules/report-team/react/CoordinatorAttachOrphanTeamPanel";
+import { OrphanReportDraftsTable } from "@modules/report-team/react/OrphanReportDraftsTable";
 import { ReportTeamValidityBadge } from "@modules/report-team/react/ReportTeamValidityBadge";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 export const CoordinatorCoordinationPanel: FC = () => {
   const dispatch = useAppDispatch();
   const { t } = useT("reportTeams");
-  const { allTeams, pendingJoinRequests, loadStatus, loadError, mutationError } =
+  const params = useParams<{ lng?: string }>();
+  const lng = typeof params?.lng === "string" && params.lng.trim() !== "" ? params.lng : "fr";
+  const { allTeams, orphanDrafts, pendingJoinRequests, loadStatus, loadError, mutationError } =
     useAppSelector((s) => s.reportTeams);
 
   const roleLabels: Record<ReportTeamMemberRole, string> = {
@@ -19,6 +24,13 @@ export const CoordinatorCoordinationPanel: FC = () => {
     mentor: t("reportTeams.roles.mentor"),
     super_admin: t("reportTeams.roles.super_admin"),
   };
+
+  const [attachDraftId, setAttachDraftId] = useState<string | null>(null);
+
+  const attachDraft = useMemo(
+    () => orphanDrafts.find((d) => d.id === attachDraftId) ?? null,
+    [orphanDrafts, attachDraftId],
+  );
 
   const isLoading = loadStatus === "loading" || loadStatus === "idle";
   const isReady = loadStatus === "success";
@@ -64,7 +76,10 @@ export const CoordinatorCoordinationPanel: FC = () => {
         pendingJoinRequests={pendingJoinRequests}
         isReady={isReady}
       />
-      <section className="dashboard-card p-4 sm:p-5" aria-labelledby="coord-teams">
+      <section
+        className="border-t border-dashboard-divider pt-6"
+        aria-labelledby="coord-teams"
+      >
         <h2 id="coord-teams" className="text-base font-semibold text-dashboard-text">
           {t("reportTeams.coordinator.teamsTitle")}
         </h2>
@@ -107,6 +122,20 @@ export const CoordinatorCoordinationPanel: FC = () => {
           </ul>
         )}
       </section>
+      <OrphanReportDraftsTable
+        lng={lng}
+        items={orphanDrafts}
+        selectedDraftId={attachDraftId}
+        onAttachDraft={(draft) => setAttachDraftId(draft.id)}
+      />
+      {attachDraft ? (
+        <CoordinatorAttachOrphanTeamPanel
+          orphan={attachDraft}
+          pendingJoinRequests={pendingJoinRequests}
+          isReady={isReady}
+          onCancel={() => setAttachDraftId(null)}
+        />
+      ) : null}
     </div>
   );
 };

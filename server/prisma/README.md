@@ -31,15 +31,42 @@ pnpm prisma:migrate:deploy
 pnpm prisma:seed
 ```
 
-## Flux conseillé (dev MySQL)
+## Flux conseillé (dev MySQL + Docker)
+
+Depuis `bugbountyapp/server/`, avec `DATABASE_NAME=MYSQL_PRISMA` dans `.env`  
+(`DATABASE_URL` peut cibler `@mysql` pour l’API dans Docker ; les scripts `docker:prisma:*` réécrivent vers `127.0.0.1`).
+
+**`docker compose` sans pnpm** (si `permission denied` sur le socket Docker, préfixer par `sudo`) :
+
+```sh
+# MySQL + Adminer
+docker compose -f docker/compose.dev.yaml --profile mysql up -d mysql adminer
+
+# Seed cycle report-draft (fichier lu sur l’hôte, exécuté dans le conteneur mysql)
+docker compose -f docker/compose.dev.yaml --profile mysql exec -T mysql \
+  mysql -ubugbountyapp -pbugbountyapp bugbountyapp \
+  < prisma/seed/dev-report-draft-bucket-vault.mysql.sql
+```
+
+Voir aussi [`../README.md`](../README.md#mysql-prisma-et-seed-report-draft-docker).
+
+**Via pnpm** (depuis `server/`) :
 
 ```bash
-cd bugbountyapp/server
-# Dans .env : DATABASE_NAME=MYSQL_PRISMA et DATABASE_URL=mysql://...
-pnpm docker:mysql:up   # optionnel — MySQL + Adminer
+pnpm docker:mysql:up                      # MySQL + Adminer (http://localhost:8088)
+pnpm docker:prisma:generate:mysql
+pnpm docker:prisma:migrate:deploy:mysql   # schéma
+pnpm docker:prisma:seed:mysql             # rôles + compte démo (non destructif)
+pnpm docker:prisma:seed:dev-draft         # cycle report-draft complet (non destructif)
+```
+
+Sans les helpers Docker (`.env` avec `DATABASE_URL=mysql://…@127.0.0.1:3306/…`) :
+
+```bash
 pnpm prisma:generate:mysql
 pnpm prisma:migrate:deploy:mysql
-pnpm prisma:seed       # utilise roles.mysql.sql / demo.mysql.sql
+pnpm prisma:seed
+pnpm prisma:seed:dev-draft
 ```
 
 Migrations MySQL : `prisma/migrations-mysql/` (schéma : `schema.mysql.prisma`).  

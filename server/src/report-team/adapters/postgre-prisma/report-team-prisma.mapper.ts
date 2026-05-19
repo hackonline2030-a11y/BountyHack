@@ -1,9 +1,11 @@
 import type {
+  ReportDraft,
   ReportTeam,
   ReportTeamJoinRequest,
   ReportTeamMember,
   User,
 } from '../../../generated/prisma/client';
+import { ReportDraftPrismaMapper } from '../../../report-draft/adapters/postgre-prisma/report-draft-prisma.mapper';
 import { computeTeamValidity } from '../../application/report-team-validity';
 import type {
   ReportTeamJoinRequestWire,
@@ -14,6 +16,7 @@ import { ReportTeamEnumMapper } from './report-team-enum.mapper';
 
 type TeamWithMembers = ReportTeam & {
   members: (ReportTeamMember & { user: User })[];
+  reportDraft: Pick<ReportDraft, 'aggregateStatus'>;
 };
 
 type JoinRequestWithRelations = ReportTeamJoinRequest & {
@@ -21,15 +24,15 @@ type JoinRequestWithRelations = ReportTeamJoinRequest & {
   user: User;
 };
 
-function displayName(user: User): string {
-  return user.username?.trim() || user.email?.trim() || user.id;
-}
-
 export class ReportTeamPrismaMapper {
+  static displayNameForUser(user: Pick<User, 'id' | 'username' | 'email'>): string {
+    return user.username?.trim() || user.email?.trim() || user.id;
+  }
+
   static memberToWire(row: ReportTeamMember & { user: User }): ReportTeamMemberWire {
     return {
       userId: row.userId,
-      displayName: displayName(row.user),
+      displayName: this.displayNameForUser(row.user),
       role: ReportTeamEnumMapper.memberRoleToWire(row.role),
     };
   }
@@ -41,6 +44,9 @@ export class ReportTeamPrismaMapper {
       reportDraftId: row.reportDraftId,
       label: row.label,
       validity: computeTeamValidity(members.map((m) => m.role)),
+      draftAggregateStatus: ReportDraftPrismaMapper.aggregateStatusToWire(
+        row.reportDraft.aggregateStatus,
+      ),
       members,
       updatedAt: row.updatedAt.toISOString(),
     };
@@ -53,7 +59,7 @@ export class ReportTeamPrismaMapper {
       reportDraftId: row.team?.reportDraftId,
       teamLabel: row.team?.label ?? '',
       userId: row.userId,
-      requesterDisplayName: displayName(row.user),
+      requesterDisplayName: this.displayNameForUser(row.user),
       requestedRole: ReportTeamEnumMapper.memberRoleToWire(row.requestedRole),
       message: row.message ?? undefined,
       status: ReportTeamEnumMapper.requestStatusToWire(row.status),

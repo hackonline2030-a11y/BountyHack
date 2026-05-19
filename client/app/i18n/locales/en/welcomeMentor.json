@@ -37,7 +37,7 @@
       "teams": {
         "title": "Report teams",
         "subtitle": "Join a team via the coordinator",
-        "description": "Report teams are assembled by the coordinator (at least hunter, quality checker, mentor). You may request to join.",
+        "description": "Report teams are assembled by the coordinator (hunter plus mentor or quality checker). You may request to join.",
         "cta": "My teams & requests",
         "askCta": "Request assignment"
       },

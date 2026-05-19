@@ -12,33 +12,27 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { variables } from '../shared/variables.config';
 import {
-  I_REPORT_REPOSITORY,
-  IReportRepository,
-} from '../document-rendering/application/ports/report-repository.port';
+  I_REPORT_DRAFT_DOCUMENT_REPOSITORY,
+  IReportDraftDocumentRepository,
+} from '../document-rendering/application/ports/report-draft-document-repository.port';
 import {
   ReportDataInvalidError,
-  ReportDataMissingError,
+  ReportIdInvalidError,
   ReportLocaleInvalidError,
-  ReportLocaleNotFoundError,
-  ReportVersionInvalidError,
-  ReportVersionNotFoundError,
+  ReportNotFoundError,
 } from '../document-rendering/application/errors/pdf-application.errors';
 
-const REPORT_VERSION_ROUTE = /^v\d+$/i;
-const REPORT_STYLE_ROUTE = /^[a-z0-9_-]+$/i;
+const DRAFT_ID_ROUTE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const LOCALE_ROUTE_CODE = /^[a-z]{2}$/;
-const LANG_LABELS: Record<string, string> = {
-  fr: 'Français',
-  en: 'English',
-};
 
 @ApiTags('root')
 @Controller()
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    @Inject(I_REPORT_REPOSITORY)
-    private readonly reportRepository: IReportRepository,
+    @Inject(I_REPORT_DRAFT_DOCUMENT_REPOSITORY)
+    private readonly documentRepository: IReportDraftDocumentRepository,
   ) {}
 
   @Get('/')
@@ -73,29 +67,17 @@ export class AppController {
   @Get('/dashboard')
   @Render('dashboard')
   @ApiOperation({
-    summary: 'Choose report dashboard style',
-    description:
-      'Lists available report styles (folders under `src/document-rendering/data` with `report.json`); each opens `/dashboard/:style`.',
+    summary: 'Choose a published report draft for PDF preview',
+    description: 'Lists `report_drafts` with aggregate status published.',
   })
-  @ApiOkResponse({
-    description: 'HTML dashboard page returned.',
-    content: {
-      'text/html': {
-        schema: {
-          type: 'string',
-          example:
-            '<!doctype html><html><head><title>Dashboard</title></head><body>...</body></html>',
-        },
-      },
-    },
-  })
-  async getDashboardVersionPickerPage() {
+  async getDashboardReportPickerPage() {
     const apiPrefix = `/${variables.globalPrefix.replace(/^\/+|\/+$/g, '')}`;
     const texts = this.appService.getDashboardTexts();
-    const styles = await this.reportRepository.listReportStyles();
-    if (!styles.length) {
+    const drafts = await this.documentRepository.listPublishedDrafts();
+
+    if (!drafts.length) {
       throw new NotFoundException(
-        'No report style folders found. Add data under `src/document-rendering/data/<style>/v1/` with `report.json` (and optional `report.<lang>.json`).',
+        'No published report drafts found in the database.',
       );
     }
 
@@ -103,111 +85,32 @@ export class AppController {
       ...texts,
       mode: 'pick' as const,
       dashboardBaseUrl: `${apiPrefix}/dashboard`,
-      pickerItems: styles.map((style) => ({
-        href: `${apiPrefix}/dashboard/${style}`,
-        label: `${texts.openVersionPrefix}${style}`,
+      pickerItems: drafts.map((draft) => ({
+        href: `${apiPrefix}/dashboard/${draft.id}`,
+        label: `${draft.title} (${draft.status})`,
       })),
       homeUrl: `${apiPrefix}`,
     };
   }
 
-  @Get('/dashboard/:style')
+  @Get('/dashboard/:draftId')
   @Render('dashboard')
   @ApiOperation({
-    summary: 'Choose report dashboard version for one style',
-    description: 'Lists available versions for one style (`/dashboard/:style/:version`).',
+    summary: 'Render report dashboard for one published draft',
+    description: 'Preview and PDF actions use `draftId` and optional `lang`.',
   })
-  @ApiOkResponse({
-    description: 'HTML dashboard page returned.',
-    content: {
-      'text/html': {
-        schema: {
-          type: 'string',
-          example:
-            '<!doctype html><html><head><title>Dashboard</title></head><body>...</body></html>',
-        },
-      },
-    },
-  })
-  async getDashboardStylePage(@Param('style') styleParam: string) {
-    const apiPrefix = `/${variables.globalPrefix.replace(/^\/+|\/+$/g, '')}`;
-    const texts = this.appService.getDashboardTexts();
-    const style = typeof styleParam === 'string' ? styleParam.trim().toLowerCase() : '';
-
-    if (!REPORT_STYLE_ROUTE.test(style)) {
-      throw new BadRequestException(
-        `Invalid report style '${styleParam}'. Expected a slug like report-final.`,
-      );
-    }
-
-    const versions = await this.reportRepository.listReportVersions(style);
-    if (!versions.length) {
-      throw new NotFoundException(
-        `No populated version folders found for style '${style}'. Add report.json under src/document-rendering/data/${style}/v1/ (or another v* folder).`,
-      );
-    }
-
-    return {
-      ...texts,
-      mode: 'pick' as const,
-      dashboardBaseUrl: `${apiPrefix}/dashboard`,
-      pickerItems: versions.map((version) => ({
-        href: `${apiPrefix}/dashboard/${style}/${version}`,
-        label: `${texts.openVersionPrefix}${version}`,
-      })),
-      currentStyle: style,
-      homeUrl: `${apiPrefix}`,
-    };
-  }
-
-  @Get('/dashboard/:style/:version')
-  @Render('dashboard')
-  @ApiOperation({
-    summary: 'Render report dashboard for one style/version',
-    description:
-      'Preview and PDF actions use matching `style`, `version`, and `lang` query parameters.',
-  })
-  @ApiOkResponse({
-    description: 'HTML dashboard page returned.',
-    content: {
-      'text/html': {
-        schema: {
-          type: 'string',
-          example:
-            '<!doctype html><html><head><title>Dashboard</title></head><body>...</body></html>',
-        },
-      },
-    },
-  })
-  async getDashboardVersionPage(
-    @Param('style') styleParam: string,
-    @Param('version') versionParam: string,
+  async getDashboardReportPage(
+    @Param('draftId') draftIdParam: string,
     @Query('lang') lang?: string,
   ) {
     const apiPrefix = `/${variables.globalPrefix.replace(/^\/+|\/+$/g, '')}`;
     const texts = this.appService.getDashboardTexts();
-    const style = typeof styleParam === 'string' ? styleParam.trim().toLowerCase() : '';
-    const slug = typeof versionParam === 'string' ? versionParam.trim() : '';
+    const draftId =
+      typeof draftIdParam === 'string' ? draftIdParam.trim() : '';
 
-    if (!REPORT_STYLE_ROUTE.test(style)) {
+    if (!DRAFT_ID_ROUTE.test(draftId)) {
       throw new BadRequestException(
-        `Invalid report style '${styleParam}'. Expected a slug like report-final.`,
-      );
-    }
-
-    if (!REPORT_VERSION_ROUTE.test(slug)) {
-      throw new BadRequestException(
-        `Invalid report version '${slug}'. Expected a slug like v1 or v2.`,
-      );
-    }
-
-    const version = slug.toLowerCase();
-
-    const locales = await this.reportRepository.listReportLocales(style, version);
-
-    if (!locales.length) {
-      throw new NotFoundException(
-        `No report locale files found for '${style}/${version}'. Add report.json / report.<lang>.json under that folder.`,
+        `Invalid draft id '${draftIdParam}'. Expected a UUID.`,
       );
     }
 
@@ -222,72 +125,63 @@ export class AppController {
       );
     }
 
-    if (trimmed !== '' && !locales.includes(trimmed)) {
-      throw new NotFoundException(
-        `Language '${trimmed}' is not available for version ${version}.`,
-      );
-    }
+    const effectiveLang = trimmed !== '' ? trimmed : 'fr';
 
+    let reportDoc;
     try {
-      await this.reportRepository.getReportTemplateData(
-        style,
-        version,
-        trimmed === '' ? undefined : trimmed,
+      reportDoc = await this.documentRepository.getDocumentTemplateData(
+        draftId,
+        effectiveLang,
       );
     } catch (e) {
-      if (
-        e instanceof ReportLocaleInvalidError ||
-        e instanceof ReportDataInvalidError ||
-        e instanceof ReportVersionInvalidError
-      ) {
-        throw new BadRequestException(e.message);
-      }
-      if (
-        e instanceof ReportLocaleNotFoundError ||
-        e instanceof ReportVersionNotFoundError ||
-        e instanceof ReportDataMissingError
-      ) {
-        throw new NotFoundException(e.message);
-      }
-      throw e;
+      this.mapRepositoryErrors(e);
     }
 
-    let effectiveLang: string;
-    if (trimmed !== '') {
-      effectiveLang = trimmed;
-    } else {
-      const primary = locales[0];
-      if (primary === undefined) {
-        throw new NotFoundException(
-          `No report locale files found for '${style}/${version}'.`,
-        );
-      }
-      effectiveLang = primary;
-    }
+    const data = reportDoc!.toReadModel();
     const params = new URLSearchParams();
-    params.set('style', style);
-    params.set('version', version);
+    params.set('draftId', draftId);
     params.set('lang', effectiveLang);
-
     const query = `?${params.toString()}`;
     const pdfBase = `${apiPrefix}/pdf`;
 
     return {
       ...texts,
       mode: 'preview' as const,
+      title: data.title,
       dashboardBaseUrl: `${apiPrefix}/dashboard`,
       pickerItems: [] as { href: string; label: string }[],
-      currentStyle: style,
-      currentVersion: version,
-      locales,
+      currentReportId: draftId,
       currentLang: effectiveLang,
-      localeOptions: locales.map((code) => ({
-        code,
-        label: LANG_LABELS[code] ?? code.toUpperCase(),
-      })),
+      localeOptions: [
+        { code: 'fr', label: 'Français' },
+        { code: 'en', label: 'English' },
+      ],
       previewUrl: `${pdfBase}/previewHtml${query}`,
-      generateUrl: `${pdfBase}/htmlToPDF${query}`,
+      generateUrl: `${pdfBase}/export${query}`,
       homeUrl: `${apiPrefix}`,
+      reportContext: {
+        meta: data.meta,
+        cvss: data.cvss,
+        reportTeam: data.reportTeam,
+        reportId: data.reportId,
+        reportStatus: data.reportStatus,
+        frozenAt: data.frozenAt,
+        labels: data.labels,
+      },
     };
+  }
+
+  private mapRepositoryErrors(err: unknown): never {
+    if (
+      err instanceof ReportIdInvalidError ||
+      err instanceof ReportLocaleInvalidError ||
+      err instanceof ReportDataInvalidError
+    ) {
+      throw new BadRequestException(err.message);
+    }
+    if (err instanceof ReportNotFoundError) {
+      throw new NotFoundException(err.message);
+    }
+    throw err;
   }
 }

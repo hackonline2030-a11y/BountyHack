@@ -48,7 +48,19 @@ const seededWithSubmission = (
   const base = makeAggregate(seedOverrides);
   const submission = base.aggregate.submitStepForReview({
     step,
-    reviewerRole: "mentor",
+    reviewerRole: "quality_checker",
+    submittedBy: "u-42",
+  });
+  return { ...base, submission };
+};
+
+const seededWithMentorAdvice = (
+  step: ReportDraftDomainModel.ReportDraftStep = Step.META,
+  seedOverrides?: Parameters<typeof makeAggregate>[0],
+) => {
+  const base = makeAggregate(seedOverrides);
+  const submission = base.aggregate.submitMentorAdvice({
+    step,
     submittedBy: "u-42",
   });
   return { ...base, submission };
@@ -63,7 +75,7 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
 
     aggregate.submitStepForReview({
       step: Step.META,
-      reviewerRole: "mentor",
+      reviewerRole: "quality_checker",
       submittedBy: "u-42",
     });
 
@@ -75,7 +87,7 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
 
     aggregate.submitStepForReview({
       step: Step.META,
-      reviewerRole: "mentor",
+      reviewerRole: "quality_checker",
       submittedBy: "u-42",
     });
 
@@ -102,7 +114,7 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
 
     aggregate.submitStepForReview({
       step: Step.META,
-      reviewerRole: "mentor",
+      reviewerRole: "quality_checker",
       submittedBy: "u-42",
     });
 
@@ -114,13 +126,13 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
     // First submit moves draft → under-review.
     aggregate.submitStepForReview({
       step: Step.META,
-      reviewerRole: "mentor",
+      reviewerRole: "quality_checker",
       submittedBy: "u-42",
     });
 
     aggregate.submitStepForReview({
       step: Step.DESCRIPTION,
-      reviewerRole: "mentor",
+      reviewerRole: "quality_checker",
       submittedBy: "u-42",
     });
 
@@ -134,7 +146,7 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
 
     aggregate.submitStepForReview({
       step: Step.META,
-      reviewerRole: "mentor",
+      reviewerRole: "quality_checker",
       submittedBy: "u-42",
     });
 
@@ -147,7 +159,7 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
 
     aggregate.submitStepForReview({
       step: Step.META,
-      reviewerRole: "mentor",
+      reviewerRole: "quality_checker",
       submittedBy: "u-42",
     });
 
@@ -162,13 +174,13 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
 
     const submission = aggregate.submitStepForReview({
       step: Step.META,
-      reviewerRole: "mentor",
+      reviewerRole: "quality_checker",
       submittedBy: "u-99",
     });
 
     expect(submission.step).toEqual(Step.META);
     expect(submission.round).toEqual(1);
-    expect(submission.reviewerRole).toEqual("mentor");
+    expect(submission.reviewerRole).toEqual("quality_checker");
     expect(submission.submittedBy).toEqual("u-99");
     expect(submission.decision).toEqual("pending");
     expect(submission.reportDraftId).toEqual(draft.id);
@@ -181,7 +193,7 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
 
     const submission = aggregate.submitStepForReview({
       step: Step.META,
-      reviewerRole: "mentor",
+      reviewerRole: "quality_checker",
       submittedBy: "u-42",
     });
 
@@ -195,7 +207,7 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
 
     const submission = aggregate.submitStepForReview({
       step: Step.META,
-      reviewerRole: "mentor",
+      reviewerRole: "quality_checker",
       submittedBy: "u-42",
     });
 
@@ -209,7 +221,7 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
 
     const submission = aggregate.submitStepForReview({
       step: Step.META,
-      reviewerRole: "mentor",
+      reviewerRole: "quality_checker",
       submittedBy: "u-42",
     });
 
@@ -233,7 +245,7 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
 
     const submission = aggregate.submitStepForReview({
       step: Step.META,
-      reviewerRole: "mentor",
+      reviewerRole: "quality_checker",
       submittedBy: "u-42",
     });
 
@@ -261,12 +273,24 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
 
     aggregate.submitStepForReview({
       step: Step.META,
-      reviewerRole: "mentor",
+      reviewerRole: "quality_checker",
       submittedBy: "u-42",
     });
 
     expect(draft.meta.status).toEqual("awaiting-review");
     expect(draft.meta.currentRound).toEqual(2);
+  });
+
+  it("rejects mentor as validation reviewer (use submitMentorAdvice)", () => {
+    const { aggregate } = makeAggregate();
+
+    expect(() =>
+      aggregate.submitStepForReview({
+        step: Step.META,
+        reviewerRole: "mentor",
+        submittedBy: "u-42",
+      }),
+    ).toThrow(/submitMentorAdvice/);
   });
 
   it("throws when the step is already 'awaiting-review'", () => {
@@ -276,7 +300,7 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
     expect(() =>
       aggregate.submitStepForReview({
         step: Step.META,
-        reviewerRole: "mentor",
+        reviewerRole: "quality_checker",
         submittedBy: "u-42",
       }),
     ).toThrow(/current status is 'awaiting-review'/);
@@ -289,7 +313,7 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
     expect(() =>
       aggregate.submitStepForReview({
         step: Step.META,
-        reviewerRole: "mentor",
+        reviewerRole: "quality_checker",
         submittedBy: "u-42",
       }),
     ).toThrow(/current status is 'approved'/);
@@ -302,6 +326,7 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
     ["given-up"],
     ["rejected"],
     ["submitted-to-program"],
+    ["published"],
   ] as const)(
     "throws when the aggregate is '%s' (terminal state)",
     (terminalStatus) => {
@@ -311,12 +336,59 @@ describe("ReportDraftAggregate.submitStepForReview", () => {
       expect(() =>
         aggregate.submitStepForReview({
           step: Step.META,
-          reviewerRole: "mentor",
+          reviewerRole: "quality_checker",
           submittedBy: "u-42",
         }),
       ).toThrow(/terminal state/);
     },
   );
+});
+
+describe("ReportDraftAggregate.submitMentorAdvice", () => {
+  it("keeps the step in 'in-progress' (does not lock the hunter form)", () => {
+    const { aggregate, draft } = makeAggregate();
+
+    aggregate.submitMentorAdvice({ step: Step.META, submittedBy: "u-42" });
+
+    expect(draft.meta.status).toEqual("in-progress");
+    expect(draft.meta.assignedReviewerRole).toBeNull();
+  });
+
+  it("returns a mentor submission with incremented round", () => {
+    const { aggregate } = makeAggregate();
+
+    const submission = aggregate.submitMentorAdvice({
+      step: Step.META,
+      submittedBy: "u-42",
+    });
+
+    expect(submission.reviewerRole).toEqual("mentor");
+    expect(submission.round).toEqual(1);
+    expect(submission.decision).toEqual("pending");
+  });
+
+  it("allows mentor endorse while step stays in-progress", () => {
+    const { aggregate, draft, submission } = seededWithMentorAdvice();
+
+    aggregate.endorseSubmission({ submission, decidedBy: "mentor-1" });
+
+    expect(submission.decision).toEqual("endorse");
+    expect(draft.meta.status).toEqual("in-progress");
+  });
+
+  it("allows QC validation submit after mentor advice without mentor decision", () => {
+    const { aggregate, draft } = makeAggregate();
+    aggregate.submitMentorAdvice({ step: Step.META, submittedBy: "u-42" });
+
+    aggregate.submitStepForReview({
+      step: Step.META,
+      reviewerRole: "quality_checker",
+      submittedBy: "u-42",
+    });
+
+    expect(draft.meta.status).toEqual("awaiting-review");
+    expect(draft.meta.assignedReviewerRole).toEqual("quality_checker");
+  });
 });
 
 // ════════════════════════════════════════════════════════════════════════
@@ -387,7 +459,7 @@ describe("ReportDraftAggregate.approveStep", () => {
     // Submit + approve the FINAL step
     const finalSubmission = aggregate.submitStepForReview({
       step: Step.FINAL,
-      reviewerRole: "mentor",
+      reviewerRole: "quality_checker",
       submittedBy: "u-42",
     });
     aggregate.approveStep({ submission: finalSubmission, decidedBy: "u-99" });
@@ -431,7 +503,7 @@ describe("ReportDraftAggregate.approveStep", () => {
     );
   });
 
-  it.each([["given-up"], ["rejected"], ["submitted-to-program"]] as const)(
+  it.each([["given-up"], ["rejected"], ["submitted-to-program"], ["published"]] as const)(
     "throws when the aggregate is '%s' (terminal state)",
     (terminalStatus) => {
       const { aggregate, draft, submission } = seededWithSubmission();
@@ -627,7 +699,7 @@ describe("ReportDraftAggregate.requestStepRevisions", () => {
     ).toThrow(/stale round/);
   });
 
-  it.each([["given-up"], ["rejected"], ["submitted-to-program"]] as const)(
+  it.each([["given-up"], ["rejected"], ["submitted-to-program"], ["published"]] as const)(
     "throws when the aggregate is '%s' (terminal state)",
     (terminalStatus) => {
       const { aggregate, draft, submission } = seededWithSubmission();
@@ -697,7 +769,7 @@ describe("ReportDraftAggregate.resumeEdit", () => {
     },
   );
 
-  it.each([["given-up"], ["rejected"], ["submitted-to-program"]] as const)(
+  it.each([["given-up"], ["rejected"], ["submitted-to-program"], ["published"]] as const)(
     "throws when the aggregate is '%s' (terminal state)",
     (terminalStatus) => {
       const { aggregate, draft } = makeAggregate();
@@ -733,7 +805,7 @@ describe("ReportDraftAggregate.giveUpDraft", () => {
     expect(draft.updatedAt).toEqual("2026-05-14T09:00:00.000Z");
   });
 
-  it.each([["given-up"], ["rejected"], ["submitted-to-program"]] as const)(
+  it.each([["given-up"], ["rejected"], ["submitted-to-program"], ["published"]] as const)(
     "throws when the aggregate is already '%s' (terminal state, no double-termination)",
     (terminalStatus) => {
       const { aggregate, draft } = makeAggregate();
@@ -781,7 +853,7 @@ describe("ReportDraftAggregate.rejectDraft", () => {
     expect(draft.updatedAt).toEqual("2026-05-14T09:00:00.000Z");
   });
 
-  it.each([["given-up"], ["rejected"], ["submitted-to-program"]] as const)(
+  it.each([["given-up"], ["rejected"], ["submitted-to-program"], ["published"]] as const)(
     "throws when the aggregate is already '%s' (terminal state)",
     (terminalStatus) => {
       const { aggregate, draft } = makeAggregate();
@@ -865,7 +937,7 @@ describe("ReportDraftAggregate.updateStepPayload", () => {
     ).toThrow(/cannot edit step/);
   });
 
-  it.each([["given-up"], ["rejected"], ["submitted-to-program"]] as const)(
+  it.each([["given-up"], ["rejected"], ["submitted-to-program"], ["published"]] as const)(
     "refuses to edit when the aggregate is '%s' (terminal state)",
     (terminalStatus) => {
       const { aggregate, draft } = makeAggregate();
@@ -876,4 +948,66 @@ describe("ReportDraftAggregate.updateStepPayload", () => {
       ).toThrow(/terminal state/);
     },
   );
+});
+
+describe("ReportDraftAggregate.submitAllStepsForGlobalRevision", () => {
+  it("marks every in-global-progress step as awaiting-global-review", () => {
+    const { aggregate, draft } = makeAggregate();
+    draft.aggregateStatus = "under-global-review";
+    draft.superAdminRevisionRequestedAt = "2026-05-17T12:00:00.000Z";
+    for (const key of [
+      "meta",
+      "description",
+      "collection",
+      "exploitation",
+      "proofOfConcept",
+      "risks",
+      "remediation",
+      "final",
+    ] as const) {
+      draft[key].status = "in-global-progress";
+    }
+
+    const submissions = aggregate.submitAllStepsForGlobalRevision({
+      submittedBy: "u-42",
+    });
+
+    expect(submissions).toHaveLength(0);
+    expect(draft.meta.status).toBe("awaiting-global-review");
+    expect(draft.final.status).toBe("awaiting-global-review");
+  });
+
+  it("skips steps already awaiting global review", () => {
+    const { aggregate, draft } = makeAggregate();
+    draft.aggregateStatus = "under-global-review";
+    draft.superAdminRevisionRequestedAt = "2026-05-17T12:00:00.000Z";
+    for (const key of [
+      "meta",
+      "description",
+      "collection",
+      "exploitation",
+      "proofOfConcept",
+      "risks",
+      "remediation",
+      "final",
+    ] as const) {
+      draft[key].status = "in-global-progress";
+    }
+    draft.meta.status = "awaiting-global-review";
+
+    aggregate.submitAllStepsForGlobalRevision({
+      submittedBy: "u-42",
+    });
+
+    expect(draft.meta.status).toBe("awaiting-global-review");
+    expect(draft.description.status).toBe("awaiting-global-review");
+  });
+
+  it("throws outside global revision mode", () => {
+    const { aggregate } = makeAggregate();
+
+    expect(() =>
+      aggregate.submitAllStepsForGlobalRevision({ submittedBy: "u-42" }),
+    ).toThrow(/global batch submit/);
+  });
 });

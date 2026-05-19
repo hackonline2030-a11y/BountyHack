@@ -20,6 +20,16 @@
     "afterPasswordReset": "Votre mot de passe a été mis à jour. Vous pouvez vous connecter avec le nouveau mot de passe.",
     "errorLogin": "Échec de la connexion",
     "errorRoleNotAllowed": "Votre rôle ne permet pas l'accès à l'application pour le moment. Veuillez contacter un administrateur.",
-    "successLogin": "Connexion réussie"
+    "successLogin": "Connexion réussie",
+    "errors": {
+      "generic": "Connexion impossible pour le moment. Réessayez dans quelques instants.",
+      "invalidCredentials": "E-mail ou mot de passe incorrect. Vérifiez vos identifiants ou utilisez « Mot de passe oublié ? ».",
+      "emailRequired": "Saisissez votre adresse e-mail.",
+      "emailInvalid": "Adresse e-mail invalide (par exemple vous@exemple.com).",
+      "passwordRequired": "Saisissez votre mot de passe.",
+      "invalidTotp": "Code incorrect ou expiré. Vérifiez votre application d’authentification et réessayez.",
+      "totpMisconfigured": "La double authentification n’est pas correctement configurée sur ce compte. Contactez un administrateur.",
+      "checkFields": "Certains champs sont invalides. Vérifiez votre e-mail et votre mot de passe, puis réessayez."
+    }
   }
 }

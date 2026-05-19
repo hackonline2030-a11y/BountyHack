@@ -4,7 +4,11 @@ import { type FC, type ReactNode } from "react";
 import type { CvssMetricOption } from "@modules/report-draft/core/catalog/cvss-metrics.catalog";
 import type { CvssSeverity } from "@modules/report-draft/core/cvss/cvss-3.1";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
+import { ReportDraftGlobalSubmitButton } from "@modules/report-draft/react/components/ReportDraftGlobalSubmitButton";
+import { SectionBlocRepeater } from "@modules/report-draft/react/components/section-bloc/SectionBlocRepeater";
 import { useDescriptionSection } from "@modules/report-draft/react/sections/description/use-description-section";
+
+const DESCRIPTION_STEP = ReportDraftDomainModel.ReportDraftStep.DESCRIPTION;
 
 /**
  * DESCRIPTION step UI. The 8 CVSS 3.1 base metric selects, plus a derived
@@ -20,14 +24,13 @@ export const DescriptionSection: FC = () => {
     draft,
     setField,
     editable,
+    hidePerStepSubmit,
     canNavigateNext,
     reviewerRole,
     setReviewerRole,
     onNext,
-    onSaveDraft,
     onSubmitForReview,
     onBack,
-    onReset,
     transitionBusy,
     transitionErr,
     derived,
@@ -61,7 +64,7 @@ export const DescriptionSection: FC = () => {
       {!editable ? (
         <p className="rounded-md border border-amber-200 bg-amber-50 p-2 text-sm text-amber-950">
           Cette étape est en attente de revue ou figée. Voir l’onglet « Commentaires ». « Suivant »
-          n’est actif qu’après validation (« Validée »).
+          n’est actif qu’après validation par le quality checker (« Validée »).
         </p>
       ) : null}
       <DerivedPanel
@@ -150,9 +153,21 @@ export const DescriptionSection: FC = () => {
         onChange={(v) => setField("availability", v)}
       />
 
+      <div className="border-t border-form-border pt-4" aria-label="Sections libres">
+        <SectionBlocRepeater
+          blocs={draft.sectionBlocs}
+          editable={editable && !transitionBusy}
+          onChange={(sectionBlocs) => setField("sectionBlocs", sectionBlocs)}
+        />
+      </div>
+
       <div className="flex flex-col gap-2 border-t border-form-border pt-4">
-        <label className="text-sm text-form-text-muted" htmlFor="desc-reviewer-role">
-          Soumission pour revue — assigner à
+        <p className="text-sm text-form-text-muted">
+          Seule la validation par le quality checker active le bouton « Suivant ». L’avis mentor est
+          facultatif et n’empêche pas de continuer sur cette étape.
+        </p>
+        <label className="text-sm font-medium text-form-text-muted" htmlFor="desc-reviewer-role">
+          Soumettre pour revue à
         </label>
         <select
           id="desc-reviewer-role"
@@ -163,8 +178,8 @@ export const DescriptionSection: FC = () => {
           }
           disabled={lockedOff}
         >
-          <option value="mentor">Mentor</option>
           <option value="quality_checker">Quality checker</option>
+          <option value="mentor">Mentor</option>
           <option value="hunter">Hunter (pair review)</option>
         </select>
       </div>
@@ -181,40 +196,30 @@ export const DescriptionSection: FC = () => {
         <button
           type="button"
           className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={() => void onSaveDraft()}
-          disabled={transitionBusy || !editable}
-        >
-          Enregistrer le brouillon
-        </button>
-        <button
-          type="button"
-          className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
           onClick={onNext}
           disabled={transitionBusy || !canNavigateNext}
           title={
             canNavigateNext
               ? undefined
-              : "Disponible uniquement après validation de cette étape par le reviewer."
+              : "Disponible uniquement après validation de cette étape par le quality checker."
           }
         >
           Suivant
         </button>
-        <button
-          type="button"
-          className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
-          onClick={() => void onSubmitForReview()}
-          disabled={transitionBusy || !editable}
-        >
-          Soumettre cette étape pour revue
-        </button>
-        <button
-          type="button"
-          className="ml-auto rounded-md border border-form-border px-3 py-2 text-sm text-form-text-muted hover:bg-form-overlay"
-          onClick={onReset}
-          disabled={lockedOff}
-        >
-          Réinitialiser
-        </button>
+        {!hidePerStepSubmit ? (
+          <button
+            type="button"
+            className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
+            onClick={() => void onSubmitForReview()}
+            disabled={transitionBusy || !editable}
+          >
+            Soumettre cette étape pour revue
+          </button>
+        ) : null}
+        <ReportDraftGlobalSubmitButton
+          currentStep={DESCRIPTION_STEP}
+          currentPayload={draft}
+        />
       </div>
     </form>
   );

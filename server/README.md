@@ -179,6 +179,61 @@ Plus de détail : [`docker/README.md`](docker/README.md#prisma-migrations-et-dé
 
 **Démo login** : `demo-user@example.local` / `password123` (Postgres seed ou import Mongo).
 
+### MySQL, Prisma et seed report-draft (Docker)
+
+`DATABASE_NAME=MYSQL_PRISMA` dans **`server/.env`**. Détails Prisma : [`prisma/README.md`](prisma/README.md).
+
+**Accès Docker sans groupe `docker`** : si `permission denied` sur `/var/run/docker.sock`, préfixe les commandes ci-dessous par **`sudo`** (pas besoin d’ajouter ton utilisateur au groupe `docker` ni de passer root au quotidien).
+
+Toutes les commandes **`docker compose`** ci-dessous s’exécutent depuis **`bugbountyapp/server/`** (chemins relatifs au fichier compose et au SQL).
+
+**Démarrer MySQL + Adminer**
+
+```sh
+docker compose -f docker/compose.dev.yaml --profile mysql up -d mysql adminer
+```
+
+Adminer : http://localhost:8088 — serveur **`mysql`**, utilisateur / mot de passe **`bugbountyapp`**.
+
+**Seed SQL cycle report-draft** (non destructif, ré-exécutable) — équivalent de `pnpm docker:prisma:seed:dev-draft` :
+
+```sh
+docker compose -f docker/compose.dev.yaml --profile mysql exec -T mysql \
+  mysql -ubugbountyapp -pbugbountyapp bugbountyapp \
+  < prisma/seed/dev-report-draft-bucket-vault.mysql.sql
+```
+
+Avec `sudo` :
+
+```sh
+sudo docker compose -f docker/compose.dev.yaml --profile mysql exec -T mysql \
+  mysql -ubugbountyapp -pbugbountyapp bugbountyapp \
+  < prisma/seed/dev-report-draft-bucket-vault.mysql.sql
+```
+
+**Arrêter MySQL + Adminer**
+
+```sh
+docker compose -f docker/compose.dev.yaml --profile mysql stop adminer mysql
+```
+
+**Schéma + seed standard (rôles, demo-user)** : Prisma depuis la machine hôte (MySQL exposé sur `localhost:3306`), sans passer par le conteneur `mysql` pour le SQL :
+
+```sh
+DATABASE_NAME=MYSQL_PRISMA DATABASE_URL=mysql://bugbountyapp:bugbountyapp@127.0.0.1:3306/bugbountyapp \
+  pnpm exec prisma generate
+
+DATABASE_NAME=MYSQL_PRISMA DATABASE_URL=mysql://bugbountyapp:bugbountyapp@127.0.0.1:3306/bugbountyapp \
+  pnpm exec prisma migrate deploy
+
+DATABASE_NAME=MYSQL_PRISMA DATABASE_URL=mysql://bugbountyapp:bugbountyapp@127.0.0.1:3306/bugbountyapp \
+  pnpm exec prisma db seed
+```
+
+Raccourcis pnpm (réécrivent `DATABASE_URL` depuis `.env`) : `pnpm docker:mysql:up`, `pnpm docker:prisma:migrate:deploy:mysql`, `pnpm docker:prisma:seed:mysql`, `pnpm docker:prisma:seed:dev-draft`.
+
+Comptes créés par le seed dev-draft : `dev-hunter-1@example.local`, `dev-qc-1@example.local`, `dev-sa-1@example.local`, etc. — mot de passe identique à **`demo-user`** (`password123`).
+
 ### 1. Avec Docker
 
 Guide détaillé (installation Docker, `start.sh`, équivalents `docker compose` bruts) : [`docker/README.md`](docker/README.md).

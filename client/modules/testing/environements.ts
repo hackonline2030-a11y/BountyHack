@@ -3,6 +3,7 @@ import { StubIdProvider } from "@modules/core/provider/stub.id-provider";
 import { InMemoryReportDraftRepository } from "@modules/report-draft/core/repository-infra/in-memory.report-draft.repository-infra";
 import { InMemoryReviewerCommentRepository } from "@modules/report-draft/core/repository-infra/in-memory.reviewer-comment.repository-infra";
 import { InMemorySubmissionRepository } from "@modules/report-draft/core/repository-infra/in-memory.submission.repository-infra";
+import { InMemoryGlobalSubmissionRepository } from "@modules/report-draft/core/repository-infra/in-memory.global-submission.repository-infra";
 import { InMemoryReportTeamRepository } from "@modules/report-team/core/repository-infra/in-memory.report-team.repository-infra";
 import { Dependencies } from "@store/dependencies";
 import { AppState, createStore } from "@store/redux/store";
@@ -24,6 +25,7 @@ const createDependencies = (overrides?: Partial<Dependencies>): Dependencies => 
   clock: new StubClockProvider(),
   reportDraftRepository: new InMemoryReportDraftRepository(),
   submissionRepository: new InMemorySubmissionRepository(),
+  globalSubmissionRepository: new InMemoryGlobalSubmissionRepository(),
   reviewerCommentRepository: new InMemoryReviewerCommentRepository(),
   reportTeamRepository: new InMemoryReportTeamRepository(),
   ...overrides,

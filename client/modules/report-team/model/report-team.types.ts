@@ -1,3 +1,5 @@
+import type { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
+
 /** Workflow role inside a report team (distinct from global app role). */
 export type ReportTeamMemberRole =
   | "hunter"
@@ -20,6 +22,7 @@ export type ReportTeam = {
   reportDraftId: string;
   label: string;
   validity: ReportTeamValidity;
+  draftAggregateStatus: ReportDraftDomainModel.AggregateStatus;
   members: ReportTeamMember[];
   updatedAt: string;
 };

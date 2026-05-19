@@ -2,6 +2,7 @@ import type { Resource } from "i18next";
 import enAdministration from "@/app/i18n/locales/en/administration.json";
 import enCommon from "@/app/i18n/locales/en/common.json";
 import enConnexion from "@/app/i18n/locales/en/connexion.json";
+import enReportDraft from "@/app/i18n/locales/en/reportDraft.json";
 import enCredits from "@/app/i18n/locales/en/credits.json";
 import enLegal from "@/app/i18n/locales/en/legal.json";
 import enMyReports from "@/app/i18n/locales/en/myReports.json";
@@ -13,10 +14,12 @@ import enWelcomeAdmin from "@/app/i18n/locales/en/welcomeAdmin.json";
 import enWelcomeCoordinator from "@/app/i18n/locales/en/welcomeCoordinator.json";
 import enWelcomeHunter from "@/app/i18n/locales/en/welcomeHunter.json";
 import enWelcomeMentor from "@/app/i18n/locales/en/welcomeMentor.json";
+import enWelcomePlatformManager from "@/app/i18n/locales/en/welcomePlatformManager.json";
 import enWelcomeQualityChecker from "@/app/i18n/locales/en/welcomeQualityChecker.json";
 import frAdministration from "@/app/i18n/locales/fr/administration.json";
 import frCommon from "@/app/i18n/locales/fr/common.json";
 import frConnexion from "@/app/i18n/locales/fr/connexion.json";
+import frReportDraft from "@/app/i18n/locales/fr/reportDraft.json";
 import frCredits from "@/app/i18n/locales/fr/credits.json";
 import frLegal from "@/app/i18n/locales/fr/legal.json";
 import frMyReports from "@/app/i18n/locales/fr/myReports.json";
@@ -28,6 +31,7 @@ import frWelcomeAdmin from "@/app/i18n/locales/fr/welcomeAdmin.json";
 import frWelcomeCoordinator from "@/app/i18n/locales/fr/welcomeCoordinator.json";
 import frWelcomeHunter from "@/app/i18n/locales/fr/welcomeHunter.json";
 import frWelcomeMentor from "@/app/i18n/locales/fr/welcomeMentor.json";
+import frWelcomePlatformManager from "@/app/i18n/locales/fr/welcomePlatformManager.json";
 import frWelcomeQualityChecker from "@/app/i18n/locales/fr/welcomeQualityChecker.json";
 
 /**
@@ -46,11 +50,13 @@ export const clientI18nNamespaces = [
   "welcomeMentor",
   "welcomeCoordinator",
   "welcomeAdmin",
+  "welcomePlatformManager",
   "reportTeams",
   "parameters",
   "legal",
   "credits",
   "myReports",
+  "reportDraft",
 ] as const;
 
 export type ClientI18nNamespace = (typeof clientI18nNamespaces)[number];
@@ -67,11 +73,13 @@ export const clientI18nResources = {
     welcomeMentor: enWelcomeMentor,
     welcomeCoordinator: enWelcomeCoordinator,
     welcomeAdmin: enWelcomeAdmin,
+    welcomePlatformManager: enWelcomePlatformManager,
     reportTeams: enReportTeams,
     parameters: enParameters,
     legal: enLegal,
     credits: enCredits,
     myReports: enMyReports,
+    reportDraft: enReportDraft,
   },
   fr: {
     common: frCommon,
@@ -84,10 +92,12 @@ export const clientI18nResources = {
     welcomeMentor: frWelcomeMentor,
     welcomeCoordinator: frWelcomeCoordinator,
     welcomeAdmin: frWelcomeAdmin,
+    welcomePlatformManager: frWelcomePlatformManager,
     reportTeams: frReportTeams,
     parameters: frParameters,
     legal: frLegal,
     credits: frCredits,
     myReports: frMyReports,
+    reportDraft: frReportDraft,
   },
 } satisfies Resource;

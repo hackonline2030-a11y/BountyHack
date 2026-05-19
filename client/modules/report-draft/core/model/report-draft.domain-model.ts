@@ -62,54 +62,54 @@ export namespace ReportDraftDomainModel {
     confidentiality: string;
     integrity: string;
     availability: string;
+    /** Free-form sections after CVSS metrics (same bloc model as long-form steps). */
+    sectionBlocs: SectionBloc[];
+  };
+
+  export type SectionHeadingStyle = "normal" | "italic" | "bold";
+  export type SectionFontSize = "small" | "medium" | "large" | "huge";
+
+  export type SectionHeadingFormat = {
+    style: SectionHeadingStyle;
+    fontSize: SectionFontSize;
+    /** HTML color (e.g. `#1e293b`). */
+    color: string;
+  };
+
+  export type SectionBlocList = {
+    id: string;
+    ordered: boolean;
+    title: string;
+    titleBold: boolean;
+    items: string[];
   };
 
   /**
-   * Structured payloads for COLLECTION → FINAL (YesWeHack-style sections).
-   * Each field is plain text (Markdown-friendly prose is fine). Binaries
-   * stay in `StepState.attachments`.
-   *
-   * Required-field rules live in `long-form-steps.form.ts` (`*Form.isSubmitable`).
+   * Free-form section inside DESCRIPTION or long-form wizard steps (COLLECTION → FINAL).
+   * Order in `sectionBlocs[]` = PDF order. Images use `attachmentId` (phase 2).
    */
-  export type CollectionFields = {
-    hypothesis: string;
-    reconNarrative: string;
-    endpointsAndParameters: string;
-    evidenceSummary: string;
+  export type SectionBloc = {
+    id: string;
+    heading: string;
+    subheading: string;
+    headingFormat: SectionHeadingFormat;
+    subheadingFormat: SectionHeadingFormat;
+    body: string;
+    lists: SectionBlocList[];
+    attachmentId: string | null;
   };
 
-  export type ExploitationFields = {
-    prerequisites: string;
-    attackPath: string;
-    exploitationNarrative: string;
-    impactIfExploited: string;
+  /** Long-form steps store only repeatable section blocs (replaces fixed textareas). */
+  export type LongFormStepPayload = {
+    sectionBlocs: SectionBloc[];
   };
 
-  export type ProofOfConceptFields = {
-    environment: string;
-    stepsToReproduce: string;
-    proofArtifactsDescription: string;
-    expectedBehavior: string;
-  };
-
-  export type RisksFields = {
-    confidentiality: string;
-    integrity: string;
-    availability: string;
-    overallRiskStatement: string;
-  };
-
-  export type RemediationFields = {
-    shortTermMitigation: string;
-    longTermFix: string;
-    verificationSteps: string;
-  };
-
-  export type FinalFields = {
-    conclusion: string;
-    references: string;
-    bugBountyNotes: string;
-  };
+  export type CollectionFields = LongFormStepPayload;
+  export type ExploitationFields = LongFormStepPayload;
+  export type ProofOfConceptFields = LongFormStepPayload;
+  export type RisksFields = LongFormStepPayload;
+  export type RemediationFields = LongFormStepPayload;
+  export type FinalFields = LongFormStepPayload;
 
   export type ReportDraftId = string;
 
@@ -123,16 +123,22 @@ export namespace ReportDraftDomainModel {
     | "super_admin";
 
   export type StepStatus =
-    | "in-progress"      // le hunter édite
-    | "awaiting-review"  // soumis, en attente d'un reviewer
-    | "needs-revision"   // reviewer a demandé des changements
-    | "approved";        // step validé par le reviewer
+    | "in-progress"              // le hunter édite (workflow par étape)
+    | "awaiting-review"          // soumis, en attente QC/mentor par étape
+    | "needs-revision"           // révisions demandées par étape
+    | "approved"                 // étape validée par le QC
+    | "in-global-progress"       // révision globale super-admin — hunter édite
+    | "needs-global-revision"      // QC a demandé des changements sur la soumission globale
+    | "awaiting-global-review";    // soumission globale en attente QC
 
   export type AggregateStatus =
     | "draft"
     | "under-review"
+    | "under-global-review"
     | "ready-to-program"
+    /** @deprecated Prefer `published`. */
     | "submitted-to-program"
+    | "published"
     | "given-up"
     | "rejected";
 
@@ -200,6 +206,11 @@ export namespace ReportDraftDomainModel {
     updatedAt: string;
     /** Titre équipe coordinateur + roster (réponse API) — pas le titre contenu META. */
     reportTeam?: ReportDraftTeamSummary | null;
+    /** Set when super-admin requests a global revision (cleared on final approval). */
+    superAdminRevisionRequestedAt?: string | null;
+    /** Monotonic count of super-admin global revision requests. */
+    superAdminGlobalRevisionCount?: number;
+    /** @deprecated Legacy link to `reports` row — PDF uses the draft after `published`. */
     // TODO V2 (dette consciente) : terminationReason / terminatedBy /
     // terminatedByRole / terminatedAt pour audit des given-up et rejected
   }
@@ -220,6 +231,32 @@ export namespace ReportDraftDomainModel {
     decision: "pending" | "approve" | "request-changes" | "endorse";
     decidedAt?: string;
     decidedBy?: string;
+  }
+
+  /** Whole-draft submission after super-admin global revision (not tied to one step). */
+  export interface GlobalSubmission {
+    id: string;
+    reportDraftId: ReportDraftId;
+    revisionNumber: number;
+    payload: Record<string, unknown>;
+    submittedAt: string;
+    submittedBy: string;
+    reviewerRole: ReviewerRole;
+    decision: "pending" | "approve" | "request-changes" | "endorse";
+    decidedAt?: string;
+    decidedBy?: string;
+  }
+
+  /** Comment on a global submission (QC or super-admin). */
+  export interface GlobalReviewerComment {
+    id: string;
+    globalSubmissionId: string;
+    authorId: string;
+    authorRole: ReviewerRole;
+    anchor?: { field: string } | null;
+    body: string;
+    createdAt: string;
+    resolvedAt?: string;
   }
 
   // ============================================================

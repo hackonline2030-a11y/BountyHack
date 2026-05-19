@@ -12,14 +12,19 @@ export class SaveReportDraftCommand {
   ) {}
 
   async execute(identity: Identity, draft: ReportDraftWire): Promise<void> {
-    this.access.assertCanSaveDraft(identity, draft);
+    await this.access.assertCanSaveDraft(identity, draft);
 
     const existing = await this.repository.findById(draft.id);
     if (!existing) {
       throw new NotFoundException('Report draft not found');
     }
 
-    const { reportTeam: _readOnlyTeam, ...toPersist } = draft;
+    const {
+      reportTeam: _readOnlyTeam,
+      superAdminRevisionRequestedAt: _revisionMarker,
+      superAdminGlobalRevisionCount: _revisionCount,
+      ...toPersist
+    } = draft;
     await this.repository.save(toPersist);
   }
 }

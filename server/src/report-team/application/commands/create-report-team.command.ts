@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import type { Identity } from '../../../auth/domain/models/identity';
 import type {
@@ -31,7 +32,17 @@ export class CreateReportTeamCommand {
       throw new BadRequestException('Team label is required');
     }
 
+    const reportDraftId = input.reportDraftId?.trim();
     const rawMembers = input.members ?? [];
+
+    if (reportDraftId) {
+      return this.createForOrphanDraft(identity, {
+        label,
+        reportDraftId,
+        rawMembers,
+      });
+    }
+
     if (rawMembers.length === 0) {
       throw new BadRequestException('At least one team member is required');
     }
@@ -50,10 +61,62 @@ export class CreateReportTeamCommand {
     const validity = computeTeamValidity(members.map((m) => m.role));
     if (validity === 'incomplete') {
       throw new BadRequestException(
-        'Team must include at least one hunter, one quality checker, and one mentor',
+        'Team must include at least one hunter and either a mentor or a quality checker',
       );
     }
 
     return this.repository.create({ label, members });
+  }
+
+  private async createForOrphanDraft(
+    _identity: Identity,
+    input: {
+      label: string;
+      reportDraftId: string;
+      rawMembers: CreateReportTeamInput['members'];
+    },
+  ): Promise<ReportTeamWire> {
+    const ownerId = await this.repository.findOrphanDraftOwnerId(
+      input.reportDraftId,
+    );
+    if (ownerId === null) {
+      throw new NotFoundException(
+        'Orphan report draft not found or already has a team',
+      );
+    }
+
+    if (input.rawMembers.length === 0) {
+      throw new BadRequestException(
+        'Select at least one pending join request to add to the team',
+      );
+    }
+
+    const extraHunter = input.rawMembers.find(
+      (m) => m.role === 'hunter' && m.userId !== ownerId,
+    );
+    if (extraHunter) {
+      throw new BadRequestException(
+        'The orphan draft owner is already the team hunter; select mentor or quality checker requests only',
+      );
+    }
+
+    const applicants = input.rawMembers.filter((m) => m.userId !== ownerId);
+    const members = await this.memberRoleResolver.resolveMemberAssignments(
+      applicants,
+    );
+
+    const allRoles = ['hunter' as const, ...members.map((m) => m.role)];
+    const validity = computeTeamValidity(allRoles);
+    if (validity === 'incomplete') {
+      throw new BadRequestException(
+        'Team must include the draft hunter and either a mentor or a quality checker from pending requests',
+      );
+    }
+
+    return this.repository.create({
+      label: input.label,
+      reportDraftId: input.reportDraftId,
+      members,
+    });
   }
 }

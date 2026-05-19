@@ -8,7 +8,7 @@
     "validity": {
       "valid": "Équipe valide",
       "incomplete": "Équipe incomplète",
-      "hint": "Une équipe rapport est valide lorsqu’elle compte au moins un hunter, un quality checker et un mentor."
+      "hint": "Une équipe rapport est valide avec au moins un hunter et un mentor ou un quality checker (vous pouvez ajouter d’autres membres librement)."
     },
     "roles": {
       "hunter": "Hunter",
@@ -56,6 +56,36 @@
       "noTeamsAvailable": "Aucune équipe disponible pour le moment. Le coordinateur doit d’abord créer une équipe pour un brouillon de rapport.",
       "errorGeneric": "Impossible d’envoyer la demande pour le moment."
     },
+    "orphanDrafts": {
+      "title": "Brouillons sans équipe",
+      "subheading": "Ces brouillons ne sont rattachés à aucune équipe rapport (équipe supprimée ou jamais créée). Le hunter reste propriétaire. Utilisez les demandes d’affectation ci-dessus pour constituer une nouvelle équipe sur demande.",
+      "empty": "Aucun brouillon orphelin pour le moment.",
+      "table": {
+        "reportDraftId": "ID brouillon",
+        "report": "Rapport",
+        "hunter": "Hunter (propriétaire)",
+        "status": "Statut global",
+        "updated": "Mis à jour",
+        "untitled": "Rapport sans titre",
+        "actions": "Actions",
+        "attachRequests": "Associer des demandes"
+      },
+      "attach": {
+        "title": "Constituer une équipe sur ce brouillon",
+        "description": "Le hunter propriétaire reste membre. Cochez les demandes d’inscription en attente (mentor ou quality checker) à rattacher à ce brouillon.",
+        "cancel": "Annuler",
+        "ownerHunter": "Hunter propriétaire du brouillon",
+        "labelField": "Libellé de l’équipe",
+        "labelPlaceholder": "ex. Rapport #1042 — XSS module commentaires",
+        "applicantsTitle": "Demandes d’inscription en attente",
+        "applicantsEmpty": "Aucune demande mentor ou quality checker en attente (inscription générale).",
+        "submit": "Créer l’équipe sur ce brouillon",
+        "submitting": "Création…",
+        "success": "Équipe créée sur le brouillon orphelin.",
+        "errorLabel": "Le libellé de l’équipe est obligatoire.",
+        "errorApplicants": "Sélectionnez au moins une demande en attente."
+      }
+    },
     "admin": {
       "metaTitle": "Gestion des équipes rapport",
       "heading": "Équipes rapport — administration",
@@ -64,13 +94,19 @@
         "reportDraftId": "ID brouillon rapport",
         "label": "Libellé",
         "validity": "Validité",
+        "reportStatus": "Statut du rapport",
         "members": "Membres",
-        "actions": "Actions"
+        "actions": "Actions",
+        "openFinalValidation": "Validation finale du rapport"
       },
       "edit": "Modifier",
-      "delete": "Supprimer",
-      "deleteConfirm": "Supprimer cette équipe (maquette) ?",
-      "mockAction": "maquette — aucune API"
+      "deleteTeam": "Supprimer l'équipe",
+      "deleteTeamConfirm": "Supprimer l'équipe « {{label}} » ? Le brouillon de rapport restera visible dans « Brouillons sans équipe ».",
+      "deleteDraft": "Supprimer le brouillon de rapport",
+      "deleteDraftModalTitle": "Supprimer définitivement ce rapport ?",
+      "deleteDraftModalBody": "Cette action efface le brouillon « {{label}} » (ID {{draftId}}), toutes les étapes, soumissions, commentaires et l'équipe associée. Elle est irréversible.",
+      "deleteDraftModalConfirm": "Supprimer définitivement",
+      "cancel": "Annuler"
     },
     "coordinator": {
       "metaTitle": "Coordination des équipes rapport",
@@ -98,7 +134,7 @@
       },
       "create": {
         "title": "Créer une équipe rapport",
-        "description": "Un brouillon de rapport est créé automatiquement. L’équipe doit comporter un hunter, un quality checker et un mentor.",
+        "description": "Un brouillon de rapport est créé automatiquement. L’équipe doit comporter un hunter et un mentor ou un quality checker. Vous pouvez ajouter d’autres membres librement.",
         "labelField": "Titre de l’équipe",
         "labelPlaceholder": "Ex. Rapport #1042 — XSS module commentaires",
         "membersField": "Membres sélectionnés",

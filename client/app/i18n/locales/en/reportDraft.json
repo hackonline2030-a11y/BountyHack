@@ -1,0 +1,88 @@
+{
+  "reportDraft": {
+    "finalValidation": {
+      "metaTitle": "Final report validation",
+      "heading": "Final validation",
+      "subheading": "All report drafts. By default, only those ready to submit are shown.",
+      "backToAdmin": "← Admin dashboard",
+      "filter": {
+        "label": "Filter by aggregate status",
+        "options": {
+          "all": "All statuses",
+          "ready-to-program": "Ready to submit (default)",
+          "under-review": "Under review",
+          "under-global-review": "Under global review",
+          "draft": "Draft",
+          "submitted-to-program": "Submitted to program",
+          "published": "Published",
+          "rejected": "Rejected",
+          "given-up": "Given up"
+        }
+      },
+      "table": {
+        "count": "{{count}} shown of {{total}} draft(s)",
+        "empty": "No drafts match this filter.",
+        "untitled": "Untitled report",
+        "columns": {
+          "report": "Report",
+          "status": "Aggregate status",
+          "team": "Team",
+          "steps": "Steps",
+          "updated": "Updated"
+        }
+      },
+      "errors": {
+        "unreachable": "Could not reach the API.",
+        "malformed_payload": "Invalid server response."
+      },
+      "detail": {
+        "metaTitle": "Final validation — report",
+        "backToTeams": "← Back to teams",
+        "tablistAria": "Final report validation",
+        "tabs": {
+          "generalPreview": "General preview",
+          "superAdminComments": "Comments"
+        },
+        "actions": {
+          "heading": "Final decision",
+          "hint": "Final validation is available when every step is approved by the quality checker (ready-to-submit status). To request a global revision, save your per-step comments first.",
+          "status": {
+            "roleQualityChecker": "quality checker",
+            "roleSuperAdmin": "super-admin",
+            "globalCycleClosed": "Global revision #{{revision}} approved by the {{role}}. No further global revision is possible. Only the super-admin can finalize this draft.",
+            "globalCycleOpenPendingSa": "Global revision #{{revision}} in progress — your decision is required before final validation.",
+            "globalCycleOpen": "Global revision #{{revision}} in progress — awaiting QC / super-admin decisions.",
+            "readyNoGlobalYet": "Draft ready to submit. You may request a global revision (once) or finalize the draft.",
+            "awaitingReady": "Final validation is unavailable until the draft is ready to submit.",
+            "submitted": "Draft already submitted to the program."
+          },
+          "approve": "Final validation",
+          "requestRevision": "Request revision",
+          "approveDisabledTitle": "Requires ready-to-submit status and Final step approved by the quality checker",
+          "revisionDisabledTitle": "Save at least one super-admin comment before requesting revision",
+          "revisionAlreadyUsedTitle": "Global revision was already requested once for this report",
+          "pendingGlobalReviewHint": "A global submission is awaiting review (QC or super-admin) before you can finalize the report.",
+          "openGlobalSubmissionReview": "Open global submission review",
+          "generatePdf": "Generate PDF",
+          "generatePdfLoading": "Generating PDF…",
+          "generatePdfDisabledTitle": "Available after final validation (published draft)"
+        },
+        "comments": {
+          "intro": "One general comment per step. The team (hunter, mentor, quality checker) reads them in the “Super-admin feedback” tab.",
+          "placeholder": "Feedback for this step…",
+          "save": "Save comments",
+          "steps": {
+            "meta": "Metadata",
+            "description": "Description",
+            "collection": "Collection",
+            "exploitation": "Exploitation",
+            "proofOfConcept": "Proof of concept",
+            "risks": "Risks",
+            "remediation": "Remediation",
+            "final": "Final"
+          }
+        }
+      }
+    }
+  }
+}

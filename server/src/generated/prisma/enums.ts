@@ -34,7 +34,10 @@ export const StepStatus = {
   IN_PROGRESS: 'IN_PROGRESS',
   AWAITING_REVIEW: 'AWAITING_REVIEW',
   NEEDS_REVISION: 'NEEDS_REVISION',
-  APPROVED: 'APPROVED'
+  APPROVED: 'APPROVED',
+  IN_GLOBAL_PROGRESS: 'IN_GLOBAL_PROGRESS',
+  NEEDS_GLOBAL_REVISION: 'NEEDS_GLOBAL_REVISION',
+  AWAITING_GLOBAL_REVIEW: 'AWAITING_GLOBAL_REVIEW'
 } as const
 
 export type StepStatus = (typeof StepStatus)[keyof typeof StepStatus]
@@ -43,8 +46,10 @@ export type StepStatus = (typeof StepStatus)[keyof typeof StepStatus]
 export const ReportDraftAggregateStatus = {
   DRAFT: 'DRAFT',
   UNDER_REVIEW: 'UNDER_REVIEW',
+  UNDER_GLOBAL_REVIEW: 'UNDER_GLOBAL_REVIEW',
   READY_TO_PROGRAM: 'READY_TO_PROGRAM',
   SUBMITTED_TO_PROGRAM: 'SUBMITTED_TO_PROGRAM',
+  PUBLISHED: 'PUBLISHED',
   GIVEN_UP: 'GIVEN_UP',
   REJECTED: 'REJECTED'
 } as const
@@ -81,14 +86,6 @@ export const SubmissionDecision = {
 } as const
 
 export type SubmissionDecision = (typeof SubmissionDecision)[keyof typeof SubmissionDecision]
-
-
-export const ReportStatus = {
-  PENDING: 'PENDING',
-  PUBLISHED: 'PUBLISHED'
-} as const
-
-export type ReportStatus = (typeof ReportStatus)[keyof typeof ReportStatus]
 
 
 export const ReportTeamMemberRole = {

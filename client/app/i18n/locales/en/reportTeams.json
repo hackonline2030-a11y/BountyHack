@@ -8,7 +8,7 @@
     "validity": {
       "valid": "Valid team",
       "incomplete": "Incomplete team",
-      "hint": "A report team is valid when it has at least one hunter, one quality checker, and one mentor."
+      "hint": "A report team is valid when it has at least one hunter and either a mentor or a quality checker (you may add more members as needed)."
     },
     "roles": {
       "hunter": "Hunter",
@@ -56,6 +56,36 @@
       "noTeamsAvailable": "No teams available yet. The coordinator must create a team for a report draft first.",
       "errorGeneric": "Could not send the request."
     },
+    "orphanDrafts": {
+      "title": "Drafts without a team",
+      "subheading": "These report drafts are not linked to any report team (team deleted or never created). The hunter remains the owner. Use the assignment requests above to form a new team on request.",
+      "empty": "No orphan drafts at the moment.",
+      "table": {
+        "reportDraftId": "Draft ID",
+        "report": "Report",
+        "hunter": "Hunter (owner)",
+        "status": "Overall status",
+        "updated": "Updated",
+        "untitled": "Untitled report",
+        "actions": "Actions",
+        "attachRequests": "Attach requests"
+      },
+      "attach": {
+        "title": "Form a team on this draft",
+        "description": "The owning hunter stays on the team. Check pending enrollment requests (mentor or quality checker) to attach to this draft.",
+        "cancel": "Cancel",
+        "ownerHunter": "Draft owner (hunter)",
+        "labelField": "Team label",
+        "labelPlaceholder": "e.g. Report #1042 — comments module XSS",
+        "applicantsTitle": "Pending enrollment requests",
+        "applicantsEmpty": "No pending mentor or quality checker enrollment requests.",
+        "submit": "Create team on this draft",
+        "submitting": "Creating…",
+        "success": "Team created on the orphan draft.",
+        "errorLabel": "Team label is required.",
+        "errorApplicants": "Select at least one pending request."
+      }
+    },
     "admin": {
       "metaTitle": "Report team management",
       "heading": "Report teams — administration",
@@ -64,13 +94,19 @@
         "reportDraftId": "Report draft ID",
         "label": "Label",
         "validity": "Validity",
+        "reportStatus": "Report status",
         "members": "Members",
-        "actions": "Actions"
+        "actions": "Actions",
+        "openFinalValidation": "Final report validation"
       },
       "edit": "Edit",
-      "delete": "Delete",
-      "deleteConfirm": "Delete this team (mockup)?",
-      "mockAction": "mockup — no API yet"
+      "deleteTeam": "Delete team",
+      "deleteTeamConfirm": "Delete team « {{label}} »? The report draft will remain and appear under « Drafts without team ».",
+      "deleteDraft": "Delete report draft",
+      "deleteDraftModalTitle": "Permanently delete this report?",
+      "deleteDraftModalBody": "This will erase draft « {{label}} » (ID {{draftId}}), all steps, submissions, comments, and the linked team. This cannot be undone.",
+      "deleteDraftModalConfirm": "Delete permanently",
+      "cancel": "Cancel"
     },
     "coordinator": {
       "metaTitle": "Report team coordination",
@@ -98,7 +134,7 @@
       },
       "create": {
         "title": "Create a report team",
-        "description": "A report draft is created automatically. The team must include one hunter, one quality checker, and one mentor.",
+        "description": "A report draft is created automatically. The team must include one hunter and either a mentor or a quality checker. You may add more members freely.",
         "labelField": "Team title",
         "labelPlaceholder": "e.g. Report #1042 — XSS comments module",
         "membersField": "Selected members",

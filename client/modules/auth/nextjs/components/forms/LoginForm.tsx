@@ -6,10 +6,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useT } from "next-i18next/client";
 import { localePrefixFromPathname } from "@/lib/locale-path";
 import { AppRoleCode } from "@/lib/app-role-code";
+import { postAuthLogin } from "@/lib/auth-api";
 import {
-  messageFromNestBody,
-  postAuthLogin,
-} from "@/lib/auth-api";
+  isLoginTotpRequired,
+  loginErrorMessageFromNest,
+} from "@/lib/login-error-message";
 
 const inputBase =
   "w-full bg-white placeholder:text-gray-500 text-gray-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow";
@@ -19,7 +20,8 @@ type PostLoginTarget =
   | "welcome-hunter"
   | "welcome-quality-checker"
   | "welcome-mentor"
-  | "welcome-coordinator";
+  | "welcome-coordinator"
+  | "welcome-platform-manager";
 
 /**
  * Maps the `roleCode` returned by `POST /api/session` to a dashboard slug.
@@ -35,6 +37,7 @@ function dashboardSlugForRole(roleCode: unknown): PostLoginTarget | null {
   if (roleCode === AppRoleCode.QUALITY_CHECKER) return "welcome-quality-checker";
   if (roleCode === AppRoleCode.MENTOR) return "welcome-mentor";
   if (roleCode === AppRoleCode.COORDINATOR) return "welcome-coordinator";
+  if (roleCode === AppRoleCode.QUALITY_CONTENT) return "welcome-platform-manager";
   return null;
 }
 
@@ -67,10 +70,30 @@ export function LoginForm() {
     setStatus("loading");
     setMessage("");
 
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (step === "credentials") {
+      if (!trimmedEmail) {
+        setStatus("error");
+        setMessage(t("loginForm.errors.emailRequired"));
+        return;
+      }
+      if (!trimmedPassword) {
+        setStatus("error");
+        setMessage(t("loginForm.errors.passwordRequired"));
+        return;
+      }
+    } else if (code.trim().length < 6) {
+      setStatus("error");
+      setMessage(t("loginForm.errors.invalidTotp"));
+      return;
+    }
+
     try {
       const res = await postAuthLogin({
-        email,
-        password,
+        email: trimmedEmail,
+        password: trimmedPassword,
         code: step === "totp" ? code.trim() || undefined : undefined,
       });
       let data: unknown;
@@ -81,15 +104,14 @@ export function LoginForm() {
       }
 
       if (!res.ok) {
-        const errorText = messageFromNestBody(data, t("loginForm.errorLogin"));
-        if (step === "credentials" && /totp code required/i.test(errorText)) {
+        if (step === "credentials" && isLoginTotpRequired(data)) {
           setStep("totp");
           setStatus("idle");
           setMessage(t("loginForm.totpStepPrompt"));
           return;
         }
         setStatus("error");
-        setMessage(errorText);
+        setMessage(loginErrorMessageFromNest(data, t));
         return;
       }
 
@@ -97,7 +119,7 @@ export function LoginForm() {
       const token = nest.token?.trim();
       if (!token) {
         setStatus("error");
-        setMessage(t("loginForm.errorLogin"));
+        setMessage(t("loginForm.errors.generic"));
         return;
       }
 
@@ -123,7 +145,7 @@ export function LoginForm() {
 
       if (!sessionRes.ok) {
         setStatus("error");
-        setMessage(t("loginForm.errorLogin"));
+        setMessage(t("loginForm.errors.generic"));
         return;
       }
 
