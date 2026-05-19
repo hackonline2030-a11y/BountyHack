@@ -13,19 +13,19 @@ type Props = {
  * Page de garde A4 : titre centré, « par {hunter} », table des matières (comme le PDF final).
  */
 export const ReportDraftPdfCoverPage: FC<Props> = ({ title, author, toc }) => (
-  <div className="flex min-h-[calc(297mm-40mm)] flex-col pt-[18mm]">
+  <div className="report-preview-cover-inner flex flex-col">
     <div className="text-center">
-      <h1 className="m-0 text-[1.75rem] font-bold leading-snug text-slate-900 sm:text-[2.75rem]">
+      <h1 className="m-0 text-[2.75rem] font-bold leading-snug text-slate-900">
         {title}
       </h1>
-      <p className="mt-7 text-xl text-slate-900 sm:text-[2.125rem]">par {author}</p>
+      <p className="mt-7 text-[2.125rem] text-slate-900">par {author}</p>
     </div>
 
     {toc.length > 0 ? (
       <ol className="mt-20 w-full list-none space-y-1.5 p-0 text-sm text-slate-900">
         {toc.map((entry) => (
-          <li key={`${entry.page}-${entry.label}`} className="flex items-baseline gap-1">
-            <span className={entry.bold ? "shrink-0 font-bold" : "shrink-0"}>
+          <li key={`${entry.page}-${entry.label}`} className="flex min-w-0 items-baseline gap-1">
+            <span className={entry.bold ? "min-w-0 wrap-break-word font-bold" : "min-w-0 wrap-break-word"}>
               {entry.label}
             </span>
             <span

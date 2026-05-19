@@ -317,7 +317,7 @@
   transform: scaleX(1);
 }
 .header-nav-link:focus-visible {
-  @apply rounded-sm outline outline-2 outline-offset-4 outline-black/40;
+  @apply rounded-sm outline-none ring-2 ring-black/40 ring-offset-4;
 }
 
 /* Active route – same look as hovered, but pinned. */
@@ -331,6 +331,72 @@
 /* Logout (and other action buttons styled as nav links) honour `disabled`. */
 .header-nav-link:disabled {
   @apply cursor-not-allowed opacity-50;
+}
+
+.header-mobile-nav-link {
+  @apply block w-full cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-black/75 no-underline transition-colors;
+}
+.header-mobile-nav-link:hover,
+.header-mobile-nav-link:focus-visible {
+  @apply bg-black/5 text-black;
+}
+.header-mobile-nav-link:focus-visible {
+  @apply outline-none ring-2 ring-black/40 ring-offset-2;
+}
+.header-mobile-nav-link--active {
+  @apply bg-black/5 text-black;
+}
+
+/* -----------------------------------------------------------------------------
+   Report draft preview — responsive A4-like pages.
+   The final PDF still uses true A4 dimensions server-side; this UI preview must
+   fit the current viewport/container so mobile users never need horizontal scroll.
+   ----------------------------------------------------------------------------- */
+.report-preview-scroll {
+  overflow-x: clip;
+}
+
+.report-preview-stack {
+  box-sizing: border-box;
+  container-type: inline-size;
+  max-width: min(100%, calc(210mm + 1rem));
+  padding-inline: 0.5rem;
+}
+
+.report-preview-page,
+.report-preview-page-break {
+  width: 100%;
+  max-width: 210mm;
+}
+
+.report-preview-page {
+  position: relative;
+  min-height: var(--report-preview-page-height, min(297mm, calc(100cqw * 1.4142857)));
+  overflow: hidden;
+}
+
+.report-preview-page-content {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  width: 210mm;
+  min-height: 297mm;
+  overflow-wrap: anywhere;
+  padding: 20mm 24mm;
+  font-size: 14px;
+  line-height: 1.45;
+  transform: scale(var(--report-preview-scale, 1));
+  transform-origin: top left;
+}
+
+.report-preview-page-break {
+  max-width: 100%;
+}
+
+.report-preview-cover-inner {
+  min-height: calc(297mm - 40mm);
+  padding-top: 18mm;
 }
 
 @media (prefers-reduced-motion: reduce) {
