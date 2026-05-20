@@ -23,6 +23,8 @@ export type ReportTeam = {
   label: string;
   validity: ReportTeamValidity;
   draftAggregateStatus: ReportDraftDomainModel.AggregateStatus;
+  /** Report draft owner (primary hunter) — cannot be removed from the team. */
+  reportDraftOwnerUserId: string;
   /** User id of the hunter who may edit/submit steps (`hunter_writer_id` on the draft). */
   hunterWriterUserId: string;
   members: ReportTeamMember[];
@@ -37,6 +39,19 @@ export type ReportTeamJoinRequest = {
   userId?: string;
   requesterDisplayName?: string;
   requestedRole: ReportTeamMemberRole;
+  message?: string;
+  status: MembershipRequestStatus;
+  requestedAt: string;
+};
+
+/** Primary hunter asks the coordinator to remove them (cannot self-leave while `hunter_id`). */
+export type ReportTeamLeaveRequest = {
+  id: string;
+  teamId: string;
+  reportDraftId: string;
+  teamLabel: string;
+  userId: string;
+  requesterDisplayName: string;
   message?: string;
   status: MembershipRequestStatus;
   requestedAt: string;

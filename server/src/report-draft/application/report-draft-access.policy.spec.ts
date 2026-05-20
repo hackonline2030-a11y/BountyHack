@@ -4,6 +4,7 @@ import { ReportDraftAccessPolicy } from './report-draft-access.policy';
 import type { IReportDraftRepository } from '../ports/report-draft-repository.interface';
 import type { ISubmissionRepository } from '../ports/submission-repository.interface';
 import type { IReportTeamRepository } from '../../report-team/ports/report-team-repository.interface';
+import type { IUserRepository } from '../../users/ports/user-repository.interface';
 import type { ReportDraftWire, SubmissionWire } from '../models/report-draft-api.types';
 
 function minimalDraft(overrides?: Partial<ReportDraftWire>): ReportDraftWire {
@@ -54,6 +55,7 @@ describe('ReportDraftAccessPolicy', () => {
   const reportDraftRepository: jest.Mocked<IReportDraftRepository> = {
     save: jest.fn(),
     updateHunterWriterId: jest.fn(),
+    updatePrimaryHunterId: jest.fn(),
     findById: jest.fn(),
     findByHunterId: jest.fn(),
     findByHunterIdOrTeamMembership: jest.fn(),
@@ -86,10 +88,18 @@ describe('ReportDraftAccessPolicy', () => {
     findByReportDraftId: jest.fn().mockResolvedValue(null),
   };
 
+  const userRepository: jest.Mocked<
+    Pick<IUserRepository, 'findSummaryById' | 'listSummariesByRoleCode'>
+  > = {
+    findSummaryById: jest.fn(),
+    listSummariesByRoleCode: jest.fn(),
+  };
+
   const policy = new ReportDraftAccessPolicy(
     reportDraftRepository,
     submissionRepository,
     reportTeamRepository as unknown as IReportTeamRepository,
+    userRepository as unknown as IUserRepository,
   );
 
   beforeEach(() => {
@@ -157,6 +167,7 @@ describe('ReportDraftAccessPolicy', () => {
       validity: 'valid',
       draftAggregateStatus: 'draft',
       hunterWriterUserId: 'hunter-1',
+      reportDraftOwnerUserId: 'hunter-1',
       updatedAt: '2026-05-15T10:00:00.000Z',
     });
     await expect(
@@ -389,6 +400,7 @@ describe('ReportDraftAccessPolicy', () => {
       validity: 'valid',
       draftAggregateStatus: 'draft',
       hunterWriterUserId: 'hunter-1',
+      reportDraftOwnerUserId: 'hunter-1',
       members: [{ userId: 'hunter-1', displayName: 'H1', role: 'hunter' }],
       updatedAt: '2026-01-01T00:00:00.000Z',
     });
@@ -412,6 +424,7 @@ describe('ReportDraftAccessPolicy', () => {
       validity: 'valid',
       draftAggregateStatus: 'draft',
       hunterWriterUserId: 'hunter-1',
+      reportDraftOwnerUserId: 'hunter-1',
       members: [
         { userId: 'hunter-1', displayName: 'A', role: 'hunter' },
         { userId: 'hunter-2', displayName: 'B', role: 'hunter' },
@@ -450,6 +463,7 @@ describe('ReportDraftAccessPolicy', () => {
       validity: 'valid',
       draftAggregateStatus: 'draft',
       hunterWriterUserId: 'hunter-1',
+      reportDraftOwnerUserId: 'hunter-1',
       members: [
         { userId: 'hunter-1', displayName: 'A', role: 'hunter' },
         { userId: 'qc-1', displayName: 'QC', role: 'quality_checker' },
@@ -474,6 +488,64 @@ describe('ReportDraftAccessPolicy', () => {
         },
         draft,
         'qc-1',
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('allows coordinator to set primary hunter to any user with hunter role', async () => {
+    userRepository.findSummaryById.mockResolvedValue({
+      uid: 'hunter-2',
+      username: 'B',
+      email: null,
+      roleCode: AppRoleCode.HUNTER,
+    });
+    const draft = minimalDraft();
+    await expect(
+      policy.assertCanSetPrimaryHunter(
+        {
+          uid: 'coord-1',
+          email: 'coord@example.com',
+          roleCode: AppRoleCode.COORDINATOR,
+        },
+        draft,
+        'hunter-2',
+      ),
+    ).resolves.toBeUndefined();
+  });
+
+  it('rejects coordinator setting primary hunter to a non-hunter user', async () => {
+    userRepository.findSummaryById.mockResolvedValue({
+      uid: 'qc-1',
+      username: 'QC',
+      email: null,
+      roleCode: AppRoleCode.QUALITY_CHECKER,
+    });
+    const draft = minimalDraft();
+    await expect(
+      policy.assertCanSetPrimaryHunter(
+        {
+          uid: 'coord-1',
+          email: 'coord@example.com',
+          roleCode: AppRoleCode.COORDINATOR,
+        },
+        draft,
+        'qc-1',
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('rejects coordinator setting primary hunter to unknown user id', async () => {
+    userRepository.findSummaryById.mockResolvedValue(null);
+    const draft = minimalDraft();
+    await expect(
+      policy.assertCanSetPrimaryHunter(
+        {
+          uid: 'coord-1',
+          email: 'coord@example.com',
+          roleCode: AppRoleCode.COORDINATOR,
+        },
+        draft,
+        'missing-user',
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });

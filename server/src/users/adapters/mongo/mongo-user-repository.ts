@@ -3,6 +3,7 @@ import { IUserRepository } from '../../ports/user-repository.interface';
 import { MongoUser } from './mongo-user';
 import { UserAdminSummary, UserRecord } from '../../models';
 import { CreateUserProfilePayload } from '../../payloads';
+import { AppRoleCode } from '../../../shared/rbac/app-role.code';
 import { HttpException, HttpStatus, Inject, NotImplementedException } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 
@@ -39,6 +40,22 @@ export class MongoUserRepository implements IUserRepository {
   async listAdminSummaries(): Promise<UserAdminSummary[]> {
     throw new NotImplementedException(
       'Admin user listing is not implemented on the Mongo adapter yet.',
+    );
+  }
+
+  async findSummaryById(id: string): Promise<UserAdminSummary | null> {
+    const record = await this.findById(id);
+    return {
+      uid: record.uid,
+      username: record.username,
+      email: null,
+      roleCode: AppRoleCode.HUNTER,
+    };
+  }
+
+  async listSummariesByRoleCode(_roleCode: AppRoleCode): Promise<UserAdminSummary[]> {
+    throw new NotImplementedException(
+      'Role-based user listing is not implemented on the Mongo adapter yet.',
     );
   }
 }

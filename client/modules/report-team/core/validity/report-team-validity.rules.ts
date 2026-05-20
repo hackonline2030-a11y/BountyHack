@@ -9,6 +9,8 @@ export type ReportTeamWorkflowRole = Exclude<ReportTeamMemberRole, "super_admin"
  *
  * Structure: AND across rows, OR within each row.
  *
+ * Business rule (enforced on the server): at most one quality checker per team.
+ *
  * Current — hunter AND (mentor OR quality_checker):
  *   [['hunter'], ['mentor', 'quality_checker']]
  *

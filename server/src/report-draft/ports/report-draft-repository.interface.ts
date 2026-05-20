@@ -5,6 +5,11 @@ export interface IReportDraftRepository {
   save(draft: ReportDraftWire): Promise<void>;
   /** Updates only `hunter_writer_id` (must stay in sync with squad rules in application code). */
   updateHunterWriterId(draftId: string, hunterWriterId: string): Promise<void>;
+  /**
+   * Updates `hunter_id` (draft owner). If the designated writer was the previous owner,
+   * `hunter_writer_id` is moved to the new owner as well.
+   */
+  updatePrimaryHunterId(draftId: string, hunterId: string): Promise<void>;
   findById(id: string): Promise<ReportDraftWire | null>;
   findByHunterId(hunterId: string): Promise<ReportDraftWire[]>;
   /**

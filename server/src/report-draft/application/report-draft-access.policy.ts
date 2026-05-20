@@ -10,6 +10,7 @@ import type {
 import type { IReportDraftRepository } from '../ports/report-draft-repository.interface';
 import type { ISubmissionRepository } from '../ports/submission-repository.interface';
 import type { IReportTeamRepository } from '../../report-team/ports/report-team-repository.interface';
+import type { IUserRepository } from '../../users/ports/user-repository.interface';
 
 @Injectable()
 export class ReportDraftAccessPolicy {
@@ -17,6 +18,7 @@ export class ReportDraftAccessPolicy {
     private readonly reportDraftRepository: IReportDraftRepository,
     private readonly submissionRepository: ISubmissionRepository,
     private readonly reportTeamRepository: IReportTeamRepository,
+    private readonly userRepository: IUserRepository,
   ) {}
 
   /**
@@ -109,6 +111,30 @@ export class ReportDraftAccessPolicy {
     if (!target || target.role !== 'hunter') {
       throw new ForbiddenException(
         'The designated writer must be a hunter on this squad',
+      );
+    }
+  }
+
+  /**
+   * Coordinators and super admins may change `report_drafts.hunter_id` to any user
+   * registered in `users` with global role `HUNTER` (not limited to current squad).
+   */
+  async assertCanSetPrimaryHunter(
+    identity: Identity,
+    draft: ReportDraftWire,
+    newHunterId: string,
+  ): Promise<void> {
+    void draft;
+    if (
+      identity.roleCode !== AppRoleCode.COORDINATOR &&
+      identity.roleCode !== AppRoleCode.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException('Coordinator or super admin required');
+    }
+    const user = await this.userRepository.findSummaryById(newHunterId);
+    if (user === null || user.roleCode !== AppRoleCode.HUNTER) {
+      throw new ForbiddenException(
+        'The primary hunter must be an existing user with the hunter role',
       );
     }
   }

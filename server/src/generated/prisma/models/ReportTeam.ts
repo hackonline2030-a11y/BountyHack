@@ -185,6 +185,7 @@ export type ReportTeamWhereInput = {
   reportDraft?: Prisma.XOR<Prisma.ReportDraftScalarRelationFilter, Prisma.ReportDraftWhereInput>
   members?: Prisma.ReportTeamMemberListRelationFilter
   joinRequests?: Prisma.ReportTeamJoinRequestListRelationFilter
+  leaveRequests?: Prisma.ReportTeamLeaveRequestListRelationFilter
 }
 
 export type ReportTeamOrderByWithRelationInput = {
@@ -196,6 +197,7 @@ export type ReportTeamOrderByWithRelationInput = {
   reportDraft?: Prisma.ReportDraftOrderByWithRelationInput
   members?: Prisma.ReportTeamMemberOrderByRelationAggregateInput
   joinRequests?: Prisma.ReportTeamJoinRequestOrderByRelationAggregateInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestOrderByRelationAggregateInput
   _relevance?: Prisma.ReportTeamOrderByRelevanceInput
 }
 
@@ -211,6 +213,7 @@ export type ReportTeamWhereUniqueInput = Prisma.AtLeast<{
   reportDraft?: Prisma.XOR<Prisma.ReportDraftScalarRelationFilter, Prisma.ReportDraftWhereInput>
   members?: Prisma.ReportTeamMemberListRelationFilter
   joinRequests?: Prisma.ReportTeamJoinRequestListRelationFilter
+  leaveRequests?: Prisma.ReportTeamLeaveRequestListRelationFilter
 }, "id" | "reportDraftId">
 
 export type ReportTeamOrderByWithAggregationInput = {
@@ -243,6 +246,7 @@ export type ReportTeamCreateInput = {
   reportDraft: Prisma.ReportDraftCreateNestedOneWithoutReportTeamInput
   members?: Prisma.ReportTeamMemberCreateNestedManyWithoutTeamInput
   joinRequests?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutTeamInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestCreateNestedManyWithoutTeamInput
 }
 
 export type ReportTeamUncheckedCreateInput = {
@@ -253,6 +257,7 @@ export type ReportTeamUncheckedCreateInput = {
   updatedAt?: Date | string
   members?: Prisma.ReportTeamMemberUncheckedCreateNestedManyWithoutTeamInput
   joinRequests?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutTeamInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestUncheckedCreateNestedManyWithoutTeamInput
 }
 
 export type ReportTeamUpdateInput = {
@@ -263,6 +268,7 @@ export type ReportTeamUpdateInput = {
   reportDraft?: Prisma.ReportDraftUpdateOneRequiredWithoutReportTeamNestedInput
   members?: Prisma.ReportTeamMemberUpdateManyWithoutTeamNestedInput
   joinRequests?: Prisma.ReportTeamJoinRequestUpdateManyWithoutTeamNestedInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestUpdateManyWithoutTeamNestedInput
 }
 
 export type ReportTeamUncheckedUpdateInput = {
@@ -273,6 +279,7 @@ export type ReportTeamUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.ReportTeamMemberUncheckedUpdateManyWithoutTeamNestedInput
   joinRequests?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutTeamNestedInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestUncheckedUpdateManyWithoutTeamNestedInput
 }
 
 export type ReportTeamCreateManyInput = {
@@ -400,6 +407,20 @@ export type ReportTeamUpdateOneWithoutJoinRequestsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ReportTeamUpdateToOneWithWhereWithoutJoinRequestsInput, Prisma.ReportTeamUpdateWithoutJoinRequestsInput>, Prisma.ReportTeamUncheckedUpdateWithoutJoinRequestsInput>
 }
 
+export type ReportTeamCreateNestedOneWithoutLeaveRequestsInput = {
+  create?: Prisma.XOR<Prisma.ReportTeamCreateWithoutLeaveRequestsInput, Prisma.ReportTeamUncheckedCreateWithoutLeaveRequestsInput>
+  connectOrCreate?: Prisma.ReportTeamCreateOrConnectWithoutLeaveRequestsInput
+  connect?: Prisma.ReportTeamWhereUniqueInput
+}
+
+export type ReportTeamUpdateOneRequiredWithoutLeaveRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.ReportTeamCreateWithoutLeaveRequestsInput, Prisma.ReportTeamUncheckedCreateWithoutLeaveRequestsInput>
+  connectOrCreate?: Prisma.ReportTeamCreateOrConnectWithoutLeaveRequestsInput
+  upsert?: Prisma.ReportTeamUpsertWithoutLeaveRequestsInput
+  connect?: Prisma.ReportTeamWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ReportTeamUpdateToOneWithWhereWithoutLeaveRequestsInput, Prisma.ReportTeamUpdateWithoutLeaveRequestsInput>, Prisma.ReportTeamUncheckedUpdateWithoutLeaveRequestsInput>
+}
+
 export type ReportTeamCreateWithoutReportDraftInput = {
   id?: string
   label: string
@@ -407,6 +428,7 @@ export type ReportTeamCreateWithoutReportDraftInput = {
   updatedAt?: Date | string
   members?: Prisma.ReportTeamMemberCreateNestedManyWithoutTeamInput
   joinRequests?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutTeamInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestCreateNestedManyWithoutTeamInput
 }
 
 export type ReportTeamUncheckedCreateWithoutReportDraftInput = {
@@ -416,6 +438,7 @@ export type ReportTeamUncheckedCreateWithoutReportDraftInput = {
   updatedAt?: Date | string
   members?: Prisma.ReportTeamMemberUncheckedCreateNestedManyWithoutTeamInput
   joinRequests?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutTeamInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestUncheckedCreateNestedManyWithoutTeamInput
 }
 
 export type ReportTeamCreateOrConnectWithoutReportDraftInput = {
@@ -441,6 +464,7 @@ export type ReportTeamUpdateWithoutReportDraftInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.ReportTeamMemberUpdateManyWithoutTeamNestedInput
   joinRequests?: Prisma.ReportTeamJoinRequestUpdateManyWithoutTeamNestedInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestUpdateManyWithoutTeamNestedInput
 }
 
 export type ReportTeamUncheckedUpdateWithoutReportDraftInput = {
@@ -450,6 +474,7 @@ export type ReportTeamUncheckedUpdateWithoutReportDraftInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.ReportTeamMemberUncheckedUpdateManyWithoutTeamNestedInput
   joinRequests?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutTeamNestedInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestUncheckedUpdateManyWithoutTeamNestedInput
 }
 
 export type ReportTeamCreateWithoutMembersInput = {
@@ -459,6 +484,7 @@ export type ReportTeamCreateWithoutMembersInput = {
   updatedAt?: Date | string
   reportDraft: Prisma.ReportDraftCreateNestedOneWithoutReportTeamInput
   joinRequests?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutTeamInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestCreateNestedManyWithoutTeamInput
 }
 
 export type ReportTeamUncheckedCreateWithoutMembersInput = {
@@ -468,6 +494,7 @@ export type ReportTeamUncheckedCreateWithoutMembersInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   joinRequests?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutTeamInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestUncheckedCreateNestedManyWithoutTeamInput
 }
 
 export type ReportTeamCreateOrConnectWithoutMembersInput = {
@@ -493,6 +520,7 @@ export type ReportTeamUpdateWithoutMembersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reportDraft?: Prisma.ReportDraftUpdateOneRequiredWithoutReportTeamNestedInput
   joinRequests?: Prisma.ReportTeamJoinRequestUpdateManyWithoutTeamNestedInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestUpdateManyWithoutTeamNestedInput
 }
 
 export type ReportTeamUncheckedUpdateWithoutMembersInput = {
@@ -502,6 +530,7 @@ export type ReportTeamUncheckedUpdateWithoutMembersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   joinRequests?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutTeamNestedInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestUncheckedUpdateManyWithoutTeamNestedInput
 }
 
 export type ReportTeamCreateWithoutJoinRequestsInput = {
@@ -511,6 +540,7 @@ export type ReportTeamCreateWithoutJoinRequestsInput = {
   updatedAt?: Date | string
   reportDraft: Prisma.ReportDraftCreateNestedOneWithoutReportTeamInput
   members?: Prisma.ReportTeamMemberCreateNestedManyWithoutTeamInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestCreateNestedManyWithoutTeamInput
 }
 
 export type ReportTeamUncheckedCreateWithoutJoinRequestsInput = {
@@ -520,6 +550,7 @@ export type ReportTeamUncheckedCreateWithoutJoinRequestsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.ReportTeamMemberUncheckedCreateNestedManyWithoutTeamInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestUncheckedCreateNestedManyWithoutTeamInput
 }
 
 export type ReportTeamCreateOrConnectWithoutJoinRequestsInput = {
@@ -545,6 +576,7 @@ export type ReportTeamUpdateWithoutJoinRequestsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reportDraft?: Prisma.ReportDraftUpdateOneRequiredWithoutReportTeamNestedInput
   members?: Prisma.ReportTeamMemberUpdateManyWithoutTeamNestedInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestUpdateManyWithoutTeamNestedInput
 }
 
 export type ReportTeamUncheckedUpdateWithoutJoinRequestsInput = {
@@ -554,6 +586,63 @@ export type ReportTeamUncheckedUpdateWithoutJoinRequestsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.ReportTeamMemberUncheckedUpdateManyWithoutTeamNestedInput
+  leaveRequests?: Prisma.ReportTeamLeaveRequestUncheckedUpdateManyWithoutTeamNestedInput
+}
+
+export type ReportTeamCreateWithoutLeaveRequestsInput = {
+  id?: string
+  label: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  reportDraft: Prisma.ReportDraftCreateNestedOneWithoutReportTeamInput
+  members?: Prisma.ReportTeamMemberCreateNestedManyWithoutTeamInput
+  joinRequests?: Prisma.ReportTeamJoinRequestCreateNestedManyWithoutTeamInput
+}
+
+export type ReportTeamUncheckedCreateWithoutLeaveRequestsInput = {
+  id?: string
+  reportDraftId: string
+  label: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.ReportTeamMemberUncheckedCreateNestedManyWithoutTeamInput
+  joinRequests?: Prisma.ReportTeamJoinRequestUncheckedCreateNestedManyWithoutTeamInput
+}
+
+export type ReportTeamCreateOrConnectWithoutLeaveRequestsInput = {
+  where: Prisma.ReportTeamWhereUniqueInput
+  create: Prisma.XOR<Prisma.ReportTeamCreateWithoutLeaveRequestsInput, Prisma.ReportTeamUncheckedCreateWithoutLeaveRequestsInput>
+}
+
+export type ReportTeamUpsertWithoutLeaveRequestsInput = {
+  update: Prisma.XOR<Prisma.ReportTeamUpdateWithoutLeaveRequestsInput, Prisma.ReportTeamUncheckedUpdateWithoutLeaveRequestsInput>
+  create: Prisma.XOR<Prisma.ReportTeamCreateWithoutLeaveRequestsInput, Prisma.ReportTeamUncheckedCreateWithoutLeaveRequestsInput>
+  where?: Prisma.ReportTeamWhereInput
+}
+
+export type ReportTeamUpdateToOneWithWhereWithoutLeaveRequestsInput = {
+  where?: Prisma.ReportTeamWhereInput
+  data: Prisma.XOR<Prisma.ReportTeamUpdateWithoutLeaveRequestsInput, Prisma.ReportTeamUncheckedUpdateWithoutLeaveRequestsInput>
+}
+
+export type ReportTeamUpdateWithoutLeaveRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reportDraft?: Prisma.ReportDraftUpdateOneRequiredWithoutReportTeamNestedInput
+  members?: Prisma.ReportTeamMemberUpdateManyWithoutTeamNestedInput
+  joinRequests?: Prisma.ReportTeamJoinRequestUpdateManyWithoutTeamNestedInput
+}
+
+export type ReportTeamUncheckedUpdateWithoutLeaveRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  reportDraftId?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.ReportTeamMemberUncheckedUpdateManyWithoutTeamNestedInput
+  joinRequests?: Prisma.ReportTeamJoinRequestUncheckedUpdateManyWithoutTeamNestedInput
 }
 
 
@@ -564,11 +653,13 @@ export type ReportTeamUncheckedUpdateWithoutJoinRequestsInput = {
 export type ReportTeamCountOutputType = {
   members: number
   joinRequests: number
+  leaveRequests: number
 }
 
 export type ReportTeamCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | ReportTeamCountOutputTypeCountMembersArgs
   joinRequests?: boolean | ReportTeamCountOutputTypeCountJoinRequestsArgs
+  leaveRequests?: boolean | ReportTeamCountOutputTypeCountLeaveRequestsArgs
 }
 
 /**
@@ -595,6 +686,13 @@ export type ReportTeamCountOutputTypeCountJoinRequestsArgs<ExtArgs extends runti
   where?: Prisma.ReportTeamJoinRequestWhereInput
 }
 
+/**
+ * ReportTeamCountOutputType without action
+ */
+export type ReportTeamCountOutputTypeCountLeaveRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReportTeamLeaveRequestWhereInput
+}
+
 
 export type ReportTeamSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -605,6 +703,7 @@ export type ReportTeamSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   reportDraft?: boolean | Prisma.ReportDraftDefaultArgs<ExtArgs>
   members?: boolean | Prisma.ReportTeam$membersArgs<ExtArgs>
   joinRequests?: boolean | Prisma.ReportTeam$joinRequestsArgs<ExtArgs>
+  leaveRequests?: boolean | Prisma.ReportTeam$leaveRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.ReportTeamCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reportTeam"]>
 
@@ -623,6 +722,7 @@ export type ReportTeamInclude<ExtArgs extends runtime.Types.Extensions.InternalA
   reportDraft?: boolean | Prisma.ReportDraftDefaultArgs<ExtArgs>
   members?: boolean | Prisma.ReportTeam$membersArgs<ExtArgs>
   joinRequests?: boolean | Prisma.ReportTeam$joinRequestsArgs<ExtArgs>
+  leaveRequests?: boolean | Prisma.ReportTeam$leaveRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.ReportTeamCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -632,6 +732,7 @@ export type $ReportTeamPayload<ExtArgs extends runtime.Types.Extensions.Internal
     reportDraft: Prisma.$ReportDraftPayload<ExtArgs>
     members: Prisma.$ReportTeamMemberPayload<ExtArgs>[]
     joinRequests: Prisma.$ReportTeamJoinRequestPayload<ExtArgs>[]
+    leaveRequests: Prisma.$ReportTeamLeaveRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -982,6 +1083,7 @@ export interface Prisma__ReportTeamClient<T, Null = never, ExtArgs extends runti
   reportDraft<T extends Prisma.ReportDraftDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReportDraftDefaultArgs<ExtArgs>>): Prisma.Prisma__ReportDraftClient<runtime.Types.Result.GetResult<Prisma.$ReportDraftPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   members<T extends Prisma.ReportTeam$membersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReportTeam$membersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportTeamMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   joinRequests<T extends Prisma.ReportTeam$joinRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReportTeam$joinRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportTeamJoinRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  leaveRequests<T extends Prisma.ReportTeam$leaveRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReportTeam$leaveRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportTeamLeaveRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1409,6 +1511,30 @@ export type ReportTeam$joinRequestsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.ReportTeamJoinRequestScalarFieldEnum | Prisma.ReportTeamJoinRequestScalarFieldEnum[]
+}
+
+/**
+ * ReportTeam.leaveRequests
+ */
+export type ReportTeam$leaveRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReportTeamLeaveRequest
+   */
+  select?: Prisma.ReportTeamLeaveRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReportTeamLeaveRequest
+   */
+  omit?: Prisma.ReportTeamLeaveRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportTeamLeaveRequestInclude<ExtArgs> | null
+  where?: Prisma.ReportTeamLeaveRequestWhereInput
+  orderBy?: Prisma.ReportTeamLeaveRequestOrderByWithRelationInput | Prisma.ReportTeamLeaveRequestOrderByWithRelationInput[]
+  cursor?: Prisma.ReportTeamLeaveRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReportTeamLeaveRequestScalarFieldEnum | Prisma.ReportTeamLeaveRequestScalarFieldEnum[]
 }
 
 /**
