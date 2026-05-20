@@ -128,11 +128,17 @@ import { ReportDraftImageAssetService } from './application/attachments/report-d
     ReportDraftImageAssetService,
     {
       provide: GetReportDraftByIdQuery,
-      inject: [I_REPORT_DRAFT_REPOSITORY, ReportDraftAccessPolicy],
+      inject: [
+        I_REPORT_DRAFT_REPOSITORY,
+        I_SUBMISSION_REPOSITORY,
+        ReportDraftAccessPolicy,
+      ],
       useFactory: (
         repository: PrismaReportDraftRepository,
+        submissionRepository: PrismaSubmissionRepository,
         access: ReportDraftAccessPolicy,
-      ) => new GetReportDraftByIdQuery(repository, access),
+      ) =>
+        new GetReportDraftByIdQuery(repository, submissionRepository, access),
     },
     {
       provide: ListReportDraftsByHunterQuery,
@@ -192,11 +198,17 @@ import { ReportDraftImageAssetService } from './application/attachments/report-d
     },
     {
       provide: SaveSubmissionCommand,
-      inject: [I_SUBMISSION_REPOSITORY, ReportDraftAccessPolicy],
+      inject: [
+        I_SUBMISSION_REPOSITORY,
+        I_REPORT_DRAFT_REPOSITORY,
+        ReportDraftAccessPolicy,
+      ],
       useFactory: (
         repository: PrismaSubmissionRepository,
+        reportDraftRepository: PrismaReportDraftRepository,
         access: ReportDraftAccessPolicy,
-      ) => new SaveSubmissionCommand(repository, access),
+      ) =>
+        new SaveSubmissionCommand(repository, reportDraftRepository, access),
     },
     {
       provide: GetSubmissionByIdQuery,

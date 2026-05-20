@@ -43,8 +43,6 @@ export const endorseSubmission =
       aggregate.endorseSubmission({ submission, decidedBy: input.decidedBy });
 
       await deps.submissionRepository.save(submission);
-      await deps.reportDraftRepository.save(aggregate.state);
-
       dispatch(reportDraftsSlice.actions.draftUpserted(aggregate.state));
       dispatch(reportDraftsSlice.actions.submissionUpserted(submission));
       dispatch(reportDraftsSlice.actions.transitionSucceeded());
