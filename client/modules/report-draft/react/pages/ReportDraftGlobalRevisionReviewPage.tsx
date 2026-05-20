@@ -10,6 +10,7 @@ import { ReportDraftAggregateStatusBadge } from "@modules/report-draft/react/com
 import { ReportDraftGeneralPreview } from "@modules/report-draft/react/components/ReportDraftGeneralPreview";
 import { ReportDraftTeamContextBanner } from "@modules/report-draft/react/components/ReportDraftTeamContextBanner";
 import { ReportDraftSuperAdminFeedbackPanel } from "@modules/report-draft/react/pages/ReportDraftSuperAdminFeedbackPanel";
+import { TabNavButton } from "@modules/app/nextjs/components/buttons/TabNavButton";
 
 type ReviewTab = "reportPreview" | "superAdminFeedback";
 
@@ -110,24 +111,18 @@ export const ReportDraftGlobalRevisionReviewPage: FC<Props> = ({
         {TAB_ORDER.map((key) => {
           const isActive = key === activeTab;
           return (
-            <button
+            <TabNavButton
               key={key}
-              type="button"
-              role="tab"
+              active={isActive}
               id={tabButtonId(key)}
               aria-selected={isActive}
               aria-controls={tabPanelId(key)}
               tabIndex={isActive ? 0 : -1}
               onClick={() => setActiveTab(key)}
               onKeyDown={onTabKeyDown}
-              className={`-mb-px border-b-2 px-1 py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent ${
-                isActive
-                  ? "border-form-accent text-form-text"
-                  : "border-transparent text-form-text-muted hover:text-form-text"
-              }`}
             >
               {t(`myReports.globalRevisionReview.tabs.${key}`)}
-            </button>
+            </TabNavButton>
           );
         })}
       </div>

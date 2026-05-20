@@ -1,5 +1,7 @@
 "use client";
 
+import { ActionButton } from "@modules/app/nextjs/components/buttons/ActionButton";
+
 import { useState, type SyntheticEvent } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useT } from "next-i18next/client";
@@ -153,13 +155,9 @@ export function RegisterForm() {
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={status === "loading"}
-        className="btn-common-styles btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-      >
+      <ActionButton type="submit" variant="primary" disabled={status === "loading"} className="w-fit">
         {status === "loading" ? t("registerForm.submitting") : t("registerForm.submit")}
-      </button>
+      </ActionButton>
     </form>
   );
 }

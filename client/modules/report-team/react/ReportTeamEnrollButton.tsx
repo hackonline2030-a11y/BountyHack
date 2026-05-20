@@ -1,5 +1,7 @@
 "use client";
 
+import { ActionButton } from "@modules/app/nextjs/components/buttons/ActionButton";
+
 import { useMemo, useState, type FC } from "react";
 import type {
   ReportTeamJoinRequest,
@@ -69,14 +71,15 @@ export const ReportTeamEnrollButton: FC<Props> = ({
           {feedback}
         </p>
       ) : null}
-      <button
+      <ActionButton
         type="button"
+        variant="primary"
         onClick={() => void onEnroll()}
         disabled={status === "loading" || pendingEnrollment !== undefined}
-        className="btn-common-styles btn-primary w-fit disabled:opacity-50"
+        className="w-fit"
       >
         {status === "loading" ? labels.submitting : labels.submit}
-      </button>
+      </ActionButton>
     </div>
   );
 };

@@ -5,7 +5,7 @@ import { useT } from "next-i18next/client";
 import type { CvssMetricOption } from "@modules/report-draft/core/catalog/cvss-metrics.catalog";
 import type { CvssSeverity } from "@modules/report-draft/core/cvss/cvss-3.1";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
-import { ReportDraftGlobalSubmitButton } from "@modules/report-draft/react/components/ReportDraftGlobalSubmitButton";
+import { ReportDraftStepNav } from "@modules/report-draft/react/components/ReportDraftStepNav";
 import { SectionBlocRepeater } from "@modules/report-draft/react/components/section-bloc/SectionBlocRepeater";
 import { useDescriptionSection } from "@modules/report-draft/react/sections/description/use-description-section";
 
@@ -199,43 +199,22 @@ export const DescriptionSection: FC = () => {
         </select>
       </div>
 
-      <div className="flex flex-wrap gap-3 pt-2">
-        <button
-          type="button"
-          className="rounded-md border border-form-border bg-form-surface px-4 py-2 text-form-text-muted hover:bg-form-overlay disabled:opacity-50"
-          onClick={onBack}
-          disabled={transitionBusy}
-        >
-          Retour
-        </button>
-        <button
-          type="button"
-          className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={onNext}
-          disabled={transitionBusy || !canNavigateNext}
-          title={
-            canNavigateNext
-              ? undefined
-              : "Disponible uniquement après validation de cette étape par le quality checker."
-          }
-        >
-          Suivant
-        </button>
-        {!hidePerStepSubmit ? (
-          <button
-            type="button"
-            className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
-            onClick={() => void onSubmitForReview()}
-            disabled={transitionBusy || !editable}
-          >
-            Soumettre cette étape pour revue
-          </button>
-        ) : null}
-        <ReportDraftGlobalSubmitButton
-          currentStep={DESCRIPTION_STEP}
-          currentPayload={draft}
-        />
-      </div>
+      <ReportDraftStepNav
+        transitionBusy={transitionBusy}
+        onBack={onBack}
+        onNext={onNext}
+        canNavigateNext={canNavigateNext}
+        nextTitle={
+          canNavigateNext
+            ? undefined
+            : "Disponible uniquement après validation de cette étape par le quality checker."
+        }
+        hidePerStepSubmit={hidePerStepSubmit}
+        onSubmitForReview={onSubmitForReview}
+        submitDisabled={!editable}
+        currentStep={DESCRIPTION_STEP}
+        currentPayload={draft}
+      />
     </form>
   );
 };

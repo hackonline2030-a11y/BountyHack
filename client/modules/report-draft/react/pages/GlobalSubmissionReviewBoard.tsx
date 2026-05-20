@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type FC, useCallback, useMemo, useState } from "react";
 import { useT } from "next-i18next/client";
+import { FormPanelButton } from "@modules/app/nextjs/components/buttons/FormPanelButton";
 import { globalSubmissionRowStatusLabel } from "@modules/report-draft/core/model/global-submission-review-status";
 import { canDecideOnGlobalSubmission } from "@modules/report-draft/core/model/super-admin-final-validation";
 import { approveGlobalSubmission } from "@modules/report-draft/core/useCase/approve-global-submission.usecase";
@@ -196,22 +197,16 @@ export const GlobalSubmissionReviewBoard: FC<Props> = ({
             />
           </label>
           <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              disabled={busy}
-              onClick={onApproveRevision}
-              className="cursor-pointer rounded-md bg-form-accent px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-            >
+            <FormPanelButton variant="accent" disabled={busy} onClick={onApproveRevision}>
               {t("myReports.globalSubmissionReview.approveRevision")}
-            </button>
-            <button
-              type="button"
+            </FormPanelButton>
+            <FormPanelButton
+              variant="surface"
               disabled={busy || revisionComment.trim().length === 0}
               onClick={onRequestChanges}
-              className="cursor-pointer rounded-md border border-form-border bg-form-surface px-4 py-2 text-sm font-semibold text-form-text hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               {t("myReports.globalSubmissionReview.requestRevision")}
-            </button>
+            </FormPanelButton>
           </div>
         </section>
       ) : (

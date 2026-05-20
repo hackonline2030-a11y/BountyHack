@@ -2,7 +2,7 @@
 
 import { type FC } from "react";
 import type { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
-import { iconActionDangerClass } from "@modules/report-team/react/icon-action-buttons";
+import { IconActionButton } from "@modules/app/nextjs/components/buttons/IconActionButton";
 import { TrashIcon } from "@modules/report-team/react/icons";
 
 type Props = {
@@ -32,16 +32,16 @@ export const ReportDraftAttachmentCard: FC<Props> = ({
           className="h-full w-full object-contain"
         />
         {canDelete ? (
-          <button
-            type="button"
-            className={`absolute right-2 top-2 ${iconActionDangerClass}`}
+          <IconActionButton
+            variant="danger"
+            className="absolute right-2 top-2"
             aria-label={`Supprimer ${attachment.filename}`}
             title="Supprimer"
             disabled={deleting}
             onClick={() => onDelete?.()}
           >
             <TrashIcon className="size-4" />
-          </button>
+          </IconActionButton>
         ) : null}
       </div>
       <div className="flex flex-col gap-1 p-3 text-xs">

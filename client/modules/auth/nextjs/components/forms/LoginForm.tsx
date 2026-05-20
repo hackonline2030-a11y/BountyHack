@@ -1,5 +1,8 @@
 "use client";
 
+import { ActionButton } from "@modules/app/nextjs/components/buttons/ActionButton";
+import { PrimaryButton } from "@modules/app/nextjs/components/buttons/PrimaryButton";
+
 import React, { startTransition, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -244,33 +247,41 @@ export function LoginForm() {
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={status === "loading" || (step === "totp" && code.trim().length < 6)}
-        className="btn-common-styles btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {status === "loading"
-          ? t("loginForm.submitting")
-          : step === "totp"
-            ? t("loginForm.submitTotp")
-            : t("loginForm.submit")}
-      </button>
-
       {step === "totp" ? (
-        <button
-          type="button"
-          onClick={() => {
-            setStep("credentials");
-            setCode("");
-            setMessage("");
-            setStatus("idle");
-          }}
-          className="btn-common-styles bg-white/10 text-white hover:bg-white/20"
+        <>
+          <ActionButton
+            type="submit"
+            variant="primary"
+            disabled={status === "loading" || code.trim().length < 6}
+            className="self-center w-fit"
+          >
+            {status === "loading" ? t("loginForm.submitting") : t("loginForm.submitTotp")}
+          </ActionButton>
+          <ActionButton
+            type="button"
+            variant="secondary"
+            disabled={status === "loading"}
+            className="self-center w-fit"
+            onClick={() => {
+              setStep("credentials");
+              setCode("");
+              setMessage("");
+              setStatus("idle");
+            }}
+          >
+            {t("loginForm.backToPassword")}
+          </ActionButton>
+        </>
+      ) : (
+        <PrimaryButton
+          variant="dark"
+          type="submit"
           disabled={status === "loading"}
+          className="self-center disabled:opacity-50"
         >
-          {t("loginForm.backToPassword")}
-        </button>
-      ) : null}
+          {status === "loading" ? t("loginForm.submitting") : t("loginForm.submit")}
+        </PrimaryButton>
+      )}
 
       <p className="text-sm text-white/80">
         {t("loginForm.noAccount")}{" "}

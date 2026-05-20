@@ -23,6 +23,7 @@ import { ReportDraftHunterWriterPanel } from "@modules/report-draft/react/compon
 import { ReportDraftSessionProvider } from "@modules/report-draft/react/context/report-draft-session.context";
 import { HunterReviewActivityBanner } from "@modules/report-draft/react/components/HunterReviewActivityBanner";
 import { SuperAdminGlobalRevisionBanner } from "@modules/report-draft/react/components/SuperAdminGlobalRevisionBanner";
+import { TabNavButton } from "@modules/app/nextjs/components/buttons/TabNavButton";
 import { GlobalRevisionEventBanner } from "@modules/report-draft/react/components/GlobalRevisionEventBanner";
 import { globalReviewerCommentsForPlacement } from "@modules/report-draft/core/model/global-submission-revision";
 import {
@@ -222,26 +223,20 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
         {tabOrder.map((key) => {
           const isActive = key === activeTab;
           return (
-            <button
+            <TabNavButton
               key={key}
-              type="button"
-              role="tab"
+              active={isActive}
               id={tabButtonId(key)}
               aria-selected={isActive}
               aria-controls={tabPanelId(key)}
               tabIndex={isActive ? 0 : -1}
               onClick={() => setActiveTab(key)}
               onKeyDown={onTabKeyDown}
-              className={`-mb-px border-b-2 px-1 py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent ${
-                isActive
-                  ? "border-form-accent text-form-text"
-                  : "border-transparent text-form-text-muted hover:text-form-text"
-              }`}
             >
               {key === "attachments"
                 ? t("myReports.workspace.tabs.attachments")
                 : TAB_LABELS[key]}
-            </button>
+            </TabNavButton>
           );
         })}
       </div>

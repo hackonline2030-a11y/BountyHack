@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { FormPanelButton } from "@modules/app/nextjs/components/buttons/FormPanelButton";
 import { type FC, useCallback, useMemo, useState } from "react";
 import { useT } from "next-i18next/client";
 import type { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
@@ -141,8 +142,8 @@ export const SuperAdminFinalValidationActions: FC<Props> = ({ draft, lng }) => {
       ) : null}
 
       <div className="flex flex-wrap gap-3">
-        <button
-          type="button"
+        <FormPanelButton
+          variant="accent"
           disabled={!canApprove || busy}
           onClick={onApprove}
           title={
@@ -150,12 +151,11 @@ export const SuperAdminFinalValidationActions: FC<Props> = ({ draft, lng }) => {
               ? undefined
               : t("reportDraft.finalValidation.detail.actions.approveDisabledTitle")
           }
-          className="cursor-pointer rounded-md bg-form-accent px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent"
         >
           {t("reportDraft.finalValidation.detail.actions.approve")}
-        </button>
-        <button
-          type="button"
+        </FormPanelButton>
+        <FormPanelButton
+          variant="surface"
           disabled={!canRevision || busy}
           onClick={onRequestRevision}
           title={
@@ -165,12 +165,11 @@ export const SuperAdminFinalValidationActions: FC<Props> = ({ draft, lng }) => {
                 ? t("reportDraft.finalValidation.detail.actions.revisionAlreadyUsedTitle")
                 : t("reportDraft.finalValidation.detail.actions.revisionDisabledTitle")
           }
-          className="cursor-pointer rounded-md border border-form-border bg-form-surface px-4 py-2 text-sm font-semibold text-form-text transition hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent"
         >
           {t("reportDraft.finalValidation.detail.actions.requestRevision")}
-        </button>
-        <button
-          type="button"
+        </FormPanelButton>
+        <FormPanelButton
+          variant="emerald"
           disabled={!canGeneratePdf || busy || pdfBusy}
           onClick={() => void onGeneratePdf()}
           title={
@@ -178,12 +177,11 @@ export const SuperAdminFinalValidationActions: FC<Props> = ({ draft, lng }) => {
               ? undefined
               : t("reportDraft.finalValidation.detail.actions.generatePdfDisabledTitle")
           }
-          className="cursor-pointer rounded-md border border-emerald-700 bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
         >
           {pdfBusy
             ? t("reportDraft.finalValidation.detail.actions.generatePdfLoading")
             : t("reportDraft.finalValidation.detail.actions.generatePdf")}
-        </button>
+        </FormPanelButton>
       </div>
       {pdfError ? (
         <p role="alert" className="text-sm text-rose-700">

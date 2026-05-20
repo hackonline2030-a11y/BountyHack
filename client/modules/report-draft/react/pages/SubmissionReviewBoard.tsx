@@ -25,6 +25,8 @@ import { rejectDraft } from "@modules/report-draft/core/useCase/reject-draft.use
 import { requestStepRevisions } from "@modules/report-draft/core/useCase/request-step-revisions.usecase";
 import type { ReviewerCommentDraft } from "@modules/report-draft/core/model/report-draft.aggregate";
 import { ReportDraftTeamContextBanner } from "@modules/report-draft/react/components/ReportDraftTeamContextBanner";
+import { SubmissionDecisionButton } from "@modules/app/nextjs/components/buttons/SubmissionDecisionButton";
+import { TabNavButton } from "@modules/app/nextjs/components/buttons/TabNavButton";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
 type Props = {
@@ -258,24 +260,18 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
         {TAB_ORDER.map((key) => {
           const isActive = key === activeTab;
           return (
-            <button
+            <TabNavButton
               key={key}
-              type="button"
-              role="tab"
+              active={isActive}
               id={tabButtonId(key)}
               aria-selected={isActive}
               aria-controls={tabPanelId(key)}
               tabIndex={isActive ? 0 : -1}
               onClick={() => setActiveTab(key)}
               onKeyDown={onTabKeyDown}
-              className={`-mb-px border-b-2 px-1 py-3 text-sm font-medium transition-colors ${
-                isActive
-                  ? "border-form-accent text-form-text"
-                  : "border-transparent text-form-text-muted hover:text-form-text"
-              }`}
             >
               {TAB_LABELS[key]}
-            </button>
+            </TabNavButton>
           );
         })}
       </div>
@@ -376,30 +372,27 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
 
       {canDecide ? (
         <div className="flex flex-wrap gap-3 border-t border-form-border pt-4">
-          <button
-            type="button"
-            className="cursor-pointer rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+          <SubmissionDecisionButton
+            variant="approve"
             disabled={transitionBusy}
             onClick={() => void onApprove()}
           >
             Valider l&apos;étape (QC — active Suivant)
-          </button>
-          <button
-            type="button"
-            className="cursor-pointer rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+          </SubmissionDecisionButton>
+          <SubmissionDecisionButton
+            variant="revision"
             disabled={transitionBusy || !hasPendingRevisionComments}
             onClick={() => void onRequestRevisions()}
           >
             Demander une révision
-          </button>
-          <button
-            type="button"
-            className="cursor-pointer rounded-md border border-rose-400 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-900 disabled:cursor-not-allowed disabled:opacity-50"
+          </SubmissionDecisionButton>
+          <SubmissionDecisionButton
+            variant="reject"
             disabled={transitionBusy}
             onClick={() => void onReject()}
           >
             Rejeter le rapport
-          </button>
+          </SubmissionDecisionButton>
         </div>
       ) : null}
 
