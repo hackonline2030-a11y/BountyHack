@@ -38,6 +38,7 @@ describe('GetReportDraftByIdQuery', () => {
   const repository: jest.Mocked<IReportDraftRepository> = {
     save: jest.fn(),
     updateHunterWriterId: jest.fn(),
+    updatePrimaryHunterId: jest.fn(),
     findById: jest.fn(),
     findByHunterId: jest.fn(),
     findByHunterIdOrTeamMembership: jest.fn(),
@@ -61,12 +62,19 @@ describe('GetReportDraftByIdQuery', () => {
     findDraftIdsForMember: jest.fn().mockResolvedValue([]),
     findByReportDraftId: jest.fn().mockResolvedValue(null),
   };
+  const userRepository = { findSummaryById: jest.fn() };
   const access = new ReportDraftAccessPolicy(
     repository,
     submissionRepository,
     reportTeamRepository as never,
+    userRepository as never,
   );
-  const query = new GetReportDraftByIdQuery(repository, access);
+  const query = new GetReportDraftByIdQuery(repository, submissionRepository, access);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    submissionRepository.findByDraftId.mockResolvedValue([]);
+  });
 
   it('allows hunter owner on orphan draft', async () => {
     repository.findById.mockResolvedValue(minimalDraft());
@@ -118,5 +126,52 @@ describe('GetReportDraftByIdQuery', () => {
     await expect(
       query.execute({ uid: 'other', email: 'o@example.com' }, 'draft-1'),
     ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('persists reconciled step status when QC approved but draft row drifted', async () => {
+    repository.findById.mockResolvedValue(
+      minimalDraft({
+        meta: {
+          payload: {},
+          attachments: [],
+          status: 'awaiting-review',
+          currentRound: 1,
+          assignedReviewerRole: 'quality_checker',
+        },
+        aggregateStatus: 'under-review',
+      }),
+    );
+    submissionRepository.findByDraftId.mockResolvedValue([
+      {
+        id: 'sub-1',
+        reportDraftId: 'draft-1',
+        step: 0,
+        round: 1,
+        payload: {},
+        attachmentsSnapshot: [],
+        submittedAt: '2026-05-15T11:00:00.000Z',
+        submittedBy: 'hunter-1',
+        reviewerRole: 'quality_checker',
+        decision: 'approve',
+        decidedAt: '2026-05-15T12:00:00.000Z',
+        decidedBy: 'qc-1',
+      },
+    ]);
+
+    reportTeamRepository.findDraftIdsForMember.mockResolvedValue(['draft-1']);
+    reportTeamRepository.isMemberOfDraft.mockResolvedValue(true);
+    const result = await query.execute(
+      {
+        uid: 'hunter-writer',
+        email: 'w@example.com',
+        roleCode: AppRoleCode.HUNTER,
+      },
+      'draft-1',
+    );
+
+    expect(result?.meta.status).toBe('approved');
+    expect(repository.save).toHaveBeenCalledWith(
+      expect.objectContaining({ meta: expect.objectContaining({ status: 'approved' }) }),
+    );
   });
 });
