@@ -3,8 +3,10 @@ import { AppRoleCode } from '../../shared/rbac/app-role.code';
 import type { Identity } from '../../auth/domain/models/identity';
 import type { GlobalSubmissionWire } from '../models/global-submission-api.types';
 import type {
+  ReportDraftStepStateKeyWire,
   ReportDraftWire,
   ReviewerRoleWire,
+  SubmissionStepWire,
   SubmissionWire,
 } from '../models/report-draft-api.types';
 import type { IReportDraftRepository } from '../ports/report-draft-repository.interface';
@@ -155,6 +157,58 @@ export class ReportDraftAccessPolicy {
    * Mentor / QC : uniquement via `report_team_members`.
    * Super admin : tous les brouillons.
    */
+  private static readonly STATE_KEY_TO_SUBMISSION_STEP: Record<
+    ReportDraftStepStateKeyWire,
+    SubmissionStepWire
+  > = {
+    meta: 0,
+    description: 1,
+    collection: 2,
+    exploitation: 3,
+    proofOfConcept: 4,
+    risks: 5,
+    remediation: 6,
+    final: 7,
+  };
+
+  /**
+   * Hunter writer, super-admin, or QC with a pending quality-checker submission
+   * on the attachment's step may delete live step attachments.
+   */
+  async assertCanDeleteAttachment(
+    identity: Identity,
+    draft: ReportDraftWire,
+    attachmentStepKey: ReportDraftStepStateKeyWire,
+  ): Promise<void> {
+    await this.assertCanReadDraft(identity, draft);
+    if (this.isSuperAdmin(identity)) {
+      return;
+    }
+    if (
+      identity.roleCode === AppRoleCode.HUNTER &&
+      identity.uid === draft.hunterWriterId
+    ) {
+      return;
+    }
+    if (identity.roleCode === AppRoleCode.QUALITY_CHECKER) {
+      const step = ReportDraftAccessPolicy.STATE_KEY_TO_SUBMISSION_STEP[attachmentStepKey];
+      const submissions = await this.submissionRepository.findByDraftId(draft.id);
+      const hasPendingQc = submissions.some(
+        (s) =>
+          s.step === step &&
+          s.reviewerRole === 'quality_checker' &&
+          s.decision === 'pending',
+      );
+      if (hasPendingQc) {
+        return;
+      }
+      throw new ForbiddenException(
+        'Quality checker can delete attachments only while a step submission is pending review',
+      );
+    }
+    throw new ForbiddenException('Cannot delete this attachment');
+  }
+
   async assertCanSaveDraft(
     identity: Identity,
     draft: { id: string; hunterId: string; hunterWriterId: string },

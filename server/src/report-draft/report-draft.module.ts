@@ -34,6 +34,7 @@ import { SaveReportDraftCommand } from './application/commands/save-report-draft
 import { GetReportDraftByIdQuery } from './application/queries/get-report-draft-by-id.query';
 import { ListReportDraftsByHunterQuery } from './application/queries/list-report-drafts-by-hunter.query';
 import { ListReportDraftsForFinalValidationQuery } from './application/queries/list-report-drafts-for-final-validation.query';
+import { ListAllReportDraftAttachmentsQuery } from './application/queries/list-all-report-draft-attachments.query';
 import { ListOrphanReportDraftsQuery } from './application/queries/list-orphan-report-drafts.query';
 import { ListHuntersForCoordinatorQuery } from './application/queries/list-hunters-for-coordinator.query';
 import { ReportTeamAccessPolicy } from '../report-team/application/report-team-access.policy';
@@ -126,6 +127,7 @@ import { ReportDraftImageAssetService } from './application/attachments/report-d
       ) => new SetPrimaryHunterCommand(repository, access),
     },
     ReportDraftImageAssetService,
+    ListAllReportDraftAttachmentsQuery,
     {
       provide: GetReportDraftByIdQuery,
       inject: [

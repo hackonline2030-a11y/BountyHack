@@ -2,6 +2,7 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { DescriptionFactory } from "@modules/report-draft/core/model/description.factory";
 import { MetaFactory } from "@modules/report-draft/core/model/meta.factory";
 import { ReportDraftDomainModel } from "../model/report-draft.domain-model";
+import { clampHunterWizardStep } from "../model/hunter-wizard-steps";
 
 export type ReportDraftFields = Record<
   ReportDraftDomainModel.ReportDraftStep,
@@ -46,7 +47,7 @@ export const reportDraftSlice = createSlice({
   initialState: reportDraftInitialState,
   reducers: {
     setStep: (state, action: PayloadAction<ReportDraftDomainModel.ReportDraftStep>) => {
-      state.step = action.payload;
+      state.step = clampHunterWizardStep(action.payload);
     },
     /** Saves text for the **current** step (same pattern as order: mutation then listener advances step). */
     submitStepContent: (state, action: PayloadAction<string>) => {

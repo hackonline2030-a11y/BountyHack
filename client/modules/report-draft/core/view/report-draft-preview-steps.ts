@@ -1,5 +1,6 @@
 import { ReportDraftDomainModel as M } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { reportDraftStepToStateKey } from "@modules/report-draft/core/model/report-draft-step-keys";
+import { LAST_HUNTER_WIZARD_STEP } from "@modules/report-draft/core/model/hunter-wizard-steps";
 
 const FIRST_STEP = M.ReportDraftStep.META;
 
@@ -63,7 +64,7 @@ export function cumulativeStepsForGeneralReportPreview(
   draft: M.ReportDraft,
 ): M.ReportDraftStep[] {
   let furthest = M.ReportDraftStep.META;
-  for (let s = M.ReportDraftStep.META; s <= M.ReportDraftStep.FINAL; s++) {
+  for (let s = M.ReportDraftStep.META; s <= LAST_HUNTER_WIZARD_STEP; s++) {
     const step = s as M.ReportDraftStep;
     const state = draft[reportDraftStepToStateKey(step)];
     if (step === M.ReportDraftStep.META) {

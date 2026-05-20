@@ -13,6 +13,8 @@ import { isStepValidationReviewerRole } from "@modules/report-draft/core/model/s
 import { ReportDraftFinalStepStatusBanner } from "@modules/report-draft/react/components/ReportDraftFinalStepStatusBanner";
 import { ReportDraftGlobalSubmitButton } from "@modules/report-draft/react/components/ReportDraftGlobalSubmitButton";
 import { SectionBlocRepeater } from "@modules/report-draft/react/components/section-bloc/SectionBlocRepeater";
+import { useStepSectionImageUpload } from "@modules/report-draft/react/hooks/use-step-section-image-upload";
+import { LAST_HUNTER_WIZARD_STEP } from "@modules/report-draft/core/model/hunter-wizard-steps";
 import { reviewerRoleFromDraftStep } from "@modules/report-draft/react/wizard/reviewer-role-from-draft";
 import {
   canWizardNavigateNext,
@@ -30,7 +32,7 @@ type Props = {
 };
 
 /**
- * Long-form wizard steps (COLLECTION → FINAL) — free section blocs repeater only.
+ * Long-form wizard steps (COLLECTION → REMEDIATION) — section blocs with image upload.
  */
 export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
   const { t } = useT("myReports");
@@ -81,7 +83,14 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
   const editable = stepEditableByWorkflow && isDesignatedStepWriter;
   const hidePerStepSubmit = isSuperAdminGlobalRevisionMode(draftRow);
   const canNavigateNext = canWizardNavigateNext(draftRow, stepStatus);
-  const isLast = step === Step.FINAL;
+  const isLast = step === LAST_HUNTER_WIZARD_STEP;
+
+  const { stepAttachments, imageUploadByBlocId, onUploadSectionImage } =
+    useStepSectionImageUpload({
+      step,
+      draftPayload: draft,
+      setDraftPayload: setDraft,
+    });
 
   const onNext = useCallback(() => {
     if (isLast || !canNavigateNext) return;
@@ -159,6 +168,9 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
         <SectionBlocRepeater
           blocs={draft.sectionBlocs}
           editable={editable}
+          attachments={stepAttachments}
+          imageUploadByBlocId={imageUploadByBlocId}
+          onImageUpload={editable ? onUploadSectionImage : undefined}
           onChange={(sectionBlocs) => setDraft({ sectionBlocs })}
         />
       </div>

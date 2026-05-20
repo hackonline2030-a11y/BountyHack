@@ -126,6 +126,23 @@ export default async function WelcomeAdminPage({ params }: PageProps) {
                 </DashboardCard>
 
                 <DashboardCard
+                  titleId="card-attachments"
+                  title="Pièces jointes des brouillons"
+                  subtitle="Inventaire global"
+                >
+                  <p className="text-sm text-dashboard-text-muted">
+                    Tableau équipe, brouillon, étape et chemin de stockage — suppression
+                    super-admin.
+                  </p>
+                  <Link
+                    href={`${prefix}/administration/attachments`}
+                    className="dashboard-card-cta mt-auto pt-4"
+                  >
+                    Ouvrir l&apos;inventaire →
+                  </Link>
+                </DashboardCard>
+
+                <DashboardCard
                   titleId="card-register"
                   title={t("welcomeAdmin.cards.register.title")}
                   subtitle={t("welcomeAdmin.cards.register.subtitle")}

@@ -3,8 +3,16 @@
     "metaTitle": "My reports",
     "heading": "My reports",
     "workspace": {
+      "tabs": {
+        "attachments": "Attachments"
+      },
+      "attachments": {
+        "hint": "Private images for this step (authenticated access only).",
+        "empty": "No attachments for this step.",
+        "noStepImages": "This step does not support attachments."
+      },
       "backToReports": "← Back to my reports",
-      "backToReportsAria": "Go back to the list of my report drafts",
+      "backToReportsAria": "Go back to my report drafts",
       "hunterWriter": {
         "title": "Designated step writer",
         "current": "Step edits and submissions are restricted to: {{name}}.",

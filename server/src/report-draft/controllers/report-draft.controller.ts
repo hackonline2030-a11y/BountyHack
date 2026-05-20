@@ -2,7 +2,9 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   NotFoundException,
   Param,
   Patch,
@@ -196,6 +198,47 @@ export class ReportDraftController {
     return this.imageAssets.uploadDescriptionImage(request.user, draftId, file);
   }
 
+  @Post('draft/:draftId/steps/:stepKey/attachments/images')
+  @AuthReportWorkflowParticipant()
+  @UseInterceptors(
+    FileInterceptor(REPORT_DRAFT_IMAGE_FIELD_NAME, {
+      storage: memoryStorage(),
+      limits: { fileSize: REPORT_DRAFT_IMAGE_MAX_BYTES, files: 1 },
+    }),
+  )
+  @ApiOperation({ summary: 'Upload a private report image for a draft wizard step section' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        [REPORT_DRAFT_IMAGE_FIELD_NAME]: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+      required: [REPORT_DRAFT_IMAGE_FIELD_NAME],
+    },
+  })
+  @ApiOkResponse({ description: 'Uploaded image attachment metadata' })
+  async uploadStepImage(
+    @Req() request: RequestWithIdentity,
+    @Param('draftId') draftId: string,
+    @Param('stepKey') stepKey: string,
+    @UploadedFile() file?: UploadedReportImageFile,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Image file is required.');
+    }
+    const parsedStepKey = this.imageAssets.parseStepKeyParam(stepKey);
+    return this.imageAssets.uploadStepSectionImage(
+      request.user,
+      draftId,
+      parsedStepKey,
+      file,
+    );
+  }
+
   @Get('draft/:draftId/attachments/:attachmentId/image')
   @AuthReportWorkflowParticipant()
   @ApiOperation({ summary: 'Read a private report image for an accessible draft' })
@@ -220,5 +263,22 @@ export class ReportDraftController {
       type: image.mimeType,
       disposition: `inline; filename="${image.filename.replace(/"/g, '')}"`,
     });
+  }
+
+  @Delete('draft/:draftId/attachments/:attachmentId')
+  @HttpCode(200)
+  @AuthReportWorkflowParticipant()
+  @ApiOperation({ summary: 'Delete a private report draft attachment' })
+  @ApiOkResponse({ description: 'Updated report draft after attachment removal' })
+  async deleteAttachment(
+    @Req() request: RequestWithIdentity,
+    @Param('draftId') draftId: string,
+    @Param('attachmentId') attachmentId: string,
+  ) {
+    return this.imageAssets.deleteDraftAttachment(
+      request.user,
+      draftId,
+      attachmentId,
+    );
   }
 }

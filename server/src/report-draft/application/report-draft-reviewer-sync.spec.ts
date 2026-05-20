@@ -67,7 +67,7 @@ describe('applySubmissionDecisionToDraft', () => {
     expect(next?.version).toBe(2);
   });
 
-  it('promotes aggregate to ready-to-program when every step is approved', () => {
+  it('promotes aggregate to ready-to-program when hunter wizard steps are approved', () => {
     const approved = { ...emptyStep(), status: 'approved' as const };
     const draft = minimalDraft({
       meta: approved,
@@ -76,13 +76,14 @@ describe('applySubmissionDecisionToDraft', () => {
       exploitation: approved,
       proofOfConcept: approved,
       risks: approved,
-      remediation: approved,
+      remediation: emptyStep(),
       final: emptyStep(),
     });
     const next = applySubmissionDecisionToDraft(
       draft,
-      submission({ decision: 'approve', step: 7 }),
+      submission({ decision: 'approve', step: 6 }),
     );
+    expect(next?.remediation.status).toBe('approved');
     expect(next?.final.status).toBe('approved');
     expect(next?.aggregateStatus).toBe('ready-to-program');
   });

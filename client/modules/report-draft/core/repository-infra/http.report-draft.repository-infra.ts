@@ -36,14 +36,15 @@ export class HttpReportDraftRepository implements IReportDraftRepository {
     return parseJsonResponse(res);
   }
 
-  async uploadDescriptionSectionImage(input: {
+  async uploadSectionImage(input: {
     draftId: ReportDraftDomainModel.ReportDraftId;
+    stepKey: import("@modules/report-draft/core/model/report-draft-step-keys").ReportDraftStepStateKey;
     file: File;
   }): Promise<ReportDraftDomainModel.Attachment> {
     const formData = new FormData();
     formData.append("file", input.file);
     const res = await fetchBff(
-      `/api/report-draft/drafts/${encodeURIComponent(input.draftId)}/attachments/images`,
+      `/api/report-draft/drafts/${encodeURIComponent(input.draftId)}/steps/${encodeURIComponent(input.stepKey)}/attachments/images`,
       {
         method: "POST",
         credentials: "include",
@@ -54,6 +55,33 @@ export class HttpReportDraftRepository implements IReportDraftRepository {
       throw new Error(await readFriendlyHttpError(res, "Impossible d’envoyer l’image."));
     }
     return parseJsonResponse(res);
+  }
+
+  async deleteAttachment(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    attachmentId: string;
+  }): Promise<ReportDraftDomainModel.ReportDraft> {
+    const res = await fetchBff(
+      `/api/report-draft/drafts/${encodeURIComponent(input.draftId)}/attachments/${encodeURIComponent(input.attachmentId)}`,
+      { method: "DELETE", credentials: "include" },
+    );
+    if (!res.ok) {
+      throw new Error(
+        await readFriendlyHttpError(res, "Impossible de supprimer la pièce jointe."),
+      );
+    }
+    return parseJsonResponse(res);
+  }
+
+  async uploadDescriptionSectionImage(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    file: File;
+  }): Promise<ReportDraftDomainModel.Attachment> {
+    return this.uploadSectionImage({
+      draftId: input.draftId,
+      stepKey: "description",
+      file: input.file,
+    });
   }
 
   async deletePermanently(

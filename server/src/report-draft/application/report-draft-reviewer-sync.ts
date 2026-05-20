@@ -4,6 +4,7 @@ import type {
   SubmissionStepWire,
   SubmissionWire,
 } from '../models/report-draft-api.types';
+import { hunterWizardStepsApproved } from './hunter-wizard-steps';
 
 const STEP_STATE_KEYS: ReadonlyArray<ReportDraftStepStateKeyWire> = [
   'meta',
@@ -28,8 +29,15 @@ const STEP_NUMBER_TO_STATE_KEY: Record<SubmissionStepWire, ReportDraftStepStateK
     7: 'final',
   };
 
-function allStepsApproved(draft: ReportDraftWire): boolean {
-  return STEP_STATE_KEYS.every((key) => draft[key].status === 'approved');
+function promoteToReadyToProgramIfWizardComplete(draft: ReportDraftWire): ReportDraftWire {
+  if (!hunterWizardStepsApproved(draft)) {
+    return draft;
+  }
+  return {
+    ...draft,
+    final: { ...draft.final, status: 'approved' },
+    aggregateStatus: 'ready-to-program',
+  };
 }
 
 /**
@@ -63,10 +71,7 @@ export function applySubmissionDecisionToDraft(
         updatedAt: now,
         version: draft.version + 1,
       };
-      if (allStepsApproved(next)) {
-        next.aggregateStatus = 'ready-to-program';
-      }
-      return next;
+      return promoteToReadyToProgramIfWizardComplete(next);
     }
     case 'request-changes': {
       return {

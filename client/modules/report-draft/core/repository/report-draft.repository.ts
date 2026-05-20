@@ -15,10 +15,22 @@ export interface IReportDraftRepository {
     hunterId: string,
   ): Promise<ReportDraftDomainModel.ReportDraft[]>;
 
+  uploadSectionImage(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    stepKey: import("@modules/report-draft/core/model/report-draft-step-keys").ReportDraftStepStateKey;
+    file: File;
+  }): Promise<ReportDraftDomainModel.Attachment>;
+
+  /** @deprecated Use {@link uploadSectionImage} with `stepKey: 'description'`. */
   uploadDescriptionSectionImage(input: {
     draftId: ReportDraftDomainModel.ReportDraftId;
     file: File;
   }): Promise<ReportDraftDomainModel.Attachment>;
+
+  deleteAttachment(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    attachmentId: string;
+  }): Promise<ReportDraftDomainModel.ReportDraft>;
 
   /** Super-admin hard delete (steps, submissions, team, legacy reports). */
   deletePermanently(draftId: ReportDraftDomainModel.ReportDraftId): Promise<void>;
