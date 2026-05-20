@@ -39,6 +39,11 @@ export function buildMemberPageCopy(
     askTitle: t("reportTeams.askJoin.title"),
     askDescription: t("reportTeams.askJoin.description"),
     openReportDraft: t("reportTeams.myTeams.openReportDraft"),
+    leaveTeam: t("reportTeams.myTeams.leaveTeam"),
+    leaveTeamConfirm: (teamLabel: string) =>
+      t("reportTeams.myTeams.leaveTeamConfirm", { label: teamLabel }),
+    leaveTeamSubmit: t("reportTeams.myTeams.leaveTeamSubmit"),
+    leaveTeamBusy: t("reportTeams.myTeams.leaveTeamBusy"),
     roleLabels,
     backHref: options?.backHref,
     backLabel: options?.backLabel,

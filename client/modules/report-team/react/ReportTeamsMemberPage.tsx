@@ -42,6 +42,11 @@ type Copy = {
   askTitle: string;
   askDescription: string;
   openReportDraft: string;
+  /** Leave team (current user). */
+  leaveTeam: string;
+  leaveTeamConfirm: (teamLabel: string) => string;
+  leaveTeamSubmit: string;
+  leaveTeamBusy: string;
   roleLabels: Record<ReportTeamMemberRole, string>;
   backHref?: string;
   backLabel?: string;
@@ -58,6 +63,10 @@ type Props = {
   showMockBanner?: boolean;
   /** Hunters open the draft from here; reviewers use the review queue after a revision request. */
   showOpenReportDraftLink?: boolean;
+  /** When set, each team card shows a leave control for the logged-in member. */
+  onLeaveTeam?: (teamId: string) => void;
+  leaveTeamBusy?: boolean;
+  leaveTeamError?: string | null;
 };
 
 export const ReportTeamsMemberPage: FC<Props> = ({
@@ -70,6 +79,9 @@ export const ReportTeamsMemberPage: FC<Props> = ({
   askJoinLabels,
   showMockBanner = false,
   showOpenReportDraftLink = false,
+  onLeaveTeam,
+  leaveTeamBusy = false,
+  leaveTeamError = null,
 }) => {
   const pathname = usePathname();
   const prefix = localePrefixFromPathname(pathname);
@@ -86,6 +98,11 @@ export const ReportTeamsMemberPage: FC<Props> = ({
         classNames="bg-pattern flex flex-1 flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
       >
         <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+          {leaveTeamError ? (
+            <p role="alert" className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
+              {leaveTeamError}
+            </p>
+          ) : null}
           <div className="dashboard-card flex flex-col gap-4 p-5 sm:p-6">
             {copy.backHref && copy.backLabel ? (
               <Link href={copy.backHref} className="dashboard-card-cta w-fit text-sm">
@@ -154,6 +171,19 @@ export const ReportTeamsMemberPage: FC<Props> = ({
                       >
                         {copy.openReportDraft} →
                       </Link>
+                    ) : null}
+                    {onLeaveTeam ? (
+                      <button
+                        type="button"
+                        className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-900 hover:bg-red-100 disabled:opacity-50"
+                        disabled={leaveTeamBusy}
+                        onClick={() => {
+                          const ok = window.confirm(copy.leaveTeamConfirm(team.label));
+                          if (ok) onLeaveTeam(team.id);
+                        }}
+                      >
+                        {leaveTeamBusy ? copy.leaveTeamBusy : copy.leaveTeamSubmit}
+                      </button>
                     ) : null}
                   </li>
                 ))}

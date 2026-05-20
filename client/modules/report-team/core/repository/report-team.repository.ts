@@ -20,6 +20,8 @@ export interface IReportTeamRepository {
   }): Promise<ReportTeam>;
   updateTeam(id: string, input: { label: string }): Promise<ReportTeam>;
   deleteTeam(id: string): Promise<void>;
+  removeTeamMember(teamId: string, memberUserId: string): Promise<ReportTeam>;
+  leaveTeam(teamId: string): Promise<ReportTeam>;
   findMyJoinRequests(): Promise<ReportTeamJoinRequest[]>;
   findPendingJoinRequests(): Promise<ReportTeamJoinRequest[]>;
   createJoinRequest(input: {

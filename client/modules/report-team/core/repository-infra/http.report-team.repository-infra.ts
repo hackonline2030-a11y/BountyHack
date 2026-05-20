@@ -102,6 +102,23 @@ export class HttpReportTeamRepository implements IReportTeamRepository {
     }
   }
 
+  async removeTeamMember(teamId: string, memberUserId: string): Promise<ReportTeam> {
+    const res = await fetchBff(
+      `${teamsBase}/${encodeURIComponent(teamId)}/members/${encodeURIComponent(memberUserId)}`,
+      { method: "DELETE", credentials: "include", cache: "no-store" },
+    );
+    return parseJsonResponse(res);
+  }
+
+  async leaveTeam(teamId: string): Promise<ReportTeam> {
+    const res = await fetchBff(`${teamsBase}/${encodeURIComponent(teamId)}/members/me`, {
+      method: "DELETE",
+      credentials: "include",
+      cache: "no-store",
+    });
+    return parseJsonResponse(res);
+  }
+
   async findMyJoinRequests(): Promise<ReportTeamJoinRequest[]> {
     const res = await fetchBff(`${joinBase}/mine`, {
       credentials: "include",

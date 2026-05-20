@@ -23,6 +23,8 @@ export type ReportTeam = {
   label: string;
   validity: ReportTeamValidity;
   draftAggregateStatus: ReportDraftDomainModel.AggregateStatus;
+  /** Report draft owner (primary hunter) — cannot be removed from the team. */
+  reportDraftOwnerUserId: string;
   /** User id of the hunter who may edit/submit steps (`hunter_writer_id` on the draft). */
   hunterWriterUserId: string;
   members: ReportTeamMember[];

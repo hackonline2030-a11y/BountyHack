@@ -8,7 +8,7 @@
     "validity": {
       "valid": "Valid team",
       "incomplete": "Incomplete team",
-      "hint": "A report team is valid when it has at least one hunter and either a mentor or a quality checker (you may add more members as needed)."
+      "hint": "A report team is valid when it has at least one hunter and either a mentor or a quality checker (you may add more members as needed). Only one quality checker is allowed per team, so joining as a quality checker is possible only when the team has none yet."
     },
     "roles": {
       "hunter": "Hunter",
@@ -22,7 +22,11 @@
       "teamId": "Team ID",
       "members": "Members",
       "updated": "Updated",
-      "openReportDraft": "Open report draft"
+      "openReportDraft": "Open report draft",
+      "leaveTeam": "Leave this team",
+      "leaveTeamConfirm": "Leave the team « {{label}} »? You will lose access until a coordinator adds you again.",
+      "leaveTeamSubmit": "Leave team",
+      "leaveTeamBusy": "Leaving…"
     },
     "requests": {
       "title": "My requests",
@@ -167,7 +171,12 @@
         "save": "Update designated writer",
         "saving": "Updating…",
         "writerSaved": "Designated writer updated.",
-        "noHunters": "This team has no hunters — add members before assigning a writer."
+        "noHunters": "This team has no hunters — add members before assigning a writer.",
+        "membersRemove": "Remove from team",
+        "membersRemoveConfirm": "Remove {{name}} from this team?",
+        "membersRemoveBusy": "Removing…",
+        "membersPrimaryHunter": "Primary report hunter — cannot be removed.",
+        "membersRemoved": "Member removed."
       },
       "addMember": "Add member",
       "mockAction": "mockup — no API yet"

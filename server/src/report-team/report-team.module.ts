@@ -12,6 +12,7 @@ import { ReportTeamMemberRoleResolver } from './application/report-team-member-r
 import { CreateReportTeamCommand } from './application/commands/create-report-team.command';
 import { UpdateReportTeamCommand } from './application/commands/update-report-team.command';
 import { DeleteReportTeamCommand } from './application/commands/delete-report-team.command';
+import { RemoveReportTeamMemberCommand } from './application/commands/remove-report-team-member.command';
 import { CreateEnrollmentRequestCommand } from './application/commands/create-enrollment-request.command';
 import { CreateJoinRequestCommand } from './application/commands/create-join-request.command';
 import { DecideJoinRequestCommand } from './application/commands/decide-join-request.command';
@@ -71,6 +72,14 @@ import { ListPendingJoinRequestsQuery } from './application/queries/list-pending
         repository: PrismaReportTeamRepository,
         access: ReportTeamAccessPolicy,
       ) => new DeleteReportTeamCommand(repository, access),
+    },
+    {
+      provide: RemoveReportTeamMemberCommand,
+      inject: [I_REPORT_TEAM_REPOSITORY, ReportTeamAccessPolicy],
+      useFactory: (
+        repository: PrismaReportTeamRepository,
+        access: ReportTeamAccessPolicy,
+      ) => new RemoveReportTeamMemberCommand(repository, access),
     },
     {
       provide: CreateJoinRequestCommand,

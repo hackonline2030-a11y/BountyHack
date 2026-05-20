@@ -11,7 +11,10 @@ import type {
 import type { IReportTeamRepository } from '../../ports/report-team-repository.interface';
 import { ReportTeamAccessPolicy } from '../report-team-access.policy';
 import { ReportTeamMemberRoleResolver } from '../report-team-member-role.resolver';
-import { computeTeamValidity } from '../report-team-validity';
+import {
+  assertAtMostOneQualityChecker,
+  computeTeamValidity,
+} from '../report-team-validity';
 
 @Injectable()
 export class CreateReportTeamCommand {
@@ -50,6 +53,7 @@ export class CreateReportTeamCommand {
     const members = await this.memberRoleResolver.resolveMemberAssignments(
       rawMembers,
     );
+    assertAtMostOneQualityChecker(members.map((m) => m.role));
 
     const hunters = members.filter((m) => m.role === 'hunter');
     if (hunters.length < 1) {
@@ -123,6 +127,7 @@ export class CreateReportTeamCommand {
     );
 
     const allRoles = ['hunter' as const, ...members.map((m) => m.role)];
+    assertAtMostOneQualityChecker(allRoles);
     const validity = computeTeamValidity(allRoles);
     if (validity === 'incomplete') {
       throw new BadRequestException(

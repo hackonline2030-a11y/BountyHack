@@ -2,6 +2,7 @@
 
 import { useEffect, type FC } from "react";
 import { useT } from "next-i18next/client";
+import { leaveReportTeam } from "@modules/report-team/core/useCase/leave-report-team.usecase";
 import { loadMemberTeams } from "@modules/report-team/core/useCase/load-member-teams.usecase";
 import type { ReportTeamMemberRole } from "@modules/report-team/model/report-team.types";
 import { buildAskJoinLabels } from "@modules/report-team/react/build-ask-join-labels";
@@ -24,7 +25,7 @@ export const ReportTeamsMemberBootstrap: FC<Props> = ({
 }) => {
   const dispatch = useAppDispatch();
   const { t } = useT("reportTeams");
-  const { myTeams, joinableTeams, myJoinRequests, loadStatus, loadError } =
+  const { myTeams, joinableTeams, myJoinRequests, loadStatus, loadError, mutationStatus, mutationError } =
     useAppSelector((s) => s.reportTeams);
 
   useEffect(() => {
@@ -62,6 +63,9 @@ export const ReportTeamsMemberBootstrap: FC<Props> = ({
       askJoinLabels={buildAskJoinLabels(t)}
       showMockBanner={false}
       showOpenReportDraftLink={defaultRole === "hunter"}
+      onLeaveTeam={(teamId) => void dispatch(leaveReportTeam(teamId))}
+      leaveTeamBusy={mutationStatus === "loading"}
+      leaveTeamError={mutationError}
     />
   );
 };

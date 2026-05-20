@@ -11,6 +11,7 @@ export const reportTeamsFixture: ReadonlyArray<ReportTeam> = [
     label: "Rapport #1042 — XSS module commentaires",
     validity: "valid",
     draftAggregateStatus: "under-review",
+    reportDraftOwnerUserId: "u-h1",
     hunterWriterUserId: "u-h1",
     updatedAt: "2026-05-14T16:30:00.000Z",
     members: [
@@ -25,6 +26,7 @@ export const reportTeamsFixture: ReadonlyArray<ReportTeam> = [
     label: "Rapport #1039 — SSRF webhook",
     validity: "valid",
     draftAggregateStatus: "draft",
+    reportDraftOwnerUserId: "u-h2",
     hunterWriterUserId: "u-h2",
     updatedAt: "2026-05-12T09:15:00.000Z",
     members: [

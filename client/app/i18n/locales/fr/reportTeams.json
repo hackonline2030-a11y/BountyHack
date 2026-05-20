@@ -8,7 +8,7 @@
     "validity": {
       "valid": "Équipe valide",
       "incomplete": "Équipe incomplète",
-      "hint": "Une équipe rapport est valide avec au moins un hunter et un mentor ou un quality checker (vous pouvez ajouter d’autres membres librement)."
+      "hint": "Une équipe rapport est valide avec au moins un hunter et un mentor ou un quality checker (vous pouvez ajouter d’autres membres librement). Un seul quality checker est autorisé par équipe : rejoindre une équipe en tant que QC n’est possible que si elle n’en a pas encore."
     },
     "roles": {
       "hunter": "Hunter",
@@ -22,7 +22,11 @@
       "teamId": "ID équipe",
       "members": "Membres",
       "updated": "Mise à jour",
-      "openReportDraft": "Ouvrir le brouillon de rapport"
+      "openReportDraft": "Ouvrir le brouillon de rapport",
+      "leaveTeam": "Quitter cette équipe",
+      "leaveTeamConfirm": "Quitter l’équipe « {{label}} » ? Vous perdrez l’accès jusqu’à ce qu’un coordinateur vous réaffecte.",
+      "leaveTeamSubmit": "Quitter l’équipe",
+      "leaveTeamBusy": "Sortie en cours…"
     },
     "requests": {
       "title": "Mes demandes",
@@ -167,7 +171,12 @@
         "save": "Mettre à jour le rédacteur désigné",
         "saving": "Mise à jour…",
         "writerSaved": "Rédacteur désigné mis à jour.",
-        "noHunters": "Aucun hunter dans cette équipe — ajoutez des membres avant d’assigner un rédacteur."
+        "noHunters": "Aucun hunter dans cette équipe — ajoutez des membres avant d’assigner un rédacteur.",
+        "membersRemove": "Retirer de l’équipe",
+        "membersRemoveConfirm": "Retirer {{name}} de cette équipe ?",
+        "membersRemoveBusy": "Retrait…",
+        "membersPrimaryHunter": "Hunter principal du rapport — ne peut pas être retiré.",
+        "membersRemoved": "Membre retiré."
       },
       "createTeam": "Créer une équipe",
       "addMember": "Ajouter un membre",

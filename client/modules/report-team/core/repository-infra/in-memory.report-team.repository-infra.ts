@@ -43,12 +43,15 @@ export class InMemoryReportTeamRepository implements IReportTeamRepository {
     reportDraftId?: string;
     hunterWriterUserId?: string;
   }): Promise<ReportTeam> {
+    const primaryHunterId =
+      input.members.find((m) => m.role === "hunter")?.userId ?? "";
     const team: ReportTeam = {
       id: `team-${this.teams.size + 1}`,
       reportDraftId: input.reportDraftId ?? `draft-${this.teams.size + 1}`,
       label: input.label,
       validity: "incomplete",
       draftAggregateStatus: "draft",
+      reportDraftOwnerUserId: primaryHunterId,
       hunterWriterUserId:
         input.hunterWriterUserId ??
         input.members.find((m) => m.role === "hunter")?.userId ??
@@ -70,6 +73,31 @@ export class InMemoryReportTeamRepository implements IReportTeamRepository {
 
   async deleteTeam(id: string): Promise<void> {
     this.teams.delete(id);
+  }
+
+  async removeTeamMember(teamId: string, memberUserId: string): Promise<ReportTeam> {
+    const team = this.teams.get(teamId);
+    if (!team) throw new Error("not found");
+    if (memberUserId === team.reportDraftOwnerUserId) {
+      throw new Error("Cannot remove the primary report hunter from the team");
+    }
+    const nextMembers = team.members.filter((m) => m.userId !== memberUserId);
+    let hunterWriterUserId = team.hunterWriterUserId;
+    if (hunterWriterUserId === memberUserId) {
+      hunterWriterUserId = team.reportDraftOwnerUserId;
+    }
+    const updated: ReportTeam = {
+      ...team,
+      members: nextMembers,
+      hunterWriterUserId,
+      updatedAt: new Date().toISOString(),
+    };
+    this.teams.set(teamId, updated);
+    return updated;
+  }
+
+  async leaveTeam(teamId: string): Promise<ReportTeam> {
+    throw new Error("leaveTeam not implemented in in-memory repository");
   }
 
   async findMyJoinRequests(): Promise<ReportTeamJoinRequest[]> {
