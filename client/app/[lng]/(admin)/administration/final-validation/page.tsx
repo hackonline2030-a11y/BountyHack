@@ -37,14 +37,14 @@ export default async function FinalValidationPage({ params }: PageProps) {
         classNames="flex min-h-0 flex-1 flex-col items-center justify-start bg-pattern py-10"
       >
         <article className="flex w-full max-w-6xl flex-col items-stretch gap-6 px-5 sm:px-6">
-          <header className="dashboard-card px-6 py-8 text-center sm:px-8 sm:py-10">
+          <header className="dashboard-card px-6 py-8 text-left sm:px-8 sm:py-10">
             <h1 className="text-3xl font-bold text-dashboard-text">
               {t("reportDraft.finalValidation.heading")}
             </h1>
             <p className="mt-2 text-sm text-dashboard-text-muted">
               {t("reportDraft.finalValidation.subheading")}
             </p>
-            <div className="mt-6 flex justify-center">
+            <div className="mt-6 flex justify-start">
               <Link
                 href={`/${lng}/welcome-admin`}
                 className="text-sm font-medium text-dashboard-accent hover:underline"

@@ -1,5 +1,7 @@
 "use client";
 
+import { inlineTextButtonClass } from "@modules/app/nextjs/components/buttons/button-styles";
+
 import { type FC, useMemo } from "react";
 import { useT } from "next-i18next/client";
 import { globalSubmissionsForCurrentRevision } from "@modules/report-draft/core/model/global-submission-revision";
@@ -62,21 +64,13 @@ export const GlobalRevisionEventBanner: FC<Props> = ({
           {" "}
           —{" "}
           {onOpenCommentsTab ? (
-            <button
-              type="button"
-              className="underline hover:text-violet-700"
-              onClick={onOpenCommentsTab}
-            >
+            <button type="button" className={inlineTextButtonClass} onClick={onOpenCommentsTab}>
               {t("myReports.globalRevisionEvent.openCommentsTab")}
             </button>
           ) : null}
           {onOpenCommentsTab && onOpenSuperAdminTab ? " · " : null}
           {onOpenSuperAdminTab ? (
-            <button
-              type="button"
-              className="underline hover:text-violet-700"
-              onClick={onOpenSuperAdminTab}
-            >
+            <button type="button" className={inlineTextButtonClass} onClick={onOpenSuperAdminTab}>
               {t("myReports.globalRevisionEvent.openSuperAdminTab")}
             </button>
           ) : null}

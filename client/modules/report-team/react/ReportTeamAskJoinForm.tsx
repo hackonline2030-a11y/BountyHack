@@ -1,5 +1,7 @@
 "use client";
 
+import { ActionButton } from "@modules/app/nextjs/components/buttons/ActionButton";
+
 import { useState, type FC } from "react";
 import type {
   ReportTeam,
@@ -142,13 +144,14 @@ export const ReportTeamAskJoinForm: FC<Props> = ({
           {feedback}
         </p>
       ) : null}
-      <button
+      <ActionButton
         type="submit"
+        variant="primary"
         disabled={status === "loading" || !reportDraftId}
-        className="btn-common-styles btn-primary w-fit disabled:opacity-50"
+        className="w-fit"
       >
         {status === "loading" ? labels.submitting : labels.submit}
-      </button>
+      </ActionButton>
     </form>
   );
 };

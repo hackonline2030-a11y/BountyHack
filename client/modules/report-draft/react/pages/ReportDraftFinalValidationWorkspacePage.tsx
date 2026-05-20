@@ -9,6 +9,7 @@ import { ReportDraftGeneralPreview } from "@modules/report-draft/react/component
 import { ReportDraftTeamContextBanner } from "@modules/report-draft/react/components/ReportDraftTeamContextBanner";
 import { SuperAdminFinalValidationActions } from "@modules/report-draft/react/components/admin/SuperAdminFinalValidationActions";
 import { SuperAdminStepCommentsEditor } from "@modules/report-draft/react/components/admin/SuperAdminStepCommentsEditor";
+import { TabNavButton } from "@modules/app/nextjs/components/buttons/TabNavButton";
 
 type ValidationTab = "generalPreview" | "superAdminComments";
 
@@ -94,24 +95,18 @@ export const ReportDraftFinalValidationWorkspacePage: FC<Props> = ({
         {TAB_ORDER.map((key) => {
           const isActive = key === activeTab;
           return (
-            <button
+            <TabNavButton
               key={key}
-              type="button"
-              role="tab"
+              active={isActive}
               id={tabButtonId(key)}
               aria-selected={isActive}
               aria-controls={tabPanelId(key)}
               tabIndex={isActive ? 0 : -1}
               onClick={() => setActiveTab(key)}
               onKeyDown={onTabKeyDown}
-              className={`-mb-px border-b-2 px-1 py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent ${
-                isActive
-                  ? "border-form-accent text-form-text"
-                  : "border-transparent text-form-text-muted hover:text-form-text"
-              }`}
             >
               {t(`reportDraft.finalValidation.detail.tabs.${key}`)}
-            </button>
+            </TabNavButton>
           );
         })}
       </div>

@@ -3,7 +3,7 @@
 import { type FC, type ReactNode } from "react";
 import { useT } from "next-i18next/client";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
-import { ReportDraftGlobalSubmitButton } from "@modules/report-draft/react/components/ReportDraftGlobalSubmitButton";
+import { ReportDraftStepNav } from "@modules/report-draft/react/components/ReportDraftStepNav";
 import { useMetaSection } from "@modules/report-draft/react/sections/meta/use-meta-section";
 
 const META_STEP = ReportDraftDomainModel.ReportDraftStep.META;
@@ -301,40 +301,21 @@ export const MetaSection: FC = () => {
         </select>
       </div>
 
-      <div className="flex flex-wrap gap-3 pt-2">
-        <button
-          type="button"
-          className="rounded-md border border-form-border bg-form-surface px-4 py-2 text-form-text-muted disabled:cursor-not-allowed disabled:opacity-50"
-          disabled
-          aria-label="Retour (indisponible — première étape)"
-        >
-          Retour
-        </button>
-        <button
-          type="button"
-          className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={onNext}
-          disabled={transitionBusy || !canNavigateNext}
-          title={
-            canNavigateNext
-              ? undefined
-              : "Disponible uniquement après validation de cette étape par le quality checker."
-          }
-        >
-          Suivant
-        </button>
-        {!hidePerStepSubmit ? (
-          <button
-            type="button"
-            className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
-            onClick={() => void onSubmitForReview()}
-            disabled={transitionBusy || !editable}
-          >
-            Soumettre cette étape pour revue
-          </button>
-        ) : null}
-        <ReportDraftGlobalSubmitButton currentStep={META_STEP} currentPayload={draft} />
-      </div>
+      <ReportDraftStepNav
+        transitionBusy={transitionBusy}
+        onNext={onNext}
+        canNavigateNext={canNavigateNext}
+        nextTitle={
+          canNavigateNext
+            ? undefined
+            : "Disponible uniquement après validation de cette étape par le quality checker."
+        }
+        hidePerStepSubmit={hidePerStepSubmit}
+        onSubmitForReview={onSubmitForReview}
+        submitDisabled={!editable}
+        currentStep={META_STEP}
+        currentPayload={draft}
+      />
     </form>
   );
 };

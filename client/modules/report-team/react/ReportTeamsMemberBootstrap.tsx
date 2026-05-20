@@ -80,7 +80,11 @@ export const ReportTeamsMemberBootstrap: FC<Props> = ({
       roleOptions={roleOptions}
       askJoinLabels={buildAskJoinLabels(t)}
       showMockBanner={false}
-      showOpenReportDraftLink={defaultRole === "hunter"}
+      showOpenReportDraftLink={
+        defaultRole === "hunter" ||
+        defaultRole === "mentor" ||
+        defaultRole === "quality_checker"
+      }
       onLeaveTeam={(teamId) => void dispatch(leaveReportTeam(teamId))}
       onRequestLeave={(teamId) => void dispatch(requestLeaveReportTeam({ teamId }))}
       leaveTeamBusy={mutationStatus === "loading"}

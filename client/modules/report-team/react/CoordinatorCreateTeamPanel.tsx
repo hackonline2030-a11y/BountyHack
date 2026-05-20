@@ -1,5 +1,7 @@
 "use client";
 
+import { DashboardCompactButton } from "@modules/app/nextjs/components/buttons/DashboardCompactButton";
+
 import { useEffect, useMemo, useState, type FC } from "react";
 import { useT } from "next-i18next/client";
 import { createReportTeam } from "@modules/report-team/core/useCase/create-report-team.usecase";
@@ -243,26 +245,24 @@ export const CoordinatorCreateTeamPanel: FC<Props> = ({
                     </td>
                     <td className="px-2 py-2">
                       <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          className="btn-common-styles bg-dashboard-accent px-3 py-1 text-xs text-white disabled:opacity-50"
+                        <DashboardCompactButton
+                          variant="accent"
                           disabled={isBusy}
                           onClick={() => void onApprove(req)}
                         >
                           {approvingId === req.id
                             ? t("reportTeams.coordinator.approving")
                             : t("reportTeams.coordinator.approve")}
-                        </button>
-                        <button
-                          type="button"
-                          className="btn-common-styles border border-dashboard-card-border bg-white/90 px-3 py-1 text-xs text-dashboard-text disabled:opacity-50"
+                        </DashboardCompactButton>
+                        <DashboardCompactButton
+                          variant="neutral"
                           disabled={isBusy}
                           onClick={() => void onReject(req)}
                         >
                           {rejectingId === req.id
                             ? t("reportTeams.coordinator.rejecting")
                             : t("reportTeams.coordinator.reject")}
-                        </button>
+                        </DashboardCompactButton>
                       </div>
                     </td>
                   </tr>
@@ -320,16 +320,15 @@ export const CoordinatorCreateTeamPanel: FC<Props> = ({
                       {roleLabels[req.requestedRole]}
                     </td>
                     <td className="px-2 py-2">
-                      <button
-                        type="button"
-                        className="btn-common-styles border border-dashboard-card-border bg-white/90 px-3 py-1 text-xs text-dashboard-text disabled:opacity-50"
+                      <DashboardCompactButton
+                        variant="neutral"
                         disabled={isBusy}
                         onClick={() => void onReject(req)}
                       >
                         {rejectingId === req.id
                           ? t("reportTeams.coordinator.rejecting")
                           : t("reportTeams.coordinator.reject")}
-                      </button>
+                      </DashboardCompactButton>
                     </td>
                   </tr>
                 ))}
