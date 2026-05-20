@@ -67,8 +67,6 @@ export const requestStepRevisions =
       // does not leave the hunter without reviewer feedback in Postgres.
       await deps.submissionRepository.save(submission);
       await deps.reviewerCommentRepository.saveMany(newComments);
-      await deps.reportDraftRepository.save(aggregate.state);
-
       dispatch(reportDraftsSlice.actions.draftUpserted(aggregate.state));
       dispatch(reportDraftsSlice.actions.submissionUpserted(submission));
       dispatch(reportDraftsSlice.actions.commentsUpserted(newComments));
