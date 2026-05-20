@@ -1,4 +1,5 @@
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
+import { REPORT_DRAFT_STEP_STATE_KEYS } from "@modules/report-draft/core/model/report-draft-step-keys";
 import type { IReportDraftRepository } from "@modules/report-draft/core/repository/report-draft.repository";
 
 export class InMemoryReportDraftRepository implements IReportDraftRepository {
@@ -62,23 +63,12 @@ export class InMemoryReportDraftRepository implements IReportDraftRepository {
     const existing = this.store.get(input.draftId);
     if (!existing) throw new Error("Draft not found");
     const next = clone(existing);
-    for (const key of [
-      "meta",
-      "description",
-      "collection",
-      "exploitation",
-      "proofOfConcept",
-      "risks",
-      "remediation",
-      "final",
-    ] as const) {
+    for (const key of REPORT_DRAFT_STEP_STATE_KEYS) {
       const step = next[key];
-      if (step.attachments.some((a) => a.id === input.attachmentId)) {
-        next[key] = {
-          ...step,
-          attachments: step.attachments.filter((a) => a.id !== input.attachmentId),
-        };
+      if (!step.attachments.some((a) => a.id === input.attachmentId)) {
+        continue;
       }
+      step.attachments = step.attachments.filter((a) => a.id !== input.attachmentId);
     }
     this.store.set(input.draftId, next);
     return clone(next);
