@@ -3,6 +3,14 @@
     "metaTitle": "Mes rapports",
     "heading": "Mes rapports",
     "workspace": {
+      "tabs": {
+        "attachments": "Pièces jointes"
+      },
+      "attachments": {
+        "hint": "Images privées de cette étape (accès authentifié uniquement).",
+        "empty": "Aucune pièce jointe pour cette étape.",
+        "noStepImages": "Cette étape ne comporte pas de pièces jointes."
+      },
       "backToReports": "← Retour à mes rapports",
       "backToReportsAria": "Retour à la liste de mes brouillons",
       "hunterWriter": {

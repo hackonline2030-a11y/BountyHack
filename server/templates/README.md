@@ -17,7 +17,7 @@ Paths are resolved from the API process `cwd` (`server/`), e.g.
 
 ### Application (primary)
 
-- **Upload:** `POST /api/report-drafts/draft/:draftId/attachments/images` — requires auth and `assertCanSaveDraft` (designated hunter writer only).
+- **Upload:** `POST /api/report-drafts/draft/:draftId/steps/:stepKey/attachments/images` (`stepKey`: `description`, `collection`, `exploitation`, `proofOfConcept`, `risks`, `remediation`) — requires auth and `assertCanSaveDraft` (designated hunter writer only). Legacy `.../attachments/images` maps to `description`.
 - **Read:** `GET /api/report-drafts/draft/:draftId/attachments/:attachmentId/image` — requires auth and `assertCanReadDraft` (report team / workflow access).
 - Images are **not** exposed under `client/public/` or a public URL path.
 

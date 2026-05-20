@@ -36,8 +36,9 @@ export class InMemoryReportDraftRepository implements IReportDraftRepository {
       .map(clone);
   }
 
-  async uploadDescriptionSectionImage(input: {
+  async uploadSectionImage(input: {
     draftId: ReportDraftDomainModel.ReportDraftId;
+    stepKey: import("@modules/report-draft/core/model/report-draft-step-keys").ReportDraftStepStateKey;
     file: File;
   }): Promise<ReportDraftDomainModel.Attachment> {
     return {
@@ -48,10 +49,50 @@ export class InMemoryReportDraftRepository implements IReportDraftRepository {
       filename: input.file.name,
       mimeType: input.file.type,
       sizeBytes: input.file.size,
-      storageKey: `in-memory/${input.draftId}/${input.file.name}`,
+      storageKey: `in-memory/${input.draftId}/${input.stepKey}/${input.file.name}`,
       uploadedAt: new Date().toISOString(),
       uploadedBy: "in-memory",
     };
+  }
+
+  async deleteAttachment(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    attachmentId: string;
+  }): Promise<ReportDraftDomainModel.ReportDraft> {
+    const existing = this.store.get(input.draftId);
+    if (!existing) throw new Error("Draft not found");
+    const next = clone(existing);
+    for (const key of [
+      "meta",
+      "description",
+      "collection",
+      "exploitation",
+      "proofOfConcept",
+      "risks",
+      "remediation",
+      "final",
+    ] as const) {
+      const step = next[key];
+      if (step.attachments.some((a) => a.id === input.attachmentId)) {
+        next[key] = {
+          ...step,
+          attachments: step.attachments.filter((a) => a.id !== input.attachmentId),
+        };
+      }
+    }
+    this.store.set(input.draftId, next);
+    return clone(next);
+  }
+
+  async uploadDescriptionSectionImage(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    file: File;
+  }): Promise<ReportDraftDomainModel.Attachment> {
+    return this.uploadSectionImage({
+      draftId: input.draftId,
+      stepKey: "description",
+      file: input.file,
+    });
   }
 
   async deletePermanently(
