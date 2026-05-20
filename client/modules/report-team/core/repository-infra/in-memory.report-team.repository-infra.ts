@@ -2,6 +2,7 @@ import type { OrphanReportDraft } from "@modules/report-team/model/orphan-report
 import type {
   ReportTeam,
   ReportTeamJoinRequest,
+  ReportTeamLeaveRequest,
   ReportTeamMemberRole,
 } from "@modules/report-team/model/report-team.types";
 import type { IReportTeamRepository } from "@modules/report-team/core/repository/report-team.repository";
@@ -10,6 +11,7 @@ import { isEnrollmentJoinRequest } from "@modules/report-team/model/report-team-
 export class InMemoryReportTeamRepository implements IReportTeamRepository {
   private teams = new Map<string, ReportTeam>();
   private requests = new Map<string, ReportTeamJoinRequest>();
+  private leaveRequests = new Map<string, ReportTeamLeaveRequest>();
 
   async findMyTeams(): Promise<ReportTeam[]> {
     return [...this.teams.values()];
@@ -100,6 +102,12 @@ export class InMemoryReportTeamRepository implements IReportTeamRepository {
     throw new Error("leaveTeam not implemented in in-memory repository");
   }
 
+  async findCoordinatorHunterUsers(): Promise<
+    Array<{ userId: string; displayName: string }>
+  > {
+    return [];
+  }
+
   async findMyJoinRequests(): Promise<ReportTeamJoinRequest[]> {
     return [...this.requests.values()];
   }
@@ -163,6 +171,51 @@ export class InMemoryReportTeamRepository implements IReportTeamRepository {
     if (!req) throw new Error("not found");
     const updated = { ...req, status: "rejected" as const };
     this.requests.set(id, updated);
+    return updated;
+  }
+
+  async findMyLeaveRequests(): Promise<ReportTeamLeaveRequest[]> {
+    return [...this.leaveRequests.values()];
+  }
+
+  async findPendingLeaveRequests(): Promise<ReportTeamLeaveRequest[]> {
+    return [...this.leaveRequests.values()].filter((r) => r.status === "pending");
+  }
+
+  async createLeaveRequest(input: {
+    teamId: string;
+    message?: string;
+  }): Promise<ReportTeamLeaveRequest> {
+    const team = this.teams.get(input.teamId);
+    if (!team) throw new Error("Report team not found");
+    const req: ReportTeamLeaveRequest = {
+      id: `leave-${this.leaveRequests.size + 1}`,
+      teamId: team.id,
+      reportDraftId: team.reportDraftId,
+      teamLabel: team.label,
+      userId: team.reportDraftOwnerUserId,
+      requesterDisplayName: "Primary hunter",
+      message: input.message,
+      status: "pending",
+      requestedAt: new Date().toISOString(),
+    };
+    this.leaveRequests.set(req.id, req);
+    return req;
+  }
+
+  async approveLeaveRequest(id: string): Promise<ReportTeamLeaveRequest> {
+    const req = this.leaveRequests.get(id);
+    if (!req) throw new Error("not found");
+    const updated = { ...req, status: "approved" as const };
+    this.leaveRequests.set(id, updated);
+    return updated;
+  }
+
+  async rejectLeaveRequest(id: string): Promise<ReportTeamLeaveRequest> {
+    const req = this.leaveRequests.get(id);
+    if (!req) throw new Error("not found");
+    const updated = { ...req, status: "rejected" as const };
+    this.leaveRequests.set(id, updated);
     return updated;
   }
 }

@@ -43,3 +43,16 @@ export type ReportTeamJoinRequest = {
   status: MembershipRequestStatus;
   requestedAt: string;
 };
+
+/** Primary hunter asks the coordinator to remove them (cannot self-leave while `hunter_id`). */
+export type ReportTeamLeaveRequest = {
+  id: string;
+  teamId: string;
+  reportDraftId: string;
+  teamLabel: string;
+  userId: string;
+  requesterDisplayName: string;
+  message?: string;
+  status: MembershipRequestStatus;
+  requestedAt: string;
+};

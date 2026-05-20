@@ -3,10 +3,13 @@ import { AuthModule } from '../auth/auth.module';
 import { PrismaModule } from '../core/infrastructure/database/prisma/prisma.module';
 import { ReportTeamController } from './controllers/report-team.controller';
 import { JoinRequestController } from './controllers/join-request.controller';
+import { LeaveRequestController } from './controllers/leave-request.controller';
 import { I_REPORT_TEAM_REPOSITORY } from './ports/report-team-repository.interface';
 import { I_JOIN_REQUEST_REPOSITORY } from './ports/join-request-repository.interface';
+import { I_LEAVE_REQUEST_REPOSITORY } from './ports/leave-request-repository.interface';
 import { PrismaReportTeamRepository } from './adapters/postgre-prisma/prisma-report-team.repository';
 import { PrismaJoinRequestRepository } from './adapters/postgre-prisma/prisma-join-request.repository';
+import { PrismaLeaveRequestRepository } from './adapters/postgre-prisma/prisma-leave-request.repository';
 import { ReportTeamAccessPolicy } from './application/report-team-access.policy';
 import { ReportTeamMemberRoleResolver } from './application/report-team-member-role.resolver';
 import { CreateReportTeamCommand } from './application/commands/create-report-team.command';
@@ -16,6 +19,8 @@ import { RemoveReportTeamMemberCommand } from './application/commands/remove-rep
 import { CreateEnrollmentRequestCommand } from './application/commands/create-enrollment-request.command';
 import { CreateJoinRequestCommand } from './application/commands/create-join-request.command';
 import { DecideJoinRequestCommand } from './application/commands/decide-join-request.command';
+import { CreateLeaveRequestCommand } from './application/commands/create-leave-request.command';
+import { DecideLeaveRequestCommand } from './application/commands/decide-leave-request.command';
 import { ListMyReportTeamsQuery } from './application/queries/list-my-report-teams.query';
 import { ListAllReportTeamsQuery } from './application/queries/list-all-report-teams.query';
 import { GetReportTeamByIdQuery } from './application/queries/get-report-team-by-id.query';
@@ -23,11 +28,13 @@ import { GetReportTeamByDraftIdQuery } from './application/queries/get-report-te
 import { ListJoinableReportTeamsQuery } from './application/queries/list-joinable-report-teams.query';
 import { ListMyJoinRequestsQuery } from './application/queries/list-my-join-requests.query';
 import { ListPendingJoinRequestsQuery } from './application/queries/list-pending-join-requests.query';
+import { ListMyLeaveRequestsQuery } from './application/queries/list-my-leave-requests.query';
+import { ListPendingLeaveRequestsQuery } from './application/queries/list-pending-leave-requests.query';
 
 @Module({
   imports: [AuthModule, PrismaModule],
-  controllers: [ReportTeamController, JoinRequestController],
-  exports: [I_REPORT_TEAM_REPOSITORY],
+  controllers: [ReportTeamController, JoinRequestController, LeaveRequestController],
+  exports: [I_REPORT_TEAM_REPOSITORY, ReportTeamAccessPolicy],
   providers: [
     ReportTeamMemberRoleResolver,
     {
@@ -37,6 +44,10 @@ import { ListPendingJoinRequestsQuery } from './application/queries/list-pending
     {
       provide: I_JOIN_REQUEST_REPOSITORY,
       useClass: PrismaJoinRequestRepository,
+    },
+    {
+      provide: I_LEAVE_REQUEST_REPOSITORY,
+      useClass: PrismaLeaveRequestRepository,
     },
     {
       provide: ReportTeamAccessPolicy,
@@ -170,6 +181,36 @@ import { ListPendingJoinRequestsQuery } from './application/queries/list-pending
         repository: PrismaJoinRequestRepository,
         access: ReportTeamAccessPolicy,
       ) => new ListPendingJoinRequestsQuery(repository, access),
+    },
+    {
+      provide: CreateLeaveRequestCommand,
+      inject: [I_LEAVE_REQUEST_REPOSITORY, ReportTeamAccessPolicy],
+      useFactory: (
+        repository: PrismaLeaveRequestRepository,
+        access: ReportTeamAccessPolicy,
+      ) => new CreateLeaveRequestCommand(repository, access),
+    },
+    {
+      provide: DecideLeaveRequestCommand,
+      inject: [I_LEAVE_REQUEST_REPOSITORY, ReportTeamAccessPolicy],
+      useFactory: (
+        repository: PrismaLeaveRequestRepository,
+        access: ReportTeamAccessPolicy,
+      ) => new DecideLeaveRequestCommand(repository, access),
+    },
+    {
+      provide: ListMyLeaveRequestsQuery,
+      inject: [I_LEAVE_REQUEST_REPOSITORY],
+      useFactory: (repository: PrismaLeaveRequestRepository) =>
+        new ListMyLeaveRequestsQuery(repository),
+    },
+    {
+      provide: ListPendingLeaveRequestsQuery,
+      inject: [I_LEAVE_REQUEST_REPOSITORY, ReportTeamAccessPolicy],
+      useFactory: (
+        repository: PrismaLeaveRequestRepository,
+        access: ReportTeamAccessPolicy,
+      ) => new ListPendingLeaveRequestsQuery(repository, access),
     },
   ],
 })

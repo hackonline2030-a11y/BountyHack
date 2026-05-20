@@ -3,6 +3,7 @@ import type { OrphanReportDraft } from "@modules/report-team/model/orphan-report
 import type {
   ReportTeam,
   ReportTeamJoinRequest,
+  ReportTeamLeaveRequest,
 } from "@modules/report-team/model/report-team.types";
 
 export type ReportTeamsLoadStatus = "idle" | "loading" | "success" | "error";
@@ -12,7 +13,9 @@ export type ReportTeamsState = {
   joinableTeams: ReportTeam[];
   allTeams: ReportTeam[];
   myJoinRequests: ReportTeamJoinRequest[];
+  myLeaveRequests: ReportTeamLeaveRequest[];
   pendingJoinRequests: ReportTeamJoinRequest[];
+  pendingLeaveRequests: ReportTeamLeaveRequest[];
   orphanDrafts: OrphanReportDraft[];
   loadStatus: ReportTeamsLoadStatus;
   loadError: string | null;
@@ -29,7 +32,9 @@ const initialState: ReportTeamsState = {
   joinableTeams: [],
   allTeams: [],
   myJoinRequests: [],
+  myLeaveRequests: [],
   pendingJoinRequests: [],
+  pendingLeaveRequests: [],
   orphanDrafts: [],
   loadStatus: "idle",
   loadError: null,
@@ -55,7 +60,9 @@ export const reportTeamsSlice = createSlice({
         joinableTeams?: ReportTeam[];
         allTeams?: ReportTeam[];
         myJoinRequests?: ReportTeamJoinRequest[];
+        myLeaveRequests?: ReportTeamLeaveRequest[];
         pendingJoinRequests?: ReportTeamJoinRequest[];
+        pendingLeaveRequests?: ReportTeamLeaveRequest[];
         orphanDrafts?: OrphanReportDraft[];
       }>,
     ) {
@@ -68,8 +75,14 @@ export const reportTeamsSlice = createSlice({
       if (action.payload.myJoinRequests !== undefined) {
         state.myJoinRequests = action.payload.myJoinRequests;
       }
+      if (action.payload.myLeaveRequests !== undefined) {
+        state.myLeaveRequests = action.payload.myLeaveRequests;
+      }
       if (action.payload.pendingJoinRequests !== undefined) {
         state.pendingJoinRequests = action.payload.pendingJoinRequests;
+      }
+      if (action.payload.pendingLeaveRequests !== undefined) {
+        state.pendingLeaveRequests = action.payload.pendingLeaveRequests;
       }
       if (action.payload.orphanDrafts !== undefined) {
         state.orphanDrafts = action.payload.orphanDrafts;
@@ -104,6 +117,15 @@ export const reportTeamsSlice = createSlice({
       action: PayloadAction<ReportTeamJoinRequest[]>,
     ) {
       state.pendingJoinRequests = action.payload;
+    },
+    myLeaveRequestsReplaced(state, action: PayloadAction<ReportTeamLeaveRequest[]>) {
+      state.myLeaveRequests = action.payload;
+    },
+    pendingLeaveRequestsReplaced(
+      state,
+      action: PayloadAction<ReportTeamLeaveRequest[]>,
+    ) {
+      state.pendingLeaveRequests = action.payload;
     },
     teamDetailReset(state) {
       state.teamDetail = null;

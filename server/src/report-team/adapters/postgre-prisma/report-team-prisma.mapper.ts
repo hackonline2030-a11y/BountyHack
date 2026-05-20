@@ -2,6 +2,7 @@ import type {
   ReportDraft,
   ReportTeam,
   ReportTeamJoinRequest,
+  ReportTeamLeaveRequest,
   ReportTeamMember,
   User,
 } from '../../../generated/prisma/client';
@@ -9,6 +10,7 @@ import { ReportDraftPrismaMapper } from '../../../report-draft/adapters/postgre-
 import { computeTeamValidity } from '../../application/report-team-validity';
 import type {
   ReportTeamJoinRequestWire,
+  ReportTeamLeaveRequestWire,
   ReportTeamMemberWire,
   ReportTeamWire,
 } from '../../models/report-team-api.types';
@@ -21,6 +23,11 @@ type TeamWithMembers = ReportTeam & {
 
 type JoinRequestWithRelations = ReportTeamJoinRequest & {
   team: ReportTeam | null;
+  user: User;
+};
+
+type LeaveRequestWithRelations = ReportTeamLeaveRequest & {
+  team: ReportTeam;
   user: User;
 };
 
@@ -63,6 +70,20 @@ export class ReportTeamPrismaMapper {
       userId: row.userId,
       requesterDisplayName: this.displayNameForUser(row.user),
       requestedRole: ReportTeamEnumMapper.memberRoleToWire(row.requestedRole),
+      message: row.message ?? undefined,
+      status: ReportTeamEnumMapper.requestStatusToWire(row.status),
+      requestedAt: row.requestedAt.toISOString(),
+    };
+  }
+
+  static leaveRequestToWire(row: LeaveRequestWithRelations): ReportTeamLeaveRequestWire {
+    return {
+      id: row.id,
+      teamId: row.teamId,
+      reportDraftId: row.team.reportDraftId,
+      teamLabel: row.team.label,
+      userId: row.userId,
+      requesterDisplayName: this.displayNameForUser(row.user),
       message: row.message ?? undefined,
       status: ReportTeamEnumMapper.requestStatusToWire(row.status),
       requestedAt: row.requestedAt.toISOString(),

@@ -4,6 +4,7 @@ import type { OrphanReportDraft } from "@modules/report-team/model/orphan-report
 import type {
   ReportTeam,
   ReportTeamJoinRequest,
+  ReportTeamLeaveRequest,
   ReportTeamMemberRole,
 } from "@modules/report-team/model/report-team.types";
 import type { IReportTeamRepository } from "@modules/report-team/core/repository/report-team.repository";
@@ -11,6 +12,7 @@ import { parseJsonResponse } from "@modules/report-team/core/repository-infra/ht
 
 const teamsBase = "/api/report-draft/report-teams";
 const joinBase = "/api/report-draft/report-teams/join-requests";
+const leaveBase = "/api/report-draft/report-teams/leave-requests";
 
 export class HttpReportTeamRepository implements IReportTeamRepository {
   async findMyTeams(): Promise<ReportTeam[]> {
@@ -119,6 +121,22 @@ export class HttpReportTeamRepository implements IReportTeamRepository {
     return parseJsonResponse(res);
   }
 
+  async findCoordinatorHunterUsers(): Promise<
+    Array<{ userId: string; displayName: string }>
+  > {
+    const res = await fetchBff("/api/report-draft/coordination/hunters", {
+      credentials: "include",
+      cache: "no-store",
+    });
+    const rows = await parseJsonResponse<
+      Array<{ uid: string; username: string; email?: string | null }>
+    >(res);
+    return rows.map((row) => ({
+      userId: row.uid,
+      displayName: row.username?.trim() || row.email?.trim() || row.uid,
+    }));
+  }
+
   async findMyJoinRequests(): Promise<ReportTeamJoinRequest[]> {
     const res = await fetchBff(`${joinBase}/mine`, {
       credentials: "include",
@@ -173,6 +191,51 @@ export class HttpReportTeamRepository implements IReportTeamRepository {
   async rejectJoinRequest(id: string): Promise<ReportTeamJoinRequest> {
     const res = await fetchBff(
       `${joinBase}/${encodeURIComponent(id)}/reject`,
+      { method: "POST", credentials: "include" },
+    );
+    return parseJsonResponse(res);
+  }
+
+  async findMyLeaveRequests(): Promise<ReportTeamLeaveRequest[]> {
+    const res = await fetchBff(`${leaveBase}/mine`, {
+      credentials: "include",
+      cache: "no-store",
+    });
+    return parseJsonResponse(res);
+  }
+
+  async findPendingLeaveRequests(): Promise<ReportTeamLeaveRequest[]> {
+    const res = await fetchBff(`${leaveBase}/pending`, {
+      credentials: "include",
+      cache: "no-store",
+    });
+    return parseJsonResponse(res);
+  }
+
+  async createLeaveRequest(input: {
+    teamId: string;
+    message?: string;
+  }): Promise<ReportTeamLeaveRequest> {
+    const res = await fetchBff(leaveBase, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    return parseJsonResponse(res);
+  }
+
+  async approveLeaveRequest(id: string): Promise<ReportTeamLeaveRequest> {
+    const res = await fetchBff(
+      `${leaveBase}/${encodeURIComponent(id)}/approve`,
+      { method: "POST", credentials: "include" },
+    );
+    return parseJsonResponse(res);
+  }
+
+  async rejectLeaveRequest(id: string): Promise<ReportTeamLeaveRequest> {
+    const res = await fetchBff(
+      `${leaveBase}/${encodeURIComponent(id)}/reject`,
       { method: "POST", credentials: "include" },
     );
     return parseJsonResponse(res);

@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { UserModule } from '../users/user.module';
+import { I_USER_REPOSITORY } from '../users/ports/user-repository.interface';
+import type { IUserRepository } from '../users/ports/user-repository.interface';
 import { ReportTeamModule } from '../report-team/report-team.module';
 import { I_REPORT_TEAM_REPOSITORY } from '../report-team/ports/report-team-repository.interface';
 import type { IReportTeamRepository } from '../report-team/ports/report-team-repository.interface';
@@ -21,6 +24,7 @@ import { PrismaGlobalSubmissionRepository } from './adapters/postgre-prisma/pris
 import { PrismaGlobalReviewerCommentRepository } from './adapters/postgre-prisma/prisma-global-reviewer-comment.repository';
 import { CreateGlobalSubmissionCommand } from './application/commands/create-global-submission.command';
 import { SetHunterWriterCommand } from './application/commands/set-hunter-writer.command';
+import { SetPrimaryHunterCommand } from './application/commands/set-primary-hunter.command';
 import { ApproveGlobalSubmissionCommand } from './application/commands/approve-global-submission.command';
 import { RequestGlobalSubmissionChangesCommand } from './application/commands/request-global-submission-changes.command';
 import { ListGlobalSubmissionsQuery } from './application/queries/list-global-submissions.query';
@@ -31,6 +35,8 @@ import { GetReportDraftByIdQuery } from './application/queries/get-report-draft-
 import { ListReportDraftsByHunterQuery } from './application/queries/list-report-drafts-by-hunter.query';
 import { ListReportDraftsForFinalValidationQuery } from './application/queries/list-report-drafts-for-final-validation.query';
 import { ListOrphanReportDraftsQuery } from './application/queries/list-orphan-report-drafts.query';
+import { ListHuntersForCoordinatorQuery } from './application/queries/list-hunters-for-coordinator.query';
+import { ReportTeamAccessPolicy } from '../report-team/application/report-team-access.policy';
 import { SuperAdminFinalValidationService } from './application/admin/super-admin-final-validation.service';
 import { DeleteReportDraftCommand } from './application/commands/delete-report-draft.command';
 import { PrismaService } from '../core/infrastructure/database/prisma/prisma.service';
@@ -44,7 +50,7 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
 import { ReportDraftImageAssetService } from './application/attachments/report-draft-image-asset.service';
 
 @Module({
-  imports: [AuthModule, ReportTeamModule],
+  imports: [AuthModule, ReportTeamModule, UserModule],
   controllers: [
     ReportDraftController,
     ReportDraftAdminController,
@@ -80,16 +86,19 @@ import { ReportDraftImageAssetService } from './application/attachments/report-d
         I_REPORT_DRAFT_REPOSITORY,
         I_SUBMISSION_REPOSITORY,
         I_REPORT_TEAM_REPOSITORY,
+        I_USER_REPOSITORY,
       ],
       useFactory: (
         reportDraftRepository: PrismaReportDraftRepository,
         submissionRepository: PrismaSubmissionRepository,
         reportTeamRepository: IReportTeamRepository,
+        userRepository: IUserRepository,
       ) =>
         new ReportDraftAccessPolicy(
           reportDraftRepository,
           submissionRepository,
           reportTeamRepository,
+          userRepository,
         ),
     },
     {
@@ -107,6 +116,14 @@ import { ReportDraftImageAssetService } from './application/attachments/report-d
         repository: PrismaReportDraftRepository,
         access: ReportDraftAccessPolicy,
       ) => new SetHunterWriterCommand(repository, access),
+    },
+    {
+      provide: SetPrimaryHunterCommand,
+      inject: [I_REPORT_DRAFT_REPOSITORY, ReportDraftAccessPolicy],
+      useFactory: (
+        repository: PrismaReportDraftRepository,
+        access: ReportDraftAccessPolicy,
+      ) => new SetPrimaryHunterCommand(repository, access),
     },
     ReportDraftImageAssetService,
     {
@@ -134,6 +151,14 @@ import { ReportDraftImageAssetService } from './application/attachments/report-d
       inject: [I_REPORT_DRAFT_REPOSITORY],
       useFactory: (repository: PrismaReportDraftRepository) =>
         new ListOrphanReportDraftsQuery(repository),
+    },
+    {
+      provide: ListHuntersForCoordinatorQuery,
+      inject: [I_USER_REPOSITORY, ReportTeamAccessPolicy],
+      useFactory: (
+        userRepository: IUserRepository,
+        teamAccess: ReportTeamAccessPolicy,
+      ) => new ListHuntersForCoordinatorQuery(userRepository, teamAccess),
     },
     {
       provide: DeleteReportDraftCommand,

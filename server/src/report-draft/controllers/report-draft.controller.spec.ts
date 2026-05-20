@@ -6,6 +6,7 @@ import { GetReportDraftByIdQuery } from '../application/queries/get-report-draft
 import { ListReportDraftsByHunterQuery } from '../application/queries/list-report-drafts-by-hunter.query';
 import { ReportDraftImageAssetService } from '../application/attachments/report-draft-image-asset.service';
 import { SetHunterWriterCommand } from '../application/commands/set-hunter-writer.command';
+import { SetPrimaryHunterCommand } from '../application/commands/set-primary-hunter.command';
 import type { RequestWithIdentity } from '../../auth/adapters/http/request-with-identity';
 import type { ReportDraftWire } from '../models/report-draft-api.types';
 
@@ -68,6 +69,10 @@ describe('ReportDraftController', () => {
         },
         {
           provide: SetHunterWriterCommand,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: SetPrimaryHunterCommand,
           useValue: { execute: jest.fn() },
         },
       ],

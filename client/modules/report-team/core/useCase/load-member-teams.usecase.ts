@@ -7,16 +7,18 @@ export const loadMemberTeams =
   async (dispatch: AppDispatch, _getState: unknown, deps: Dependencies): Promise<void> => {
     dispatch(reportTeamsSlice.actions.loadStarted());
     try {
-      const [myTeams, joinableTeams, myJoinRequests] = await Promise.all([
+      const [myTeams, joinableTeams, myJoinRequests, myLeaveRequests] = await Promise.all([
         deps.reportTeamRepository.findMyTeams(),
         deps.reportTeamRepository.findJoinableTeams(),
         deps.reportTeamRepository.findMyJoinRequests(),
+        deps.reportTeamRepository.findMyLeaveRequests(),
       ]);
       dispatch(
         reportTeamsSlice.actions.loadSucceeded({
           myTeams,
           joinableTeams,
           myJoinRequests,
+          myLeaveRequests,
         }),
       );
     } catch (error) {

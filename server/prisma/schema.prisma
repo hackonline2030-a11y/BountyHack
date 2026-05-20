@@ -38,6 +38,8 @@ model User {
   reportTeamMembers ReportTeamMember[]
   reportTeamJoinRequests ReportTeamJoinRequest[] @relation("JoinRequestUser")
   reportTeamJoinRequestsDecided ReportTeamJoinRequest[] @relation("JoinRequestDecider")
+  reportTeamLeaveRequests ReportTeamLeaveRequest[] @relation("LeaveRequestUser")
+  reportTeamLeaveRequestsDecided ReportTeamLeaveRequest[] @relation("LeaveRequestDecider")
 
   @@index([roleId])
   @@map("users")
@@ -412,8 +414,9 @@ model ReportTeam {
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   reportDraft  ReportDraft             @relation(fields: [reportDraftId], references: [id], onDelete: Cascade)
-  members      ReportTeamMember[]
-  joinRequests ReportTeamJoinRequest[]
+  members       ReportTeamMember[]
+  joinRequests  ReportTeamJoinRequest[]
+  leaveRequests ReportTeamLeaveRequest[]
 
   @@index([reportDraftId])
   @@map("report_draft_teams")
@@ -454,4 +457,24 @@ model ReportTeamJoinRequest {
   @@index([teamId, status])
   @@index([userId, status])
   @@map("report_team_join_requests")
+}
+
+/// Primary hunter asks the coordinator to remove them from the squad (cannot self-leave while `hunter_id`).
+model ReportTeamLeaveRequest {
+  id          String                      @id @default(uuid())
+  teamId      String                      @map("team_id")
+  userId      String                      @map("user_id")
+  message     String?
+  status      ReportTeamJoinRequestStatus @default(PENDING)
+  requestedAt DateTime                    @default(now()) @map("requested_at")
+  decidedAt   DateTime?                   @map("decided_at")
+  decidedById String?                     @map("decided_by_id")
+
+  team      ReportTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User       @relation("LeaveRequestUser", fields: [userId], references: [id], onDelete: Cascade)
+  decidedBy User?      @relation("LeaveRequestDecider", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  @@index([teamId, status])
+  @@index([userId, status])
+  @@map("report_team_leave_requests")
 }

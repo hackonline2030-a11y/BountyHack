@@ -80,3 +80,20 @@ export interface CreateEnrollmentRequestInput {
   requestedRole: ReportTeamMemberRoleWire;
   message?: string;
 }
+
+export interface ReportTeamLeaveRequestWire {
+  id: string;
+  teamId: string;
+  reportDraftId: string;
+  teamLabel: string;
+  userId: string;
+  requesterDisplayName: string;
+  message?: string;
+  status: MembershipRequestStatusWire;
+  requestedAt: string;
+}
+
+export interface CreateLeaveRequestInput {
+  teamId: string;
+  message?: string;
+}

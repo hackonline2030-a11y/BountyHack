@@ -6,9 +6,12 @@ import { useParams } from "next/navigation";
 import { useStore } from "react-redux";
 import { useT } from "next-i18next/client";
 import { loadCoordinatorTeamDetail } from "@modules/report-team/core/useCase/load-coordinator-team-detail.usecase";
+import { loadCoordinatorHunterUsers } from "@modules/report-team/core/useCase/load-coordinator-hunter-users.usecase";
+import type { CoordinatorHunterUserOption } from "@modules/report-team/core/useCase/load-coordinator-hunter-users.usecase";
 import { loadCoordinatorTeams } from "@modules/report-team/core/useCase/load-coordinator-teams.usecase";
 import { removeMemberFromReportTeamAsCoordinator } from "@modules/report-team/core/useCase/remove-member-from-report-team-as-coordinator.usecase";
 import { setReportDraftHunterWriter } from "@modules/report-draft/core/useCase/set-hunter-writer.usecase";
+import { setReportDraftPrimaryHunter } from "@modules/report-draft/core/useCase/set-primary-hunter.usecase";
 import { reportTeamsSlice } from "@modules/report-team/core/store/report-teams.slice";
 import type { ReportTeamMemberRole } from "@modules/report-team/model/report-team.types";
 import { ReportTeamValidityBadge } from "@modules/report-team/react/ReportTeamValidityBadge";
@@ -35,8 +38,11 @@ export const CoordinatorTeamDetailPanel: FC<Props> = ({ teamId }) => {
     useAppSelector((s) => s.reportTeams);
 
   const [feedback, setFeedback] = useState("");
+  const [primaryFeedback, setPrimaryFeedback] = useState("");
   const [memberFeedback, setMemberFeedback] = useState("");
   const [selectedWriterId, setSelectedWriterId] = useState("");
+  const [selectedPrimaryHunterId, setSelectedPrimaryHunterId] = useState("");
+  const [hunterPicker, setHunterPicker] = useState<CoordinatorHunterUserOption[]>([]);
 
   const team = teamDetail?.id === teamId ? teamDetail : null;
 
@@ -55,6 +61,11 @@ export const CoordinatorTeamDetailPanel: FC<Props> = ({ teamId }) => {
   useEffect(() => {
     dispatch(reportTeamsSlice.actions.teamDetailReset());
     void dispatch(loadCoordinatorTeamDetail(teamId));
+    void dispatch(loadCoordinatorHunterUsers()).then((rows) => {
+      if (Array.isArray(rows)) {
+        setHunterPicker(rows);
+      }
+    });
     return () => {
       dispatch(reportTeamsSlice.actions.teamDetailReset());
     };
@@ -65,6 +76,40 @@ export const CoordinatorTeamDetailPanel: FC<Props> = ({ teamId }) => {
       setSelectedWriterId(team.hunterWriterUserId);
     }
   }, [team?.hunterWriterUserId]);
+
+  useEffect(() => {
+    if (team?.reportDraftOwnerUserId) {
+      setSelectedPrimaryHunterId(team.reportDraftOwnerUserId);
+    }
+  }, [team?.reportDraftOwnerUserId]);
+
+  async function onSavePrimaryHunter() {
+    if (!team) return;
+    const next = selectedPrimaryHunterId.trim();
+    if (!next || next === team.reportDraftOwnerUserId) return;
+    setPrimaryFeedback("");
+    try {
+      await dispatch(
+        setReportDraftPrimaryHunter({
+          draftId: team.reportDraftId,
+          hunterId: next,
+        }),
+      );
+      const tr = (store.getState() as AppState).reportDrafts.transition;
+      if (tr.status === "error") {
+        setPrimaryFeedback(tr.message);
+        return;
+      }
+      setPrimaryFeedback(t("reportTeams.coordinator.teamDetail.primaryHunterSaved"));
+      await dispatch(loadCoordinatorTeamDetail(teamId));
+      await dispatch(loadCoordinatorTeams());
+    } catch {
+      const tr = (store.getState() as AppState).reportDrafts.transition;
+      if (tr.status === "error") {
+        setPrimaryFeedback(tr.message);
+      }
+    }
+  }
 
   async function onSaveWriter() {
     if (!team || hunters.length === 0) return;
@@ -142,6 +187,15 @@ export const CoordinatorTeamDetailPanel: FC<Props> = ({ teamId }) => {
   const writerName =
     team.members.find((m) => m.userId === team.hunterWriterUserId)?.displayName ??
     team.hunterWriterUserId;
+
+  const primaryHunterName =
+    hunterPicker.find((h) => h.userId === team.reportDraftOwnerUserId)?.displayName ??
+    team.members.find((m) => m.userId === team.reportDraftOwnerUserId)?.displayName ??
+    team.reportDraftOwnerUserId;
+
+  const selectableHunters = hunterPicker.filter(
+    (h) => h.userId !== team.reportDraftOwnerUserId,
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -225,6 +279,77 @@ export const CoordinatorTeamDetailPanel: FC<Props> = ({ teamId }) => {
         {memberFeedback ? (
           <p className="mt-2 text-sm text-dashboard-text" role="status">
             {memberFeedback}
+          </p>
+        ) : null}
+      </section>
+
+      <section
+        className="rounded-lg border border-dashboard-card-border bg-dashboard-accent-soft/20 p-4"
+        aria-labelledby="coord-primary-hunter"
+      >
+        <h2
+          id="coord-primary-hunter"
+          className="text-base font-semibold text-dashboard-text"
+        >
+          {t("reportTeams.coordinator.teamDetail.primaryHunterSectionTitle")}
+        </h2>
+        <p className="mt-1 text-sm text-dashboard-text-muted">
+          {t("reportTeams.coordinator.teamDetail.primaryHunterSectionHint")}
+        </p>
+        <p className="mt-3 text-sm text-dashboard-text">
+          {t("reportTeams.coordinator.teamDetail.currentPrimaryHunter", {
+            name: primaryHunterName,
+          })}
+        </p>
+
+        {selectableHunters.length > 0 ? (
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end">
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <label
+                htmlFor="coord-primary-hunter-select"
+                className="text-xs text-dashboard-text-muted"
+              >
+                {t("reportTeams.coordinator.teamDetail.primaryHunterLabel")}
+              </label>
+              <select
+                id="coord-primary-hunter-select"
+                className={fieldInput}
+                value={selectedPrimaryHunterId}
+                onChange={(e) => setSelectedPrimaryHunterId(e.target.value)}
+                disabled={writerBusy}
+              >
+                {hunterPicker.map((h) => (
+                  <option key={h.userId} value={h.userId}>
+                    {h.displayName}
+                    {h.userId === team.reportDraftOwnerUserId ? " ★" : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="button"
+              className="rounded-md border border-dashboard-accent bg-dashboard-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+              disabled={
+                writerBusy ||
+                !selectedPrimaryHunterId.trim() ||
+                selectedPrimaryHunterId === team.reportDraftOwnerUserId
+              }
+              onClick={() => void onSavePrimaryHunter()}
+            >
+              {writerBusy
+                ? t("reportTeams.coordinator.teamDetail.primaryHunterSaving")
+                : t("reportTeams.coordinator.teamDetail.primaryHunterSave")}
+            </button>
+          </div>
+        ) : (
+          <p className="mt-3 text-sm text-amber-800">
+            {t("reportTeams.coordinator.teamDetail.primaryHunterNeedAnother")}
+          </p>
+        )}
+
+        {primaryFeedback ? (
+          <p className="mt-3 text-sm text-dashboard-text" role="status">
+            {primaryFeedback}
           </p>
         ) : null}
       </section>

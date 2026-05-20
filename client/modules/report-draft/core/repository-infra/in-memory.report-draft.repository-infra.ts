@@ -71,6 +71,20 @@ export class InMemoryReportDraftRepository implements IReportDraftRepository {
       hunterWriterId: input.hunterWriterId,
     });
   }
+
+  async setPrimaryHunter(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    hunterId: string;
+  }): Promise<void> {
+    const existing = this.store.get(input.draftId);
+    if (!existing) throw new Error("Draft not found");
+    const next = clone(existing);
+    if (next.hunterWriterId === next.hunterId) {
+      next.hunterWriterId = input.hunterId;
+    }
+    next.hunterId = input.hunterId;
+    this.store.set(input.draftId, next);
+  }
 }
 
 function clone<T>(value: T): T {
