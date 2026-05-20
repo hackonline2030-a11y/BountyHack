@@ -8,6 +8,7 @@ import {
   cumulativeStepsForReview,
   payloadResolverForReview,
 } from "@modules/report-draft/core/view/report-draft-preview-steps";
+import { createEmptySectionBloc } from "@modules/report-draft/core/model/section-bloc";
 
 describe("report-draft-preview-steps", () => {
   const draft = ReportDraftFactory.create({
@@ -17,7 +18,14 @@ describe("report-draft-preview-steps", () => {
   });
   draft.collection.status = "approved";
   draft.collection.payload = {
-    sectionBlocs: [{ id: "b1", heading: "", subheading: "", body: "draft", lists: [] }],
+    sectionBlocs: [
+      createEmptySectionBloc({
+        id: "b1",
+        heading: "",
+        subheading: "",
+        body: "draft",
+      }),
+    ],
   };
 
   it("cumulativeStepsForHunter includes steps up to cursor", () => {
@@ -49,7 +57,7 @@ describe("report-draft-preview-steps", () => {
     const resolve = payloadResolverForReview(
       draft,
       ReportDraftDomainModel.ReportDraftStep.COLLECTION,
-      { sectionBlocs: [{ id: "b1", heading: "", subheading: "", body: "submitted", lists: [] }] },
+      { sectionBlocs: [createEmptySectionBloc({ id: "b1", body: "submitted" })] },
     );
     const payload = resolve(ReportDraftDomainModel.ReportDraftStep.COLLECTION) as {
       sectionBlocs: { body: string }[];

@@ -4,6 +4,9 @@ import { ReportDraftController } from './report-draft.controller';
 import { SaveReportDraftCommand } from '../application/commands/save-report-draft.command';
 import { GetReportDraftByIdQuery } from '../application/queries/get-report-draft-by-id.query';
 import { ListReportDraftsByHunterQuery } from '../application/queries/list-report-drafts-by-hunter.query';
+import { ReportDraftImageAssetService } from '../application/attachments/report-draft-image-asset.service';
+import { SetHunterWriterCommand } from '../application/commands/set-hunter-writer.command';
+import { SetPrimaryHunterCommand } from '../application/commands/set-primary-hunter.command';
 import type { RequestWithIdentity } from '../../auth/adapters/http/request-with-identity';
 import type { ReportDraftWire } from '../models/report-draft-api.types';
 
@@ -18,6 +21,7 @@ function minimalDraft(): ReportDraftWire {
   return {
     id: 'draft-1',
     hunterId: 'uid-1',
+    hunterWriterId: 'uid-1',
     version: 0,
     aggregateStatus: 'draft',
     meta: emptyStep,
@@ -57,6 +61,18 @@ describe('ReportDraftController', () => {
         },
         {
           provide: ListReportDraftsByHunterQuery,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: ReportDraftImageAssetService,
+          useValue: {},
+        },
+        {
+          provide: SetHunterWriterCommand,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: SetPrimaryHunterCommand,
           useValue: { execute: jest.fn() },
         },
       ],

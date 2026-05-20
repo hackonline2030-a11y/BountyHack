@@ -17,6 +17,8 @@ describe("friendlyHttpErrorMessage", () => {
       message: "Cannot list submissions for this reviewer role",
       statusCode: 403,
     });
-    expect(friendlyHttpErrorMessage(raw, 403)).toContain("quality checker");
+    expect(friendlyHttpErrorMessage(raw, 403)).toBe(
+      "Votre compte n’a pas le rôle requis pour afficher cette liste de revues.",
+    );
   });
 });

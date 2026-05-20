@@ -36,6 +36,26 @@ export class HttpReportDraftRepository implements IReportDraftRepository {
     return parseJsonResponse(res);
   }
 
+  async uploadDescriptionSectionImage(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    file: File;
+  }): Promise<ReportDraftDomainModel.Attachment> {
+    const formData = new FormData();
+    formData.append("file", input.file);
+    const res = await fetchBff(
+      `/api/report-draft/drafts/${encodeURIComponent(input.draftId)}/attachments/images`,
+      {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      },
+    );
+    if (!res.ok) {
+      throw new Error(await readFriendlyHttpError(res, "Impossible d’envoyer l’image."));
+    }
+    return parseJsonResponse(res);
+  }
+
   async deletePermanently(
     draftId: ReportDraftDomainModel.ReportDraftId,
   ): Promise<void> {
@@ -46,6 +66,54 @@ export class HttpReportDraftRepository implements IReportDraftRepository {
     if (!res.ok) {
       throw new Error(
         await readFriendlyHttpError(res, "Impossible de supprimer le brouillon de rapport."),
+      );
+    }
+  }
+
+  async setHunterWriter(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    hunterWriterId: string;
+  }): Promise<void> {
+    const res = await fetchBff(
+      `/api/report-draft/drafts/${encodeURIComponent(input.draftId)}/hunter-writer`,
+      {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hunterWriterId: input.hunterWriterId }),
+        cache: "no-store",
+      },
+    );
+    if (!res.ok) {
+      throw new Error(
+        await readFriendlyHttpError(
+          res,
+          "Impossible de mettre à jour le rédacteur désigné.",
+        ),
+      );
+    }
+  }
+
+  async setPrimaryHunter(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    hunterId: string;
+  }): Promise<void> {
+    const res = await fetchBff(
+      `/api/report-draft/drafts/${encodeURIComponent(input.draftId)}/primary-hunter`,
+      {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hunterId: input.hunterId }),
+        cache: "no-store",
+      },
+    );
+    if (!res.ok) {
+      throw new Error(
+        await readFriendlyHttpError(
+          res,
+          "Impossible de changer le hunter principal du rapport.",
+        ),
       );
     }
   }

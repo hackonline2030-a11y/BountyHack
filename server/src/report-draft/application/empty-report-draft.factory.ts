@@ -20,6 +20,7 @@ export function createEmptyReportDraftWire(input: {
   return {
     id: input.id ?? randomUUID(),
     hunterId: input.hunterId,
+    hunterWriterId: input.hunterId,
     version: 0,
     aggregateStatus: 'draft',
     meta: emptyStep(),

@@ -1,4 +1,10 @@
+import { dirname } from 'path';
+import { mkdirSync, rmSync, writeFileSync } from 'fs';
 import { mapFrozenContentToDocument } from './frozen-content-to-document.mapper';
+import {
+  reportImageStorageKey,
+  resolveReportImageAssetPath,
+} from '../../../report-draft/application/attachments/report-draft-image-storage';
 
 describe('mapFrozenContentToDocument', () => {
   const frozenContent = {
@@ -106,5 +112,66 @@ describe('mapFrozenContentToDocument', () => {
     });
 
     expect(doc.sections.every((s) => s.key !== 'description')).toBe(true);
+  });
+
+  it('embeds section block images from private report storage', () => {
+    const storageKey = reportImageStorageKey({
+      draftId: 'draft-1',
+      stepKey: 'description',
+      attachmentId: 'attachment-1',
+      extension: 'png',
+    });
+    const imagePath = resolveReportImageAssetPath(storageKey);
+    mkdirSync(dirname(imagePath), { recursive: true });
+    writeFileSync(
+      imagePath,
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    );
+
+    try {
+      const doc = mapFrozenContentToDocument({
+        reportId: 'report-1',
+        reportStatus: 'PENDING',
+        hunterId: 'hunter-1',
+        frozenContent: {
+          ...frozenContent,
+          steps: {
+            ...frozenContent.steps,
+            description: {
+              payload: {
+                sectionBlocs: [
+                  {
+                    id: 'bloc-1',
+                    body: 'description with image',
+                    heading: '',
+                    subheading: '',
+                    attachmentId: 'attachment-1',
+                  },
+                ],
+              },
+              attachments: [
+                {
+                  id: 'attachment-1',
+                  filename: 'preuve.png',
+                  mimeType: 'image/png',
+                  sizeBytes: 8,
+                  storageKey,
+                  uploadedAt: '2026-05-19T10:00:00.000Z',
+                  uploadedBy: 'hunter-1',
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      const firstBloc = doc.sections[0]?.sectionBlocs[0] as
+        | { image?: { src: string; filename: string } }
+        | undefined;
+      expect(firstBloc?.image?.filename).toBe('preuve.png');
+      expect(firstBloc?.image?.src).toContain('data:image/png;base64,');
+    } finally {
+      rmSync(imagePath, { force: true });
+    }
   });
 });

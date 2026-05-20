@@ -71,7 +71,8 @@ export const ModelName = {
   SubmissionContentSnapshot: 'SubmissionContentSnapshot',
   ReportTeam: 'ReportTeam',
   ReportTeamMember: 'ReportTeamMember',
-  ReportTeamJoinRequest: 'ReportTeamJoinRequest'
+  ReportTeamJoinRequest: 'ReportTeamJoinRequest',
+  ReportTeamLeaveRequest: 'ReportTeamLeaveRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -184,6 +185,7 @@ export type TwoFactorTotpScalarFieldEnum = (typeof TwoFactorTotpScalarFieldEnum)
 export const ReportDraftScalarFieldEnum = {
   id: 'id',
   hunterId: 'hunterId',
+  hunterWriterId: 'hunterWriterId',
   version: 'version',
   aggregateStatus: 'aggregateStatus',
   superAdminRevisionRequestedAt: 'superAdminRevisionRequestedAt',
@@ -350,6 +352,20 @@ export const ReportTeamJoinRequestScalarFieldEnum = {
 export type ReportTeamJoinRequestScalarFieldEnum = (typeof ReportTeamJoinRequestScalarFieldEnum)[keyof typeof ReportTeamJoinRequestScalarFieldEnum]
 
 
+export const ReportTeamLeaveRequestScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  message: 'message',
+  status: 'status',
+  requestedAt: 'requestedAt',
+  decidedAt: 'decidedAt',
+  decidedById: 'decidedById'
+} as const
+
+export type ReportTeamLeaveRequestScalarFieldEnum = (typeof ReportTeamLeaveRequestScalarFieldEnum)[keyof typeof ReportTeamLeaveRequestScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -449,7 +465,8 @@ export type TwoFactorTotpOrderByRelevanceFieldEnum = (typeof TwoFactorTotpOrderB
 
 export const ReportDraftOrderByRelevanceFieldEnum = {
   id: 'id',
-  hunterId: 'hunterId'
+  hunterId: 'hunterId',
+  hunterWriterId: 'hunterWriterId'
 } as const
 
 export type ReportDraftOrderByRelevanceFieldEnum = (typeof ReportDraftOrderByRelevanceFieldEnum)[keyof typeof ReportDraftOrderByRelevanceFieldEnum]
@@ -582,4 +599,15 @@ export const ReportTeamJoinRequestOrderByRelevanceFieldEnum = {
 } as const
 
 export type ReportTeamJoinRequestOrderByRelevanceFieldEnum = (typeof ReportTeamJoinRequestOrderByRelevanceFieldEnum)[keyof typeof ReportTeamJoinRequestOrderByRelevanceFieldEnum]
+
+
+export const ReportTeamLeaveRequestOrderByRelevanceFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  message: 'message',
+  decidedById: 'decidedById'
+} as const
+
+export type ReportTeamLeaveRequestOrderByRelevanceFieldEnum = (typeof ReportTeamLeaveRequestOrderByRelevanceFieldEnum)[keyof typeof ReportTeamLeaveRequestOrderByRelevanceFieldEnum]
 

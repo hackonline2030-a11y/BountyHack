@@ -14,6 +14,7 @@ import {
   RemediationFactory,
   RisksFactory,
 } from "@modules/report-draft/core/model/long-form-steps.factory";
+import { createEmptySectionBloc } from "@modules/report-draft/core/model/section-bloc";
 
 /**
  * Builds a `CreateReportDraftDeps` with sensible defaults so each test
@@ -80,6 +81,23 @@ describe("ReportDraftFactory", () => {
     const draft = ReportDraftFactory.create(makeDeps({ hunterId: "u-7" }));
 
     expect(draft.hunterId).toEqual("u-7");
+  });
+
+  it("defaults hunterWriterId to the creating hunter", () => {
+    const draft = ReportDraftFactory.create(makeDeps({ hunterId: "u-7" }));
+
+    expect(draft.hunterWriterId).toEqual("u-7");
+  });
+
+  it("allows a distinct hunterWriterId override", () => {
+    const draft = ReportDraftFactory.create(
+      makeDeps({
+        hunterId: "u-owner",
+        overrides: { hunterWriterId: "u-writer" },
+      }),
+    );
+
+    expect(draft.hunterWriterId).toEqual("u-writer");
   });
 
   it("starts in 'draft' aggregate status (editable, not yet under review)", () => {
@@ -186,31 +204,119 @@ describe("ReportDraftFactory", () => {
         overrides: {
           collection: CollectionFactory.create({
             sectionBlocs: [
-              {
+              createEmptySectionBloc({
                 id: "b1",
                 heading: "Collecte",
                 subheading: "",
                 body: "C",
                 attachmentId: null,
-              },
+              }),
             ],
           }),
-          exploitation: ExploitationFactory.create({ prerequisites: "E" }),
-          proofOfConcept: ProofOfConceptFactory.create({ environment: "P" }),
-          risks: RisksFactory.create({ confidentiality: "R" }),
-          remediation: RemediationFactory.create({ shortTermMitigation: "RM" }),
-          final: FinalFactory.create({ conclusion: "F" }),
+          exploitation: ExploitationFactory.create({
+            sectionBlocs: [
+              createEmptySectionBloc({
+                id: "e1",
+                heading: "Prérequis (auth, rôle, configuration…)",
+                body: "E",
+              }),
+            ],
+          }),
+          proofOfConcept: ProofOfConceptFactory.create({
+            sectionBlocs: [
+              createEmptySectionBloc({
+                id: "p1",
+                heading: "Environnement de test",
+                body: "P",
+              }),
+            ],
+          }),
+          risks: RisksFactory.create({
+            sectionBlocs: [
+              createEmptySectionBloc({
+                id: "r1",
+                heading: "Risque pour la confidentialité",
+                body: "R",
+              }),
+            ],
+          }),
+          remediation: RemediationFactory.create({
+            sectionBlocs: [
+              createEmptySectionBloc({
+                id: "rm1",
+                heading: "Atténuation court terme",
+                body: "RM",
+              }),
+            ],
+          }),
+          final: FinalFactory.create({
+            sectionBlocs: [
+              createEmptySectionBloc({
+                id: "f1",
+                heading: "Conclusion",
+                body: "F",
+              }),
+            ],
+          }),
         },
       }),
     );
 
     expect(draft.collection.payload.sectionBlocs[0]?.body).toBe("C");
-    expect(draft.exploitation.payload).toEqual(ExploitationFactory.create({ prerequisites: "E" }));
-    expect(draft.proofOfConcept.payload).toEqual(ProofOfConceptFactory.create({ environment: "P" }));
-    expect(draft.risks.payload).toEqual(RisksFactory.create({ confidentiality: "R" }));
-    expect(draft.remediation.payload).toEqual(
-      RemediationFactory.create({ shortTermMitigation: "RM" }),
+    expect(draft.exploitation.payload).toEqual(
+      ExploitationFactory.create({
+        sectionBlocs: [
+          createEmptySectionBloc({
+            id: "e1",
+            heading: "Prérequis (auth, rôle, configuration…)",
+            body: "E",
+          }),
+        ],
+      }),
     );
-    expect(draft.final.payload).toEqual(FinalFactory.create({ conclusion: "F" }));
+    expect(draft.proofOfConcept.payload).toEqual(
+      ProofOfConceptFactory.create({
+        sectionBlocs: [
+          createEmptySectionBloc({
+            id: "p1",
+            heading: "Environnement de test",
+            body: "P",
+          }),
+        ],
+      }),
+    );
+    expect(draft.risks.payload).toEqual(
+      RisksFactory.create({
+        sectionBlocs: [
+          createEmptySectionBloc({
+            id: "r1",
+            heading: "Risque pour la confidentialité",
+            body: "R",
+          }),
+        ],
+      }),
+    );
+    expect(draft.remediation.payload).toEqual(
+      RemediationFactory.create({
+        sectionBlocs: [
+          createEmptySectionBloc({
+            id: "rm1",
+            heading: "Atténuation court terme",
+            body: "RM",
+          }),
+        ],
+      }),
+    );
+    expect(draft.final.payload).toEqual(
+      FinalFactory.create({
+        sectionBlocs: [
+          createEmptySectionBloc({
+            id: "f1",
+            heading: "Conclusion",
+            body: "F",
+          }),
+        ],
+      }),
+    );
   });
 });

@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState, type FC } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useT } from "next-i18next/client";
 import { loadCoordinatorTeams } from "@modules/report-team/core/useCase/load-coordinator-teams.usecase";
 import type { ReportTeamMemberRole } from "@modules/report-team/model/report-team.types";
 import { CoordinatorCreateTeamPanel } from "@modules/report-team/react/CoordinatorCreateTeamPanel";
+import { CoordinatorLeaveRequestsPanel } from "@modules/report-team/react/CoordinatorLeaveRequestsPanel";
 import { CoordinatorAttachOrphanTeamPanel } from "@modules/report-team/react/CoordinatorAttachOrphanTeamPanel";
 import { OrphanReportDraftsTable } from "@modules/report-team/react/OrphanReportDraftsTable";
 import { ReportTeamValidityBadge } from "@modules/report-team/react/ReportTeamValidityBadge";
@@ -15,8 +17,15 @@ export const CoordinatorCoordinationPanel: FC = () => {
   const { t } = useT("reportTeams");
   const params = useParams<{ lng?: string }>();
   const lng = typeof params?.lng === "string" && params.lng.trim() !== "" ? params.lng : "fr";
-  const { allTeams, orphanDrafts, pendingJoinRequests, loadStatus, loadError, mutationError } =
-    useAppSelector((s) => s.reportTeams);
+  const {
+    allTeams,
+    orphanDrafts,
+    pendingJoinRequests,
+    pendingLeaveRequests,
+    loadStatus,
+    loadError,
+    mutationError,
+  } = useAppSelector((s) => s.reportTeams);
 
   const roleLabels: Record<ReportTeamMemberRole, string> = {
     hunter: t("reportTeams.roles.hunter"),
@@ -76,6 +85,12 @@ export const CoordinatorCoordinationPanel: FC = () => {
         pendingJoinRequests={pendingJoinRequests}
         isReady={isReady}
       />
+      <div className="dashboard-card p-4 sm:p-5">
+        <CoordinatorLeaveRequestsPanel
+          pendingLeaveRequests={pendingLeaveRequests}
+          isReady={isReady}
+        />
+      </div>
       <section
         className="border-t border-dashboard-divider pt-6"
         aria-labelledby="coord-teams"
@@ -90,33 +105,36 @@ export const CoordinatorCoordinationPanel: FC = () => {
         ) : (
           <ul role="list" className="mt-4 flex flex-col gap-3">
             {allTeams.map((team) => (
-              <li
-                key={team.id}
-                className="rounded-lg border border-dashboard-card-border p-4"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div>
-                    <p className="font-medium text-dashboard-text">{team.label}</p>
-                    <p className="mt-1 font-mono text-xs text-dashboard-text-muted">
-                      {t("reportTeams.coordinator.reportDraftId")}: {team.reportDraftId}
-                    </p>
+              <li key={team.id} className="list-none">
+                <Link
+                  href={`/${lng}/coordination/team/${encodeURIComponent(team.id)}`}
+                  aria-label={t("reportTeams.coordinator.teamCardAria", { label: team.label })}
+                  className="block rounded-lg border border-dashboard-card-border bg-white p-4 transition-colors duration-150 hover:border-dashboard-accent hover:bg-dashboard-accent-soft/25 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dashboard-accent focus-visible:ring-offset-2"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <p className="font-medium text-dashboard-text">{team.label}</p>
+                      <p className="mt-1 font-mono text-xs text-dashboard-text-muted">
+                        {t("reportTeams.coordinator.reportDraftId")}: {team.reportDraftId}
+                      </p>
+                    </div>
+                    <ReportTeamValidityBadge
+                      validity={team.validity}
+                      validLabel={t("reportTeams.validity.valid")}
+                      incompleteLabel={t("reportTeams.validity.incomplete")}
+                    />
                   </div>
-                  <ReportTeamValidityBadge
-                    validity={team.validity}
-                    validLabel={t("reportTeams.validity.valid")}
-                    incompleteLabel={t("reportTeams.validity.incomplete")}
-                  />
-                </div>
-                <p className="mt-2 text-xs text-dashboard-text-muted">
-                  {t("reportTeams.myTeams.members")}
-                </p>
-                <p className="mt-1 text-sm text-dashboard-text">
-                  {team.members.length === 0
-                    ? "—"
-                    : team.members
-                        .map((m) => `${m.displayName} (${roleLabels[m.role]})`)
-                        .join(" · ")}
-                </p>
+                  <p className="mt-2 text-xs text-dashboard-text-muted">
+                    {t("reportTeams.myTeams.members")}
+                  </p>
+                  <p className="mt-1 text-sm text-dashboard-text">
+                    {team.members.length === 0
+                      ? "—"
+                      : team.members
+                          .map((m) => `${m.displayName} (${roleLabels[m.role]})`)
+                          .join(" · ")}
+                  </p>
+                </Link>
               </li>
             ))}
           </ul>

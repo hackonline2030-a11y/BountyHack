@@ -79,6 +79,8 @@ export type ReportDraftStepStateKeyWire =
 export interface ReportDraftWire {
   id: string;
   hunterId: string;
+  /** User allowed to edit the draft and submit steps (defaults to owner at creation). */
+  hunterWriterId: string;
   version: number;
   aggregateStatus: AggregateStatusWire;
   meta: StepStateWire;

@@ -324,12 +324,12 @@ SET @payload_final = CAST('{"sectionBlocs": []}' AS JSON);
 
 -- ── Brouillon (sauté si @draft_id existe déjà) ─────────────────────────────────
 INSERT INTO `report_drafts` (
-  `id`, `hunter_id`, `version`, `aggregate_status`,
+  `id`, `hunter_id`, `hunter_writer_id`, `version`, `aggregate_status`,
   `super_admin_revision_requested_at`, `super_admin_global_revision_count`,
   `created_at`, `updated_at`
 )
 SELECT
-  @draft_id, @hunter1_id, 36, 'PUBLISHED',
+  @draft_id, @hunter1_id, @hunter1_id, 36, 'PUBLISHED',
   NULL, 2,
   @t0, @t7
 FROM DUAL
@@ -554,6 +554,7 @@ WHERE `id` = @team_id;
 
 UPDATE `report_drafts`
 SET `aggregate_status` = 'PUBLISHED',
+    `hunter_writer_id` = @hunter1_id,
     `updated_at` = @t7
 WHERE `id` = @draft_id;
 

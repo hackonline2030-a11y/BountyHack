@@ -9,6 +9,7 @@ export const createReportTeam =
     label: string;
     members: Array<{ userId: string; role: ReportTeamMemberRole }>;
     reportDraftId?: string;
+    hunterWriterUserId?: string;
   }) =>
   async (dispatch: AppDispatch, _getState: unknown, deps: Dependencies): Promise<void> => {
     dispatch(reportTeamsSlice.actions.mutationStarted());

@@ -16,6 +16,7 @@ import {
   parseAppRoleCodeFromRoleName,
   reportTeamRoleFromAppRoleCode,
 } from '../../application/report-team-member-role-from-app-role';
+import { assertAtMostOneQualityChecker } from '../../application/report-team-validity';
 import { ReportTeamEnumMapper } from './report-team-enum.mapper';
 import { ReportTeamPrismaMapper } from './report-team-prisma.mapper';
 
@@ -158,9 +159,19 @@ export class PrismaJoinRequestRepository implements IJoinRequestRepository {
           select: { role: { select: { name: true } } },
         });
         const roleCode = parseAppRoleCodeFromRoleName(user?.role?.name);
-        const memberRole = ReportTeamEnumMapper.memberRoleFromWire(
+        const prismaMemberRole = ReportTeamEnumMapper.memberRoleFromWire(
           reportTeamRoleFromAppRoleCode(roleCode),
         );
+
+        const currentMembers = await tx.reportTeamMember.findMany({
+          where: { teamId: existing.teamId },
+          select: { userId: true, role: true },
+        });
+        const nextRoles = currentMembers
+          .filter((m) => m.userId !== existing.userId)
+          .map((m) => ReportTeamEnumMapper.memberRoleToWire(m.role));
+        nextRoles.push(ReportTeamEnumMapper.memberRoleToWire(prismaMemberRole));
+        assertAtMostOneQualityChecker(nextRoles);
 
         await tx.reportTeamMember.upsert({
           where: {
@@ -173,9 +184,9 @@ export class PrismaJoinRequestRepository implements IJoinRequestRepository {
             id: randomUUID(),
             teamId: existing.teamId,
             userId: existing.userId,
-            role: memberRole,
+            role: prismaMemberRole,
           },
-          update: { role: memberRole },
+          update: { role: prismaMemberRole },
         });
       }
 

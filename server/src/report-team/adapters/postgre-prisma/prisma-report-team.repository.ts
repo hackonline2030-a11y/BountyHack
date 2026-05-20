@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -19,12 +20,15 @@ import type {
   ReportTeamWire,
   UpdateReportTeamInput,
 } from '../../models/report-team-api.types';
+import { assertAtMostOneQualityChecker } from '../../application/report-team-validity';
 import { ReportTeamEnumMapper } from './report-team-enum.mapper';
 import { ReportTeamPrismaMapper } from './report-team-prisma.mapper';
 
 const teamInclude = {
   members: { include: { user: true } },
-  reportDraft: { select: { aggregateStatus: true } },
+  reportDraft: {
+    select: { aggregateStatus: true, hunterWriterId: true, hunterId: true },
+  },
 } as const;
 
 @Injectable()
@@ -120,7 +124,12 @@ export class PrismaReportTeamRepository implements IReportTeamRepository {
     }
 
     const hunters = input.members.filter((m) => m.role === 'hunter');
-    const hunterId = hunters[0]!.userId;
+    const primaryHunterId = hunters[0]!.userId;
+    const writerId =
+      input.hunterWriterUserId?.trim() &&
+      hunters.some((h) => h.userId === input.hunterWriterUserId.trim())
+        ? input.hunterWriterUserId.trim()
+        : primaryHunterId;
     const reportDraftId = randomUUID();
     const teamId = randomUUID();
     const now = new Date();
@@ -130,7 +139,8 @@ export class PrismaReportTeamRepository implements IReportTeamRepository {
       await tx.reportDraft.create({
         data: {
           id: reportDraftId,
-          hunterId,
+          hunterId: primaryHunterId,
+          hunterWriterId: writerId,
           version: 0,
           aggregateStatus: ReportDraftAggregateStatus.DRAFT,
           createdAt: now,
@@ -294,11 +304,63 @@ export class PrismaReportTeamRepository implements IReportTeamRepository {
     }
   }
 
+  async removeMember(teamId: string, userId: string): Promise<ReportTeamWire> {
+    const row = await this.prisma.$transaction(async (tx) => {
+      const team = await tx.reportTeam.findUnique({
+        where: { id: teamId },
+        include: {
+          reportDraft: {
+            select: { id: true, hunterId: true, hunterWriterId: true },
+          },
+        },
+      });
+      if (team === null) {
+        throw new NotFoundException('Report team not found');
+      }
+      if (userId === team.reportDraft.hunterId) {
+        throw new BadRequestException(
+          'Cannot remove the primary report hunter from the team',
+        );
+      }
+
+      const removed = await tx.reportTeamMember.deleteMany({
+        where: { teamId, userId },
+      });
+      if (removed.count === 0) {
+        throw new NotFoundException('Team member not found');
+      }
+
+      if (team.reportDraft.hunterWriterId === userId) {
+        await tx.reportDraft.update({
+          where: { id: team.reportDraft.id },
+          data: { hunterWriterId: team.reportDraft.hunterId },
+        });
+      }
+
+      return tx.reportTeam.findUniqueOrThrow({
+        where: { id: teamId },
+        include: teamInclude,
+      });
+    });
+
+    return ReportTeamPrismaMapper.teamToWire(row);
+  }
+
   async addMember(
     teamId: string,
     userId: string,
     role: ReportTeamMemberRoleWire,
   ): Promise<ReportTeamWire> {
+    const currentMembers = await this.prisma.reportTeamMember.findMany({
+      where: { teamId },
+      select: { userId: true, role: true },
+    });
+    const nextRoles = currentMembers
+      .filter((m) => m.userId !== userId)
+      .map((m) => ReportTeamEnumMapper.memberRoleToWire(m.role));
+    nextRoles.push(role);
+    assertAtMostOneQualityChecker(nextRoles);
+
     await this.prisma.reportTeamMember.upsert({
       where: { teamId_userId: { teamId, userId } },
       create: {

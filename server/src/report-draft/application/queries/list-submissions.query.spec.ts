@@ -17,6 +17,7 @@ function minimalDraft(): ReportDraftWire {
   return {
     id: 'draft-1',
     hunterId: 'hunter-1',
+    hunterWriterId: 'hunter-1',
     version: 0,
     aggregateStatus: 'draft',
     meta: emptyStep,
@@ -45,10 +46,14 @@ describe('ListSubmissionsQuery', () => {
   };
   const reportDraftRepository: jest.Mocked<IReportDraftRepository> = {
     save: jest.fn(),
+    updateHunterWriterId: jest.fn(),
     findById: jest.fn(),
     findByHunterId: jest.fn(),
+    findByHunterIdOrTeamMembership: jest.fn(),
     findAll: jest.fn(),
     findOrphanSummaries: jest.fn(),
+    findPublished: jest.fn(),
+    deleteById: jest.fn(),
   };
   const reportTeamRepository: jest.Mocked<
     Pick<

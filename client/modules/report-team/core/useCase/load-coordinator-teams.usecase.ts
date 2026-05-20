@@ -8,7 +8,12 @@ export const loadCoordinatorTeams =
   async (dispatch: AppDispatch, _getState: unknown, deps: Dependencies): Promise<void> => {
     dispatch(reportTeamsSlice.actions.loadStarted());
     try {
-      await dispatch(refreshReportTeamsData({ withPendingJoinRequests: true }));
+      await dispatch(
+        refreshReportTeamsData({
+          withPendingJoinRequests: true,
+          withPendingLeaveRequests: true,
+        }),
+      );
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       dispatch(reportTeamsSlice.actions.loadFailed({ message }));

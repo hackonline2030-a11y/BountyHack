@@ -33,10 +33,13 @@ model User {
   refreshTokens RefreshToken[]
   passwordResetTokens PasswordResetToken[]
   role       Role?   @relation(fields: [roleId], references: [id], onDelete: SetNull)
-  reportDrafts ReportDraft[]
+  reportDraftsOwned       ReportDraft[] @relation("ReportDraftOwner")
+  reportDraftsAsHunterWriter ReportDraft[] @relation("ReportDraftHunterWriter")
   reportTeamMembers ReportTeamMember[]
   reportTeamJoinRequests ReportTeamJoinRequest[] @relation("JoinRequestUser")
   reportTeamJoinRequestsDecided ReportTeamJoinRequest[] @relation("JoinRequestDecider")
+  reportTeamLeaveRequests ReportTeamLeaveRequest[] @relation("LeaveRequestUser")
+  reportTeamLeaveRequestsDecided ReportTeamLeaveRequest[] @relation("LeaveRequestDecider")
 
   @@index([roleId])
   @@map("users")
@@ -213,6 +216,8 @@ enum SubmissionDecision {
 model ReportDraft {
   id              String                     @id @default(uuid())
   hunterId        String                     @map("hunter_id")
+  /// Squad member allowed to edit the draft and submit workflow steps (defaults to `hunter_id`).
+  hunterWriterId  String                     @map("hunter_writer_id")
   version         Int                        @default(1)
   aggregateStatus ReportDraftAggregateStatus @default(DRAFT) @map("aggregate_status")
   /// Set when super-admin requests a global revision (team-wide rework).
@@ -222,13 +227,15 @@ model ReportDraft {
   createdAt       DateTime                   @default(now()) @map("created_at")
   updatedAt       DateTime                   @updatedAt @map("updated_at")
 
-  hunter        User              @relation(fields: [hunterId], references: [id], onDelete: Cascade)
+  hunter        User              @relation("ReportDraftOwner", fields: [hunterId], references: [id], onDelete: Cascade)
+  hunterWriter  User              @relation("ReportDraftHunterWriter", fields: [hunterWriterId], references: [id], onDelete: Cascade)
   steps             ReportDraftStep[]
   submissions       Submission[]
   globalSubmissions GlobalSubmission[]
   reportTeam        ReportTeam?
 
   @@index([hunterId])
+  @@index([hunterWriterId])
   @@index([aggregateStatus])
   @@map("report_drafts")
 }
@@ -407,8 +414,9 @@ model ReportTeam {
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   reportDraft  ReportDraft             @relation(fields: [reportDraftId], references: [id], onDelete: Cascade)
-  members      ReportTeamMember[]
-  joinRequests ReportTeamJoinRequest[]
+  members       ReportTeamMember[]
+  joinRequests  ReportTeamJoinRequest[]
+  leaveRequests ReportTeamLeaveRequest[]
 
   @@index([reportDraftId])
   @@map("report_draft_teams")
@@ -449,4 +457,24 @@ model ReportTeamJoinRequest {
   @@index([teamId, status])
   @@index([userId, status])
   @@map("report_team_join_requests")
+}
+
+/// Primary hunter asks the coordinator to remove them from the squad (cannot self-leave while `hunter_id`).
+model ReportTeamLeaveRequest {
+  id          String                      @id @default(uuid())
+  teamId      String                      @map("team_id")
+  userId      String                      @map("user_id")
+  message     String?
+  status      ReportTeamJoinRequestStatus @default(PENDING)
+  requestedAt DateTime                    @default(now()) @map("requested_at")
+  decidedAt   DateTime?                   @map("decided_at")
+  decidedById String?                     @map("decided_by_id")
+
+  team      ReportTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User       @relation("LeaveRequestUser", fields: [userId], references: [id], onDelete: Cascade)
+  decidedBy User?      @relation("LeaveRequestDecider", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  @@index([teamId, status])
+  @@index([userId, status])
+  @@map("report_team_leave_requests")
 }

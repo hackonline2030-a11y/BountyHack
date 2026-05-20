@@ -1,10 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { ReportDraftAggregateStatus } from '../../../generated/prisma/enums';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import {
+  ReportDraftAggregateStatus,
+  ReportTeamMemberRole,
+} from '../../../generated/prisma/enums';
+import { AppRoleCode } from '../../../shared/rbac/app-role.code';
+import { assertAtMostOneQualityChecker } from '../../../report-team/application/report-team-validity';
 import { PrismaService } from '../../../core/infrastructure/database/prisma/prisma.service';
 import type { IReportDraftRepository } from '../../ports/report-draft-repository.interface';
 import type { ReportDraftOrphanSummary } from '../../models/report-draft-orphan-summary.model';
 import type { ReportDraftWire } from '../../models/report-draft-api.types';
 import { toReportDraftOrphanSummary } from '../../application/mappers/report-draft-to-orphan-summary.mapper';
+import { ReportTeamEnumMapper } from '../../../report-team/adapters/postgre-prisma/report-team-enum.mapper';
 import { ReportTeamPrismaMapper } from '../../../report-team/adapters/postgre-prisma/report-team-prisma.mapper';
 import {
   ReportDraftPrismaMapper,
@@ -33,6 +40,7 @@ export class PrismaReportDraftRepository implements IReportDraftRepository {
         create: header,
         update: {
           hunterId: header.hunterId,
+          hunterWriterId: header.hunterWriterId,
           version: header.version,
           aggregateStatus: header.aggregateStatus,
           updatedAt: header.updatedAt,
@@ -78,6 +86,71 @@ export class PrismaReportDraftRepository implements IReportDraftRepository {
     });
   }
 
+  async updateHunterWriterId(draftId: string, hunterWriterId: string): Promise<void> {
+    await this.prisma.reportDraft.update({
+      where: { id: draftId },
+      data: { hunterWriterId },
+    });
+  }
+
+  async updatePrimaryHunterId(draftId: string, hunterId: string): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      const hunterUser = await tx.user.findUnique({
+        where: { id: hunterId },
+        select: { role: { select: { name: true } } },
+      });
+      if (hunterUser === null || hunterUser.role?.name !== AppRoleCode.HUNTER) {
+        throw new BadRequestException(
+          'The primary hunter must be an existing user with the hunter role',
+        );
+      }
+
+      const draft = await tx.reportDraft.findUnique({
+        where: { id: draftId },
+        select: {
+          hunterId: true,
+          hunterWriterId: true,
+          reportTeam: { select: { id: true } },
+        },
+      });
+      if (draft === null) {
+        throw new NotFoundException('Report draft not found');
+      }
+      const data: { hunterId: string; hunterWriterId?: string } = { hunterId };
+      if (draft.hunterWriterId === draft.hunterId) {
+        data.hunterWriterId = hunterId;
+      }
+      await tx.reportDraft.update({
+        where: { id: draftId },
+        data,
+      });
+
+      const teamId = draft.reportTeam?.id;
+      if (teamId !== undefined) {
+        const currentMembers = await tx.reportTeamMember.findMany({
+          where: { teamId },
+          select: { userId: true, role: true },
+        });
+        const nextRoles = currentMembers
+          .filter((m) => m.userId !== hunterId)
+          .map((m) => ReportTeamEnumMapper.memberRoleToWire(m.role));
+        nextRoles.push('hunter');
+        assertAtMostOneQualityChecker(nextRoles);
+
+        await tx.reportTeamMember.upsert({
+          where: { teamId_userId: { teamId, userId: hunterId } },
+          create: {
+            id: randomUUID(),
+            teamId,
+            userId: hunterId,
+            role: ReportTeamMemberRole.HUNTER,
+          },
+          update: { role: ReportTeamMemberRole.HUNTER },
+        });
+      }
+    });
+  }
+
   async findById(id: string): Promise<ReportDraftWire | null> {
     const row = await this.prisma.reportDraft.findUnique({
       where: { id },
@@ -97,6 +170,33 @@ export class PrismaReportDraftRepository implements IReportDraftRepository {
   async findByHunterId(hunterId: string): Promise<ReportDraftWire[]> {
     const rows = await this.prisma.reportDraft.findMany({
       where: { hunterId },
+      include: {
+        steps: {
+          include: STEP_INCLUDE,
+        },
+        reportTeam: { include: TEAM_INCLUDE },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+    return rows.map((row) =>
+      ReportDraftPrismaMapper.toDomain(row as ReportDraftWithSteps),
+    );
+  }
+
+  async findByHunterIdOrTeamMembership(
+    userId: string,
+  ): Promise<ReportDraftWire[]> {
+    const rows = await this.prisma.reportDraft.findMany({
+      where: {
+        OR: [
+          { hunterId: userId },
+          {
+            reportTeam: {
+              members: { some: { userId } },
+            },
+          },
+        ],
+      },
       include: {
         steps: {
           include: STEP_INCLUDE,

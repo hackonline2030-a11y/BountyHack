@@ -11,7 +11,10 @@ import type {
 import type { IReportTeamRepository } from '../../ports/report-team-repository.interface';
 import { ReportTeamAccessPolicy } from '../report-team-access.policy';
 import { ReportTeamMemberRoleResolver } from '../report-team-member-role.resolver';
-import { computeTeamValidity } from '../report-team-validity';
+import {
+  assertAtMostOneQualityChecker,
+  computeTeamValidity,
+} from '../report-team-validity';
 
 @Injectable()
 export class CreateReportTeamCommand {
@@ -50,12 +53,26 @@ export class CreateReportTeamCommand {
     const members = await this.memberRoleResolver.resolveMemberAssignments(
       rawMembers,
     );
+    assertAtMostOneQualityChecker(members.map((m) => m.role));
 
     const hunters = members.filter((m) => m.role === 'hunter');
-    if (hunters.length !== 1) {
-      throw new BadRequestException(
-        'Exactly one hunter must be assigned to the team',
-      );
+    if (hunters.length < 1) {
+      throw new BadRequestException('At least one hunter must be assigned to the team');
+    }
+
+    const hunterUserIds = new Set(hunters.map((h) => h.userId));
+    const rawWriter = input.hunterWriterUserId?.trim();
+    let hunterWriterUserId: string;
+    if (hunters.length > 1) {
+      if (!rawWriter || !hunterUserIds.has(rawWriter)) {
+        throw new BadRequestException(
+          'hunterWriterUserId must be set to one of the selected hunters when multiple hunters are on the team',
+        );
+      }
+      hunterWriterUserId = rawWriter;
+    } else {
+      hunterWriterUserId =
+        rawWriter && hunterUserIds.has(rawWriter) ? rawWriter : hunters[0]!.userId;
     }
 
     const validity = computeTeamValidity(members.map((m) => m.role));
@@ -65,7 +82,11 @@ export class CreateReportTeamCommand {
       );
     }
 
-    return this.repository.create({ label, members });
+    return this.repository.create({
+      label,
+      members,
+      hunterWriterUserId,
+    });
   }
 
   private async createForOrphanDraft(
@@ -106,6 +127,7 @@ export class CreateReportTeamCommand {
     );
 
     const allRoles = ['hunter' as const, ...members.map((m) => m.role)];
+    assertAtMostOneQualityChecker(allRoles);
     const validity = computeTeamValidity(allRoles);
     if (validity === 'incomplete') {
       throw new BadRequestException(

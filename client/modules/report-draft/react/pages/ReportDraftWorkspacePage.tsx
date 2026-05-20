@@ -18,6 +18,8 @@ import {
   stepStatusPillClassFr,
 } from "@modules/report-draft/react/wizard/step-status-fr";
 import { ReportDraftTeamContextBanner } from "@modules/report-draft/react/components/ReportDraftTeamContextBanner";
+import { ReportDraftHunterWriterPanel } from "@modules/report-draft/react/components/ReportDraftHunterWriterPanel";
+import { ReportDraftSessionProvider } from "@modules/report-draft/react/context/report-draft-session.context";
 import { HunterReviewActivityBanner } from "@modules/report-draft/react/components/HunterReviewActivityBanner";
 import { SuperAdminGlobalRevisionBanner } from "@modules/report-draft/react/components/SuperAdminGlobalRevisionBanner";
 import { GlobalRevisionEventBanner } from "@modules/report-draft/react/components/GlobalRevisionEventBanner";
@@ -194,7 +196,8 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
   );
 
   return (
-    <div className="mx-auto my-6 flex w-full max-w-4xl flex-col gap-6 rounded-lg border border-black/10 bg-form-surface px-4 py-6 shadow-xl sm:my-10 sm:px-6 sm:py-8">
+    <ReportDraftSessionProvider viewerUserId={viewerUserId}>
+      <div className="mx-auto my-6 flex w-full max-w-4xl flex-col gap-6 rounded-lg border border-black/10 bg-form-surface px-4 py-6 shadow-xl sm:my-10 sm:px-6 sm:py-8">
       {showHunterBack ? (
         <div className="-mb-2">
           <Link
@@ -237,6 +240,7 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
       </div>
 
       <WorkspaceTeamBanner />
+      <ReportDraftHunterWriterPanel />
 
       <WorkspaceStepStatusPill />
 
@@ -310,5 +314,6 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
         </div>
       ) : null}
     </div>
+    </ReportDraftSessionProvider>
   );
 };

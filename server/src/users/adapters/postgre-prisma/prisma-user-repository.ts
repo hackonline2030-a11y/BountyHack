@@ -32,6 +32,46 @@ export class PrismaUserRepository implements IUserRepository {
     };
   }
 
+  async findSummaryById(uid: string): Promise<UserAdminSummary | null> {
+    const row = await this.prisma.user.findUnique({
+      where: { id: uid },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: { select: { name: true } },
+      },
+    });
+    if (row === null) {
+      return null;
+    }
+    return {
+      uid: row.id,
+      username: row.username,
+      email: row.email ?? null,
+      roleCode: this.toAppRoleCode(row.role?.name ?? null),
+    };
+  }
+
+  async listSummariesByRoleCode(roleCode: AppRoleCode): Promise<UserAdminSummary[]> {
+    const rows = await this.prisma.user.findMany({
+      where: { role: { name: roleCode } },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: { select: { name: true } },
+      },
+      orderBy: { username: 'asc' },
+    });
+    return rows.map((row) => ({
+      uid: row.id,
+      username: row.username,
+      email: row.email ?? null,
+      roleCode: this.toAppRoleCode(row.role?.name ?? null),
+    }));
+  }
+
   async listAdminSummaries(): Promise<UserAdminSummary[]> {
     /**
      * Strictly selects the four fields needed by the admin table: any other column

@@ -1,19 +1,31 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   NotFoundException,
   Param,
+  Patch,
+  Post,
   Put,
   Query,
   Req,
+  Res,
+  StreamableFile,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { memoryStorage } from 'multer';
+import type { Response } from 'express';
 import { RequestWithIdentity } from '../../auth/adapters/http/request-with-identity';
 import { AuthReportWorkflowParticipant } from '../../shared/rbac/report-workflow-auth.decorator';
 import {
@@ -25,6 +37,15 @@ import type { ReportDraftWire } from '../models/report-draft-api.types';
 import { SaveReportDraftCommand } from '../application/commands/save-report-draft.command';
 import { GetReportDraftByIdQuery } from '../application/queries/get-report-draft-by-id.query';
 import { ListReportDraftsByHunterQuery } from '../application/queries/list-report-drafts-by-hunter.query';
+import { SetHunterWriterCommand } from '../application/commands/set-hunter-writer.command';
+import { SetPrimaryHunterCommand } from '../application/commands/set-primary-hunter.command';
+import { AuthCoordinatorOrSuperAdmin } from '../../shared/rbac/report-workflow-auth.decorator';
+import { ReportDraftImageAssetService } from '../application/attachments/report-draft-image-asset.service';
+import {
+  REPORT_DRAFT_IMAGE_FIELD_NAME,
+  REPORT_DRAFT_IMAGE_MAX_BYTES,
+  type UploadedReportImageFile,
+} from '../application/attachments/report-draft-image-storage';
 
 @ApiTags('report-drafts')
 @ApiBearerAuth()
@@ -34,6 +55,9 @@ export class ReportDraftController {
     private readonly saveReportDraft: SaveReportDraftCommand,
     private readonly getReportDraftById: GetReportDraftByIdQuery,
     private readonly listReportDraftsByHunter: ListReportDraftsByHunterQuery,
+    private readonly imageAssets: ReportDraftImageAssetService,
+    private readonly setHunterWriterCommand: SetHunterWriterCommand,
+    private readonly setPrimaryHunterCommand: SetPrimaryHunterCommand,
   ) {}
 
   @Put()
@@ -54,6 +78,49 @@ export class ReportDraftController {
     @Body() draft: ReportDraftWire,
   ): Promise<{ ok: true }> {
     await this.saveReportDraft.execute(request.user, draft);
+    return { ok: true };
+  }
+
+  @Patch('draft/:draftId/hunter-writer')
+  @AuthReportWorkflowParticipant()
+  @ApiOperation({
+    summary:
+      'Set which squad hunter may edit the draft and submit steps (hunter_writer_id)',
+  })
+  @ApiOkResponse({ description: 'Writer updated', schema: { example: { ok: true } } })
+  async patchHunterWriter(
+    @Req() request: RequestWithIdentity,
+    @Param('draftId') draftId: string,
+    @Body() body: { hunterWriterId?: string },
+  ): Promise<{ ok: true }> {
+    await this.setHunterWriterCommand.execute(
+      request.user,
+      draftId,
+      body.hunterWriterId ?? '',
+    );
+    return { ok: true };
+  }
+
+  @Patch('draft/:draftId/primary-hunter')
+  @AuthCoordinatorOrSuperAdmin()
+  @ApiOperation({
+    summary:
+      'Change the report draft owner (`hunter_id`) to another squad hunter (coordinator)',
+  })
+  @ApiOkResponse({ description: 'Primary hunter updated', schema: { example: { ok: true } } })
+  @ApiHttpUnauthorized('Missing or invalid bearer token.')
+  @ApiHttpForbidden('Coordinator or super admin required.')
+  @ApiHttpInternalServerError('Unexpected error while updating primary hunter.')
+  async patchPrimaryHunter(
+    @Req() request: RequestWithIdentity,
+    @Param('draftId') draftId: string,
+    @Body() body: { hunterId?: string },
+  ): Promise<{ ok: true }> {
+    await this.setPrimaryHunterCommand.execute(
+      request.user,
+      draftId,
+      body.hunterId ?? '',
+    );
     return { ok: true };
   }
 
@@ -93,5 +160,65 @@ export class ReportDraftController {
       throw new NotFoundException('Report draft not found');
     }
     return draft;
+  }
+
+  @Post('draft/:draftId/attachments/images')
+  @AuthReportWorkflowParticipant()
+  @UseInterceptors(
+    FileInterceptor(REPORT_DRAFT_IMAGE_FIELD_NAME, {
+      storage: memoryStorage(),
+      limits: { fileSize: REPORT_DRAFT_IMAGE_MAX_BYTES, files: 1 },
+    }),
+  )
+  @ApiOperation({ summary: 'Upload a private report image for a draft section' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        [REPORT_DRAFT_IMAGE_FIELD_NAME]: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+      required: [REPORT_DRAFT_IMAGE_FIELD_NAME],
+    },
+  })
+  @ApiOkResponse({ description: 'Uploaded image attachment metadata' })
+  async uploadImage(
+    @Req() request: RequestWithIdentity,
+    @Param('draftId') draftId: string,
+    @UploadedFile() file?: UploadedReportImageFile,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Image file is required.');
+    }
+    return this.imageAssets.uploadDescriptionImage(request.user, draftId, file);
+  }
+
+  @Get('draft/:draftId/attachments/:attachmentId/image')
+  @AuthReportWorkflowParticipant()
+  @ApiOperation({ summary: 'Read a private report image for an accessible draft' })
+  @ApiOkResponse({ description: 'Private report image stream' })
+  async readImage(
+    @Req() request: RequestWithIdentity,
+    @Param('draftId') draftId: string,
+    @Param('attachmentId') attachmentId: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<StreamableFile> {
+    const image = await this.imageAssets.readDraftImage(
+      request.user,
+      draftId,
+      attachmentId,
+    );
+    response.set({
+      'Cache-Control': 'private, no-store',
+      'Content-Type': image.mimeType,
+      'Content-Disposition': `inline; filename="${image.filename.replace(/"/g, '')}"`,
+    });
+    return new StreamableFile(image.buffer, {
+      type: image.mimeType,
+      disposition: `inline; filename="${image.filename.replace(/"/g, '')}"`,
+    });
   }
 }

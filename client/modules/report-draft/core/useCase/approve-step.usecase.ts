@@ -48,8 +48,7 @@ export const approveStep =
       aggregate.approveStep({ submission, decidedBy: input.decidedBy });
 
       await deps.submissionRepository.save(submission);
-      await deps.reportDraftRepository.save(aggregate.state);
-
+      // Step status is persisted server-side when the submission is saved (reviewers cannot PUT the draft).
       dispatch(reportDraftsSlice.actions.draftUpserted(aggregate.state));
       dispatch(reportDraftsSlice.actions.submissionUpserted(submission));
       dispatch(reportDraftsSlice.actions.transitionSucceeded());

@@ -404,7 +404,8 @@ export const ModelName = {
   SubmissionContentSnapshot: 'SubmissionContentSnapshot',
   ReportTeam: 'ReportTeam',
   ReportTeamMember: 'ReportTeamMember',
-  ReportTeamJoinRequest: 'ReportTeamJoinRequest'
+  ReportTeamJoinRequest: 'ReportTeamJoinRequest',
+  ReportTeamLeaveRequest: 'ReportTeamLeaveRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -420,7 +421,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "globalSubmission" | "globalReviewerComment" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "reportTeam" | "reportTeamMember" | "reportTeamJoinRequest"
+    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "globalSubmission" | "globalReviewerComment" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "reportTeam" | "reportTeamMember" | "reportTeamJoinRequest" | "reportTeamLeaveRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1810,6 +1811,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ReportTeamLeaveRequest: {
+      payload: Prisma.$ReportTeamLeaveRequestPayload<ExtArgs>
+      fields: Prisma.ReportTeamLeaveRequestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReportTeamLeaveRequestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamLeaveRequestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReportTeamLeaveRequestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamLeaveRequestPayload>
+        }
+        findFirst: {
+          args: Prisma.ReportTeamLeaveRequestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamLeaveRequestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReportTeamLeaveRequestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamLeaveRequestPayload>
+        }
+        findMany: {
+          args: Prisma.ReportTeamLeaveRequestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamLeaveRequestPayload>[]
+        }
+        create: {
+          args: Prisma.ReportTeamLeaveRequestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamLeaveRequestPayload>
+        }
+        createMany: {
+          args: Prisma.ReportTeamLeaveRequestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.ReportTeamLeaveRequestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamLeaveRequestPayload>
+        }
+        update: {
+          args: Prisma.ReportTeamLeaveRequestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamLeaveRequestPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReportTeamLeaveRequestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReportTeamLeaveRequestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.ReportTeamLeaveRequestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportTeamLeaveRequestPayload>
+        }
+        aggregate: {
+          args: Prisma.ReportTeamLeaveRequestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReportTeamLeaveRequest>
+        }
+        groupBy: {
+          args: Prisma.ReportTeamLeaveRequestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReportTeamLeaveRequestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReportTeamLeaveRequestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReportTeamLeaveRequestCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1943,6 +2010,7 @@ export type TwoFactorTotpScalarFieldEnum = (typeof TwoFactorTotpScalarFieldEnum)
 export const ReportDraftScalarFieldEnum = {
   id: 'id',
   hunterId: 'hunterId',
+  hunterWriterId: 'hunterWriterId',
   version: 'version',
   aggregateStatus: 'aggregateStatus',
   superAdminRevisionRequestedAt: 'superAdminRevisionRequestedAt',
@@ -2109,6 +2177,20 @@ export const ReportTeamJoinRequestScalarFieldEnum = {
 export type ReportTeamJoinRequestScalarFieldEnum = (typeof ReportTeamJoinRequestScalarFieldEnum)[keyof typeof ReportTeamJoinRequestScalarFieldEnum]
 
 
+export const ReportTeamLeaveRequestScalarFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  message: 'message',
+  status: 'status',
+  requestedAt: 'requestedAt',
+  decidedAt: 'decidedAt',
+  decidedById: 'decidedById'
+} as const
+
+export type ReportTeamLeaveRequestScalarFieldEnum = (typeof ReportTeamLeaveRequestScalarFieldEnum)[keyof typeof ReportTeamLeaveRequestScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2208,7 +2290,8 @@ export type TwoFactorTotpOrderByRelevanceFieldEnum = (typeof TwoFactorTotpOrderB
 
 export const ReportDraftOrderByRelevanceFieldEnum = {
   id: 'id',
-  hunterId: 'hunterId'
+  hunterId: 'hunterId',
+  hunterWriterId: 'hunterWriterId'
 } as const
 
 export type ReportDraftOrderByRelevanceFieldEnum = (typeof ReportDraftOrderByRelevanceFieldEnum)[keyof typeof ReportDraftOrderByRelevanceFieldEnum]
@@ -2341,6 +2424,17 @@ export const ReportTeamJoinRequestOrderByRelevanceFieldEnum = {
 } as const
 
 export type ReportTeamJoinRequestOrderByRelevanceFieldEnum = (typeof ReportTeamJoinRequestOrderByRelevanceFieldEnum)[keyof typeof ReportTeamJoinRequestOrderByRelevanceFieldEnum]
+
+
+export const ReportTeamLeaveRequestOrderByRelevanceFieldEnum = {
+  id: 'id',
+  teamId: 'teamId',
+  userId: 'userId',
+  message: 'message',
+  decidedById: 'decidedById'
+} as const
+
+export type ReportTeamLeaveRequestOrderByRelevanceFieldEnum = (typeof ReportTeamLeaveRequestOrderByRelevanceFieldEnum)[keyof typeof ReportTeamLeaveRequestOrderByRelevanceFieldEnum]
 
 
 
@@ -2598,6 +2692,7 @@ export type GlobalOmitConfig = {
   reportTeam?: Prisma.ReportTeamOmit
   reportTeamMember?: Prisma.ReportTeamMemberOmit
   reportTeamJoinRequest?: Prisma.ReportTeamJoinRequestOmit
+  reportTeamLeaveRequest?: Prisma.ReportTeamLeaveRequestOmit
 }
 
 /* Types for Logging */

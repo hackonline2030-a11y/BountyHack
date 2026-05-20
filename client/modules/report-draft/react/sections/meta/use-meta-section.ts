@@ -21,6 +21,7 @@ import {
 } from "@modules/report-draft/core/model/super-admin-final-validation";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
+import { useReportDraftSession } from "@modules/report-draft/react/context/report-draft-session.context";
 
 const META_STEP = ReportDraftDomainModel.ReportDraftStep.META;
 
@@ -30,6 +31,7 @@ const META_STEP = ReportDraftDomainModel.ReportDraftStep.META;
  */
 export const useMetaSection = () => {
   const dispatch = useAppDispatch();
+  const { viewerUserId, isDesignatedStepWriter } = useReportDraftSession();
   const currentDraftId = useAppSelector((s) => s.reportDrafts.currentDraftId);
   const draftRow = useAppSelector((s) =>
     currentDraftId ? s.reportDrafts.byId[currentDraftId] : undefined,
@@ -45,7 +47,7 @@ export const useMetaSection = () => {
 
   const persistedMeta = draftRow?.meta.payload ?? null;
   const stepStatus = draftRow?.meta.status ?? "in-progress";
-  const submittedBy = draftRow?.hunterId ?? "";
+  const submittedBy = viewerUserId;
 
   const [reviewerRole, setReviewerRole] =
     useState<ReportDraftDomainModel.ReviewerRole>("quality_checker");
@@ -78,10 +80,11 @@ export const useMetaSection = () => {
   );
 
   const isSubmitable = useMemo(() => form.isSubmitable(draft), [form, draft]);
-  const editable = isWizardStepEditable(stepStatus, {
+  const stepEditableByWorkflow = isWizardStepEditable(stepStatus, {
     draft: draftRow,
     globalSubmissions,
   });
+  const editable = stepEditableByWorkflow && isDesignatedStepWriter;
   const hidePerStepSubmit = isSuperAdminGlobalRevisionMode(draftRow);
   const canNavigateNext = canWizardNavigateNext(draftRow, stepStatus);
   const transitionBusy = transition.status === "loading";
@@ -124,6 +127,8 @@ export const useMetaSection = () => {
     draft,
     setField,
     isSubmitable,
+    isDesignatedStepWriter,
+    stepEditableByWorkflow,
     editable,
     hidePerStepSubmit,
     stepStatus,

@@ -1,3 +1,4 @@
+import type { AppRoleCode } from '../../shared/rbac/app-role.code';
 import { CreateUserProfilePayload } from '../payloads';
 import { UserAdminSummary, UserRecord } from '../models';
 
@@ -16,4 +17,8 @@ export interface IUserRepository {
    * enough that a single response becomes too heavy.
    */
   listAdminSummaries(): Promise<UserAdminSummary[]>;
+  /** Lookup by `users.id` with role resolved (coordinator workflows). */
+  findSummaryById(uid: string): Promise<UserAdminSummary | null>;
+  /** Users whose global role matches `roleCode` (e.g. all hunters). */
+  listSummariesByRoleCode(roleCode: AppRoleCode): Promise<UserAdminSummary[]>;
 }

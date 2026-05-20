@@ -21,6 +21,7 @@ import {
 } from "@modules/report-draft/core/model/description.factory";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { reportDraftSlice } from "@modules/report-draft/core/store/report-draft.slice";
+import { reportDraftsSlice } from "@modules/report-draft/core/store/report-drafts.slice";
 import { submitMentorAdvice } from "@modules/report-draft/core/useCase/submit-mentor-advice.usecase";
 import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-step-for-review.usecase";
 import { isStepValidationReviewerRole } from "@modules/report-draft/core/model/step-validation-reviewer";
@@ -30,12 +31,16 @@ import {
   isSuperAdminGlobalRevisionMode,
 } from "@modules/report-draft/core/model/super-admin-final-validation";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
+import { useDependencies } from "@modules/app/nextjs/DependencyProvider";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
+import { useReportDraftSession } from "@modules/report-draft/react/context/report-draft-session.context";
 
 const DESCRIPTION_STEP = ReportDraftDomainModel.ReportDraftStep.DESCRIPTION;
 
 export const useDescriptionSection = () => {
   const dispatch = useAppDispatch();
+  const dependencies = useDependencies();
+  const { viewerUserId, isDesignatedStepWriter } = useReportDraftSession();
   const currentDraftId = useAppSelector((s) => s.reportDrafts.currentDraftId);
   const draftRow = useAppSelector((s) =>
     currentDraftId ? s.reportDrafts.byId[currentDraftId] : undefined,
@@ -52,7 +57,7 @@ export const useDescriptionSection = () => {
   const persistedDescription = draftRow?.description.payload ?? null;
   const stepStatus = draftRow?.description.status ?? "in-progress";
   const metaScopeSlug = draftRow?.meta.payload.scopeSlug ?? "";
-  const submittedBy = draftRow?.hunterId ?? "";
+  const submittedBy = viewerUserId;
 
   const [reviewerRole, setReviewerRole] =
     useState<ReportDraftDomainModel.ReviewerRole>("quality_checker");
@@ -73,6 +78,9 @@ export const useDescriptionSection = () => {
   );
   const [draft, setDraft] =
     useState<ReportDraftDomainModel.DescriptionFields>(initialDraft);
+  const [imageUploadByBlocId, setImageUploadByBlocId] = useState<
+    Record<string, { status: "uploading" | "error"; message?: string }>
+  >({});
 
   useEffect(() => {
     setDraft(initialDraft);
@@ -89,10 +97,11 @@ export const useDescriptionSection = () => {
   );
 
   const isSubmitable = useMemo(() => form.isSubmitable(draft), [form, draft]);
-  const editable = isWizardStepEditable(stepStatus, {
+  const stepEditableByWorkflow = isWizardStepEditable(stepStatus, {
     draft: draftRow,
     globalSubmissions,
   });
+  const editable = stepEditableByWorkflow && isDesignatedStepWriter;
   const hidePerStepSubmit = isSuperAdminGlobalRevisionMode(draftRow);
   const canNavigateNext = canWizardNavigateNext(draftRow, stepStatus);
   const transitionBusy = transition.status === "loading";
@@ -135,6 +144,65 @@ export const useDescriptionSection = () => {
     );
   }, [dispatch, currentDraftId, submittedBy, reviewerRole, draft]);
 
+  const onUploadSectionImage = useCallback(
+    async (blocId: string, file: File) => {
+      if (!currentDraftId || !draftRow) return;
+      setImageUploadByBlocId((current) => ({
+        ...current,
+        [blocId]: { status: "uploading" },
+      }));
+
+      try {
+        const attachment =
+          await dependencies.reportDraftRepository.uploadDescriptionSectionImage({
+            draftId: currentDraftId,
+            file,
+          });
+        const nextSectionBlocs = draft.sectionBlocs.map((bloc) =>
+          bloc.id === blocId ? { ...bloc, attachmentId: attachment.id } : bloc,
+        );
+        const nextDescription = {
+          ...draft,
+          sectionBlocs: nextSectionBlocs,
+        };
+        const nextAttachments = [
+          ...draftRow.description.attachments.filter((a) => a.id !== attachment.id),
+          attachment,
+        ];
+        const nextDraftRow: ReportDraftDomainModel.ReportDraft = {
+          ...draftRow,
+          description: {
+            ...draftRow.description,
+            payload: nextDescription,
+            attachments: nextAttachments,
+          },
+          updatedAt: new Date().toISOString(),
+        };
+
+        await dependencies.reportDraftRepository.save(nextDraftRow);
+        setDraft(nextDescription);
+        dispatch(reportDraftsSlice.actions.draftUpserted(nextDraftRow));
+        setImageUploadByBlocId((current) => {
+          const next = { ...current };
+          delete next[blocId];
+          return next;
+        });
+      } catch (error) {
+        setImageUploadByBlocId((current) => ({
+          ...current,
+          [blocId]: {
+            status: "error",
+            message:
+              error instanceof Error
+                ? error.message
+                : "Impossible d’envoyer l’image.",
+          },
+        }));
+      }
+    },
+    [currentDraftId, dependencies.reportDraftRepository, dispatch, draft, draftRow],
+  );
+
   const onBack = useCallback(() => {
     dispatch(
       reportDraftSlice.actions.setStep(ReportDraftDomainModel.ReportDraftStep.META),
@@ -145,6 +213,8 @@ export const useDescriptionSection = () => {
     draft,
     setField,
     isSubmitable,
+    stepEditableByWorkflow,
+    isDesignatedStepWriter,
     editable,
     hidePerStepSubmit,
     stepStatus,
@@ -153,9 +223,12 @@ export const useDescriptionSection = () => {
     setReviewerRole,
     onNext,
     onSubmitForReview,
+    onUploadSectionImage,
     onBack,
     transitionBusy,
     transitionErr,
+    imageUploadByBlocId,
+    descriptionAttachments: draftRow?.description.attachments ?? [],
     derived: {
       vector: derivedVector,
       score: derivedScore,

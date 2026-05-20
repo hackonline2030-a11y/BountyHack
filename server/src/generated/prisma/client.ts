@@ -146,3 +146,8 @@ export type ReportTeamMember = Prisma.ReportTeamMemberModel
  * User asks coordinator to join a team (or general pool when teamId is null).
  */
 export type ReportTeamJoinRequest = Prisma.ReportTeamJoinRequestModel
+/**
+ * Model ReportTeamLeaveRequest
+ * Primary hunter asks the coordinator to remove them from the squad (cannot self-leave while `hunter_id`).
+ */
+export type ReportTeamLeaveRequest = Prisma.ReportTeamLeaveRequestModel

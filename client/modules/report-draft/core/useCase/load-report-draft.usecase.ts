@@ -1,4 +1,3 @@
-import { reconcileDraftStepStatusFromSubmissions } from "@modules/report-draft/core/useCase/reconcile-draft-from-submissions";
 import { reportDraftsSlice } from "@modules/report-draft/core/store/report-drafts.slice";
 import { Dependencies } from "@store/dependencies";
 import { AppDispatch, AppGetState } from "@store/redux/store";
@@ -56,12 +55,6 @@ export const loadReportDraft =
         if (comments.length > 0) {
           dispatch(reportDraftsSlice.actions.globalReviewerCommentsUpserted(comments));
         }
-      }
-
-      const reconciled = reconcileDraftStepStatusFromSubmissions(draft, submissions);
-      if (reconciled.version !== draft.version || reconciled.meta.status !== draft.meta.status) {
-        dispatch(reportDraftsSlice.actions.draftUpserted(reconciled));
-        await deps.reportDraftRepository.save(reconciled);
       }
 
       dispatch(reportDraftsSlice.actions.loadSucceeded());

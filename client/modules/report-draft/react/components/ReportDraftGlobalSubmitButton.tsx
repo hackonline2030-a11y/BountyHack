@@ -9,6 +9,7 @@ import {
 } from "@modules/report-draft/core/model/super-admin-final-validation";
 import { submitDraftGloballyForReview } from "@modules/report-draft/core/useCase/submit-draft-globally-for-review.usecase";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
+import { useReportDraftSession } from "@modules/report-draft/react/context/report-draft-session.context";
 
 type Props = {
   currentStep?: ReportDraftDomainModel.ReportDraftStep;
@@ -22,6 +23,7 @@ export const ReportDraftGlobalSubmitButton: FC<Props> = ({
 }) => {
   const { t } = useT("myReports");
   const dispatch = useAppDispatch();
+  const { isDesignatedStepWriter } = useReportDraftSession();
   const draftId = useAppSelector((s) => s.reportDrafts.currentDraftId);
   const draft = useAppSelector((s) => (draftId ? s.reportDrafts.byId[draftId] : undefined));
   const globalSubmissionsById = useAppSelector((s) => s.reportDrafts.globalSubmissionsById);
@@ -32,7 +34,7 @@ export const ReportDraftGlobalSubmitButton: FC<Props> = ({
   const transition = useAppSelector((s) => s.reportDrafts.transition);
 
   const onGlobalSubmit = useCallback(async () => {
-    if (!draftId || !draft?.hunterId) return;
+    if (!draftId || !draft?.hunterId || !isDesignatedStepWriter) return;
     await dispatch(
       submitDraftGloballyForReview({
         draftId,
@@ -40,7 +42,7 @@ export const ReportDraftGlobalSubmitButton: FC<Props> = ({
         currentPayload,
       }),
     );
-  }, [dispatch, draftId, draft?.hunterId, currentStep, currentPayload]);
+  }, [dispatch, draftId, draft?.hunterId, currentStep, currentPayload, isDesignatedStepWriter]);
 
   if (!isSuperAdminGlobalRevisionMode(draft)) return null;
 
@@ -52,7 +54,7 @@ export const ReportDraftGlobalSubmitButton: FC<Props> = ({
       type="button"
       className="cursor-pointer rounded-md border border-violet-700 bg-violet-50 px-4 py-2 font-medium text-violet-900 hover:bg-violet-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       onClick={() => void onGlobalSubmit()}
-      disabled={transitionBusy || eligible === 0}
+      disabled={transitionBusy || eligible === 0 || !isDesignatedStepWriter}
       title={
         eligible === 0
           ? t("myReports.wizard.globalSubmit.disabledNone")

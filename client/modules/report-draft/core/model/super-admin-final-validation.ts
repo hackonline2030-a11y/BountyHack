@@ -114,15 +114,26 @@ export function canExportReportPdf(
   );
 }
 
-/** Super-admin may open the global revision cycle only once per draft. */
+/**
+ * Super-admin may request the **initial** global revision from final validation
+ * (draft must be `ready-to-program`, revision count 0, and not while reviewers
+ * are still awaiting first decisions on the current round — see server
+ * `SuperAdminFinalValidationService.requestFinalRevision`).
+ */
 export function canRequestFinalRevision(
   draft: ReportDraftDomainModel.ReportDraft,
-  _globalSubmissions: ReadonlyArray<ReportDraftDomainModel.GlobalSubmission> = [],
+  globalSubmissions: ReadonlyArray<ReportDraftDomainModel.GlobalSubmission> = [],
 ): boolean {
   if (draft.aggregateStatus !== "ready-to-program") {
     return false;
   }
-  return (draft.superAdminGlobalRevisionCount ?? 0) === 0;
+  if ((draft.superAdminGlobalRevisionCount ?? 0) > 0) {
+    return false;
+  }
+  if (hasPendingGlobalSubmission(draft, globalSubmissions)) {
+    return false;
+  }
+  return true;
 }
 
 /** Global revision cycle is open (hunter may submit globally). */
