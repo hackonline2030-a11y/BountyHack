@@ -10,9 +10,10 @@ Ce dépôt est un monorepo (**`client/`** — Next.js, **`server/`** — NestJS/
 
 Si vous évaluez une faille, précisez si elle concerne un **déploiement sans conteneur**, une **stack Docker locale**, ou la **CI** : le périmètre et la criticité peuvent différer.
 
-## Où placer ce fichier ?
-
-À la **racine du dépôt**, `SECURITY.md` est l’emplacement attendu par les plateformes (par ex. GitHub : onglet **Security** → politique visible). Une variante acceptée est `.github/SECURITY.md` ; la racine reste la plus courante et la plus visible.
+### Nginx / VPS
+- **Do not** set `root` or `alias` on `~/bugbountyapp/server` or `templates/`. Use `proxy_pass` only to `127.0.0.1:3000` (API) and `3001` (Next).
+- Browser upload hits `https://hackthebounty.fr/api/report-draft/...` (Next BFF), then the API. Set **`client_max_body_size`** ≥ **12M** on both front and API vhosts (app limit: **10 MB**). Only **one** `client_max_body_size` per `server` block — duplicates make `nginx -t` fail and the old config stays loaded.
+- A **413** on upload with empty PM2 logs usually means nginx rejected the body before Node ran.
 
 ## Branches et périmètre des correctifs
 
