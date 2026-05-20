@@ -38,6 +38,8 @@ import { SaveReportDraftCommand } from '../application/commands/save-report-draf
 import { GetReportDraftByIdQuery } from '../application/queries/get-report-draft-by-id.query';
 import { ListReportDraftsByHunterQuery } from '../application/queries/list-report-drafts-by-hunter.query';
 import { SetHunterWriterCommand } from '../application/commands/set-hunter-writer.command';
+import { SetPrimaryHunterCommand } from '../application/commands/set-primary-hunter.command';
+import { AuthCoordinatorOrSuperAdmin } from '../../shared/rbac/report-workflow-auth.decorator';
 import { ReportDraftImageAssetService } from '../application/attachments/report-draft-image-asset.service';
 import {
   REPORT_DRAFT_IMAGE_FIELD_NAME,
@@ -55,6 +57,7 @@ export class ReportDraftController {
     private readonly listReportDraftsByHunter: ListReportDraftsByHunterQuery,
     private readonly imageAssets: ReportDraftImageAssetService,
     private readonly setHunterWriterCommand: SetHunterWriterCommand,
+    private readonly setPrimaryHunterCommand: SetPrimaryHunterCommand,
   ) {}
 
   @Put()
@@ -94,6 +97,29 @@ export class ReportDraftController {
       request.user,
       draftId,
       body.hunterWriterId ?? '',
+    );
+    return { ok: true };
+  }
+
+  @Patch('draft/:draftId/primary-hunter')
+  @AuthCoordinatorOrSuperAdmin()
+  @ApiOperation({
+    summary:
+      'Change the report draft owner (`hunter_id`) to another squad hunter (coordinator)',
+  })
+  @ApiOkResponse({ description: 'Primary hunter updated', schema: { example: { ok: true } } })
+  @ApiHttpUnauthorized('Missing or invalid bearer token.')
+  @ApiHttpForbidden('Coordinator or super admin required.')
+  @ApiHttpInternalServerError('Unexpected error while updating primary hunter.')
+  async patchPrimaryHunter(
+    @Req() request: RequestWithIdentity,
+    @Param('draftId') draftId: string,
+    @Body() body: { hunterId?: string },
+  ): Promise<{ ok: true }> {
+    await this.setPrimaryHunterCommand.execute(
+      request.user,
+      draftId,
+      body.hunterId ?? '',
     );
     return { ok: true };
   }

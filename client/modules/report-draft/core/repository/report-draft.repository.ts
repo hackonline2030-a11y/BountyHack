@@ -30,4 +30,10 @@ export interface IReportDraftRepository {
     draftId: ReportDraftDomainModel.ReportDraftId;
     hunterWriterId: string;
   }): Promise<void>;
+
+  /** Coordinator: change `report_drafts.hunter_id` to another squad hunter. */
+  setPrimaryHunter(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    hunterId: string;
+  }): Promise<void>;
 }

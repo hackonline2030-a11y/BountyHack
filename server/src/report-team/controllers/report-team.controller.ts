@@ -32,6 +32,7 @@ import type {
 import { CreateReportTeamCommand } from '../application/commands/create-report-team.command';
 import { UpdateReportTeamCommand } from '../application/commands/update-report-team.command';
 import { DeleteReportTeamCommand } from '../application/commands/delete-report-team.command';
+import { RemoveReportTeamMemberCommand } from '../application/commands/remove-report-team-member.command';
 import { ListMyReportTeamsQuery } from '../application/queries/list-my-report-teams.query';
 import { ListAllReportTeamsQuery } from '../application/queries/list-all-report-teams.query';
 import { GetReportTeamByIdQuery } from '../application/queries/get-report-team-by-id.query';
@@ -46,6 +47,7 @@ export class ReportTeamController {
     private readonly createReportTeam: CreateReportTeamCommand,
     private readonly updateReportTeam: UpdateReportTeamCommand,
     private readonly deleteReportTeam: DeleteReportTeamCommand,
+    private readonly removeReportTeamMember: RemoveReportTeamMemberCommand,
     private readonly listMyReportTeams: ListMyReportTeamsQuery,
     private readonly listAllReportTeams: ListAllReportTeamsQuery,
     private readonly getReportTeamById: GetReportTeamByIdQuery,
@@ -151,6 +153,47 @@ export class ReportTeamController {
     @Body() body: UpdateReportTeamInput,
   ): Promise<ReportTeamWire> {
     return this.updateReportTeam.execute(request.user, teamId, body);
+  }
+
+  @Delete(':teamId/members/me')
+  @AuthReportWorkflowParticipant()
+  @ApiOperation({
+    summary: 'Leave a report team (remove yourself as a member)',
+  })
+  @ApiOkResponse({ description: 'Updated report-draft team after removal' })
+  @ApiHttpUnauthorized('Missing or invalid bearer token.')
+  @ApiHttpForbidden('Not allowed to access this team.')
+  @ApiHttpInternalServerError('Unexpected error while leaving report-draft team.')
+  async leaveTeam(
+    @Req() request: RequestWithIdentity,
+    @Param('teamId') teamId: string,
+  ): Promise<ReportTeamWire> {
+    return this.removeReportTeamMember.execute(
+      request.user,
+      teamId,
+      request.user.uid,
+    );
+  }
+
+  @Delete(':teamId/members/:memberUserId')
+  @AuthCoordinatorOrSuperAdmin()
+  @ApiOperation({
+    summary: 'Remove a member from a report team (coordinator / super admin)',
+  })
+  @ApiOkResponse({ description: 'Updated report-draft team after removal' })
+  @ApiHttpUnauthorized('Missing or invalid bearer token.')
+  @ApiHttpForbidden('Coordinator or super admin required.')
+  @ApiHttpInternalServerError('Unexpected error while removing team member.')
+  async expelMember(
+    @Req() request: RequestWithIdentity,
+    @Param('teamId') teamId: string,
+    @Param('memberUserId') memberUserId: string,
+  ): Promise<ReportTeamWire> {
+    return this.removeReportTeamMember.execute(
+      request.user,
+      teamId,
+      memberUserId,
+    );
   }
 
   @Delete(':teamId')

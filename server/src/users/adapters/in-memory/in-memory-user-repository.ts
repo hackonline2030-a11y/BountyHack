@@ -1,4 +1,5 @@
 import { Injectable, Optional } from '@nestjs/common';
+import { AppRoleCode } from '../../../shared/rbac/app-role.code';
 import { IUserRepository } from '../../ports/user-repository.interface';
 import { UserAdminSummary, UserRecord } from '../../models';
 import { CreateUserProfilePayload } from '../../payloads';
@@ -38,6 +39,23 @@ export class InMemoryUserRepository implements IUserRepository {
    * stays honourable without leaking ad-hoc test data through this surface.
    */
   async listAdminSummaries(): Promise<UserAdminSummary[]> {
+    return [];
+  }
+
+  async findSummaryById(uid: string): Promise<UserAdminSummary | null> {
+    const record = await this.findById(uid);
+    if (record === null) {
+      return null;
+    }
+    return {
+      uid: record.uid,
+      username: record.username,
+      email: null,
+      roleCode: AppRoleCode.HUNTER,
+    };
+  }
+
+  async listSummariesByRoleCode(_roleCode: AppRoleCode): Promise<UserAdminSummary[]> {
     return [];
   }
 }

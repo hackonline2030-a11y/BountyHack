@@ -23,6 +23,7 @@ export interface IReportTeamRepository {
     userId: string,
     role: ReportTeamMemberRoleWire,
   ): Promise<ReportTeamWire>;
+  removeMember(teamId: string, userId: string): Promise<ReportTeamWire>;
 }
 
 export const I_REPORT_TEAM_REPOSITORY = Symbol('I_REPORT_TEAM_REPOSITORY');

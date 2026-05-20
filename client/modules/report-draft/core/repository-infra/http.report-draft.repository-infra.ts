@@ -93,4 +93,28 @@ export class HttpReportDraftRepository implements IReportDraftRepository {
       );
     }
   }
+
+  async setPrimaryHunter(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    hunterId: string;
+  }): Promise<void> {
+    const res = await fetchBff(
+      `/api/report-draft/drafts/${encodeURIComponent(input.draftId)}/primary-hunter`,
+      {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hunterId: input.hunterId }),
+        cache: "no-store",
+      },
+    );
+    if (!res.ok) {
+      throw new Error(
+        await readFriendlyHttpError(
+          res,
+          "Impossible de changer le hunter principal du rapport.",
+        ),
+      );
+    }
+  }
 }
