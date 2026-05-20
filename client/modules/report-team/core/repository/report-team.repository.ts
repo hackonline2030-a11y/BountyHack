@@ -16,6 +16,7 @@ export interface IReportTeamRepository {
     label: string;
     members: Array<{ userId: string; role: ReportTeamMemberRole }>;
     reportDraftId?: string;
+    hunterWriterUserId?: string;
   }): Promise<ReportTeam>;
   updateTeam(id: string, input: { label: string }): Promise<ReportTeam>;
   deleteTeam(id: string): Promise<void>;

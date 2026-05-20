@@ -8,6 +8,7 @@ import type {
   ReportTeamJoinRequest,
   ReportTeamMemberRole,
 } from "@modules/report-team/model/report-team.types";
+import { isEnrollmentJoinRequest } from "@modules/report-team/model/report-team-join-request.utils";
 import { ActionButton } from "@modules/app/nextjs/components/buttons/ActionButton";
 import { ReportTeamValidityBadge } from "@modules/report-team/react/ReportTeamValidityBadge";
 import { computeTeamValidityFromRoles } from "@modules/report-team/core/validity";
@@ -30,10 +31,6 @@ const fieldLabel =
   "text-xs font-medium uppercase tracking-wide text-dashboard-text-muted";
 const fieldInput =
   "w-full rounded-lg border border-dashboard-card-border bg-white px-3 py-2 text-sm text-dashboard-text shadow-sm focus:border-dashboard-accent focus:outline-none focus:ring-1 focus:ring-dashboard-accent";
-
-function isEnrollmentRequest(req: ReportTeamJoinRequest): boolean {
-  return req.teamId === undefined || req.teamId === "";
-}
 
 export const CoordinatorAttachOrphanTeamPanel: FC<Props> = ({
   orphan,
@@ -59,7 +56,7 @@ export const CoordinatorAttachOrphanTeamPanel: FC<Props> = ({
   const applicants = useMemo(() => {
     const byUser = new Map<string, ReportTeamJoinRequest>();
     for (const req of pendingJoinRequests) {
-      if (!isEnrollmentRequest(req)) continue;
+      if (!isEnrollmentJoinRequest(req)) continue;
       const uid = req.userId ?? "";
       if (!uid || uid === orphan.hunterId || byUser.has(uid)) continue;
       if (req.requestedRole === "hunter") continue;

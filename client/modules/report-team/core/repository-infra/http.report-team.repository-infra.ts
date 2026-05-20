@@ -70,6 +70,7 @@ export class HttpReportTeamRepository implements IReportTeamRepository {
     label: string;
     members: Array<{ userId: string; role: ReportTeamMemberRole }>;
     reportDraftId?: string;
+    hunterWriterUserId?: string;
   }): Promise<ReportTeam> {
     const res = await fetchBff(teamsBase, {
       method: "POST",

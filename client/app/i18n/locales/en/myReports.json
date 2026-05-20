@@ -4,7 +4,18 @@
     "heading": "My reports",
     "workspace": {
       "backToReports": "← Back to my reports",
-      "backToReportsAria": "Go back to the list of my report drafts"
+      "backToReportsAria": "Go back to the list of my report drafts",
+      "hunterWriter": {
+        "title": "Designated step writer",
+        "current": "Step edits and submissions are restricted to: {{name}}.",
+        "youAreWriter": "You are the designated writer — you can edit and submit steps.",
+        "readOnly": "Only « {{name}} » can edit and submit steps. Ask them to hand off using the selector below, or ask a program coordinator.",
+        "coHunterReadOnly": "You are not the designated writer — you cannot edit or submit steps. Ask the current writer to hand off to you, or ask a program coordinator.",
+        "transferLabel": "Hand off writer role to",
+        "pickPlaceholder": "Choose a hunter…",
+        "transferButton": "Update designated writer",
+        "transferring": "Updating…"
+      }
     },
     "qcSubmissions": {
       "filteredHeading": "Submissions for this report",

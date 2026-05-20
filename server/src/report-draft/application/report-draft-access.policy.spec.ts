@@ -380,7 +380,8 @@ describe('ReportDraftAccessPolicy', () => {
     ).resolves.toBeUndefined();
   });
 
-  it('allows coordinator to read a draft linked to a report team', async () => {
+  it('rejects coordinator from reading any report draft', async () => {
+    reportTeamRepository.isMemberOfDraft.mockResolvedValue(false);
     reportTeamRepository.findByReportDraftId.mockResolvedValue({
       id: 'team-1',
       reportDraftId: 'draft-1',
@@ -391,20 +392,6 @@ describe('ReportDraftAccessPolicy', () => {
       members: [{ userId: 'hunter-1', displayName: 'H1', role: 'hunter' }],
       updatedAt: '2026-01-01T00:00:00.000Z',
     });
-    await expect(
-      policy.assertCanReadDraft(
-        {
-          uid: 'coord-1',
-          email: 'coord@example.com',
-          roleCode: AppRoleCode.COORDINATOR,
-        },
-        { id: 'draft-1', hunterId: 'hunter-1' },
-      ),
-    ).resolves.toBeUndefined();
-  });
-
-  it('denies coordinator reading a draft without a report team', async () => {
-    reportTeamRepository.findByReportDraftId.mockResolvedValue(null);
     await expect(
       policy.assertCanReadDraft(
         {

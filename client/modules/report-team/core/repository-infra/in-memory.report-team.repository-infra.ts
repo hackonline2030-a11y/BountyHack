@@ -5,6 +5,7 @@ import type {
   ReportTeamMemberRole,
 } from "@modules/report-team/model/report-team.types";
 import type { IReportTeamRepository } from "@modules/report-team/core/repository/report-team.repository";
+import { isEnrollmentJoinRequest } from "@modules/report-team/model/report-team-join-request.utils";
 
 export class InMemoryReportTeamRepository implements IReportTeamRepository {
   private teams = new Map<string, ReportTeam>();
@@ -40,6 +41,7 @@ export class InMemoryReportTeamRepository implements IReportTeamRepository {
     label: string;
     members: Array<{ userId: string; role: ReportTeamMemberRole }>;
     reportDraftId?: string;
+    hunterWriterUserId?: string;
   }): Promise<ReportTeam> {
     const team: ReportTeam = {
       id: `team-${this.teams.size + 1}`,
@@ -47,6 +49,10 @@ export class InMemoryReportTeamRepository implements IReportTeamRepository {
       label: input.label,
       validity: "incomplete",
       draftAggregateStatus: "draft",
+      hunterWriterUserId:
+        input.hunterWriterUserId ??
+        input.members.find((m) => m.role === "hunter")?.userId ??
+        "",
       members: [],
       updatedAt: new Date().toISOString(),
     };
@@ -101,7 +107,7 @@ export class InMemoryReportTeamRepository implements IReportTeamRepository {
     message?: string;
   }): Promise<ReportTeamJoinRequest> {
     const pending = [...this.requests.values()].find(
-      (r) => !r.teamId && r.status === "pending",
+      (r) => isEnrollmentJoinRequest(r) && r.status === "pending",
     );
     if (pending) throw new Error("A pending enrollment request already exists");
     const req: ReportTeamJoinRequest = {

@@ -11,6 +11,7 @@ import {
   cvssVector,
 } from "@modules/report-draft/core/cvss/cvss-3.1";
 import type { StepPayloadResolver } from "@modules/report-draft/core/view/report-draft-preview-steps";
+import { reportDraftStepToStateKey } from "@modules/report-draft/core/model/report-draft-step-keys";
 import {
   authorNameFromDraft,
   buildPdfTableOfContents,
@@ -30,7 +31,11 @@ const PdfChapterHeading: FC<{ title: string }> = ({ title }) => (
   <h2 className="mb-4 text-lg font-bold text-[#c1121f]">{title} :</h2>
 );
 
-const DescriptionChapterBody: FC<{ payload: unknown }> = ({ payload }) => {
+const DescriptionChapterBody: FC<{
+  draftId: string;
+  payload: unknown;
+  attachments: readonly M.Attachment[];
+}> = ({ draftId, payload, attachments }) => {
   const desc = normalizeDescriptionPayload(payload);
   const score = cvssBaseScore(desc);
   const severity = cvssSeverity(score);
@@ -57,7 +62,14 @@ const DescriptionChapterBody: FC<{ payload: unknown }> = ({ payload }) => {
       {hasBlocs ? (
         <div className="flex flex-col">
           {desc.sectionBlocs.map((bloc, index) => (
-            <SectionBlocDisplay key={bloc.id} bloc={bloc} index={index} documentMode />
+            <SectionBlocDisplay
+              key={bloc.id}
+              bloc={bloc}
+              index={index}
+              documentMode
+              draftId={draftId}
+              attachments={attachments}
+            />
           ))}
         </div>
       ) : null}
@@ -66,9 +78,11 @@ const DescriptionChapterBody: FC<{ payload: unknown }> = ({ payload }) => {
 };
 
 const LongFormChapterBody: FC<{
+  draftId: string;
   step: M.ReportDraftStep;
   payload: unknown;
-}> = ({ step, payload }) => {
+  attachments: readonly M.Attachment[];
+}> = ({ draftId, step, payload, attachments }) => {
   const { sectionBlocs } = normalizeLongFormPayload(step, payload);
   if (sectionBlocs.length === 0) {
     return <p className="text-sm text-slate-500">—</p>;
@@ -76,29 +90,47 @@ const LongFormChapterBody: FC<{
   return (
     <div className="flex flex-col">
       {sectionBlocs.map((bloc, index) => (
-        <SectionBlocDisplay key={bloc.id} bloc={bloc} index={index} documentMode />
+        <SectionBlocDisplay
+          key={bloc.id}
+          bloc={bloc}
+          index={index}
+          documentMode
+          draftId={draftId}
+          attachments={attachments}
+        />
       ))}
     </div>
   );
 };
 
 const PdfChapter: FC<{
+  draft: M.ReportDraft;
   step: M.ReportDraftStep;
   resolvePayload: StepPayloadResolver;
-}> = ({ step, resolvePayload }) => {
+}> = ({ draft, step, resolvePayload }) => {
   const title = pdfChapterTitle(step);
   if (!title) return null;
 
   const payload = resolvePayload(step);
   if (!stepHasPdfChapterContent(step, payload)) return null;
+  const attachments = draft[reportDraftStepToStateKey(step)].attachments;
 
   return (
     <section>
       <PdfChapterHeading title={title} />
       {step === M.ReportDraftStep.DESCRIPTION ? (
-        <DescriptionChapterBody payload={payload} />
+        <DescriptionChapterBody
+          draftId={draft.id}
+          payload={payload}
+          attachments={attachments}
+        />
       ) : (
-        <LongFormChapterBody step={step} payload={payload} />
+        <LongFormChapterBody
+          draftId={draft.id}
+          step={step}
+          payload={payload}
+          attachments={attachments}
+        />
       )}
     </section>
   );
@@ -153,7 +185,7 @@ export const ReportDraftDocumentPreview: FC<ReportDraftDocumentPreviewProps> = (
             <Fragment key={step}>
               {index > 0 ? <ReportPreviewPageBreak /> : null}
               <ReportPreviewA4Page aria-label={`Page ${pageNumber}`}>
-                <PdfChapter step={step} resolvePayload={resolvePayload} />
+                <PdfChapter draft={draft} step={step} resolvePayload={resolvePayload} />
               </ReportPreviewA4Page>
             </Fragment>
           );
@@ -169,7 +201,7 @@ export const ReportDraftDocumentPreview: FC<ReportDraftDocumentPreviewProps> = (
           <ReportDraftPdfCoverPage title={title} author={author} toc={[]} />
         ) : null}
         {chapterSteps.map((step) => (
-          <PdfChapter key={step} step={step} resolvePayload={resolvePayload} />
+          <PdfChapter key={step} draft={draft} step={step} resolvePayload={resolvePayload} />
         ))}
       </ReportPreviewA4Page>
     </ReportPreviewScrollArea>

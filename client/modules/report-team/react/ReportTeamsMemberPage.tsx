@@ -13,6 +13,7 @@ import { ReportTeamEnrollButton } from "@modules/report-team/react/ReportTeamEnr
 import type { buildAskJoinLabels } from "@modules/report-team/react/build-ask-join-labels";
 import { ReportTeamMockBanner } from "@modules/report-team/react/ReportTeamMockBanner";
 import { ReportTeamValidityBadge } from "@modules/report-team/react/ReportTeamValidityBadge";
+import { isEnrollmentJoinRequest } from "@modules/report-team/model/report-team-join-request.utils";
 
 type Copy = {
   heading: string;
@@ -171,7 +172,9 @@ export const ReportTeamsMemberPage: FC<Props> = ({
                 {joinRequests.map((req) => (
                   <li key={req.id} className="py-3 first:pt-0 last:pb-0">
                     <p className="text-sm font-medium text-dashboard-text">
-                      {req.teamId ? req.teamLabel : copy.enrollTitle}
+                      {isEnrollmentJoinRequest(req)
+                        ? copy.enrollTitle
+                        : req.teamLabel}
                     </p>
                     <p className="mt-1 text-xs text-dashboard-text-muted">
                       {copy.roleLabels[req.requestedRole]} ·{" "}

@@ -36,22 +36,37 @@ export class ReportDraftAccessPolicy {
   }
 
   /**
+   * - Coordinators may assign the writer using squad membership only (no report-draft read).
    * - Squad hunters may hand off the writer role to another hunter on the team.
    * - Without a report team, only the draft owner may be the writer (no reassignment).
-   * - Coordinators and super admins may assign the writer for any draft that has a squad,
-   *   targeting a hunter member only.
+   * - Super admins may assign the writer for squads (after draft read check).
    */
   async assertCanAssignHunterWriter(
     identity: Identity,
     draft: ReportDraftWire,
     newWriterId: string,
   ): Promise<void> {
+    if (identity.roleCode === AppRoleCode.COORDINATOR) {
+      const members = await this.squadMembersForDraft(draft);
+      if (members.length === 0) {
+        throw new ForbiddenException(
+          'A report team is required to assign the designated writer from this role',
+        );
+      }
+      const target = members.find(
+        (m) => m.userId === newWriterId && m.role === 'hunter',
+      );
+      if (!target) {
+        throw new ForbiddenException(
+          'The designated writer must be a hunter on this squad',
+        );
+      }
+      return;
+    }
+
     await this.assertCanReadDraft(identity, draft);
 
-    if (
-      identity.roleCode === AppRoleCode.COORDINATOR ||
-      identity.roleCode === AppRoleCode.SUPER_ADMIN
-    ) {
+    if (identity.roleCode === AppRoleCode.SUPER_ADMIN) {
       const members = await this.squadMembersForDraft(draft);
       if (members.length === 0) {
         throw new ForbiddenException(
@@ -143,11 +158,9 @@ export class ReportDraftAccessPolicy {
       return;
     }
     if (identity.roleCode === AppRoleCode.COORDINATOR) {
-      const team = await this.reportTeamRepository.findByReportDraftId(draft.id);
-      if (team !== null) {
-        return;
-      }
-      throw new ForbiddenException('Cannot access this report draft');
+      throw new ForbiddenException(
+        'Coordinators cannot access report draft content; manage teams via report-team coordination only',
+      );
     }
     if (identity.roleCode === AppRoleCode.HUNTER) {
       if (await this.hunterCanAccessDraft(identity.uid, draft)) {
