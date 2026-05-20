@@ -145,6 +145,7 @@ export class ReportDraftPrismaMapper {
     const draft: ReportDraftWire = {
       id: row.id,
       hunterId: row.hunterId,
+      hunterWriterId: row.hunterWriterId,
       version: row.version,
       aggregateStatus: AGGREGATE_STATUS_TO_WIRE[row.aggregateStatus],
       meta: emptyStepState(),
@@ -214,6 +215,7 @@ export class ReportDraftPrismaMapper {
   static draftHeaderFromWire(draft: ReportDraftWire): {
     id: string;
     hunterId: string;
+    hunterWriterId: string;
     version: number;
     aggregateStatus: ReportDraftAggregateStatus;
     superAdminRevisionRequestedAt: Date | null;
@@ -224,6 +226,7 @@ export class ReportDraftPrismaMapper {
     return {
       id: draft.id,
       hunterId: draft.hunterId,
+      hunterWriterId: draft.hunterWriterId,
       version: draft.version,
       aggregateStatus: AGGREGATE_STATUS_FROM_WIRE[draft.aggregateStatus],
       superAdminRevisionRequestedAt: draft.superAdminRevisionRequestedAt

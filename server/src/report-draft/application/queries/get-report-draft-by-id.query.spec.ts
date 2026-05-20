@@ -17,6 +17,7 @@ function minimalDraft(overrides?: Partial<ReportDraftWire>): ReportDraftWire {
   return {
     id: 'draft-1',
     hunterId: 'hunter-1',
+    hunterWriterId: 'hunter-1',
     version: 0,
     aggregateStatus: 'draft',
     meta: emptyStep,
@@ -36,10 +37,14 @@ function minimalDraft(overrides?: Partial<ReportDraftWire>): ReportDraftWire {
 describe('GetReportDraftByIdQuery', () => {
   const repository: jest.Mocked<IReportDraftRepository> = {
     save: jest.fn(),
+    updateHunterWriterId: jest.fn(),
     findById: jest.fn(),
     findByHunterId: jest.fn(),
+    findByHunterIdOrTeamMembership: jest.fn(),
     findAll: jest.fn(),
     findOrphanSummaries: jest.fn(),
+    findPublished: jest.fn(),
+    deleteById: jest.fn(),
   };
   const submissionRepository: jest.Mocked<ISubmissionRepository> = {
     save: jest.fn(),

@@ -1,5 +1,7 @@
+import { readFileSync } from 'fs';
 import { ReportDataInvalidError } from '../errors/pdf-application.errors';
 import { REPORT_DRAFT_STEP_STATE_KEYS } from '../../../report-draft/models/report-draft-api.types';
+import { resolveReportImageAssetPath } from '../../../report-draft/application/attachments/report-draft-image-storage';
 import type {
   FrozenReportDocumentReadModel,
   FrozenReportSectionReadModel,
@@ -146,6 +148,58 @@ function sectionBlocsFromPayload(
   );
 }
 
+function stepAttachments(
+  steps: Record<string, unknown>,
+  stepKey: string,
+): Array<Record<string, unknown>> {
+  const step = asRecord(steps[stepKey]);
+  const raw = step?.['attachments'];
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw.filter(
+    (item): item is Record<string, unknown> =>
+      typeof item === 'object' && item !== null && !Array.isArray(item),
+  );
+}
+
+function sectionBlocsWithImages(
+  blocs: Array<Record<string, unknown>>,
+  attachments: Array<Record<string, unknown>>,
+): Array<Record<string, unknown>> {
+  return blocs.map((bloc) => {
+    const attachmentId = String(bloc['attachmentId'] ?? '').trim();
+    if (!attachmentId) {
+      return bloc;
+    }
+    const attachment = attachments.find((a) => String(a['id'] ?? '') === attachmentId);
+    const image = attachment ? attachmentImageReadModel(attachment) : null;
+    return image ? { ...bloc, image } : bloc;
+  });
+}
+
+function attachmentImageReadModel(attachment: Record<string, unknown>) {
+  const mimeType = String(attachment['mimeType'] ?? '').trim();
+  if (!['image/png', 'image/jpeg', 'image/webp'].includes(mimeType)) {
+    return null;
+  }
+  const storageKey = String(attachment['storageKey'] ?? '').trim();
+  if (!storageKey) {
+    return null;
+  }
+
+  try {
+    const file = readFileSync(resolveReportImageAssetPath(storageKey));
+    return {
+      src: `data:${mimeType};base64,${file.toString('base64')}`,
+      filename: String(attachment['filename'] ?? 'report-image'),
+      mimeType,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function isCvssOnlyPayload(payload: Record<string, unknown>): boolean {
   const keys = Object.keys(payload).filter(
     (k) => payload[k] !== undefined && payload[k] !== null && String(payload[k]).trim() !== '',
@@ -180,7 +234,7 @@ function buildPdfSections(
     out.push({
       key,
       title: labels[titleKey] ?? key,
-      sectionBlocs: blocs,
+      sectionBlocs: sectionBlocsWithImages(blocs, stepAttachments(steps, key)),
     });
   }
   return out;

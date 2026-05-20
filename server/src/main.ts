@@ -37,7 +37,10 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('ejs');
 
-  app.use('/template-assets', express.static(join(process.cwd(), 'templates')));
+  app.use(
+    '/template-assets/report-final/styles',
+    express.static(join(process.cwd(), 'templates', 'report-final', 'styles')),
+  );
 
   app.setGlobalPrefix(variables.globalPrefix);
 

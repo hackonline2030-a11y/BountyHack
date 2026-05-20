@@ -55,7 +55,9 @@ export class ReportDraftDevController {
     if (!hunterId?.trim()) {
       return [];
     }
-    return this.reportDraftRepository.findByHunterId(hunterId.trim());
+    return this.reportDraftRepository.findByHunterIdOrTeamMembership(
+      hunterId.trim(),
+    );
   }
 
   @Get('draft/:draftId')

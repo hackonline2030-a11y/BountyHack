@@ -20,6 +20,7 @@ import { PrismaReviewerCommentRepository } from './adapters/postgre-prisma/prism
 import { PrismaGlobalSubmissionRepository } from './adapters/postgre-prisma/prisma-global-submission.repository';
 import { PrismaGlobalReviewerCommentRepository } from './adapters/postgre-prisma/prisma-global-reviewer-comment.repository';
 import { CreateGlobalSubmissionCommand } from './application/commands/create-global-submission.command';
+import { SetHunterWriterCommand } from './application/commands/set-hunter-writer.command';
 import { ApproveGlobalSubmissionCommand } from './application/commands/approve-global-submission.command';
 import { RequestGlobalSubmissionChangesCommand } from './application/commands/request-global-submission-changes.command';
 import { ListGlobalSubmissionsQuery } from './application/queries/list-global-submissions.query';
@@ -40,6 +41,7 @@ import { SaveReviewerCommentsCommand } from './application/commands/save-reviewe
 import { ListReviewerCommentsQuery } from './application/queries/list-reviewer-comments.query';
 import { ListReviewerCommentsForStepQuery } from './application/queries/list-reviewer-comments-for-step.query';
 import { ReportDraftAccessPolicy } from './application/report-draft-access.policy';
+import { ReportDraftImageAssetService } from './application/attachments/report-draft-image-asset.service';
 
 @Module({
   imports: [AuthModule, ReportTeamModule],
@@ -98,6 +100,15 @@ import { ReportDraftAccessPolicy } from './application/report-draft-access.polic
         access: ReportDraftAccessPolicy,
       ) => new SaveReportDraftCommand(repository, access),
     },
+    {
+      provide: SetHunterWriterCommand,
+      inject: [I_REPORT_DRAFT_REPOSITORY, ReportDraftAccessPolicy],
+      useFactory: (
+        repository: PrismaReportDraftRepository,
+        access: ReportDraftAccessPolicy,
+      ) => new SetHunterWriterCommand(repository, access),
+    },
+    ReportDraftImageAssetService,
     {
       provide: GetReportDraftByIdQuery,
       inject: [I_REPORT_DRAFT_REPOSITORY, ReportDraftAccessPolicy],

@@ -33,6 +33,7 @@ export class PrismaReportDraftRepository implements IReportDraftRepository {
         create: header,
         update: {
           hunterId: header.hunterId,
+          hunterWriterId: header.hunterWriterId,
           version: header.version,
           aggregateStatus: header.aggregateStatus,
           updatedAt: header.updatedAt,
@@ -78,6 +79,13 @@ export class PrismaReportDraftRepository implements IReportDraftRepository {
     });
   }
 
+  async updateHunterWriterId(draftId: string, hunterWriterId: string): Promise<void> {
+    await this.prisma.reportDraft.update({
+      where: { id: draftId },
+      data: { hunterWriterId },
+    });
+  }
+
   async findById(id: string): Promise<ReportDraftWire | null> {
     const row = await this.prisma.reportDraft.findUnique({
       where: { id },
@@ -97,6 +105,33 @@ export class PrismaReportDraftRepository implements IReportDraftRepository {
   async findByHunterId(hunterId: string): Promise<ReportDraftWire[]> {
     const rows = await this.prisma.reportDraft.findMany({
       where: { hunterId },
+      include: {
+        steps: {
+          include: STEP_INCLUDE,
+        },
+        reportTeam: { include: TEAM_INCLUDE },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+    return rows.map((row) =>
+      ReportDraftPrismaMapper.toDomain(row as ReportDraftWithSteps),
+    );
+  }
+
+  async findByHunterIdOrTeamMembership(
+    userId: string,
+  ): Promise<ReportDraftWire[]> {
+    const rows = await this.prisma.reportDraft.findMany({
+      where: {
+        OR: [
+          { hunterId: userId },
+          {
+            reportTeam: {
+              members: { some: { userId } },
+            },
+          },
+        ],
+      },
       include: {
         steps: {
           include: STEP_INCLUDE,

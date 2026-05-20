@@ -6,8 +6,11 @@ function buildPrismaRow(overrides?: Partial<ReportDraftWithSteps>): ReportDraftW
   const base: ReportDraftWithSteps = {
     id: 'draft-1',
     hunterId: 'hunter-1',
+    hunterWriterId: 'hunter-1',
     version: 2,
     aggregateStatus: ReportDraftAggregateStatus.UNDER_REVIEW,
+    superAdminRevisionRequestedAt: null,
+    superAdminGlobalRevisionCount: 0,
     createdAt: new Date('2026-05-15T10:00:00.000Z'),
     updatedAt: new Date('2026-05-15T11:00:00.000Z'),
     steps: [
@@ -44,6 +47,7 @@ function buildWireDraft(overrides?: Partial<ReportDraftWire>): ReportDraftWire {
   const base: ReportDraftWire = {
     id: 'draft-1',
     hunterId: 'hunter-1',
+    hunterWriterId: 'hunter-1',
     version: 2,
     aggregateStatus: 'under-review',
     meta: {
@@ -82,6 +86,7 @@ describe('ReportDraftPrismaMapper', () => {
 
     expect(domain.id).toBe('draft-1');
     expect(domain.hunterId).toBe('hunter-1');
+    expect(domain.hunterWriterId).toBe('hunter-1');
     expect(domain.version).toBe(2);
     expect(domain.aggregateStatus).toBe('under-review');
     expect(domain.meta.payload).toEqual({ reportTitle: 'SQLi' });

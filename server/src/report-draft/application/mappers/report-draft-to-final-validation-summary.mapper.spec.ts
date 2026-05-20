@@ -12,6 +12,7 @@ function minimalDraft(overrides?: Partial<ReportDraftWire>): ReportDraftWire {
   return {
     id: 'draft-1',
     hunterId: 'hunter-1',
+    hunterWriterId: 'hunter-1',
     version: 3,
     aggregateStatus: 'ready-to-program',
     meta: {
