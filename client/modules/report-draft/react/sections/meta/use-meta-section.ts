@@ -20,6 +20,7 @@ import {
   isSuperAdminGlobalRevisionMode,
 } from "@modules/report-draft/core/model/super-admin-final-validation";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
+import { useReportDraftStepSave } from "@modules/report-draft/react/hooks/use-report-draft-step-save";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 import { useReportDraftSession } from "@modules/report-draft/react/context/report-draft-session.context";
 
@@ -91,12 +92,26 @@ export const useMetaSection = () => {
   const transitionErr =
     transition.status === "error" ? transition.message : null;
 
+  const { saveDraft, persistThen, hasUnsavedChanges } = useReportDraftStepSave({
+    draftId: currentDraftId,
+    step: META_STEP,
+    localPayload: draft,
+    persistedPayload: persistedMeta,
+    canSave: editable,
+  });
+
   const onNext = useCallback(() => {
-    if (!canNavigateNext) return;
-    dispatch(
-      reportDraftSlice.actions.setStep(ReportDraftDomainModel.ReportDraftStep.DESCRIPTION),
-    );
-  }, [dispatch, canNavigateNext]);
+    void persistThen(() => {
+      if (!canNavigateNext) return;
+      dispatch(
+        reportDraftSlice.actions.setStep(ReportDraftDomainModel.ReportDraftStep.DESCRIPTION),
+      );
+    });
+  }, [dispatch, canNavigateNext, persistThen]);
+
+  const onSaveDraft = useCallback(async () => {
+    await saveDraft();
+  }, [saveDraft]);
 
   const onSubmitForReview = useCallback(async () => {
     if (!currentDraftId || !submittedBy) return;
@@ -136,6 +151,8 @@ export const useMetaSection = () => {
     reviewerRole,
     setReviewerRole,
     onNext,
+    onSaveDraft,
+    hasUnsavedChanges,
     onSubmitForReview,
     transitionBusy,
     transitionErr,

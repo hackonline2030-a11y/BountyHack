@@ -31,6 +31,7 @@ import {
   isSuperAdminGlobalRevisionMode,
 } from "@modules/report-draft/core/model/super-admin-final-validation";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
+import { useReportDraftStepSave } from "@modules/report-draft/react/hooks/use-report-draft-step-save";
 import { useDependencies } from "@modules/app/nextjs/DependencyProvider";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 import { useReportDraftSession } from "@modules/report-draft/react/context/report-draft-session.context";
@@ -108,16 +109,26 @@ export const useDescriptionSection = () => {
   const transitionErr =
     transition.status === "error" ? transition.message : null;
 
+  const { saveDraft, persistThen, hasUnsavedChanges } = useReportDraftStepSave({
+    draftId: currentDraftId,
+    step: DESCRIPTION_STEP,
+    localPayload: draft,
+    persistedPayload: persistedDescription,
+    canSave: editable,
+  });
+
   const derivedVector = useMemo(() => cvssVector(draft), [draft]);
   const derivedScore = useMemo(() => cvssBaseScore(draft), [draft]);
   const derivedSeverity = useMemo(() => cvssSeverity(derivedScore), [derivedScore]);
 
   const onNext = useCallback(() => {
-    if (!canNavigateNext) return;
-    dispatch(
-      reportDraftSlice.actions.setStep(ReportDraftDomainModel.ReportDraftStep.COLLECTION),
-    );
-  }, [dispatch, canNavigateNext]);
+    void persistThen(() => {
+      if (!canNavigateNext) return;
+      dispatch(
+        reportDraftSlice.actions.setStep(ReportDraftDomainModel.ReportDraftStep.COLLECTION),
+      );
+    });
+  }, [dispatch, canNavigateNext, persistThen]);
 
   const onSubmitForReview = useCallback(async () => {
     if (!currentDraftId || !submittedBy) return;
@@ -204,10 +215,16 @@ export const useDescriptionSection = () => {
   );
 
   const onBack = useCallback(() => {
-    dispatch(
-      reportDraftSlice.actions.setStep(ReportDraftDomainModel.ReportDraftStep.META),
-    );
-  }, [dispatch]);
+    void persistThen(() => {
+      dispatch(
+        reportDraftSlice.actions.setStep(ReportDraftDomainModel.ReportDraftStep.META),
+      );
+    });
+  }, [dispatch, persistThen]);
+
+  const onSaveDraft = useCallback(async () => {
+    await saveDraft();
+  }, [saveDraft]);
 
   return {
     draft,
@@ -222,6 +239,8 @@ export const useDescriptionSection = () => {
     reviewerRole,
     setReviewerRole,
     onNext,
+    onSaveDraft,
+    hasUnsavedChanges,
     onSubmitForReview,
     onUploadSectionImage,
     onBack,

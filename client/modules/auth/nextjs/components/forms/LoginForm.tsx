@@ -1,8 +1,5 @@
 "use client";
 
-import { ActionButton } from "@modules/app/nextjs/components/buttons/ActionButton";
-import { PrimaryButton } from "@modules/app/nextjs/components/buttons/PrimaryButton";
-
 import React, { startTransition, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -17,6 +14,13 @@ import {
 
 const inputBase =
   "w-full bg-white placeholder:text-gray-500 text-gray-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow";
+
+/**
+ * Login-only submit — native `<button>`, black pill, centered.
+ * Intentionally not using PrimaryButton / ActionButton so refactors elsewhere cannot break login.
+ */
+const loginSubmitClass =
+  "btn-common-styles btn-primary-dark self-center w-fit min-w-[10rem] disabled:opacity-50";
 
 type PostLoginTarget =
   | "welcome-admin"
@@ -249,19 +253,17 @@ export function LoginForm() {
 
       {step === "totp" ? (
         <>
-          <ActionButton
+          <button
             type="submit"
-            variant="primary"
+            className={loginSubmitClass}
             disabled={status === "loading" || code.trim().length < 6}
-            className="self-center w-fit"
           >
             {status === "loading" ? t("loginForm.submitting") : t("loginForm.submitTotp")}
-          </ActionButton>
-          <ActionButton
+          </button>
+          <button
             type="button"
-            variant="secondary"
+            className="btn-common-styles self-center w-fit rounded-full border border-white/30 bg-white/10 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={status === "loading"}
-            className="self-center w-fit"
             onClick={() => {
               setStep("credentials");
               setCode("");
@@ -270,17 +272,16 @@ export function LoginForm() {
             }}
           >
             {t("loginForm.backToPassword")}
-          </ActionButton>
+          </button>
         </>
       ) : (
-        <PrimaryButton
-          variant="dark"
+        <button
           type="submit"
+          className={loginSubmitClass}
           disabled={status === "loading"}
-          className="self-center disabled:opacity-50"
         >
           {status === "loading" ? t("loginForm.submitting") : t("loginForm.submit")}
-        </PrimaryButton>
+        </button>
       )}
 
       <p className="text-sm text-white/80">

@@ -22,6 +22,8 @@ export const MetaSection: FC = () => {
     reviewerRole,
     setReviewerRole,
     onNext,
+    onSaveDraft,
+    hasUnsavedChanges,
     onSubmitForReview,
     transitionBusy,
     transitionErr,
@@ -303,6 +305,14 @@ export const MetaSection: FC = () => {
 
       <ReportDraftStepNav
         transitionBusy={transitionBusy}
+        showSaveDraft={editable}
+        onSaveDraft={onSaveDraft}
+        saveDraftLabel={
+          hasUnsavedChanges
+            ? t("myReports.wizard.saveDraft.button")
+            : t("myReports.wizard.saveDraft.saved")
+        }
+        saveDraftTitle={t("myReports.wizard.saveDraft.hint")}
         onNext={onNext}
         canNavigateNext={canNavigateNext}
         nextTitle={

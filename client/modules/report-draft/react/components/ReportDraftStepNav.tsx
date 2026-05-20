@@ -6,6 +6,7 @@ import type { ReportDraftDomainModel } from "@modules/report-draft/core/model/re
 import {
   wizardBackClass,
   wizardNextClass,
+  wizardSaveDraftClass,
   wizardSubmitClass,
 } from "@modules/app/nextjs/components/buttons/button-styles";
 
@@ -13,6 +14,10 @@ type Props = {
   transitionBusy: boolean;
   /** When set, back is clickable; when omitted, back stays disabled (first step). */
   onBack?: () => void;
+  onSaveDraft?: () => void | Promise<void>;
+  showSaveDraft?: boolean;
+  saveDraftLabel?: ReactNode;
+  saveDraftTitle?: string;
   showNext?: boolean;
   onNext?: () => void;
   canNavigateNext?: boolean;
@@ -29,6 +34,10 @@ type Props = {
 export const ReportDraftStepNav: FC<Props> = ({
   transitionBusy,
   onBack,
+  onSaveDraft,
+  showSaveDraft = false,
+  saveDraftLabel = "Enregistrer le brouillon",
+  saveDraftTitle,
   showNext = true,
   onNext,
   canNavigateNext = true,
@@ -45,17 +54,28 @@ export const ReportDraftStepNav: FC<Props> = ({
     <button
       type="button"
       className={wizardBackClass}
-      onClick={onBack}
+      onClick={() => void onBack?.()}
       disabled={transitionBusy || !onBack}
       aria-label={onBack ? undefined : "Retour (indisponible — première étape)"}
     >
       Retour
     </button>
+    {showSaveDraft && onSaveDraft ? (
+      <button
+        type="button"
+        className={wizardSaveDraftClass}
+        onClick={() => void onSaveDraft()}
+        disabled={transitionBusy}
+        title={saveDraftTitle}
+      >
+        {saveDraftLabel}
+      </button>
+    ) : null}
     {showNext && onNext ? (
       <button
         type="button"
         className={wizardNextClass}
-        onClick={onNext}
+        onClick={() => void onNext()}
         disabled={transitionBusy || !canNavigateNext}
         title={nextTitle}
       >

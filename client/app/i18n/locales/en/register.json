@@ -6,13 +6,12 @@
   "registerForm": {
     "roleLabel": "Assigned role",
     "roles": {
-      "USER": "User (default)",
-      "SUPER_ADMIN": "Super admin",
-      "HUNTER": "Hunter (junior researcher)",
+      "SUPER_ADMIN": "Lead (super admin)",
+      "HUNTER": "Junior researcher",
       "MENTOR": "Mentor",
-      "QUALITY_CHECKER": "Quality checker (reports & vuln process)",
+      "QUALITY_CHECKER": "Reports quality manager",
       "COORDINATOR": "Coordinator",
-      "QUALITY_CONTENT": "Learning tools & content lead"
+      "QUALITY_CONTENT": "Educational content manager"
     },
     "usernameLabel": "Username",
     "emailLabel": "Email",
