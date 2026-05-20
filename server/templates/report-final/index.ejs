@@ -64,6 +64,14 @@
           const tag = list && list.ordered ? 'ol' : 'ul';
           html += `<${tag}>${items.map((it) => `<li>${escapeHtml(it)}</li>`).join('')}</${tag}>`;
         });
+        const image = bloc && typeof bloc.image === 'object' ? bloc.image : null;
+        const imageSrc = image && /^data:image\/(png|jpeg|webp);base64,/.test(String(image.src || ''))
+          ? String(image.src)
+          : '';
+        if (imageSrc) {
+          const filename = escapeHtml(image.filename || 'Illustration');
+          html += `<figure class="section-image"><img src="${escapeHtml(imageSrc)}" alt="${filename}" /><figcaption>${filename}</figcaption></figure>`;
+        }
         return html;
       };
     %>

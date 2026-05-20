@@ -11,6 +11,6 @@ export class ListReportDraftsByHunterQuery {
     if (hunterId !== identity.uid) {
       throw new ForbiddenException('Cannot list drafts for another hunter');
     }
-    return this.repository.findByHunterId(hunterId);
+    return this.repository.findByHunterIdOrTeamMembership(hunterId);
   }
 }

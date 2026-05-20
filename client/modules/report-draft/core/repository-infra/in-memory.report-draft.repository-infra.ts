@@ -22,7 +22,11 @@ export class InMemoryReportDraftRepository implements IReportDraftRepository {
     hunterId: string,
   ): Promise<ReportDraftDomainModel.ReportDraft[]> {
     return Array.from(this.store.values())
-      .filter((d) => d.hunterId === hunterId)
+      .filter(
+        (d) =>
+          d.hunterId === hunterId ||
+          d.reportTeam?.members?.some((m) => m.userId === hunterId) === true,
+      )
       .sort((a, b) => {
         if (a.updatedAt !== b.updatedAt) {
           return a.updatedAt < b.updatedAt ? 1 : -1;
@@ -32,10 +36,40 @@ export class InMemoryReportDraftRepository implements IReportDraftRepository {
       .map(clone);
   }
 
+  async uploadDescriptionSectionImage(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    file: File;
+  }): Promise<ReportDraftDomainModel.Attachment> {
+    return {
+      id:
+        typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+          ? crypto.randomUUID()
+          : `attachment-${Date.now()}`,
+      filename: input.file.name,
+      mimeType: input.file.type,
+      sizeBytes: input.file.size,
+      storageKey: `in-memory/${input.draftId}/${input.file.name}`,
+      uploadedAt: new Date().toISOString(),
+      uploadedBy: "in-memory",
+    };
+  }
+
   async deletePermanently(
     id: ReportDraftDomainModel.ReportDraftId,
   ): Promise<void> {
     this.store.delete(id);
+  }
+
+  async setHunterWriter(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    hunterWriterId: string;
+  }): Promise<void> {
+    const existing = this.store.get(input.draftId);
+    if (!existing) throw new Error("Draft not found");
+    this.store.set(input.draftId, {
+      ...clone(existing),
+      hunterWriterId: input.hunterWriterId,
+    });
   }
 }
 

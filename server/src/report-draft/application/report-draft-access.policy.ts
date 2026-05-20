@@ -3,6 +3,7 @@ import { AppRoleCode } from '../../shared/rbac/app-role.code';
 import type { Identity } from '../../auth/domain/models/identity';
 import type { GlobalSubmissionWire } from '../models/global-submission-api.types';
 import type {
+  ReportDraftWire,
   ReviewerRoleWire,
   SubmissionWire,
 } from '../models/report-draft-api.types';
@@ -18,14 +19,108 @@ export class ReportDraftAccessPolicy {
     private readonly reportTeamRepository: IReportTeamRepository,
   ) {}
 
-  async assertDraftOwnedByHunter(
+  /**
+   * Only the user designated as `hunter_writer_id` may perform hunter-side
+   * submissions (step submit, global batch, etc.) when acting as a hunter.
+   */
+  async assertActingHunterWriter(
     identity: Identity,
     draftId: string,
   ): Promise<void> {
     const draft = await this.reportDraftRepository.findById(draftId);
-    if (draft === null || draft.hunterId !== identity.uid) {
-      throw new ForbiddenException('Cannot access this report draft');
+    if (draft === null || draft.hunterWriterId !== identity.uid) {
+      throw new ForbiddenException(
+        'Only the designated hunter writer can perform this action',
+      );
     }
+  }
+
+  /**
+   * - Coordinators may assign the writer using squad membership only (no report-draft read).
+   * - Squad hunters may hand off the writer role to another hunter on the team.
+   * - Without a report team, only the draft owner may be the writer (no reassignment).
+   * - Super admins may assign the writer for squads (after draft read check).
+   */
+  async assertCanAssignHunterWriter(
+    identity: Identity,
+    draft: ReportDraftWire,
+    newWriterId: string,
+  ): Promise<void> {
+    if (identity.roleCode === AppRoleCode.COORDINATOR) {
+      const members = await this.squadMembersForDraft(draft);
+      if (members.length === 0) {
+        throw new ForbiddenException(
+          'A report team is required to assign the designated writer from this role',
+        );
+      }
+      const target = members.find(
+        (m) => m.userId === newWriterId && m.role === 'hunter',
+      );
+      if (!target) {
+        throw new ForbiddenException(
+          'The designated writer must be a hunter on this squad',
+        );
+      }
+      return;
+    }
+
+    await this.assertCanReadDraft(identity, draft);
+
+    if (identity.roleCode === AppRoleCode.SUPER_ADMIN) {
+      const members = await this.squadMembersForDraft(draft);
+      if (members.length === 0) {
+        throw new ForbiddenException(
+          'A report team is required to assign the designated writer from this role',
+        );
+      }
+      const target = members.find(
+        (m) => m.userId === newWriterId && m.role === 'hunter',
+      );
+      if (!target) {
+        throw new ForbiddenException(
+          'The designated writer must be a hunter on this squad',
+        );
+      }
+      return;
+    }
+
+    if (identity.roleCode !== AppRoleCode.HUNTER) {
+      throw new ForbiddenException('Only hunters can change the designated writer');
+    }
+    if (!draft.reportTeam) {
+      if (newWriterId !== draft.hunterId) {
+        throw new ForbiddenException(
+          'Without a squad, the draft owner must remain the writer',
+        );
+      }
+      if (identity.uid !== draft.hunterId) {
+        throw new ForbiddenException('Cannot reassign writer on this draft');
+      }
+      return;
+    }
+    const members = draft.reportTeam.members;
+    const caller = members.find((m) => m.userId === identity.uid);
+    if (!caller || caller.role !== 'hunter') {
+      throw new ForbiddenException(
+        'Only squad hunters can change the designated writer',
+      );
+    }
+    const target = members.find((m) => m.userId === newWriterId);
+    if (!target || target.role !== 'hunter') {
+      throw new ForbiddenException(
+        'The designated writer must be a hunter on this squad',
+      );
+    }
+  }
+
+  private async squadMembersForDraft(
+    draft: ReportDraftWire,
+  ): Promise<ReadonlyArray<{ userId: string; role: string }>> {
+    if (draft.reportTeam?.members?.length) {
+      return draft.reportTeam.members;
+    }
+    const team = await this.reportTeamRepository.findByReportDraftId(draft.id);
+    return team?.members ?? [];
   }
 
   /**
@@ -36,9 +131,23 @@ export class ReportDraftAccessPolicy {
    */
   async assertCanSaveDraft(
     identity: Identity,
-    draft: { id: string; hunterId: string },
+    draft: { id: string; hunterId: string; hunterWriterId: string },
   ): Promise<void> {
     await this.assertCanReadDraft(identity, draft);
+    if (this.isSuperAdmin(identity)) {
+      return;
+    }
+    if (identity.roleCode === AppRoleCode.HUNTER) {
+      if (identity.uid !== draft.hunterWriterId) {
+        throw new ForbiddenException(
+          'Only the designated hunter writer can save this draft',
+        );
+      }
+      return;
+    }
+    throw new ForbiddenException(
+      'Only the designated hunter writer or a super admin can save this draft',
+    );
   }
 
   async assertCanReadDraft(
@@ -47,6 +156,11 @@ export class ReportDraftAccessPolicy {
   ): Promise<void> {
     if (this.isSuperAdmin(identity)) {
       return;
+    }
+    if (identity.roleCode === AppRoleCode.COORDINATOR) {
+      throw new ForbiddenException(
+        'Coordinators cannot access report draft content; manage teams via report-team coordination only',
+      );
     }
     if (identity.roleCode === AppRoleCode.HUNTER) {
       if (await this.hunterCanAccessDraft(identity.uid, draft)) {
@@ -140,7 +254,7 @@ export class ReportDraftAccessPolicy {
     const isHunterSubmit =
       submission.decision === 'pending' &&
       submission.submittedBy === identity.uid &&
-      draft.hunterId === identity.uid;
+      draft.hunterWriterId === identity.uid;
 
     if (isHunterSubmit) {
       return;

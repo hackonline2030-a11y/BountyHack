@@ -1943,6 +1943,7 @@ export type TwoFactorTotpScalarFieldEnum = (typeof TwoFactorTotpScalarFieldEnum)
 export const ReportDraftScalarFieldEnum = {
   id: 'id',
   hunterId: 'hunterId',
+  hunterWriterId: 'hunterWriterId',
   version: 'version',
   aggregateStatus: 'aggregateStatus',
   superAdminRevisionRequestedAt: 'superAdminRevisionRequestedAt',
@@ -2208,7 +2209,8 @@ export type TwoFactorTotpOrderByRelevanceFieldEnum = (typeof TwoFactorTotpOrderB
 
 export const ReportDraftOrderByRelevanceFieldEnum = {
   id: 'id',
-  hunterId: 'hunterId'
+  hunterId: 'hunterId',
+  hunterWriterId: 'hunterWriterId'
 } as const
 
 export type ReportDraftOrderByRelevanceFieldEnum = (typeof ReportDraftOrderByRelevanceFieldEnum)[keyof typeof ReportDraftOrderByRelevanceFieldEnum]

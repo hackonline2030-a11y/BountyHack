@@ -2,6 +2,7 @@
 
 import { type FC } from "react";
 import type { SectionBloc } from "@modules/report-draft/core/model/section-bloc";
+import type { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import {
   sectionHeadingFormatClassName,
   sectionHeadingFormatStyle,
@@ -12,13 +13,22 @@ type Props = {
   index: number;
   /** Aperçu rapport PDF : pas de libellé « Section N » si le titre est vide. */
   documentMode?: boolean;
+  draftId?: string;
+  attachments?: ReadonlyArray<ReportDraftDomainModel.Attachment>;
 };
 
-export const SectionBlocDisplay: FC<Props> = ({ bloc, index, documentMode = false }) => {
+export const SectionBlocDisplay: FC<Props> = ({
+  bloc,
+  index,
+  documentMode = false,
+  draftId,
+  attachments = [],
+}) => {
   const hasBody = bloc.body.trim().length > 0;
   const hasLists = bloc.lists.some(
     (l) => l.title.trim() || l.items.some((i) => i.trim().length > 0),
   );
+  const attachment = attachments.find((a) => a.id === bloc.attachmentId);
 
   const sectionClass = documentMode
     ? "mb-4 last:mb-0"
@@ -78,6 +88,20 @@ export const SectionBlocDisplay: FC<Props> = ({ bloc, index, documentMode = fals
           </div>
         );
       })}
+      {draftId && attachment ? (
+        <figure className="mt-4">
+          {/* Authenticated report images are served by the BFF, not Next's public image pipeline. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`/api/report-draft/drafts/${encodeURIComponent(draftId)}/attachments/${encodeURIComponent(
+              attachment.id,
+            )}/image`}
+            alt={attachment.filename}
+            className="block max-h-[520px] w-full rounded border border-slate-200 object-contain"
+          />
+          <figcaption className={`mt-1 text-xs ${mutedClass}`}>{attachment.filename}</figcaption>
+        </figure>
+      ) : null}
     </section>
   );
 };

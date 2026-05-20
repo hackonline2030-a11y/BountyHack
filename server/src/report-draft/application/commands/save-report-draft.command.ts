@@ -12,19 +12,25 @@ export class SaveReportDraftCommand {
   ) {}
 
   async execute(identity: Identity, draft: ReportDraftWire): Promise<void> {
-    await this.access.assertCanSaveDraft(identity, draft);
-
     const existing = await this.repository.findById(draft.id);
     if (!existing) {
       throw new NotFoundException('Report draft not found');
     }
 
+    // Authorize against persisted metadata — never trust hunter_id / hunter_writer_id from the body.
+    await this.access.assertCanSaveDraft(identity, existing);
+
     const {
       reportTeam: _readOnlyTeam,
       superAdminRevisionRequestedAt: _revisionMarker,
       superAdminGlobalRevisionCount: _revisionCount,
-      ...toPersist
+      ...rest
     } = draft;
+    const toPersist: ReportDraftWire = {
+      ...rest,
+      hunterId: existing.hunterId,
+      hunterWriterId: existing.hunterWriterId,
+    };
     await this.repository.save(toPersist);
   }
 }

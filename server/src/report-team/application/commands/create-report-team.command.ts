@@ -52,10 +52,23 @@ export class CreateReportTeamCommand {
     );
 
     const hunters = members.filter((m) => m.role === 'hunter');
-    if (hunters.length !== 1) {
-      throw new BadRequestException(
-        'Exactly one hunter must be assigned to the team',
-      );
+    if (hunters.length < 1) {
+      throw new BadRequestException('At least one hunter must be assigned to the team');
+    }
+
+    const hunterUserIds = new Set(hunters.map((h) => h.userId));
+    const rawWriter = input.hunterWriterUserId?.trim();
+    let hunterWriterUserId: string;
+    if (hunters.length > 1) {
+      if (!rawWriter || !hunterUserIds.has(rawWriter)) {
+        throw new BadRequestException(
+          'hunterWriterUserId must be set to one of the selected hunters when multiple hunters are on the team',
+        );
+      }
+      hunterWriterUserId = rawWriter;
+    } else {
+      hunterWriterUserId =
+        rawWriter && hunterUserIds.has(rawWriter) ? rawWriter : hunters[0]!.userId;
     }
 
     const validity = computeTeamValidity(members.map((m) => m.role));
@@ -65,7 +78,11 @@ export class CreateReportTeamCommand {
       );
     }
 
-    return this.repository.create({ label, members });
+    return this.repository.create({
+      label,
+      members,
+      hunterWriterUserId,
+    });
   }
 
   private async createForOrphanDraft(

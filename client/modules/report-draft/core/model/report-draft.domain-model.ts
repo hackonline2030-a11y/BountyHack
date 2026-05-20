@@ -192,6 +192,8 @@ export namespace ReportDraftDomainModel {
   export interface ReportDraft {
     id: ReportDraftId;
     hunterId: string;                  // user uid du propriétaire (JWT sub)
+    /** Who may edit the draft and submit steps (defaults to owner at creation). */
+    hunterWriterId: string;
     version: number;                   // optimistic-lock
     aggregateStatus: AggregateStatus;
     meta: StepState<MetaFields>;

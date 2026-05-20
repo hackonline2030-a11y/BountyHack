@@ -5,6 +5,7 @@ import {
   coordinatorPendingRequestsFixture,
   reportTeamsFixture,
 } from "@modules/report-team/fixtures/report-team.fixtures";
+import { isEnrollmentJoinRequest } from "@modules/report-team/model/report-team-join-request.utils";
 
 export type PendingRequestPreviewFixture = {
   id: string;
@@ -26,7 +27,7 @@ export const pendingRequestsPreviewFixture: ReadonlyArray<PendingRequestPreviewF
     requesterDisplayName: PENDING_REQUESTER_NAMES[req.id] ?? "Participant",
     requestedRole: req.requestedRole,
     teamLabel: req.teamLabel,
-    kind: req.teamId ? "join" : "enrollment",
+    kind: isEnrollmentJoinRequest(req) ? "enrollment" : "join",
     requestedAgoMinutes:
       req.id === "req-001" ? 45 : req.id === "req-002" ? 120 : 60,
   }));

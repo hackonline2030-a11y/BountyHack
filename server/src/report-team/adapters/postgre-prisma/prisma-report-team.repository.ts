@@ -24,7 +24,7 @@ import { ReportTeamPrismaMapper } from './report-team-prisma.mapper';
 
 const teamInclude = {
   members: { include: { user: true } },
-  reportDraft: { select: { aggregateStatus: true } },
+  reportDraft: { select: { aggregateStatus: true, hunterWriterId: true } },
 } as const;
 
 @Injectable()
@@ -120,7 +120,12 @@ export class PrismaReportTeamRepository implements IReportTeamRepository {
     }
 
     const hunters = input.members.filter((m) => m.role === 'hunter');
-    const hunterId = hunters[0]!.userId;
+    const primaryHunterId = hunters[0]!.userId;
+    const writerId =
+      input.hunterWriterUserId?.trim() &&
+      hunters.some((h) => h.userId === input.hunterWriterUserId.trim())
+        ? input.hunterWriterUserId.trim()
+        : primaryHunterId;
     const reportDraftId = randomUUID();
     const teamId = randomUUID();
     const now = new Date();
@@ -130,7 +135,8 @@ export class PrismaReportTeamRepository implements IReportTeamRepository {
       await tx.reportDraft.create({
         data: {
           id: reportDraftId,
-          hunterId,
+          hunterId: primaryHunterId,
+          hunterWriterId: writerId,
           version: 0,
           aggregateStatus: ReportDraftAggregateStatus.DRAFT,
           createdAt: now,

@@ -15,6 +15,19 @@ export interface IReportDraftRepository {
     hunterId: string,
   ): Promise<ReportDraftDomainModel.ReportDraft[]>;
 
+  uploadDescriptionSectionImage(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    file: File;
+  }): Promise<ReportDraftDomainModel.Attachment>;
+
   /** Super-admin hard delete (steps, submissions, team, legacy reports). */
   deletePermanently(draftId: ReportDraftDomainModel.ReportDraftId): Promise<void>;
+
+  /**
+   * Squad hunters may hand off who edits the draft (PATCH Nest). Refetches draft after success.
+   */
+  setHunterWriter(input: {
+    draftId: ReportDraftDomainModel.ReportDraftId;
+    hunterWriterId: string;
+  }): Promise<void>;
 }

@@ -21,6 +21,7 @@ export interface CreateReportDraftDeps {
     version?: number;
     aggregateStatus?: ReportDraftDomainModel.AggregateStatus;
     hunterId?: string;
+    hunterWriterId?: string;
     createdAt?: string;
     updatedAt?: string;
     meta?: ReportDraftDomainModel.MetaFields;
@@ -41,6 +42,7 @@ export class ReportDraftFactory {
     return {
       id: overrides?.id ?? idProvider.next(),
       hunterId: overrides?.hunterId ?? hunterId,
+      hunterWriterId: overrides?.hunterWriterId ?? overrides?.hunterId ?? hunterId,
       version: overrides?.version ?? 0,
       aggregateStatus: overrides?.aggregateStatus ?? "draft",
       meta: StepStateFactory.createInProgress(overrides?.meta ?? MetaFactory.create()),
