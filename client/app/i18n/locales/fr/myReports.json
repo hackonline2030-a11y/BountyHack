@@ -101,6 +101,11 @@
       "openSubmissions": "Voir les soumissions de ce rapport"
     },
     "wizard": {
+      "saveDraft": {
+        "button": "Enregistrer le brouillon",
+        "saved": "Brouillon enregistré",
+        "hint": "Sauvegarde cette étape sans la soumettre pour revue. Vous pourrez reprendre plus tard, même si « Suivant » est indisponible."
+      },
       "finalStep": {
         "awaitingLeadValidation": "Dernière étape validée : en attente de validation finale.",
         "leadValidated": "Rapport validé par le Lead.",

@@ -40,6 +40,9 @@ export const wizardBackClass =
 export const wizardNextClass =
   "cursor-pointer rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50";
 
+export const wizardSaveDraftClass =
+  "cursor-pointer rounded-md border border-violet-300 bg-violet-50 px-4 py-2 font-medium text-violet-900 hover:bg-violet-100 disabled:cursor-not-allowed disabled:opacity-50";
+
 export const wizardSubmitClass =
   "cursor-pointer rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled";
 

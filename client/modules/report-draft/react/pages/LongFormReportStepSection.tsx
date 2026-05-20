@@ -21,6 +21,7 @@ import {
   isSuperAdminGlobalRevisionMode,
 } from "@modules/report-draft/core/model/super-admin-final-validation";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
+import { useReportDraftStepSave } from "@modules/report-draft/react/hooks/use-report-draft-step-save";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 import { useReportDraftSession } from "@modules/report-draft/react/context/report-draft-session.context";
 
@@ -92,11 +93,25 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
       setDraftPayload: setDraft,
     });
 
+  const { saveDraft, persistThen, hasUnsavedChanges } = useReportDraftStepSave({
+    draftId: currentDraftId,
+    step,
+    localPayload: draft,
+    persistedPayload,
+    canSave: editable,
+  });
+
   const onNext = useCallback(() => {
-    if (isLast || !canNavigateNext) return;
-    const next = (step + 1) as ReportDraftDomainModel.ReportDraftStep;
-    dispatch(reportDraftSlice.actions.setStep(next));
-  }, [dispatch, step, isLast, canNavigateNext]);
+    void persistThen(() => {
+      if (isLast || !canNavigateNext) return;
+      const next = (step + 1) as ReportDraftDomainModel.ReportDraftStep;
+      dispatch(reportDraftSlice.actions.setStep(next));
+    });
+  }, [dispatch, step, isLast, canNavigateNext, persistThen]);
+
+  const onSaveDraft = useCallback(async () => {
+    await saveDraft();
+  }, [saveDraft]);
 
   const submitForReview = useCallback(async () => {
     if (!currentDraftId || !submittedBy) return;
@@ -124,9 +139,11 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
   }, [dispatch, currentDraftId, step, reviewerRole, submittedBy, draft]);
 
   const onBack = useCallback(() => {
-    const prev = (step - 1) as ReportDraftDomainModel.ReportDraftStep;
-    dispatch(reportDraftSlice.actions.setStep(prev));
-  }, [dispatch, step]);
+    void persistThen(() => {
+      const prev = (step - 1) as ReportDraftDomainModel.ReportDraftStep;
+      dispatch(reportDraftSlice.actions.setStep(prev));
+    });
+  }, [dispatch, step, persistThen]);
 
   const transitionBusy = transition.status === "loading";
   const transitionErr =
@@ -201,6 +218,14 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
       <ReportDraftStepNav
         transitionBusy={transitionBusy}
         onBack={onBack}
+        showSaveDraft={editable && currentDraftId != null}
+        onSaveDraft={onSaveDraft}
+        saveDraftLabel={
+          hasUnsavedChanges
+            ? t("myReports.wizard.saveDraft.button")
+            : t("myReports.wizard.saveDraft.saved")
+        }
+        saveDraftTitle={t("myReports.wizard.saveDraft.hint")}
         showNext={!isLast}
         onNext={onNext}
         canNavigateNext={canNavigateNext}

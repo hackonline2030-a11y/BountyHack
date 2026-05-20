@@ -33,6 +33,8 @@ export const DescriptionSection: FC = () => {
     reviewerRole,
     setReviewerRole,
     onNext,
+    onSaveDraft,
+    hasUnsavedChanges,
     onSubmitForReview,
     onBack,
     transitionBusy,
@@ -202,6 +204,14 @@ export const DescriptionSection: FC = () => {
       <ReportDraftStepNav
         transitionBusy={transitionBusy}
         onBack={onBack}
+        showSaveDraft={editable}
+        onSaveDraft={onSaveDraft}
+        saveDraftLabel={
+          hasUnsavedChanges
+            ? t("myReports.wizard.saveDraft.button")
+            : t("myReports.wizard.saveDraft.saved")
+        }
+        saveDraftTitle={t("myReports.wizard.saveDraft.hint")}
         onNext={onNext}
         canNavigateNext={canNavigateNext}
         nextTitle={

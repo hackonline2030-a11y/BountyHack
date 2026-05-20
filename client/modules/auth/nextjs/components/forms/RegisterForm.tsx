@@ -26,7 +26,7 @@ export function RegisterForm() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [roleCode, setRoleCode] = useState<AppRoleCode>(AppRoleCode.USER);
+  const [roleCode, setRoleCode] = useState<AppRoleCode>(AppRoleCode.HUNTER);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -78,7 +78,7 @@ export function RegisterForm() {
       noValidate
     >
       <div>
-        <label htmlFor="register-role" className="block text-sm font-medium text-white mb-1">
+        <label htmlFor="register-role" className="mb-1 block text-sm font-medium text-form-text">
           {t("registerForm.roleLabel")}
         </label>
         <select
@@ -97,7 +97,7 @@ export function RegisterForm() {
       </div>
 
       <div>
-        <label htmlFor="register-username" className="block text-sm font-medium text-white mb-1">
+        <label htmlFor="register-username" className="mb-1 block text-sm font-medium text-form-text">
           {t("registerForm.usernameLabel")}
         </label>
         <input
@@ -113,7 +113,7 @@ export function RegisterForm() {
         />
       </div>
       <div>
-        <label htmlFor="register-email" className="block text-sm font-medium text-white mb-1">
+        <label htmlFor="register-email" className="mb-1 block text-sm font-medium text-form-text">
           {t("registerForm.emailLabel")}
         </label>
         <input
@@ -129,7 +129,7 @@ export function RegisterForm() {
         />
       </div>
       <div>
-        <label htmlFor="register-password" className="block text-sm font-medium text-white mb-1">
+        <label htmlFor="register-password" className="mb-1 block text-sm font-medium text-form-text">
           {t("registerForm.passwordLabel")}
         </label>
         <input
@@ -149,7 +149,7 @@ export function RegisterForm() {
       {message && (
         <p
           role="alert"
-          className={`text-sm ${status === "error" ? "text-red-200" : "text-green-200"}`}
+          className={`text-sm ${status === "error" ? "text-red-700" : "text-emerald-800"}`}
         >
           {message}
         </p>
