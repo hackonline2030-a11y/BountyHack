@@ -14,9 +14,8 @@ export enum AppRoleCode {
 /** Frozen list of every known {@link AppRoleCode} (handy for runtime membership checks). */
 export const APP_ROLE_CODE_VALUES: readonly AppRoleCode[] = Object.values(AppRoleCode);
 
-/** Order shown in admin register dropdown. */
+/** Roles offered in the admin register dropdown (excludes generic USER). */
 export const REGISTER_ROLE_OPTIONS: AppRoleCode[] = [
-  AppRoleCode.USER,
   AppRoleCode.SUPER_ADMIN,
   AppRoleCode.HUNTER,
   AppRoleCode.MENTOR,

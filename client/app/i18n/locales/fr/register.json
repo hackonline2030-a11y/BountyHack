@@ -6,13 +6,12 @@
   "registerForm": {
     "roleLabel": "Rôle attribué",
     "roles": {
-      "USER": "Utilisateur (défaut)",
-      "SUPER_ADMIN": "Super administrateur",
-      "HUNTER": "Chercheur (junior / bug bounty)",
+      "SUPER_ADMIN": "Lead (super admin)",
+      "HUNTER": "Chercheur junior",
       "MENTOR": "Mentor",
-      "QUALITY_CHECKER": "Contrôle qualité (rapports & processus vuln.)",
+      "QUALITY_CHECKER": "Responsable qualité des rapports",
       "COORDINATOR": "Coordinateur",
-      "QUALITY_CONTENT": "Responsable outils et contenus pédagogiques"
+      "QUALITY_CONTENT": "Responsable des contenus pédagogiques"
     },
     "usernameLabel": "Nom d’utilisateur",
     "emailLabel": "E-mail",

@@ -101,6 +101,11 @@
       "openSubmissions": "View this report’s submissions"
     },
     "wizard": {
+      "saveDraft": {
+        "button": "Save draft",
+        "saved": "Draft saved",
+        "hint": "Saves this step without submitting it for review. You can come back later, even when “Next” is disabled."
+      },
       "finalStep": {
         "awaitingLeadValidation": "Last step validated: awaiting final validation.",
         "leadValidated": "Report validated by the Lead.",
