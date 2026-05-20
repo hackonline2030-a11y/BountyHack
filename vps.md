@@ -165,6 +165,28 @@ Dans le `server` HTTPS du front, inclure :
 connect-src 'self' https://api.hackthebounty.fr;
 ```
 
+### Premier démarrage PM2 (une fois sur le VPS)
+
+Enregistrer **api** et **next-app** via l’ecosystem (chemins, `PORT`, `HOSTNAME` déjà définis) :
+
+```bash
+cd ~/bugbountyapp
+cp ecosystem.config.example.cjs ecosystem.config.cjs   # adapter user/chemins si besoin
+pm2 start ecosystem.config.cjs
+pm2 save
+```
+
+Alternative manuelle pour le front uniquement (depuis `client/`) :
+
+```bash
+cd ~/bugbountyapp/client
+PORT=3001 HOSTNAME=127.0.0.1 NODE_ENV=production \
+  pm2 start .next/standalone/server.js --name next-app
+pm2 save
+```
+
+Après ce premier enregistrement, ne plus utiliser `pm2 delete next-app` puis `pm2 start` à chaque déploiement : PM2 recrée un processus et **incrémente l’id** à chaque fois. Utiliser **`pm2 restart next-app`** pour recharger le build standalone.
+
 ### Déploiement (sur le VPS)
 
 ```bash
@@ -178,19 +200,16 @@ pnpm exec prisma generate   # DATABASE_NAME=MYSQL_PRISMA dans .env
 pnpm run build              # nx → dist/main.js
 pm2 restart api
 
-# Front
+# Front (standalone : postbuild copie public/ et .next/static)
 cd ../client
 pnpm install
-pnpm run build              # postbuild copie les assets standalone
-pm2 delete next-app 2>/dev/null || true
-cd ~/bugbountyapp/client
-PORT=3001 HOSTNAME=127.0.0.1 NODE_ENV=production \
-  pm2 start .next/standalone/server.js --name next-app
-# ou : cp ../ecosystem.config.example.cjs ../ecosystem.config.cjs && pm2 start ../ecosystem.config.cjs
-pm2 save
+pnpm run build
+pm2 restart next-app          # même id PM2, charge le nouveau server.js
 ```
 
-Variables d’env PM2 pour Next : `PORT=3001`, `HOSTNAME=127.0.0.1`, `NODE_ENV=production`.
+Si `next-app` n’existe pas encore dans `pm2 list`, suivre la section **Premier démarrage PM2** ci-dessus au lieu de `restart`.
+
+Variables d’env PM2 pour Next (dans `ecosystem.config.cjs`) : `PORT=3001`, `HOSTNAME=127.0.0.1`, `NODE_ENV=production`. Après modification du fichier : `pm2 restart next-app --update-env`.
 
 ### Chromium (export PDF)
 

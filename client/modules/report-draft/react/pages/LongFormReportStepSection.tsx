@@ -11,7 +11,7 @@ import { submitMentorAdvice } from "@modules/report-draft/core/useCase/submit-me
 import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-step-for-review.usecase";
 import { isStepValidationReviewerRole } from "@modules/report-draft/core/model/step-validation-reviewer";
 import { ReportDraftFinalStepStatusBanner } from "@modules/report-draft/react/components/ReportDraftFinalStepStatusBanner";
-import { ReportDraftGlobalSubmitButton } from "@modules/report-draft/react/components/ReportDraftGlobalSubmitButton";
+import { ReportDraftStepNav } from "@modules/report-draft/react/components/ReportDraftStepNav";
 import { SectionBlocRepeater } from "@modules/report-draft/react/components/section-bloc/SectionBlocRepeater";
 import { useStepSectionImageUpload } from "@modules/report-draft/react/hooks/use-step-section-image-upload";
 import { LAST_HUNTER_WIZARD_STEP } from "@modules/report-draft/core/model/hunter-wizard-steps";
@@ -198,42 +198,24 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
         </select>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <button
-          type="button"
-          className="rounded-md border border-form-border bg-form-surface px-4 py-2 text-form-text-muted hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={onBack}
-          disabled={transitionBusy}
-        >
-          Retour
-        </button>
-        {!isLast ? (
-          <button
-            type="button"
-            className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={onNext}
-            disabled={transitionBusy || !canNavigateNext}
-            title={
-              canNavigateNext
-                ? undefined
-                : "Disponible uniquement après validation de cette étape par le quality checker."
-            }
-          >
-            Suivant
-          </button>
-        ) : null}
-        {!hidePerStepSubmit ? (
-          <button
-            type="button"
-            className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
-            onClick={() => void submitForReview()}
-            disabled={transitionBusy || !editable || !submittedBy}
-          >
-            Soumettre cette étape pour revue
-          </button>
-        ) : null}
-        <ReportDraftGlobalSubmitButton currentStep={step} currentPayload={draft} />
-      </div>
+      <ReportDraftStepNav
+        transitionBusy={transitionBusy}
+        onBack={onBack}
+        showNext={!isLast}
+        onNext={onNext}
+        canNavigateNext={canNavigateNext}
+        nextTitle={
+          canNavigateNext
+            ? undefined
+            : "Disponible uniquement après validation de cette étape par le quality checker."
+        }
+        hidePerStepSubmit={hidePerStepSubmit}
+        onSubmitForReview={submitForReview}
+        submitDisabled={!editable || !submittedBy}
+        currentStep={step}
+        currentPayload={draft}
+        className="pt-0"
+      />
     </>
   );
 };

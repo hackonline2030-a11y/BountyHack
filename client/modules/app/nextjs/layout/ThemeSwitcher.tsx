@@ -35,7 +35,7 @@ export const ThemeSwitcher: React.FC = () => {
   return (
     <button
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="flex items-center gap-2 h-8 min-h-8 min-w-[7.5rem] py-1"
+      className="flex cursor-pointer items-center gap-2 h-8 min-h-8 min-w-[7.5rem] py-1"
       suppressHydrationWarning
     >
       <span className="relative h-6 w-6 shrink-0 overflow-hidden rounded flex items-center justify-center">

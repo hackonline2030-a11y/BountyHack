@@ -6,7 +6,7 @@ import { fetchBff } from "@/lib/bff-fetch";
 import { readFriendlyHttpError } from "@/lib/http-error-message";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { STEP_TITLE_FR } from "@modules/report-draft/core/model/step-field-catalog";
-import { iconActionDangerClass } from "@modules/report-team/react/icon-action-buttons";
+import { IconActionButton } from "@modules/app/nextjs/components/buttons/IconActionButton";
 import { TrashIcon } from "@modules/report-team/react/icons";
 
 const STATE_KEY_TO_STEP_LABEL: Record<string, string> = {
@@ -155,16 +155,15 @@ export const AdminReportDraftAttachmentsPage: FC<Props> = ({ lng }) => {
                     {(row.sizeBytes / 1024).toFixed(1)} Ko
                   </td>
                   <td className="px-4 py-3">
-                    <button
-                      type="button"
-                      className={iconActionDangerClass}
+                    <IconActionButton
+                      variant="danger"
                       aria-label="Supprimer"
                       title="Supprimer"
                       disabled={deletingId === row.attachmentId}
                       onClick={() => void onDelete(row.attachmentId)}
                     >
                       <TrashIcon className="size-4" />
-                    </button>
+                    </IconActionButton>
                   </td>
                 </tr>
               ))

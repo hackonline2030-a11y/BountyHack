@@ -12,11 +12,8 @@ import { ReportDraftAggregateStatusBadge } from "@modules/report-draft/react/com
 import { CoordinatorAttachOrphanTeamPanel } from "@modules/report-team/react/CoordinatorAttachOrphanTeamPanel";
 import { ConfirmDangerModal } from "@modules/report-team/react/ConfirmDangerModal";
 import { OrphanReportDraftsTable } from "@modules/report-team/react/OrphanReportDraftsTable";
-import {
-  iconActionClass,
-  iconActionDangerClass,
-  iconActionDraftDangerClass,
-} from "@modules/report-team/react/icon-action-buttons";
+import { iconActionClass } from "@modules/report-team/react/icon-action-buttons";
+import { IconActionButton } from "@modules/app/nextjs/components/buttons/IconActionButton";
 import { ReportDraftOpenIcon, TrashIcon } from "@modules/report-team/react/icons";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
@@ -155,18 +152,16 @@ export const ReportTeamAdminBootstrap: FC = () => {
                     >
                       <ReportDraftOpenIcon className="size-4" />
                     </Link>
-                    <button
-                      type="button"
-                      className={iconActionDangerClass}
+                    <IconActionButton
+                      variant="danger"
                       aria-label={t("reportTeams.admin.deleteTeam")}
                       title={t("reportTeams.admin.deleteTeam")}
                       onClick={() => void onDeleteTeam(team.id, team.label)}
                     >
                       <TrashIcon className="size-4" />
-                    </button>
-                    <button
-                      type="button"
-                      className={iconActionDraftDangerClass}
+                    </IconActionButton>
+                    <IconActionButton
+                      variant="draftDanger"
                       aria-label={t("reportTeams.admin.deleteDraft")}
                       title={t("reportTeams.admin.deleteDraft")}
                       onClick={() =>
@@ -177,7 +172,7 @@ export const ReportTeamAdminBootstrap: FC = () => {
                       }
                     >
                       <TrashIcon className="size-4" />
-                    </button>
+                    </IconActionButton>
                   </div>
                 </td>
               </tr>

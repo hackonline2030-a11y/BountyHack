@@ -7,7 +7,6 @@ import { useElementHeightCssVar } from "@/modules/app/nextjs/hooks/useElementHei
 import { LangLinks } from "@/modules/app/nextjs/layout/LangLinks";
 import { logoutFromBrowser } from "@modules/auth/core/browser-logout.factory";
 import {
-  isAdministrationPath,
   isAuthHeaderLoginHighlightPath,
   localePrefixFromPathname,
 } from "@/lib/locale-path";
@@ -55,11 +54,8 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
 
   const prefix = localePrefixFromPathname(pathname);
   const localeHome = prefix;
-  const adminHref = `${prefix}/administration`;
   const loginHref = `${prefix}/login`;
   const isLoginActive = isAuthHeaderLoginHighlightPath(pathname);
-  const isAdminActive = isAdministrationPath(pathname);
-  const isSuperAdmin = currentRoleCode === "SUPER_ADMIN";
   const dashboardSegment = welcomeDashboardPathFromRoleCode(currentRoleCode);
   const dashboardHref =
     isAuthenticated && dashboardSegment ? `${prefix}/${dashboardSegment}` : null;
@@ -241,15 +237,6 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
             </Link>
           ) : null}
           <LangLinks />
-          {isSuperAdmin ? (
-            <Link
-              href={adminHref}
-              aria-current={isAdminActive ? "page" : undefined}
-              className={`header-nav-link${isAdminActive ? " header-nav-link--active" : ""}`}
-            >
-              {t("header.admin")}
-            </Link>
-          ) : null}
           {isAuthenticated ? (
             <button
               type="button"
@@ -293,18 +280,6 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {t("header.dashboard")}
-              </Link>
-            ) : null}
-            {isSuperAdmin ? (
-              <Link
-                href={adminHref}
-                aria-current={isAdminActive ? "page" : undefined}
-                className={`header-mobile-nav-link${
-                  isAdminActive ? " header-mobile-nav-link--active" : ""
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t("header.admin")}
               </Link>
             ) : null}
             <div className="flex items-center justify-between rounded-md border border-black/10 px-3 py-2">
