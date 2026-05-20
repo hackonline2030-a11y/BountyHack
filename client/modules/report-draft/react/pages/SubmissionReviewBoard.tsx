@@ -12,6 +12,8 @@ import {
   stepCommentGroupsFromPayload,
 } from "@modules/report-draft/core/model/step-field-catalog";
 import { SubmissionStepPreview } from "@modules/report-draft/react/components/SubmissionStepPreview";
+import { ReportDraftStepAttachmentsPanel } from "@modules/report-draft/react/pages/ReportDraftStepAttachmentsPanel";
+import { ReportDraftSessionProvider } from "@modules/report-draft/react/context/report-draft-session.context";
 import { SubmissionStepFieldCommentsPanel } from "@modules/report-draft/react/components/review/SubmissionStepFieldCommentsPanel";
 import {
   SubmissionReviewCumulativePreview,
@@ -31,10 +33,11 @@ type Props = {
   lng: string;
 };
 
-type ReviewTab = "form" | "comments" | "stepPreview" | "cumulativePreview";
+type ReviewTab = "form" | "attachments" | "comments" | "stepPreview" | "cumulativePreview";
 
 const TAB_ORDER: readonly ReviewTab[] = [
   "form",
+  "attachments",
   "comments",
   "stepPreview",
   "cumulativePreview",
@@ -42,6 +45,7 @@ const TAB_ORDER: readonly ReviewTab[] = [
 
 const TAB_LABELS: Record<ReviewTab, string> = {
   form: "Formulaire hunter",
+  attachments: "Pièces jointes",
   comments: "Commentaires (QC + mentor)",
   stepPreview: "Aperçu étape",
   cumulativePreview: "Aperçu rapport",
@@ -197,6 +201,7 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
   const isMentorPeerView = submission.reviewerRole === "mentor";
 
   return (
+    <ReportDraftSessionProvider viewerUserId={reviewerId}>
     <div className="mx-auto w-full max-w-4xl px-2 py-4 sm:px-4">
       <div className="dashboard-card flex flex-col gap-6 p-5 sm:p-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
@@ -289,7 +294,21 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
           step={submission.step}
           payload={submission.payload}
           reportTitle={reportTitle}
+          draftId={submission.reportDraftId}
+          attachments={submission.attachmentsSnapshot}
         />
+      </div>
+
+      <div
+        role="tabpanel"
+        id={tabPanelId("attachments")}
+        hidden={activeTab !== "attachments"}
+        aria-labelledby={tabButtonId("attachments")}
+        className="min-h-[120px]"
+      >
+        {draft ? (
+          <ReportDraftStepAttachmentsPanel step={submission.step} />
+        ) : null}
       </div>
 
       <div
@@ -334,6 +353,7 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
             step={submission.step}
             draft={draft}
             submissionPayload={submission.payload}
+            attachmentsSnapshot={submission.attachmentsSnapshot}
           />
         ) : null}
       </div>
@@ -349,6 +369,7 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
             submissionStep={submission.step}
             draft={draft}
             submissionPayload={submission.payload}
+            attachmentsSnapshot={submission.attachmentsSnapshot}
           />
         ) : null}
       </div>
@@ -397,5 +418,6 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
       ) : null}
       </div>
     </div>
+    </ReportDraftSessionProvider>
   );
 };

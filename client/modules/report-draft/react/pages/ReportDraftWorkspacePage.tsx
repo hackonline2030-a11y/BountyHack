@@ -12,6 +12,7 @@ import {
 } from "@modules/report-draft/react/components/ReportDraftPreview";
 import { ReportDraftStepCommentsPanel } from "@modules/report-draft/react/pages/ReportDraftStepCommentsPanel";
 import { ReportDraftStepRevisionsListPanel } from "@modules/report-draft/react/pages/ReportDraftStepRevisionsListPanel";
+import { ReportDraftStepAttachmentsPanel } from "@modules/report-draft/react/pages/ReportDraftStepAttachmentsPanel";
 import { ReportDraftWizardPage } from "@modules/report-draft/react/pages/ReportDraftWizardPage";
 import {
   stepStatusLabelFr,
@@ -39,6 +40,7 @@ import { useAppSelector } from "@store/redux/store";
 type WorkspaceTab =
   | "form"
   | "stepPreview"
+  | "attachments"
   | "cumulativePreview"
   | "comments"
   | "revisions"
@@ -47,6 +49,7 @@ type WorkspaceTab =
 const BASE_TAB_ORDER: readonly WorkspaceTab[] = [
   "form",
   "stepPreview",
+  "attachments",
   "cumulativePreview",
   "comments",
   "revisions",
@@ -54,10 +57,11 @@ const BASE_TAB_ORDER: readonly WorkspaceTab[] = [
 
 const TAB_LABELS: Record<WorkspaceTab, string> = {
   form: "Édition",
-  stepPreview: "Aperçu étape",
+  stepPreview: "Aperçu (étape)",
+  attachments: "Médias (étape)",
   cumulativePreview: "Aperçu",
   comments: "Commentaires",
-  revisions: "Liste de mes demandes de révision",
+  revisions: "Mes demandes",
   superAdminFeedback: "Retours super-admin",
 };
 
@@ -130,7 +134,8 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
 }) => {
   const params = useParams<{ lng?: string }>();
   const lng = typeof params?.lng === "string" && params.lng.trim() !== "" ? params.lng : "fr";
-  const { t } = useT(["myReports"]);
+  const { t } = useT("myReports");
+  const step = useAppSelector((s) => s.reportDraft.step);
   const currentDraftId = useAppSelector((s) => s.reportDrafts.currentDraftId);
   const draft = useAppSelector((s) =>
     currentDraftId ? s.reportDrafts.byId[currentDraftId] : undefined,
@@ -233,7 +238,9 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
                   : "border-transparent text-form-text-muted hover:text-form-text"
               }`}
             >
-              {TAB_LABELS[key]}
+              {key === "attachments"
+                ? t("myReports.workspace.tabs.attachments")
+                : TAB_LABELS[key]}
             </button>
           );
         })}
@@ -271,6 +278,16 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
         hidden={activeTab !== "stepPreview"}
       >
         <ReportDraftPreview />
+      </div>
+
+      <div
+        role="tabpanel"
+        id={tabPanelId("attachments")}
+        aria-labelledby={tabButtonId("attachments")}
+        hidden={activeTab !== "attachments"}
+        className="min-h-[120px]"
+      >
+        <ReportDraftStepAttachmentsPanel step={step} />
       </div>
 
       <div

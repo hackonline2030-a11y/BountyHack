@@ -6,7 +6,7 @@ import {
 
 export type LongFormWizardStep = Exclude<
   M.ReportDraftStep,
-  M.ReportDraftStep.META | M.ReportDraftStep.DESCRIPTION
+  M.ReportDraftStep.META | M.ReportDraftStep.DESCRIPTION | M.ReportDraftStep.FINAL
 >;
 
 /** Legacy flat field keys per step (import migration only). */
@@ -39,11 +39,6 @@ const LEGACY_FIELDS_BY_STEP: Record<LongFormWizardStep, ReadonlyArray<{ key: str
     { key: "shortTermMitigation", heading: "Atténuation court terme" },
     { key: "longTermFix", heading: "Correctif durable" },
     { key: "verificationSteps", heading: "Vérification après correctif" },
-  ],
-  [M.ReportDraftStep.FINAL]: [
-    { key: "conclusion", heading: "Conclusion" },
-    { key: "references", heading: "Références (CVE, CWE, liens…)" },
-    { key: "bugBountyNotes", heading: "Notes finales / chaîne de bugs" },
   ],
 };
 

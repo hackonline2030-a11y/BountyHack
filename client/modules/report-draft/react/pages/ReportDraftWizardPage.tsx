@@ -6,6 +6,11 @@ import { useAppSelector } from "@store/redux/store";
 import { DescriptionSection } from "@modules/report-draft/react/sections/description/DescriptionSection";
 import { MetaSection } from "@modules/report-draft/react/sections/meta/MetaSection";
 import { LongFormReportStepSection } from "@modules/report-draft/react/pages/LongFormReportStepSection";
+import {
+  clampHunterWizardStep,
+  HUNTER_WIZARD_STEP_COUNT,
+} from "@modules/report-draft/core/model/hunter-wizard-steps";
+import type { LongFormWizardStep } from "@modules/report-draft/core/model/long-form-steps.factory";
 
 const STEP_LABELS: Record<ReportDraftDomainModel.ReportDraftStep, string> = {
   [ReportDraftDomainModel.ReportDraftStep.META]: "Métadonnées",
@@ -17,8 +22,6 @@ const STEP_LABELS: Record<ReportDraftDomainModel.ReportDraftStep, string> = {
   [ReportDraftDomainModel.ReportDraftStep.REMEDIATION]: "Remédiation",
   [ReportDraftDomainModel.ReportDraftStep.FINAL]: "Finalisation",
 };
-
-const TOTAL_STEPS = 8;
 
 /** Route the current step to its dedicated section. */
 const renderStepBody = (
@@ -35,13 +38,17 @@ const renderStepBody = (
     case ReportDraftDomainModel.ReportDraftStep.PROOF_OF_CONCEPT:
     case ReportDraftDomainModel.ReportDraftStep.RISKS:
     case ReportDraftDomainModel.ReportDraftStep.REMEDIATION:
-    case ReportDraftDomainModel.ReportDraftStep.FINAL:
-      return <LongFormReportStepSection step={step} label={label} />;
+      return (
+        <LongFormReportStepSection step={step as LongFormWizardStep} label={label} />
+      );
+    default:
+      return null;
   }
 };
 
 export const ReportDraftWizardPage: FC = () => {
-  const step = useAppSelector((s) => s.reportDraft.step);
+  const rawStep = useAppSelector((s) => s.reportDraft.step);
+  const step = clampHunterWizardStep(rawStep);
   const label = STEP_LABELS[step];
   const stepIndex = step + 1;
 
@@ -49,7 +56,7 @@ export const ReportDraftWizardPage: FC = () => {
     <div className="flex w-full max-w-lg flex-col gap-4 py-2">
       <header className="flex flex-col gap-1">
         <p className="text-sm text-form-text-muted">
-          Étape {stepIndex} / {TOTAL_STEPS} — « Soumettre pour revue » enregistre et envoie au
+          Étape {stepIndex} / {HUNTER_WIZARD_STEP_COUNT} — « Soumettre pour revue » enregistre et envoie au
           reviewer. « Suivant » n’est actif qu’après validation par le quality checker (pastille et
           onglet Commentaires).
         </p>

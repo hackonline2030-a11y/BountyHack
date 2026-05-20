@@ -12,6 +12,7 @@ import {
   isGlobalStepStatus,
 } from "./global-step-status";
 import { isStepValidationReviewerRole } from "./step-validation-reviewer";
+import { hunterWizardStepsApproved } from "./hunter-wizard-steps";
 
 export interface ReportDraftAggregateDeps {
   idProvider: IIdProvider;
@@ -359,7 +360,11 @@ export class ReportDraftAggregate {
     this._state.updatedAt = now;
     this._state.version += 1;
 
-    if (this.allStepsApproved()) {
+    if (hunterWizardStepsApproved(this._state)) {
+      this._state.final = {
+        ...this._state.final,
+        status: "approved",
+      };
       this._state.aggregateStatus = "ready-to-program";
     }
   }
@@ -520,9 +525,6 @@ export class ReportDraftAggregate {
     return stepKey;
   }
 
-  private allStepsApproved(): boolean {
-    return REPORT_DRAFT_STEP_STATE_KEYS.every((key) => this._state[key].status === "approved");
-  }
 }
 
 /**

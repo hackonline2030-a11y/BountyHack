@@ -20,6 +20,9 @@ import {
   type SuperAdminStepCommentInput,
 } from '../application/admin/super-admin-final-validation.service';
 import { DeleteReportDraftCommand } from '../application/commands/delete-report-draft.command';
+import { ListAllReportDraftAttachmentsQuery } from '../application/queries/list-all-report-draft-attachments.query';
+import { ReportDraftImageAssetService } from '../application/attachments/report-draft-image-asset.service';
+import type { AdminReportDraftAttachmentRowWire } from '../models/report-draft-attachment-admin.types';
 import type { ReportDraftWire, ReviewerCommentWire } from '../models/report-draft-api.types';
 
 @ApiTags('report-drafts-admin')
@@ -30,6 +33,8 @@ export class ReportDraftAdminController {
     private readonly listForFinalValidation: ListReportDraftsForFinalValidationQuery,
     private readonly superAdminFinalValidation: SuperAdminFinalValidationService,
     private readonly deleteReportDraft: DeleteReportDraftCommand,
+    private readonly listAllAttachmentsQuery: ListAllReportDraftAttachmentsQuery,
+    private readonly imageAssets: ReportDraftImageAssetService,
   ) {}
 
   @Get('final-validation-queue')
@@ -109,6 +114,30 @@ export class ReportDraftAdminController {
       request.user,
       draftId,
       body.comments ?? [],
+    );
+  }
+
+  @Get('attachments')
+  @AuthRoles(AppRoleCode.SUPER_ADMIN)
+  @ApiOperation({ summary: 'List all report draft attachments (super-admin)' })
+  @ApiOkResponse({ description: 'Attachment inventory rows' })
+  async listAllAttachments(): Promise<AdminReportDraftAttachmentRowWire[]> {
+    return this.listAllAttachmentsQuery.execute();
+  }
+
+  @Delete('attachments/:attachmentId')
+  @AuthRoles(AppRoleCode.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Delete a report draft attachment (super-admin)' })
+  @ApiOkResponse({ description: 'Updated report draft' })
+  async deleteAttachment(
+    @Req() request: RequestWithIdentity,
+    @Param('attachmentId') attachmentId: string,
+  ): Promise<ReportDraftWire> {
+    const row = await this.imageAssets.findAttachmentDraftId(attachmentId);
+    return this.imageAssets.deleteDraftAttachment(
+      request.user,
+      row.draftId,
+      attachmentId,
     );
   }
 }

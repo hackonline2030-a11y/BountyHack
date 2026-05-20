@@ -17,6 +17,8 @@ type Props = {
   step: ReportDraftDomainModel.ReportDraftStep;
   payload: unknown;
   reportTitle?: string;
+  draftId?: string;
+  attachments?: ReadonlyArray<ReportDraftDomainModel.Attachment>;
 };
 
 function isLongFormStep(step: ReportDraftDomainModel.ReportDraftStep): boolean {
@@ -37,7 +39,13 @@ const StepPreviewHeader: FC<{
 /**
  * Read-only preview of what the hunter submitted for one wizard step.
  */
-export const SubmissionStepPreview: FC<Props> = ({ step, payload, reportTitle }) => {
+export const SubmissionStepPreview: FC<Props> = ({
+  step,
+  payload,
+  reportTitle,
+  draftId,
+  attachments = [],
+}) => {
   if (isLongFormStep(step)) {
     const { sectionBlocs } = normalizeLongFormPayload(step, payload);
     return (
@@ -48,7 +56,13 @@ export const SubmissionStepPreview: FC<Props> = ({ step, payload, reportTitle })
         ) : (
           <div className="flex flex-col gap-6">
             {sectionBlocs.map((bloc, index) => (
-              <SectionBlocDisplay key={bloc.id} bloc={bloc} index={index} />
+              <SectionBlocDisplay
+                key={bloc.id}
+                bloc={bloc}
+                index={index}
+                draftId={draftId}
+                attachments={attachments}
+              />
             ))}
           </div>
         )}
@@ -86,7 +100,13 @@ export const SubmissionStepPreview: FC<Props> = ({ step, payload, reportTitle })
         ) : (
           <div className="flex flex-col gap-6">
             {desc.sectionBlocs.map((bloc, index) => (
-              <SectionBlocDisplay key={bloc.id} bloc={bloc} index={index} />
+              <SectionBlocDisplay
+                key={bloc.id}
+                bloc={bloc}
+                index={index}
+                draftId={draftId}
+                attachments={attachments}
+              />
             ))}
           </div>
         )}
