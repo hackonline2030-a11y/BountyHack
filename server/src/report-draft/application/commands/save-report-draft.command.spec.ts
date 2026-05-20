@@ -17,6 +17,7 @@ function minimalDraft(overrides?: Partial<ReportDraftWire>): ReportDraftWire {
   return {
     id: 'draft-1',
     hunterId: 'hunter-1',
+    hunterWriterId: 'hunter-1',
     version: 0,
     aggregateStatus: 'draft',
     meta: emptyStep,
@@ -36,10 +37,14 @@ function minimalDraft(overrides?: Partial<ReportDraftWire>): ReportDraftWire {
 describe('SaveReportDraftCommand', () => {
   const reportDraftRepository: jest.Mocked<IReportDraftRepository> = {
     save: jest.fn(),
+    updateHunterWriterId: jest.fn(),
     findById: jest.fn(),
     findByHunterId: jest.fn(),
+    findByHunterIdOrTeamMembership: jest.fn(),
     findAll: jest.fn(),
     findOrphanSummaries: jest.fn(),
+    findPublished: jest.fn(),
+    deleteById: jest.fn(),
   };
   const submissionRepository: jest.Mocked<ISubmissionRepository> = {
     save: jest.fn(),
@@ -116,7 +121,7 @@ describe('SaveReportDraftCommand', () => {
     expect(arg).not.toHaveProperty('reportTeam');
   });
 
-  it('allows quality checker on team to persist hunter draft after review', async () => {
+  it('rejects quality checker on team from persisting hunter draft content', async () => {
     reportTeamRepository.isMemberOfDraft.mockResolvedValue(true);
     reportDraftRepository.findById.mockResolvedValue(
       minimalDraft({
@@ -129,23 +134,53 @@ describe('SaveReportDraftCommand', () => {
         },
       }),
     );
+    await expect(
+      command.execute(
+        {
+          uid: 'qc-1',
+          email: 'qc@example.com',
+          roleCode: AppRoleCode.QUALITY_CHECKER,
+        },
+        minimalDraft({
+          meta: {
+            payload: {},
+            attachments: [],
+            status: 'needs-revision',
+            currentRound: 1,
+            assignedReviewerRole: 'quality_checker',
+          },
+        }),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(reportDraftRepository.save).not.toHaveBeenCalled();
+  });
+
+  it('rejects co-hunter who spoofs hunterWriterId in the PUT body', async () => {
+    reportTeamRepository.isMemberOfDraft.mockResolvedValue(true);
+    await expect(
+      command.execute(
+        {
+          uid: 'hunter-2',
+          email: 'h2@example.com',
+          roleCode: AppRoleCode.HUNTER,
+        },
+        minimalDraft({ hunterWriterId: 'hunter-2' }),
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(reportDraftRepository.save).not.toHaveBeenCalled();
+  });
+
+  it('persists hunterWriterId from the database, not from a tampered client body', async () => {
     await command.execute(
       {
-        uid: 'qc-1',
-        email: 'qc@example.com',
-        roleCode: AppRoleCode.QUALITY_CHECKER,
+        uid: 'hunter-1',
+        email: 'h@example.com',
+        roleCode: AppRoleCode.HUNTER,
       },
-      minimalDraft({
-        meta: {
-          payload: {},
-          attachments: [],
-          status: 'needs-revision',
-          currentRound: 1,
-          assignedReviewerRole: 'quality_checker',
-        },
-      }),
+      minimalDraft({ hunterWriterId: 'hunter-2' }),
     );
-    expect(reportDraftRepository.save).toHaveBeenCalled();
+    const saved = reportDraftRepository.save.mock.calls[0]?.[0];
+    expect(saved?.hunterWriterId).toBe('hunter-1');
   });
 
   it('rejects unrelated user', async () => {

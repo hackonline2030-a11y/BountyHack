@@ -5,6 +5,7 @@ import type {
   ReportTeamJoinRequest,
   ReportTeamMemberRole,
 } from "@modules/report-team/model/report-team.types";
+import { isEnrollmentJoinRequest } from "@modules/report-team/model/report-team-join-request.utils";
 import { requestEnrollment } from "@modules/report-team/core/useCase/request-enrollment.usecase";
 import { useAppDispatch } from "@store/redux/store";
 
@@ -33,7 +34,10 @@ export const ReportTeamEnrollButton: FC<Props> = ({
   const [feedback, setFeedback] = useState("");
 
   const pendingEnrollment = useMemo(
-    () => joinRequests.find((r) => !r.teamId && r.status === "pending"),
+    () =>
+      joinRequests.find(
+        (r) => isEnrollmentJoinRequest(r) && r.status === "pending",
+      ),
     [joinRequests],
   );
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type FC } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useT } from "next-i18next/client";
 import { loadCoordinatorTeams } from "@modules/report-team/core/useCase/load-coordinator-teams.usecase";
@@ -90,33 +91,36 @@ export const CoordinatorCoordinationPanel: FC = () => {
         ) : (
           <ul role="list" className="mt-4 flex flex-col gap-3">
             {allTeams.map((team) => (
-              <li
-                key={team.id}
-                className="rounded-lg border border-dashboard-card-border p-4"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div>
-                    <p className="font-medium text-dashboard-text">{team.label}</p>
-                    <p className="mt-1 font-mono text-xs text-dashboard-text-muted">
-                      {t("reportTeams.coordinator.reportDraftId")}: {team.reportDraftId}
-                    </p>
+              <li key={team.id} className="list-none">
+                <Link
+                  href={`/${lng}/coordination/team/${encodeURIComponent(team.id)}`}
+                  aria-label={t("reportTeams.coordinator.teamCardAria", { label: team.label })}
+                  className="block rounded-lg border border-dashboard-card-border bg-white p-4 transition-colors duration-150 hover:border-dashboard-accent hover:bg-dashboard-accent-soft/25 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dashboard-accent focus-visible:ring-offset-2"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <p className="font-medium text-dashboard-text">{team.label}</p>
+                      <p className="mt-1 font-mono text-xs text-dashboard-text-muted">
+                        {t("reportTeams.coordinator.reportDraftId")}: {team.reportDraftId}
+                      </p>
+                    </div>
+                    <ReportTeamValidityBadge
+                      validity={team.validity}
+                      validLabel={t("reportTeams.validity.valid")}
+                      incompleteLabel={t("reportTeams.validity.incomplete")}
+                    />
                   </div>
-                  <ReportTeamValidityBadge
-                    validity={team.validity}
-                    validLabel={t("reportTeams.validity.valid")}
-                    incompleteLabel={t("reportTeams.validity.incomplete")}
-                  />
-                </div>
-                <p className="mt-2 text-xs text-dashboard-text-muted">
-                  {t("reportTeams.myTeams.members")}
-                </p>
-                <p className="mt-1 text-sm text-dashboard-text">
-                  {team.members.length === 0
-                    ? "—"
-                    : team.members
-                        .map((m) => `${m.displayName} (${roleLabels[m.role]})`)
-                        .join(" · ")}
-                </p>
+                  <p className="mt-2 text-xs text-dashboard-text-muted">
+                    {t("reportTeams.myTeams.members")}
+                  </p>
+                  <p className="mt-1 text-sm text-dashboard-text">
+                    {team.members.length === 0
+                      ? "—"
+                      : team.members
+                          .map((m) => `${m.displayName} (${roleLabels[m.role]})`)
+                          .join(" · ")}
+                  </p>
+                </Link>
               </li>
             ))}
           </ul>

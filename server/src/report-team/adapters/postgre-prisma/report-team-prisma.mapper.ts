@@ -16,7 +16,7 @@ import { ReportTeamEnumMapper } from './report-team-enum.mapper';
 
 type TeamWithMembers = ReportTeam & {
   members: (ReportTeamMember & { user: User })[];
-  reportDraft: Pick<ReportDraft, 'aggregateStatus'>;
+  reportDraft: Pick<ReportDraft, 'aggregateStatus' | 'hunterWriterId'>;
 };
 
 type JoinRequestWithRelations = ReportTeamJoinRequest & {
@@ -47,6 +47,7 @@ export class ReportTeamPrismaMapper {
       draftAggregateStatus: ReportDraftPrismaMapper.aggregateStatusToWire(
         row.reportDraft.aggregateStatus,
       ),
+      hunterWriterUserId: row.reportDraft.hunterWriterId,
       members,
       updatedAt: row.updatedAt.toISOString(),
     };

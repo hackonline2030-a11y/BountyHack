@@ -5,9 +5,14 @@ import type { ReportDraftWire } from '../../models/report-draft-api.types';
 describe('ListReportDraftsForFinalValidationQuery', () => {
   const repository: jest.Mocked<IReportDraftRepository> = {
     save: jest.fn(),
+    updateHunterWriterId: jest.fn(),
     findById: jest.fn(),
     findByHunterId: jest.fn(),
+    findByHunterIdOrTeamMembership: jest.fn(),
     findAll: jest.fn(),
+    findOrphanSummaries: jest.fn(),
+    findPublished: jest.fn(),
+    deleteById: jest.fn(),
   };
 
   const query = new ListReportDraftsForFinalValidationQuery(repository);
@@ -23,6 +28,7 @@ describe('ListReportDraftsForFinalValidationQuery', () => {
     const draft: ReportDraftWire = {
       id: 'd1',
       hunterId: 'h1',
+      hunterWriterId: 'h1',
       version: 1,
       aggregateStatus: 'ready-to-program',
       meta: emptyStep,

@@ -10,9 +10,11 @@ import {
 const clock = { now: () => "2026-05-17T12:00:00.000Z" };
 const idProvider = { next: () => "id-next" };
 
-function draftInGlobalRevision(
-  overrides?: Partial<ReportDraftDomainModel.ReportDraft>,
-): ReportDraftDomainModel.ReportDraft {
+function draftInGlobalRevision(overrides?: {
+  superAdminRevisionRequestedAt?: string | null;
+  superAdminGlobalRevisionCount?: number;
+  aggregateStatus?: ReportDraftDomainModel.AggregateStatus;
+}): ReportDraftDomainModel.ReportDraft {
   const draft = ReportDraftFactory.create({
     idProvider,
     clock,

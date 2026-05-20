@@ -23,6 +23,8 @@ export type ReportTeam = {
   label: string;
   validity: ReportTeamValidity;
   draftAggregateStatus: ReportDraftDomainModel.AggregateStatus;
+  /** User id of the hunter who may edit/submit steps (`hunter_writer_id` on the draft). */
+  hunterWriterUserId: string;
   members: ReportTeamMember[];
   updatedAt: string;
 };

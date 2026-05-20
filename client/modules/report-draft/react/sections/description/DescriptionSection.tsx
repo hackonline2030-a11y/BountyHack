@@ -1,6 +1,7 @@
 "use client";
 
-import { type FC, type ReactNode } from "react";
+import { type FC } from "react";
+import { useT } from "next-i18next/client";
 import type { CvssMetricOption } from "@modules/report-draft/core/catalog/cvss-metrics.catalog";
 import type { CvssSeverity } from "@modules/report-draft/core/cvss/cvss-3.1";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
@@ -20,10 +21,13 @@ const DESCRIPTION_STEP = ReportDraftDomainModel.ReportDraftStep.DESCRIPTION;
  * "N/A" to avoid emitting a half-valid CVSS string.
  */
 export const DescriptionSection: FC = () => {
+  const { t } = useT("myReports");
   const {
     draft,
     setField,
     editable,
+    stepEditableByWorkflow,
+    isDesignatedStepWriter,
     hidePerStepSubmit,
     canNavigateNext,
     reviewerRole,
@@ -33,6 +37,9 @@ export const DescriptionSection: FC = () => {
     onBack,
     transitionBusy,
     transitionErr,
+    imageUploadByBlocId,
+    descriptionAttachments,
+    onUploadSectionImage,
     derived,
     metaScopeSlug,
     catalogs,
@@ -59,6 +66,11 @@ export const DescriptionSection: FC = () => {
           className="rounded-md border border-rose-200 bg-rose-50 p-2 text-sm text-rose-900"
         >
           {transitionErr}
+        </p>
+      ) : null}
+      {!isDesignatedStepWriter && stepEditableByWorkflow ? (
+        <p className="rounded-md border border-amber-200 bg-amber-50 p-2 text-sm text-amber-950">
+          {t("myReports.workspace.hunterWriter.coHunterReadOnly")}
         </p>
       ) : null}
       {!editable ? (
@@ -157,6 +169,9 @@ export const DescriptionSection: FC = () => {
         <SectionBlocRepeater
           blocs={draft.sectionBlocs}
           editable={editable && !transitionBusy}
+          attachments={descriptionAttachments}
+          imageUploadByBlocId={imageUploadByBlocId}
+          onImageUpload={onUploadSectionImage}
           onChange={(sectionBlocs) => setField("sectionBlocs", sectionBlocs)}
         />
       </div>

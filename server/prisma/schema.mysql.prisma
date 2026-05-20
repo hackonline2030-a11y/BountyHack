@@ -33,7 +33,8 @@ model User {
   refreshTokens RefreshToken[]
   passwordResetTokens PasswordResetToken[]
   role       Role?   @relation(fields: [roleId], references: [id], onDelete: SetNull)
-  reportDrafts ReportDraft[]
+  reportDraftsOwned       ReportDraft[] @relation("ReportDraftOwner")
+  reportDraftsAsHunterWriter ReportDraft[] @relation("ReportDraftHunterWriter")
   reportTeamMembers ReportTeamMember[]
   reportTeamJoinRequests ReportTeamJoinRequest[] @relation("JoinRequestUser")
   reportTeamJoinRequestsDecided ReportTeamJoinRequest[] @relation("JoinRequestDecider")
@@ -207,6 +208,8 @@ enum SubmissionDecision {
 model ReportDraft {
   id              String                     @id @default(uuid())
   hunterId        String                     @map("hunter_id")
+  /// Squad member allowed to edit the draft and submit workflow steps (defaults to `hunter_id`).
+  hunterWriterId  String                     @map("hunter_writer_id")
   version         Int                        @default(1)
   aggregateStatus ReportDraftAggregateStatus @default(DRAFT) @map("aggregate_status")
   /// Set when super-admin requests a global revision (team-wide rework).
@@ -216,13 +219,15 @@ model ReportDraft {
   createdAt       DateTime                   @default(now()) @map("created_at")
   updatedAt       DateTime                   @updatedAt @map("updated_at")
 
-  hunter        User              @relation(fields: [hunterId], references: [id], onDelete: Cascade)
+  hunter        User              @relation("ReportDraftOwner", fields: [hunterId], references: [id], onDelete: Cascade)
+  hunterWriter  User              @relation("ReportDraftHunterWriter", fields: [hunterWriterId], references: [id], onDelete: Cascade)
   steps             ReportDraftStep[]
   submissions       Submission[]
   globalSubmissions GlobalSubmission[]
   reportTeam        ReportTeam?
 
   @@index([hunterId])
+  @@index([hunterWriterId])
   @@index([aggregateStatus])
   @@map("report_drafts")
 }

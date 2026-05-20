@@ -4,7 +4,18 @@
     "heading": "Mes rapports",
     "workspace": {
       "backToReports": "← Retour à mes rapports",
-      "backToReportsAria": "Retour à la liste de mes brouillons"
+      "backToReportsAria": "Retour à la liste de mes brouillons",
+      "hunterWriter": {
+        "title": "Rédacteur désigné des étapes",
+        "current": "Les modifications et soumissions sont limitées à : {{name}}.",
+        "youAreWriter": "Vous êtes le rédacteur désigné — vous pouvez éditer et soumettre les étapes.",
+        "readOnly": "Seul « {{name}} » peut éditer et soumettre. Demandez-lui de vous passer le rôle avec le sélecteur ci-dessous, ou un coordinateur.",
+        "coHunterReadOnly": "Vous n’êtes pas le rédacteur désigné — l’édition et les soumissions sont désactivées. Demandez au rédacteur actuel de passer la main, ou un coordinateur.",
+        "transferLabel": "Passer le rôle de rédacteur à",
+        "pickPlaceholder": "Choisir un hunter…",
+        "transferButton": "Mettre à jour le rédacteur désigné",
+        "transferring": "Mise à jour…"
+      }
     },
     "qcSubmissions": {
       "filteredHeading": "Soumissions de ce rapport",

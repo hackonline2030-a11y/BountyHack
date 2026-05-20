@@ -17,6 +17,7 @@ function minimalDraft(overrides?: Partial<ReportDraftWire>): ReportDraftWire {
   return {
     id: 'draft-1',
     hunterId: 'hunter-1',
+    hunterWriterId: 'hunter-1',
     version: 0,
     aggregateStatus: 'draft',
     meta: emptyStep,
@@ -52,10 +53,14 @@ function minimalSubmission(overrides?: Partial<SubmissionWire>): SubmissionWire 
 describe('ReportDraftAccessPolicy', () => {
   const reportDraftRepository: jest.Mocked<IReportDraftRepository> = {
     save: jest.fn(),
+    updateHunterWriterId: jest.fn(),
     findById: jest.fn(),
     findByHunterId: jest.fn(),
+    findByHunterIdOrTeamMembership: jest.fn(),
     findAll: jest.fn(),
     findOrphanSummaries: jest.fn(),
+    findPublished: jest.fn(),
+    deleteById: jest.fn(),
   };
   const submissionRepository: jest.Mocked<ISubmissionRepository> = {
     save: jest.fn(),
@@ -103,7 +108,7 @@ describe('ReportDraftAccessPolicy', () => {
 
   it('rejects hunter saving submission on another hunters draft', async () => {
     reportDraftRepository.findById.mockResolvedValue(
-      minimalDraft({ hunterId: 'other' }),
+      minimalDraft({ hunterId: 'other', hunterWriterId: 'other' }),
     );
     await expect(
       policy.assertCanSaveSubmission(
@@ -151,6 +156,7 @@ describe('ReportDraftAccessPolicy', () => {
       members: [],
       validity: 'valid',
       draftAggregateStatus: 'draft',
+      hunterWriterUserId: 'hunter-1',
       updatedAt: '2026-05-15T10:00:00.000Z',
     });
     await expect(
@@ -211,7 +217,61 @@ describe('ReportDraftAccessPolicy', () => {
     expect(reportTeamRepository.isMemberOfDraft).not.toHaveBeenCalled();
   });
 
-  it('allows quality checker on team to save hunter draft', async () => {
+  it('rejects co-hunter who is not the designated writer from saving draft', async () => {
+    reportTeamRepository.isMemberOfDraft.mockResolvedValue(true);
+    await expect(
+      policy.assertCanSaveDraft(
+        {
+          uid: 'hunter-2',
+          email: 'h2@example.com',
+          roleCode: AppRoleCode.HUNTER,
+        },
+        {
+          id: 'draft-1',
+          hunterId: 'hunter-1',
+          hunterWriterId: 'hunter-1',
+        },
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('allows designated writer co-hunter to save draft', async () => {
+    reportTeamRepository.findDraftIdsForMember.mockResolvedValue(['draft-1']);
+    reportTeamRepository.isMemberOfDraft.mockResolvedValue(true);
+    await expect(
+      policy.assertCanSaveDraft(
+        {
+          uid: 'hunter-2',
+          email: 'h2@example.com',
+          roleCode: AppRoleCode.HUNTER,
+        },
+        {
+          id: 'draft-1',
+          hunterId: 'hunter-1',
+          hunterWriterId: 'hunter-2',
+        },
+      ),
+    ).resolves.toBeUndefined();
+  });
+
+  it('allows super admin to save hunter draft', async () => {
+    await expect(
+      policy.assertCanSaveDraft(
+        {
+          uid: 'admin-1',
+          email: 'admin@example.com',
+          roleCode: AppRoleCode.SUPER_ADMIN,
+        },
+        {
+          id: 'draft-1',
+          hunterId: 'hunter-1',
+          hunterWriterId: 'hunter-1',
+        },
+      ),
+    ).resolves.toBeUndefined();
+  });
+
+  it('rejects quality checker on team from saving hunter draft content', async () => {
     reportTeamRepository.isMemberOfDraft.mockResolvedValue(true);
     await expect(
       policy.assertCanSaveDraft(
@@ -220,9 +280,13 @@ describe('ReportDraftAccessPolicy', () => {
           email: 'qc@example.com',
           roleCode: AppRoleCode.QUALITY_CHECKER,
         },
-        { id: 'draft-1', hunterId: 'hunter-1' },
+        {
+          id: 'draft-1',
+          hunterId: 'hunter-1',
+          hunterWriterId: 'hunter-1',
+        },
       ),
-    ).resolves.toBeUndefined();
+    ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('rejects quality checker not on team from reading draft', async () => {
@@ -248,7 +312,7 @@ describe('ReportDraftAccessPolicy', () => {
           email: 'qc@example.com',
           roleCode: AppRoleCode.QUALITY_CHECKER,
         },
-        { id: 'draft-1', hunterId: 'hunter-1' },
+        { id: 'draft-1', hunterId: 'hunter-1', hunterWriterId: 'hunter-1' },
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
@@ -314,5 +378,103 @@ describe('ReportDraftAccessPolicy', () => {
         minimalSubmission(),
       ),
     ).resolves.toBeUndefined();
+  });
+
+  it('rejects coordinator from reading any report draft', async () => {
+    reportTeamRepository.isMemberOfDraft.mockResolvedValue(false);
+    reportTeamRepository.findByReportDraftId.mockResolvedValue({
+      id: 'team-1',
+      reportDraftId: 'draft-1',
+      label: 'T',
+      validity: 'valid',
+      draftAggregateStatus: 'draft',
+      hunterWriterUserId: 'hunter-1',
+      members: [{ userId: 'hunter-1', displayName: 'H1', role: 'hunter' }],
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    });
+    await expect(
+      policy.assertCanReadDraft(
+        {
+          uid: 'coord-1',
+          email: 'coord@example.com',
+          roleCode: AppRoleCode.COORDINATOR,
+        },
+        { id: 'draft-1', hunterId: 'hunter-1' },
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('allows coordinator to assign designated writer to a squad hunter', async () => {
+    reportTeamRepository.findByReportDraftId.mockResolvedValue({
+      id: 'team-1',
+      reportDraftId: 'draft-1',
+      label: 'Squad',
+      validity: 'valid',
+      draftAggregateStatus: 'draft',
+      hunterWriterUserId: 'hunter-1',
+      members: [
+        { userId: 'hunter-1', displayName: 'A', role: 'hunter' },
+        { userId: 'hunter-2', displayName: 'B', role: 'hunter' },
+        { userId: 'qc-1', displayName: 'QC', role: 'quality_checker' },
+      ],
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    });
+    const draft = minimalDraft({
+      reportTeam: {
+        label: 'Squad',
+        members: [
+          { userId: 'hunter-1', displayName: 'A', role: 'hunter' },
+          { userId: 'hunter-2', displayName: 'B', role: 'hunter' },
+          { userId: 'qc-1', displayName: 'QC', role: 'quality_checker' },
+        ],
+      },
+    });
+    await expect(
+      policy.assertCanAssignHunterWriter(
+        {
+          uid: 'coord-1',
+          email: 'coord@example.com',
+          roleCode: AppRoleCode.COORDINATOR,
+        },
+        draft,
+        'hunter-2',
+      ),
+    ).resolves.toBeUndefined();
+  });
+
+  it('rejects coordinator assigning writer to a non-hunter member', async () => {
+    reportTeamRepository.findByReportDraftId.mockResolvedValue({
+      id: 'team-1',
+      reportDraftId: 'draft-1',
+      label: 'Squad',
+      validity: 'valid',
+      draftAggregateStatus: 'draft',
+      hunterWriterUserId: 'hunter-1',
+      members: [
+        { userId: 'hunter-1', displayName: 'A', role: 'hunter' },
+        { userId: 'qc-1', displayName: 'QC', role: 'quality_checker' },
+      ],
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    });
+    const draft = minimalDraft({
+      reportTeam: {
+        label: 'Squad',
+        members: [
+          { userId: 'hunter-1', displayName: 'A', role: 'hunter' },
+          { userId: 'qc-1', displayName: 'QC', role: 'quality_checker' },
+        ],
+      },
+    });
+    await expect(
+      policy.assertCanAssignHunterWriter(
+        {
+          uid: 'coord-1',
+          email: 'coord@example.com',
+          roleCode: AppRoleCode.COORDINATOR,
+        },
+        draft,
+        'qc-1',
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
   });
 });

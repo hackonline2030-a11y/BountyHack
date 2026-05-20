@@ -19,6 +19,7 @@ function bucketVaultDraft(): ReportDraftWire {
   return {
     id: 'bbbbbbbb-0001-4000-8000-000000000001',
     hunterId: 'hunter-1',
+    hunterWriterId: 'hunter-1',
     version: 36,
     aggregateStatus: 'published',
     meta: approvedStep({

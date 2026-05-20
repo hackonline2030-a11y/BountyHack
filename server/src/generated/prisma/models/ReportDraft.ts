@@ -39,6 +39,7 @@ export type ReportDraftSumAggregateOutputType = {
 export type ReportDraftMinAggregateOutputType = {
   id: string | null
   hunterId: string | null
+  hunterWriterId: string | null
   version: number | null
   aggregateStatus: $Enums.ReportDraftAggregateStatus | null
   superAdminRevisionRequestedAt: Date | null
@@ -50,6 +51,7 @@ export type ReportDraftMinAggregateOutputType = {
 export type ReportDraftMaxAggregateOutputType = {
   id: string | null
   hunterId: string | null
+  hunterWriterId: string | null
   version: number | null
   aggregateStatus: $Enums.ReportDraftAggregateStatus | null
   superAdminRevisionRequestedAt: Date | null
@@ -61,6 +63,7 @@ export type ReportDraftMaxAggregateOutputType = {
 export type ReportDraftCountAggregateOutputType = {
   id: number
   hunterId: number
+  hunterWriterId: number
   version: number
   aggregateStatus: number
   superAdminRevisionRequestedAt: number
@@ -84,6 +87,7 @@ export type ReportDraftSumAggregateInputType = {
 export type ReportDraftMinAggregateInputType = {
   id?: true
   hunterId?: true
+  hunterWriterId?: true
   version?: true
   aggregateStatus?: true
   superAdminRevisionRequestedAt?: true
@@ -95,6 +99,7 @@ export type ReportDraftMinAggregateInputType = {
 export type ReportDraftMaxAggregateInputType = {
   id?: true
   hunterId?: true
+  hunterWriterId?: true
   version?: true
   aggregateStatus?: true
   superAdminRevisionRequestedAt?: true
@@ -106,6 +111,7 @@ export type ReportDraftMaxAggregateInputType = {
 export type ReportDraftCountAggregateInputType = {
   id?: true
   hunterId?: true
+  hunterWriterId?: true
   version?: true
   aggregateStatus?: true
   superAdminRevisionRequestedAt?: true
@@ -204,6 +210,7 @@ export type ReportDraftGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
 export type ReportDraftGroupByOutputType = {
   id: string
   hunterId: string
+  hunterWriterId: string
   version: number
   aggregateStatus: $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt: Date | null
@@ -238,6 +245,7 @@ export type ReportDraftWhereInput = {
   NOT?: Prisma.ReportDraftWhereInput | Prisma.ReportDraftWhereInput[]
   id?: Prisma.StringFilter<"ReportDraft"> | string
   hunterId?: Prisma.StringFilter<"ReportDraft"> | string
+  hunterWriterId?: Prisma.StringFilter<"ReportDraft"> | string
   version?: Prisma.IntFilter<"ReportDraft"> | number
   aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFilter<"ReportDraft"> | $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Prisma.DateTimeNullableFilter<"ReportDraft"> | Date | string | null
@@ -245,6 +253,7 @@ export type ReportDraftWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"ReportDraft"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReportDraft"> | Date | string
   hunter?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  hunterWriter?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   steps?: Prisma.ReportDraftStepListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
   globalSubmissions?: Prisma.GlobalSubmissionListRelationFilter
@@ -254,6 +263,7 @@ export type ReportDraftWhereInput = {
 export type ReportDraftOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   hunterId?: Prisma.SortOrder
+  hunterWriterId?: Prisma.SortOrder
   version?: Prisma.SortOrder
   aggregateStatus?: Prisma.SortOrder
   superAdminRevisionRequestedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -261,6 +271,7 @@ export type ReportDraftOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   hunter?: Prisma.UserOrderByWithRelationInput
+  hunterWriter?: Prisma.UserOrderByWithRelationInput
   steps?: Prisma.ReportDraftStepOrderByRelationAggregateInput
   submissions?: Prisma.SubmissionOrderByRelationAggregateInput
   globalSubmissions?: Prisma.GlobalSubmissionOrderByRelationAggregateInput
@@ -274,6 +285,7 @@ export type ReportDraftWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ReportDraftWhereInput[]
   NOT?: Prisma.ReportDraftWhereInput | Prisma.ReportDraftWhereInput[]
   hunterId?: Prisma.StringFilter<"ReportDraft"> | string
+  hunterWriterId?: Prisma.StringFilter<"ReportDraft"> | string
   version?: Prisma.IntFilter<"ReportDraft"> | number
   aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFilter<"ReportDraft"> | $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Prisma.DateTimeNullableFilter<"ReportDraft"> | Date | string | null
@@ -281,6 +293,7 @@ export type ReportDraftWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"ReportDraft"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReportDraft"> | Date | string
   hunter?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  hunterWriter?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   steps?: Prisma.ReportDraftStepListRelationFilter
   submissions?: Prisma.SubmissionListRelationFilter
   globalSubmissions?: Prisma.GlobalSubmissionListRelationFilter
@@ -290,6 +303,7 @@ export type ReportDraftWhereUniqueInput = Prisma.AtLeast<{
 export type ReportDraftOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   hunterId?: Prisma.SortOrder
+  hunterWriterId?: Prisma.SortOrder
   version?: Prisma.SortOrder
   aggregateStatus?: Prisma.SortOrder
   superAdminRevisionRequestedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -309,6 +323,7 @@ export type ReportDraftScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ReportDraftScalarWhereWithAggregatesInput | Prisma.ReportDraftScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ReportDraft"> | string
   hunterId?: Prisma.StringWithAggregatesFilter<"ReportDraft"> | string
+  hunterWriterId?: Prisma.StringWithAggregatesFilter<"ReportDraft"> | string
   version?: Prisma.IntWithAggregatesFilter<"ReportDraft"> | number
   aggregateStatus?: Prisma.EnumReportDraftAggregateStatusWithAggregatesFilter<"ReportDraft"> | $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ReportDraft"> | Date | string | null
@@ -325,7 +340,8 @@ export type ReportDraftCreateInput = {
   superAdminGlobalRevisionCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  hunter: Prisma.UserCreateNestedOneWithoutReportDraftsInput
+  hunter: Prisma.UserCreateNestedOneWithoutReportDraftsOwnedInput
+  hunterWriter: Prisma.UserCreateNestedOneWithoutReportDraftsAsHunterWriterInput
   steps?: Prisma.ReportDraftStepCreateNestedManyWithoutReportDraftInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutReportDraftInput
   globalSubmissions?: Prisma.GlobalSubmissionCreateNestedManyWithoutReportDraftInput
@@ -335,6 +351,7 @@ export type ReportDraftCreateInput = {
 export type ReportDraftUncheckedCreateInput = {
   id?: string
   hunterId: string
+  hunterWriterId: string
   version?: number
   aggregateStatus?: $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Date | string | null
@@ -355,7 +372,8 @@ export type ReportDraftUpdateInput = {
   superAdminGlobalRevisionCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  hunter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsNestedInput
+  hunter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsOwnedNestedInput
+  hunterWriter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsAsHunterWriterNestedInput
   steps?: Prisma.ReportDraftStepUpdateManyWithoutReportDraftNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutReportDraftNestedInput
   globalSubmissions?: Prisma.GlobalSubmissionUpdateManyWithoutReportDraftNestedInput
@@ -365,6 +383,7 @@ export type ReportDraftUpdateInput = {
 export type ReportDraftUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   hunterId?: Prisma.StringFieldUpdateOperationsInput | string
+  hunterWriterId?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFieldUpdateOperationsInput | $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -380,6 +399,7 @@ export type ReportDraftUncheckedUpdateInput = {
 export type ReportDraftCreateManyInput = {
   id?: string
   hunterId: string
+  hunterWriterId: string
   version?: number
   aggregateStatus?: $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Date | string | null
@@ -401,6 +421,7 @@ export type ReportDraftUpdateManyMutationInput = {
 export type ReportDraftUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   hunterId?: Prisma.StringFieldUpdateOperationsInput | string
+  hunterWriterId?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFieldUpdateOperationsInput | $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -428,6 +449,7 @@ export type ReportDraftOrderByRelevanceInput = {
 export type ReportDraftCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   hunterId?: Prisma.SortOrder
+  hunterWriterId?: Prisma.SortOrder
   version?: Prisma.SortOrder
   aggregateStatus?: Prisma.SortOrder
   superAdminRevisionRequestedAt?: Prisma.SortOrder
@@ -444,6 +466,7 @@ export type ReportDraftAvgOrderByAggregateInput = {
 export type ReportDraftMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   hunterId?: Prisma.SortOrder
+  hunterWriterId?: Prisma.SortOrder
   version?: Prisma.SortOrder
   aggregateStatus?: Prisma.SortOrder
   superAdminRevisionRequestedAt?: Prisma.SortOrder
@@ -455,6 +478,7 @@ export type ReportDraftMaxOrderByAggregateInput = {
 export type ReportDraftMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   hunterId?: Prisma.SortOrder
+  hunterWriterId?: Prisma.SortOrder
   version?: Prisma.SortOrder
   aggregateStatus?: Prisma.SortOrder
   superAdminRevisionRequestedAt?: Prisma.SortOrder
@@ -480,10 +504,24 @@ export type ReportDraftCreateNestedManyWithoutHunterInput = {
   connect?: Prisma.ReportDraftWhereUniqueInput | Prisma.ReportDraftWhereUniqueInput[]
 }
 
+export type ReportDraftCreateNestedManyWithoutHunterWriterInput = {
+  create?: Prisma.XOR<Prisma.ReportDraftCreateWithoutHunterWriterInput, Prisma.ReportDraftUncheckedCreateWithoutHunterWriterInput> | Prisma.ReportDraftCreateWithoutHunterWriterInput[] | Prisma.ReportDraftUncheckedCreateWithoutHunterWriterInput[]
+  connectOrCreate?: Prisma.ReportDraftCreateOrConnectWithoutHunterWriterInput | Prisma.ReportDraftCreateOrConnectWithoutHunterWriterInput[]
+  createMany?: Prisma.ReportDraftCreateManyHunterWriterInputEnvelope
+  connect?: Prisma.ReportDraftWhereUniqueInput | Prisma.ReportDraftWhereUniqueInput[]
+}
+
 export type ReportDraftUncheckedCreateNestedManyWithoutHunterInput = {
   create?: Prisma.XOR<Prisma.ReportDraftCreateWithoutHunterInput, Prisma.ReportDraftUncheckedCreateWithoutHunterInput> | Prisma.ReportDraftCreateWithoutHunterInput[] | Prisma.ReportDraftUncheckedCreateWithoutHunterInput[]
   connectOrCreate?: Prisma.ReportDraftCreateOrConnectWithoutHunterInput | Prisma.ReportDraftCreateOrConnectWithoutHunterInput[]
   createMany?: Prisma.ReportDraftCreateManyHunterInputEnvelope
+  connect?: Prisma.ReportDraftWhereUniqueInput | Prisma.ReportDraftWhereUniqueInput[]
+}
+
+export type ReportDraftUncheckedCreateNestedManyWithoutHunterWriterInput = {
+  create?: Prisma.XOR<Prisma.ReportDraftCreateWithoutHunterWriterInput, Prisma.ReportDraftUncheckedCreateWithoutHunterWriterInput> | Prisma.ReportDraftCreateWithoutHunterWriterInput[] | Prisma.ReportDraftUncheckedCreateWithoutHunterWriterInput[]
+  connectOrCreate?: Prisma.ReportDraftCreateOrConnectWithoutHunterWriterInput | Prisma.ReportDraftCreateOrConnectWithoutHunterWriterInput[]
+  createMany?: Prisma.ReportDraftCreateManyHunterWriterInputEnvelope
   connect?: Prisma.ReportDraftWhereUniqueInput | Prisma.ReportDraftWhereUniqueInput[]
 }
 
@@ -501,6 +539,20 @@ export type ReportDraftUpdateManyWithoutHunterNestedInput = {
   deleteMany?: Prisma.ReportDraftScalarWhereInput | Prisma.ReportDraftScalarWhereInput[]
 }
 
+export type ReportDraftUpdateManyWithoutHunterWriterNestedInput = {
+  create?: Prisma.XOR<Prisma.ReportDraftCreateWithoutHunterWriterInput, Prisma.ReportDraftUncheckedCreateWithoutHunterWriterInput> | Prisma.ReportDraftCreateWithoutHunterWriterInput[] | Prisma.ReportDraftUncheckedCreateWithoutHunterWriterInput[]
+  connectOrCreate?: Prisma.ReportDraftCreateOrConnectWithoutHunterWriterInput | Prisma.ReportDraftCreateOrConnectWithoutHunterWriterInput[]
+  upsert?: Prisma.ReportDraftUpsertWithWhereUniqueWithoutHunterWriterInput | Prisma.ReportDraftUpsertWithWhereUniqueWithoutHunterWriterInput[]
+  createMany?: Prisma.ReportDraftCreateManyHunterWriterInputEnvelope
+  set?: Prisma.ReportDraftWhereUniqueInput | Prisma.ReportDraftWhereUniqueInput[]
+  disconnect?: Prisma.ReportDraftWhereUniqueInput | Prisma.ReportDraftWhereUniqueInput[]
+  delete?: Prisma.ReportDraftWhereUniqueInput | Prisma.ReportDraftWhereUniqueInput[]
+  connect?: Prisma.ReportDraftWhereUniqueInput | Prisma.ReportDraftWhereUniqueInput[]
+  update?: Prisma.ReportDraftUpdateWithWhereUniqueWithoutHunterWriterInput | Prisma.ReportDraftUpdateWithWhereUniqueWithoutHunterWriterInput[]
+  updateMany?: Prisma.ReportDraftUpdateManyWithWhereWithoutHunterWriterInput | Prisma.ReportDraftUpdateManyWithWhereWithoutHunterWriterInput[]
+  deleteMany?: Prisma.ReportDraftScalarWhereInput | Prisma.ReportDraftScalarWhereInput[]
+}
+
 export type ReportDraftUncheckedUpdateManyWithoutHunterNestedInput = {
   create?: Prisma.XOR<Prisma.ReportDraftCreateWithoutHunterInput, Prisma.ReportDraftUncheckedCreateWithoutHunterInput> | Prisma.ReportDraftCreateWithoutHunterInput[] | Prisma.ReportDraftUncheckedCreateWithoutHunterInput[]
   connectOrCreate?: Prisma.ReportDraftCreateOrConnectWithoutHunterInput | Prisma.ReportDraftCreateOrConnectWithoutHunterInput[]
@@ -512,6 +564,20 @@ export type ReportDraftUncheckedUpdateManyWithoutHunterNestedInput = {
   connect?: Prisma.ReportDraftWhereUniqueInput | Prisma.ReportDraftWhereUniqueInput[]
   update?: Prisma.ReportDraftUpdateWithWhereUniqueWithoutHunterInput | Prisma.ReportDraftUpdateWithWhereUniqueWithoutHunterInput[]
   updateMany?: Prisma.ReportDraftUpdateManyWithWhereWithoutHunterInput | Prisma.ReportDraftUpdateManyWithWhereWithoutHunterInput[]
+  deleteMany?: Prisma.ReportDraftScalarWhereInput | Prisma.ReportDraftScalarWhereInput[]
+}
+
+export type ReportDraftUncheckedUpdateManyWithoutHunterWriterNestedInput = {
+  create?: Prisma.XOR<Prisma.ReportDraftCreateWithoutHunterWriterInput, Prisma.ReportDraftUncheckedCreateWithoutHunterWriterInput> | Prisma.ReportDraftCreateWithoutHunterWriterInput[] | Prisma.ReportDraftUncheckedCreateWithoutHunterWriterInput[]
+  connectOrCreate?: Prisma.ReportDraftCreateOrConnectWithoutHunterWriterInput | Prisma.ReportDraftCreateOrConnectWithoutHunterWriterInput[]
+  upsert?: Prisma.ReportDraftUpsertWithWhereUniqueWithoutHunterWriterInput | Prisma.ReportDraftUpsertWithWhereUniqueWithoutHunterWriterInput[]
+  createMany?: Prisma.ReportDraftCreateManyHunterWriterInputEnvelope
+  set?: Prisma.ReportDraftWhereUniqueInput | Prisma.ReportDraftWhereUniqueInput[]
+  disconnect?: Prisma.ReportDraftWhereUniqueInput | Prisma.ReportDraftWhereUniqueInput[]
+  delete?: Prisma.ReportDraftWhereUniqueInput | Prisma.ReportDraftWhereUniqueInput[]
+  connect?: Prisma.ReportDraftWhereUniqueInput | Prisma.ReportDraftWhereUniqueInput[]
+  update?: Prisma.ReportDraftUpdateWithWhereUniqueWithoutHunterWriterInput | Prisma.ReportDraftUpdateWithWhereUniqueWithoutHunterWriterInput[]
+  updateMany?: Prisma.ReportDraftUpdateManyWithWhereWithoutHunterWriterInput | Prisma.ReportDraftUpdateManyWithWhereWithoutHunterWriterInput[]
   deleteMany?: Prisma.ReportDraftScalarWhereInput | Prisma.ReportDraftScalarWhereInput[]
 }
 
@@ -587,6 +653,7 @@ export type ReportDraftCreateWithoutHunterInput = {
   superAdminGlobalRevisionCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  hunterWriter: Prisma.UserCreateNestedOneWithoutReportDraftsAsHunterWriterInput
   steps?: Prisma.ReportDraftStepCreateNestedManyWithoutReportDraftInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutReportDraftInput
   globalSubmissions?: Prisma.GlobalSubmissionCreateNestedManyWithoutReportDraftInput
@@ -595,6 +662,7 @@ export type ReportDraftCreateWithoutHunterInput = {
 
 export type ReportDraftUncheckedCreateWithoutHunterInput = {
   id?: string
+  hunterWriterId: string
   version?: number
   aggregateStatus?: $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Date | string | null
@@ -614,6 +682,46 @@ export type ReportDraftCreateOrConnectWithoutHunterInput = {
 
 export type ReportDraftCreateManyHunterInputEnvelope = {
   data: Prisma.ReportDraftCreateManyHunterInput | Prisma.ReportDraftCreateManyHunterInput[]
+  skipDuplicates?: boolean
+}
+
+export type ReportDraftCreateWithoutHunterWriterInput = {
+  id?: string
+  version?: number
+  aggregateStatus?: $Enums.ReportDraftAggregateStatus
+  superAdminRevisionRequestedAt?: Date | string | null
+  superAdminGlobalRevisionCount?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  hunter: Prisma.UserCreateNestedOneWithoutReportDraftsOwnedInput
+  steps?: Prisma.ReportDraftStepCreateNestedManyWithoutReportDraftInput
+  submissions?: Prisma.SubmissionCreateNestedManyWithoutReportDraftInput
+  globalSubmissions?: Prisma.GlobalSubmissionCreateNestedManyWithoutReportDraftInput
+  reportTeam?: Prisma.ReportTeamCreateNestedOneWithoutReportDraftInput
+}
+
+export type ReportDraftUncheckedCreateWithoutHunterWriterInput = {
+  id?: string
+  hunterId: string
+  version?: number
+  aggregateStatus?: $Enums.ReportDraftAggregateStatus
+  superAdminRevisionRequestedAt?: Date | string | null
+  superAdminGlobalRevisionCount?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  steps?: Prisma.ReportDraftStepUncheckedCreateNestedManyWithoutReportDraftInput
+  submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutReportDraftInput
+  globalSubmissions?: Prisma.GlobalSubmissionUncheckedCreateNestedManyWithoutReportDraftInput
+  reportTeam?: Prisma.ReportTeamUncheckedCreateNestedOneWithoutReportDraftInput
+}
+
+export type ReportDraftCreateOrConnectWithoutHunterWriterInput = {
+  where: Prisma.ReportDraftWhereUniqueInput
+  create: Prisma.XOR<Prisma.ReportDraftCreateWithoutHunterWriterInput, Prisma.ReportDraftUncheckedCreateWithoutHunterWriterInput>
+}
+
+export type ReportDraftCreateManyHunterWriterInputEnvelope = {
+  data: Prisma.ReportDraftCreateManyHunterWriterInput | Prisma.ReportDraftCreateManyHunterWriterInput[]
   skipDuplicates?: boolean
 }
 
@@ -639,12 +747,29 @@ export type ReportDraftScalarWhereInput = {
   NOT?: Prisma.ReportDraftScalarWhereInput | Prisma.ReportDraftScalarWhereInput[]
   id?: Prisma.StringFilter<"ReportDraft"> | string
   hunterId?: Prisma.StringFilter<"ReportDraft"> | string
+  hunterWriterId?: Prisma.StringFilter<"ReportDraft"> | string
   version?: Prisma.IntFilter<"ReportDraft"> | number
   aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFilter<"ReportDraft"> | $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Prisma.DateTimeNullableFilter<"ReportDraft"> | Date | string | null
   superAdminGlobalRevisionCount?: Prisma.IntFilter<"ReportDraft"> | number
   createdAt?: Prisma.DateTimeFilter<"ReportDraft"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReportDraft"> | Date | string
+}
+
+export type ReportDraftUpsertWithWhereUniqueWithoutHunterWriterInput = {
+  where: Prisma.ReportDraftWhereUniqueInput
+  update: Prisma.XOR<Prisma.ReportDraftUpdateWithoutHunterWriterInput, Prisma.ReportDraftUncheckedUpdateWithoutHunterWriterInput>
+  create: Prisma.XOR<Prisma.ReportDraftCreateWithoutHunterWriterInput, Prisma.ReportDraftUncheckedCreateWithoutHunterWriterInput>
+}
+
+export type ReportDraftUpdateWithWhereUniqueWithoutHunterWriterInput = {
+  where: Prisma.ReportDraftWhereUniqueInput
+  data: Prisma.XOR<Prisma.ReportDraftUpdateWithoutHunterWriterInput, Prisma.ReportDraftUncheckedUpdateWithoutHunterWriterInput>
+}
+
+export type ReportDraftUpdateManyWithWhereWithoutHunterWriterInput = {
+  where: Prisma.ReportDraftScalarWhereInput
+  data: Prisma.XOR<Prisma.ReportDraftUpdateManyMutationInput, Prisma.ReportDraftUncheckedUpdateManyWithoutHunterWriterInput>
 }
 
 export type ReportDraftCreateWithoutGlobalSubmissionsInput = {
@@ -655,7 +780,8 @@ export type ReportDraftCreateWithoutGlobalSubmissionsInput = {
   superAdminGlobalRevisionCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  hunter: Prisma.UserCreateNestedOneWithoutReportDraftsInput
+  hunter: Prisma.UserCreateNestedOneWithoutReportDraftsOwnedInput
+  hunterWriter: Prisma.UserCreateNestedOneWithoutReportDraftsAsHunterWriterInput
   steps?: Prisma.ReportDraftStepCreateNestedManyWithoutReportDraftInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutReportDraftInput
   reportTeam?: Prisma.ReportTeamCreateNestedOneWithoutReportDraftInput
@@ -664,6 +790,7 @@ export type ReportDraftCreateWithoutGlobalSubmissionsInput = {
 export type ReportDraftUncheckedCreateWithoutGlobalSubmissionsInput = {
   id?: string
   hunterId: string
+  hunterWriterId: string
   version?: number
   aggregateStatus?: $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Date | string | null
@@ -699,7 +826,8 @@ export type ReportDraftUpdateWithoutGlobalSubmissionsInput = {
   superAdminGlobalRevisionCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  hunter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsNestedInput
+  hunter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsOwnedNestedInput
+  hunterWriter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsAsHunterWriterNestedInput
   steps?: Prisma.ReportDraftStepUpdateManyWithoutReportDraftNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutReportDraftNestedInput
   reportTeam?: Prisma.ReportTeamUpdateOneWithoutReportDraftNestedInput
@@ -708,6 +836,7 @@ export type ReportDraftUpdateWithoutGlobalSubmissionsInput = {
 export type ReportDraftUncheckedUpdateWithoutGlobalSubmissionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   hunterId?: Prisma.StringFieldUpdateOperationsInput | string
+  hunterWriterId?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFieldUpdateOperationsInput | $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -727,7 +856,8 @@ export type ReportDraftCreateWithoutStepsInput = {
   superAdminGlobalRevisionCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  hunter: Prisma.UserCreateNestedOneWithoutReportDraftsInput
+  hunter: Prisma.UserCreateNestedOneWithoutReportDraftsOwnedInput
+  hunterWriter: Prisma.UserCreateNestedOneWithoutReportDraftsAsHunterWriterInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutReportDraftInput
   globalSubmissions?: Prisma.GlobalSubmissionCreateNestedManyWithoutReportDraftInput
   reportTeam?: Prisma.ReportTeamCreateNestedOneWithoutReportDraftInput
@@ -736,6 +866,7 @@ export type ReportDraftCreateWithoutStepsInput = {
 export type ReportDraftUncheckedCreateWithoutStepsInput = {
   id?: string
   hunterId: string
+  hunterWriterId: string
   version?: number
   aggregateStatus?: $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Date | string | null
@@ -771,7 +902,8 @@ export type ReportDraftUpdateWithoutStepsInput = {
   superAdminGlobalRevisionCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  hunter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsNestedInput
+  hunter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsOwnedNestedInput
+  hunterWriter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsAsHunterWriterNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutReportDraftNestedInput
   globalSubmissions?: Prisma.GlobalSubmissionUpdateManyWithoutReportDraftNestedInput
   reportTeam?: Prisma.ReportTeamUpdateOneWithoutReportDraftNestedInput
@@ -780,6 +912,7 @@ export type ReportDraftUpdateWithoutStepsInput = {
 export type ReportDraftUncheckedUpdateWithoutStepsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   hunterId?: Prisma.StringFieldUpdateOperationsInput | string
+  hunterWriterId?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFieldUpdateOperationsInput | $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -799,7 +932,8 @@ export type ReportDraftCreateWithoutSubmissionsInput = {
   superAdminGlobalRevisionCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  hunter: Prisma.UserCreateNestedOneWithoutReportDraftsInput
+  hunter: Prisma.UserCreateNestedOneWithoutReportDraftsOwnedInput
+  hunterWriter: Prisma.UserCreateNestedOneWithoutReportDraftsAsHunterWriterInput
   steps?: Prisma.ReportDraftStepCreateNestedManyWithoutReportDraftInput
   globalSubmissions?: Prisma.GlobalSubmissionCreateNestedManyWithoutReportDraftInput
   reportTeam?: Prisma.ReportTeamCreateNestedOneWithoutReportDraftInput
@@ -808,6 +942,7 @@ export type ReportDraftCreateWithoutSubmissionsInput = {
 export type ReportDraftUncheckedCreateWithoutSubmissionsInput = {
   id?: string
   hunterId: string
+  hunterWriterId: string
   version?: number
   aggregateStatus?: $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Date | string | null
@@ -843,7 +978,8 @@ export type ReportDraftUpdateWithoutSubmissionsInput = {
   superAdminGlobalRevisionCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  hunter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsNestedInput
+  hunter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsOwnedNestedInput
+  hunterWriter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsAsHunterWriterNestedInput
   steps?: Prisma.ReportDraftStepUpdateManyWithoutReportDraftNestedInput
   globalSubmissions?: Prisma.GlobalSubmissionUpdateManyWithoutReportDraftNestedInput
   reportTeam?: Prisma.ReportTeamUpdateOneWithoutReportDraftNestedInput
@@ -852,6 +988,7 @@ export type ReportDraftUpdateWithoutSubmissionsInput = {
 export type ReportDraftUncheckedUpdateWithoutSubmissionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   hunterId?: Prisma.StringFieldUpdateOperationsInput | string
+  hunterWriterId?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFieldUpdateOperationsInput | $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -871,7 +1008,8 @@ export type ReportDraftCreateWithoutReportTeamInput = {
   superAdminGlobalRevisionCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  hunter: Prisma.UserCreateNestedOneWithoutReportDraftsInput
+  hunter: Prisma.UserCreateNestedOneWithoutReportDraftsOwnedInput
+  hunterWriter: Prisma.UserCreateNestedOneWithoutReportDraftsAsHunterWriterInput
   steps?: Prisma.ReportDraftStepCreateNestedManyWithoutReportDraftInput
   submissions?: Prisma.SubmissionCreateNestedManyWithoutReportDraftInput
   globalSubmissions?: Prisma.GlobalSubmissionCreateNestedManyWithoutReportDraftInput
@@ -880,6 +1018,7 @@ export type ReportDraftCreateWithoutReportTeamInput = {
 export type ReportDraftUncheckedCreateWithoutReportTeamInput = {
   id?: string
   hunterId: string
+  hunterWriterId: string
   version?: number
   aggregateStatus?: $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Date | string | null
@@ -915,7 +1054,8 @@ export type ReportDraftUpdateWithoutReportTeamInput = {
   superAdminGlobalRevisionCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  hunter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsNestedInput
+  hunter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsOwnedNestedInput
+  hunterWriter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsAsHunterWriterNestedInput
   steps?: Prisma.ReportDraftStepUpdateManyWithoutReportDraftNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutReportDraftNestedInput
   globalSubmissions?: Prisma.GlobalSubmissionUpdateManyWithoutReportDraftNestedInput
@@ -924,6 +1064,7 @@ export type ReportDraftUpdateWithoutReportTeamInput = {
 export type ReportDraftUncheckedUpdateWithoutReportTeamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   hunterId?: Prisma.StringFieldUpdateOperationsInput | string
+  hunterWriterId?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFieldUpdateOperationsInput | $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -937,6 +1078,18 @@ export type ReportDraftUncheckedUpdateWithoutReportTeamInput = {
 
 export type ReportDraftCreateManyHunterInput = {
   id?: string
+  hunterWriterId: string
+  version?: number
+  aggregateStatus?: $Enums.ReportDraftAggregateStatus
+  superAdminRevisionRequestedAt?: Date | string | null
+  superAdminGlobalRevisionCount?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ReportDraftCreateManyHunterWriterInput = {
+  id?: string
+  hunterId: string
   version?: number
   aggregateStatus?: $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Date | string | null
@@ -953,6 +1106,7 @@ export type ReportDraftUpdateWithoutHunterInput = {
   superAdminGlobalRevisionCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  hunterWriter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsAsHunterWriterNestedInput
   steps?: Prisma.ReportDraftStepUpdateManyWithoutReportDraftNestedInput
   submissions?: Prisma.SubmissionUpdateManyWithoutReportDraftNestedInput
   globalSubmissions?: Prisma.GlobalSubmissionUpdateManyWithoutReportDraftNestedInput
@@ -961,6 +1115,7 @@ export type ReportDraftUpdateWithoutHunterInput = {
 
 export type ReportDraftUncheckedUpdateWithoutHunterInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  hunterWriterId?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFieldUpdateOperationsInput | $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -975,6 +1130,48 @@ export type ReportDraftUncheckedUpdateWithoutHunterInput = {
 
 export type ReportDraftUncheckedUpdateManyWithoutHunterInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  hunterWriterId?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFieldUpdateOperationsInput | $Enums.ReportDraftAggregateStatus
+  superAdminRevisionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  superAdminGlobalRevisionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ReportDraftUpdateWithoutHunterWriterInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFieldUpdateOperationsInput | $Enums.ReportDraftAggregateStatus
+  superAdminRevisionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  superAdminGlobalRevisionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  hunter?: Prisma.UserUpdateOneRequiredWithoutReportDraftsOwnedNestedInput
+  steps?: Prisma.ReportDraftStepUpdateManyWithoutReportDraftNestedInput
+  submissions?: Prisma.SubmissionUpdateManyWithoutReportDraftNestedInput
+  globalSubmissions?: Prisma.GlobalSubmissionUpdateManyWithoutReportDraftNestedInput
+  reportTeam?: Prisma.ReportTeamUpdateOneWithoutReportDraftNestedInput
+}
+
+export type ReportDraftUncheckedUpdateWithoutHunterWriterInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  hunterId?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFieldUpdateOperationsInput | $Enums.ReportDraftAggregateStatus
+  superAdminRevisionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  superAdminGlobalRevisionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  steps?: Prisma.ReportDraftStepUncheckedUpdateManyWithoutReportDraftNestedInput
+  submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutReportDraftNestedInput
+  globalSubmissions?: Prisma.GlobalSubmissionUncheckedUpdateManyWithoutReportDraftNestedInput
+  reportTeam?: Prisma.ReportTeamUncheckedUpdateOneWithoutReportDraftNestedInput
+}
+
+export type ReportDraftUncheckedUpdateManyWithoutHunterWriterInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  hunterId?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   aggregateStatus?: Prisma.EnumReportDraftAggregateStatusFieldUpdateOperationsInput | $Enums.ReportDraftAggregateStatus
   superAdminRevisionRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1035,6 +1232,7 @@ export type ReportDraftCountOutputTypeCountGlobalSubmissionsArgs<ExtArgs extends
 export type ReportDraftSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   hunterId?: boolean
+  hunterWriterId?: boolean
   version?: boolean
   aggregateStatus?: boolean
   superAdminRevisionRequestedAt?: boolean
@@ -1042,6 +1240,7 @@ export type ReportDraftSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   createdAt?: boolean
   updatedAt?: boolean
   hunter?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  hunterWriter?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   steps?: boolean | Prisma.ReportDraft$stepsArgs<ExtArgs>
   submissions?: boolean | Prisma.ReportDraft$submissionsArgs<ExtArgs>
   globalSubmissions?: boolean | Prisma.ReportDraft$globalSubmissionsArgs<ExtArgs>
@@ -1054,6 +1253,7 @@ export type ReportDraftSelect<ExtArgs extends runtime.Types.Extensions.InternalA
 export type ReportDraftSelectScalar = {
   id?: boolean
   hunterId?: boolean
+  hunterWriterId?: boolean
   version?: boolean
   aggregateStatus?: boolean
   superAdminRevisionRequestedAt?: boolean
@@ -1062,9 +1262,10 @@ export type ReportDraftSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ReportDraftOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "hunterId" | "version" | "aggregateStatus" | "superAdminRevisionRequestedAt" | "superAdminGlobalRevisionCount" | "createdAt" | "updatedAt", ExtArgs["result"]["reportDraft"]>
+export type ReportDraftOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "hunterId" | "hunterWriterId" | "version" | "aggregateStatus" | "superAdminRevisionRequestedAt" | "superAdminGlobalRevisionCount" | "createdAt" | "updatedAt", ExtArgs["result"]["reportDraft"]>
 export type ReportDraftInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   hunter?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  hunterWriter?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   steps?: boolean | Prisma.ReportDraft$stepsArgs<ExtArgs>
   submissions?: boolean | Prisma.ReportDraft$submissionsArgs<ExtArgs>
   globalSubmissions?: boolean | Prisma.ReportDraft$globalSubmissionsArgs<ExtArgs>
@@ -1076,6 +1277,7 @@ export type $ReportDraftPayload<ExtArgs extends runtime.Types.Extensions.Interna
   name: "ReportDraft"
   objects: {
     hunter: Prisma.$UserPayload<ExtArgs>
+    hunterWriter: Prisma.$UserPayload<ExtArgs>
     steps: Prisma.$ReportDraftStepPayload<ExtArgs>[]
     submissions: Prisma.$SubmissionPayload<ExtArgs>[]
     globalSubmissions: Prisma.$GlobalSubmissionPayload<ExtArgs>[]
@@ -1084,6 +1286,10 @@ export type $ReportDraftPayload<ExtArgs extends runtime.Types.Extensions.Interna
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     hunterId: string
+    /**
+     * Squad member allowed to edit the draft and submit workflow steps (defaults to `hunter_id`).
+     */
+    hunterWriterId: string
     version: number
     aggregateStatus: $Enums.ReportDraftAggregateStatus
     /**
@@ -1437,6 +1643,7 @@ readonly fields: ReportDraftFieldRefs;
 export interface Prisma__ReportDraftClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   hunter<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  hunterWriter<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   steps<T extends Prisma.ReportDraft$stepsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReportDraft$stepsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportDraftStepPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   submissions<T extends Prisma.ReportDraft$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReportDraft$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   globalSubmissions<T extends Prisma.ReportDraft$globalSubmissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReportDraft$globalSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GlobalSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1472,6 +1679,7 @@ export interface Prisma__ReportDraftClient<T, Null = never, ExtArgs extends runt
 export interface ReportDraftFieldRefs {
   readonly id: Prisma.FieldRef<"ReportDraft", 'String'>
   readonly hunterId: Prisma.FieldRef<"ReportDraft", 'String'>
+  readonly hunterWriterId: Prisma.FieldRef<"ReportDraft", 'String'>
   readonly version: Prisma.FieldRef<"ReportDraft", 'Int'>
   readonly aggregateStatus: Prisma.FieldRef<"ReportDraft", 'ReportDraftAggregateStatus'>
   readonly superAdminRevisionRequestedAt: Prisma.FieldRef<"ReportDraft", 'DateTime'>

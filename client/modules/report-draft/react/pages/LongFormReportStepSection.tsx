@@ -1,6 +1,7 @@
 "use client";
 
 import { type FC, useCallback, useEffect, useMemo, useState } from "react";
+import { useT } from "next-i18next/client";
 import { normalizeLongFormPayload } from "@modules/report-draft/core/model/long-form-steps.factory";
 import type { LongFormWizardStep } from "@modules/report-draft/core/model/long-form-steps.factory";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
@@ -19,6 +20,7 @@ import {
 } from "@modules/report-draft/core/model/super-admin-final-validation";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
+import { useReportDraftSession } from "@modules/report-draft/react/context/report-draft-session.context";
 
 const Step = ReportDraftDomainModel.ReportDraftStep;
 
@@ -31,7 +33,9 @@ type Props = {
  * Long-form wizard steps (COLLECTION → FINAL) — free section blocs repeater only.
  */
 export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
+  const { t } = useT("myReports");
   const dispatch = useAppDispatch();
+  const { viewerUserId, isDesignatedStepWriter } = useReportDraftSession();
   const currentDraftId = useAppSelector((s) => s.reportDrafts.currentDraftId);
   const draftRow = useAppSelector((s) =>
     currentDraftId ? s.reportDrafts.byId[currentDraftId] : undefined,
@@ -54,7 +58,7 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
 
   const stepStatus = draftRow?.[stateKey]?.status ?? "in-progress";
 
-  const submittedBy = draftRow?.hunterId ?? "";
+  const submittedBy = viewerUserId;
   const [reviewerRole, setReviewerRole] =
     useState<ReportDraftDomainModel.ReviewerRole>("quality_checker");
 
@@ -70,10 +74,11 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
     setDraft(persistedPayload);
   }, [step, persistedPayload]);
 
-  const editable = isWizardStepEditable(stepStatus, {
+  const stepEditableByWorkflow = isWizardStepEditable(stepStatus, {
     draft: draftRow,
     globalSubmissions,
   });
+  const editable = stepEditableByWorkflow && isDesignatedStepWriter;
   const hidePerStepSubmit = isSuperAdminGlobalRevisionMode(draftRow);
   const canNavigateNext = canWizardNavigateNext(draftRow, stepStatus);
   const isLast = step === Step.FINAL;
@@ -126,6 +131,11 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
           className="rounded-md border border-rose-200 bg-rose-50 p-2 text-sm text-rose-900"
         >
           {transitionErr}
+        </p>
+      ) : null}
+      {!isDesignatedStepWriter && stepEditableByWorkflow ? (
+        <p className="rounded-md border border-amber-200 bg-amber-50 p-2 text-sm text-amber-950">
+          {t("myReports.workspace.hunterWriter.coHunterReadOnly")}
         </p>
       ) : null}
       {!editable ? (

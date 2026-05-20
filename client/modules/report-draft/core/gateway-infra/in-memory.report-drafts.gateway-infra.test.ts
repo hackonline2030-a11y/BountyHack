@@ -84,7 +84,7 @@ describe("InMemoryReportDraftRepository (IReportDraftsGateway contract)", () => 
   // ──────────────────────────────────────────────────────────────────────
   // findByHunterId
   // ──────────────────────────────────────────────────────────────────────
-  it("findByHunterId returns only the drafts owned by the given hunter", async () => {
+  it("findByHunterId returns drafts owned by the hunter or where they are on the report team", async () => {
     const repo = new InMemoryReportDraftRepository();
     await repo.save(buildDraft({ id: "d1", hunterId: "u-42" }));
     await repo.save(buildDraft({ id: "d2", hunterId: "u-99" }));
@@ -93,6 +93,26 @@ describe("InMemoryReportDraftRepository (IReportDraftsGateway contract)", () => 
     const result = await repo.findByHunterId("u-42");
 
     expect(result.map((d) => d.id).sort()).toEqual(["d1", "d3"]);
+  });
+
+  it("findByHunterId includes a draft owned by another user when the hunter is a squad member", async () => {
+    const repo = new InMemoryReportDraftRepository();
+    const coHunterDraft = buildDraft({
+      id: "d-squad",
+      hunterId: "owner-1",
+    });
+    coHunterDraft.reportTeam = {
+      label: "Bucket Vault",
+      members: [
+        { userId: "owner-1", displayName: "Owner", role: "hunter" },
+        { userId: "u-42", displayName: "Co", role: "hunter" },
+      ],
+    };
+    await repo.save(coHunterDraft);
+    await repo.save(buildDraft({ id: "d-alone", hunterId: "u-42" }));
+
+    const result = await repo.findByHunterId("u-42");
+    expect(result.map((d) => d.id).sort()).toEqual(["d-alone", "d-squad"]);
   });
 
   it("findByHunterId sorts by updatedAt DESC (most recently touched first)", async () => {

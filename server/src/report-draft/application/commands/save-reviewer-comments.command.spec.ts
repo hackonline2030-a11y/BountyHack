@@ -5,7 +5,7 @@ import { ReportDraftAccessPolicy } from '../report-draft-access.policy';
 import type { IReviewerCommentRepository } from '../../ports/reviewer-comment-repository.interface';
 import type { IReportDraftRepository } from '../../ports/report-draft-repository.interface';
 import type { ISubmissionRepository } from '../../ports/submission-repository.interface';
-import type { ReviewerCommentWire } from '../../models/report-draft-api.types';
+import type { ReportDraftWire, ReviewerCommentWire } from '../../models/report-draft-api.types';
 
 function comment(overrides?: Partial<ReviewerCommentWire>): ReviewerCommentWire {
   return {
@@ -23,13 +23,18 @@ describe('SaveReviewerCommentsCommand', () => {
   const repository: jest.Mocked<IReviewerCommentRepository> = {
     saveMany: jest.fn(),
     findBySubmissionId: jest.fn(),
+    findByReportDraftStep: jest.fn(),
   };
   const reportDraftRepository: jest.Mocked<IReportDraftRepository> = {
     save: jest.fn(),
+    updateHunterWriterId: jest.fn(),
     findById: jest.fn(),
     findByHunterId: jest.fn(),
+    findByHunterIdOrTeamMembership: jest.fn(),
     findAll: jest.fn(),
     findOrphanSummaries: jest.fn(),
+    findPublished: jest.fn(),
+    deleteById: jest.fn(),
   };
   const submissionRepository: jest.Mocked<ISubmissionRepository> = {
     save: jest.fn(),
@@ -55,6 +60,11 @@ describe('SaveReviewerCommentsCommand', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    reportDraftRepository.findById.mockResolvedValue({
+      id: 'draft-1',
+      hunterId: 'hunter-1',
+      hunterWriterId: 'hunter-1',
+    } as ReportDraftWire);
     submissionRepository.findById.mockResolvedValue({
       id: 'sub-1',
       reportDraftId: 'draft-1',

@@ -37,12 +37,20 @@ describe("super-admin final validation helpers", () => {
     expect(canWizardNavigateNext(draft, "awaiting-global-review")).toBe(true);
   });
 
-  it("allows super-admin to re-open revision when no pending global submission", () => {
+  it("allows requesting the initial global revision when ready, none opened yet, no blocking subs", () => {
+    const draft = ReportDraftFactory.create({ idProvider, clock, hunterId: "h1" });
+    draft.aggregateStatus = "ready-to-program";
+    draft.final.status = "approved";
+    draft.superAdminGlobalRevisionCount = 0;
+    expect(canRequestFinalRevision(draft, [])).toBe(true);
+  });
+
+  it("does not allow request when global revision cycle already started", () => {
     const draft = ReportDraftFactory.create({ idProvider, clock, hunterId: "h1" });
     draft.aggregateStatus = "under-global-review";
     draft.superAdminRevisionRequestedAt = new Date().toISOString();
     draft.superAdminGlobalRevisionCount = 1;
-    expect(canRequestFinalRevision(draft, [])).toBe(true);
+    expect(canRequestFinalRevision(draft, [])).toBe(false);
   });
 
   it("counts in-global-progress steps as eligible for global submit", () => {

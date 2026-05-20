@@ -22,6 +22,8 @@ export interface ReportTeamWire {
   validity: ReportTeamValidityWire;
   /** Linked report draft workflow status (1 team ↔ 1 draft). */
   draftAggregateStatus: AggregateStatusWire;
+  /** User id allowed to edit/submit steps (`report_drafts.hunter_writer_id`). */
+  hunterWriterUserId: string;
   members: ReportTeamMemberWire[];
   updatedAt: string;
 }
@@ -53,6 +55,12 @@ export interface CreateReportTeamInput {
    * from approved join/enrollment requests (mentor, QC, etc.).
    */
   reportDraftId?: string;
+  /**
+   * Which squad hunter may edit the new draft and submit steps (`hunter_writer_id`).
+   * Optional when exactly one hunter is on the team (that hunter is used).
+   * Required when multiple hunters are included — must match one of their user ids.
+   */
+  hunterWriterUserId?: string;
 }
 
 export interface UpdateReportTeamInput {

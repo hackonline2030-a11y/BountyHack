@@ -20,7 +20,7 @@ export class CreateGlobalSubmissionCommand {
   ) {}
 
   async execute(identity: Identity, draftId: string): Promise<GlobalSubmissionWire[]> {
-    await this.access.assertDraftOwnedByHunter(identity, draftId);
+    await this.access.assertActingHunterWriter(identity, draftId);
 
     const draft = await this.reportDraftRepository.findById(draftId);
     if (draft === null) {

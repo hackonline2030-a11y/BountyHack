@@ -1,6 +1,7 @@
 "use client";
 
 import { type FC, type ReactNode } from "react";
+import { useT } from "next-i18next/client";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { ReportDraftGlobalSubmitButton } from "@modules/report-draft/react/components/ReportDraftGlobalSubmitButton";
 import { useMetaSection } from "@modules/report-draft/react/sections/meta/use-meta-section";
@@ -9,10 +10,13 @@ const META_STEP = ReportDraftDomainModel.ReportDraftStep.META;
 
 /** META step UI — **Soumettre pour revue** persiste à la soumission ; **Suivant** après validation QC. */
 export const MetaSection: FC = () => {
+  const { t } = useT("myReports");
   const {
     draft,
     setField,
     editable,
+    stepEditableByWorkflow,
+    isDesignatedStepWriter,
     hidePerStepSubmit,
     canNavigateNext,
     reviewerRole,
@@ -56,6 +60,11 @@ export const MetaSection: FC = () => {
           className="rounded-md border border-rose-200 bg-rose-50 p-2 text-sm text-rose-900"
         >
           {transitionErr}
+        </p>
+      ) : null}
+      {!isDesignatedStepWriter && stepEditableByWorkflow ? (
+        <p className="rounded-md border border-amber-200 bg-amber-50 p-2 text-sm text-amber-950">
+          {t("myReports.workspace.hunterWriter.coHunterReadOnly")}
         </p>
       ) : null}
       {!editable ? (
