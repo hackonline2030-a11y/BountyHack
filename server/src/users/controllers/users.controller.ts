@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Post,
   Req,
   UnauthorizedException,
@@ -26,6 +28,7 @@ import { AuthRoles } from '../../auth/rbac/roles.decorator';
 import { AppRoleCode } from '../../shared/rbac/app-role.code';
 
 import { AddUsername } from '../commands/add-username';
+import { DeleteUserCompletelyCommand } from '../commands/delete-user-completely.command';
 import {
   CreateUserProfileBodyDto,
   UserAdminSummaryListResponseDto,
@@ -43,6 +46,7 @@ export class UsersController {
     private readonly addUsername: AddUsername,
     private readonly getUserByIdQuery: GetUserByIdQuery,
     private readonly listUsersAdminSummariesQuery: ListUsersAdminSummariesQuery,
+    private readonly deleteUserCompletely: DeleteUserCompletelyCommand,
   ) {}
 
   @Post()
@@ -140,6 +144,31 @@ export class UsersController {
     description: 'Authenticated user is not `SUPER_ADMIN`.',
   })
   @ApiHttpInternalServerError('Unexpected server error while listing users.')
+  @Delete(':userId')
+  @AuthRoles(AppRoleCode.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Permanently delete a user (admin)',
+    description:
+      'Removes the account and cascaded data (owned report drafts, team memberships, sessions, …). ' +
+      'Reassigns designated-writer on co-hunter drafts. Irreversible. SUPER_ADMIN only; cannot delete self or the last super-admin.',
+  })
+  @ApiOkResponse({ schema: { example: { ok: true } } })
+  @ApiHttpUnauthorized('Missing or invalid bearer token.')
+  @ApiForbiddenResponse({
+    description: 'Authenticated user is not `SUPER_ADMIN`.',
+  })
+  @ApiHttpInternalServerError('Unexpected server error while deleting user.')
+  async deleteUser(
+    @Req() request: RequestWithIdentity,
+    @Param('userId') userId: string,
+  ): Promise<{ ok: true }> {
+    await this.deleteUserCompletely.execute(
+      this.getAuthenticatedIdentity(request),
+      userId,
+    );
+    return { ok: true };
+  }
+
   async list(): Promise<UserAdminSummaryListResponseDto> {
     try {
       const summaries = await this.listUsersAdminSummariesQuery.execute();

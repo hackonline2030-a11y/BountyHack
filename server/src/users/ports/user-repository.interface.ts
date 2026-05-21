@@ -21,4 +21,9 @@ export interface IUserRepository {
   findSummaryById(uid: string): Promise<UserAdminSummary | null>;
   /** Users whose global role matches `roleCode` (e.g. all hunters). */
   listSummariesByRoleCode(roleCode: AppRoleCode): Promise<UserAdminSummary[]>;
+  /**
+   * Hard-deletes the user and cascaded dependents. Caller must enforce
+   * SUPER_ADMIN, forbid self-delete, and protect the last super-admin.
+   */
+  deleteCompletely(uid: string): Promise<void>;
 }

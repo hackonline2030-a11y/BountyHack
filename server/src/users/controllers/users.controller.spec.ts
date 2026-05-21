@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { AddUsername } from '../commands/add-username';
+import { DeleteUserCompletelyCommand } from '../commands/delete-user-completely.command';
 import { GetUserByIdQuery } from '../queries/get-user-by-id';
 import { ListUsersAdminSummariesQuery } from '../queries/list-users-admin-summaries.query';
 import {
@@ -17,6 +18,7 @@ describe('UsersController', () => {
   let addUsername: jest.Mocked<AddUsername>;
   let getUserByIdQuery: jest.Mocked<GetUserByIdQuery>;
   let listUsersAdminSummariesQuery: jest.Mocked<ListUsersAdminSummariesQuery>;
+  let deleteUserCompletely: jest.Mocked<DeleteUserCompletelyCommand>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,6 +36,10 @@ describe('UsersController', () => {
           provide: ListUsersAdminSummariesQuery,
           useValue: { execute: jest.fn() },
         },
+        {
+          provide: DeleteUserCompletelyCommand,
+          useValue: { execute: jest.fn() },
+        },
       ],
     }).compile();
 
@@ -41,6 +47,7 @@ describe('UsersController', () => {
     addUsername = module.get(AddUsername);
     getUserByIdQuery = module.get(GetUserByIdQuery);
     listUsersAdminSummariesQuery = module.get(ListUsersAdminSummariesQuery);
+    deleteUserCompletely = module.get(DeleteUserCompletelyCommand);
   });
 
   it('should create user profile for authenticated user', async () => {
@@ -87,6 +94,27 @@ describe('UsersController', () => {
         roleCode: null,
       }),
     );
+  });
+
+  describe('deleteUser() — admin hard delete', () => {
+    it('delegates to DeleteUserCompletelyCommand', async () => {
+      const request = {
+        user: {
+          uid: 'admin-1',
+          email: 'admin@example.com',
+          roleCode: AppRoleCode.SUPER_ADMIN,
+        },
+      } as RequestWithIdentity;
+
+      await expect(
+        controller.deleteUser(request, 'hunter-42'),
+      ).resolves.toEqual({ ok: true });
+
+      expect(deleteUserCompletely.execute).toHaveBeenCalledWith(
+        request.user,
+        'hunter-42',
+      );
+    });
   });
 
   describe('list() — admin user summaries', () => {

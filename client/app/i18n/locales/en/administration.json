@@ -15,8 +15,13 @@
     "columns": {
       "username": "Username",
       "email": "Email",
-      "role": "Role"
+      "role": "Role",
+      "actions": "Actions"
     },
+    "deleteTitle": "Delete account",
+    "deleteAria": "Delete account {{username}}",
+    "deleteConfirm": "Permanently delete account “{{username}}” and all related data (reports, teams, sessions)? This cannot be undone.",
+    "deleteFailed": "Could not delete this account.",
     "values": {
       "noEmail": "—",
       "noRole": "No role"

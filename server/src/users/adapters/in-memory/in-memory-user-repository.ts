@@ -58,4 +58,8 @@ export class InMemoryUserRepository implements IUserRepository {
   async listSummariesByRoleCode(_roleCode: AppRoleCode): Promise<UserAdminSummary[]> {
     return [];
   }
+
+  async deleteCompletely(uid: string): Promise<void> {
+    this.users.delete(uid);
+  }
 }
