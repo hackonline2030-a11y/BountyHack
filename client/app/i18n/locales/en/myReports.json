@@ -115,6 +115,9 @@
         "button": "Submit draft globally",
         "hint": "Sends every step still editable to the quality checker in one action.",
         "disabledNone": "All steps are already submitted or approved."
+      },
+      "sectionBloc": {
+        "compressBeforeUpload": "Compress your image as much as possible before uploading, for example using <serviceLink>this service</serviceLink>."
       }
     },
     "superAdminFeedback": {
