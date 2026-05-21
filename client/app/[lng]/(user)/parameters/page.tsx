@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getT } from "next-i18next/server";
 import { notFound } from "next/navigation";
 import { Section } from "@modules/app/nextjs/components/sections/Section";
+import { DeleteOwnAccountPanel } from "@/modules/auth/nextjs/components/parameters/DeleteOwnAccountPanel";
 import { TotpEnrollmentPanel } from "@/modules/auth/nextjs/components/parameters/TotpEnrollmentPanel";
 import { getParametersProfile } from "@/lib/dal/parameters-profile";
 import { verifySession } from "@/lib/dal/session";
@@ -37,6 +38,7 @@ export default async function ParametersPage({ params }: PageProps) {
           <div className="mt-4">
             <TotpEnrollmentPanel initialTotpEnabled={profile.twoFactorEnabled} />
           </div>
+          <DeleteOwnAccountPanel roleCode={profile.roleCode} />
         </div>
       </Section>
     </main>

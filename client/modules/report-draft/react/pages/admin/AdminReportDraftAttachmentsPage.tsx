@@ -7,7 +7,9 @@ import { readFriendlyHttpError } from "@/lib/http-error-message";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { STEP_TITLE_FR } from "@modules/report-draft/core/model/step-field-catalog";
 import { IconActionButton } from "@modules/app/nextjs/components/buttons/IconActionButton";
+import { ConfirmDangerModal } from "@modules/app/nextjs/components/ConfirmDangerModal";
 import { TrashIcon } from "@modules/report-team/react/icons";
+import { useT } from "next-i18next/client";
 
 const STATE_KEY_TO_STEP_LABEL: Record<string, string> = {
   meta: STEP_TITLE_FR[ReportDraftDomainModel.ReportDraftStep.META],
@@ -39,9 +41,11 @@ type Props = {
 };
 
 export const AdminReportDraftAttachmentsPage: FC<Props> = ({ lng }) => {
+  const { t } = useT(["reportDraft", "common"]);
   const [rows, setRows] = useState<AdminAttachmentRow[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoadError(null);
@@ -61,8 +65,9 @@ export const AdminReportDraftAttachmentsPage: FC<Props> = ({ lng }) => {
     void load();
   }, [load]);
 
-  const onDelete = async (attachmentId: string) => {
-    if (!window.confirm("Supprimer définitivement cette pièce jointe ?")) return;
+  const onConfirmDelete = async () => {
+    if (!deleteTargetId) return;
+    const attachmentId = deleteTargetId;
     setDeletingId(attachmentId);
     try {
       const res = await fetchBff(
@@ -73,10 +78,12 @@ export const AdminReportDraftAttachmentsPage: FC<Props> = ({ lng }) => {
         throw new Error(await readFriendlyHttpError(res, "Suppression impossible."));
       }
       setRows((current) => current.filter((r) => r.attachmentId !== attachmentId));
+      setDeleteTargetId(null);
     } catch (error) {
       setLoadError(
         error instanceof Error ? error.message : "Suppression impossible.",
       );
+      setDeleteTargetId(null);
     } finally {
       setDeletingId(null);
     }
@@ -160,7 +167,7 @@ export const AdminReportDraftAttachmentsPage: FC<Props> = ({ lng }) => {
                       aria-label="Supprimer"
                       title="Supprimer"
                       disabled={deletingId === row.attachmentId}
-                      onClick={() => void onDelete(row.attachmentId)}
+                      onClick={() => setDeleteTargetId(row.attachmentId)}
                     >
                       <TrashIcon className="size-4" />
                     </IconActionButton>
@@ -171,6 +178,21 @@ export const AdminReportDraftAttachmentsPage: FC<Props> = ({ lng }) => {
           </tbody>
         </table>
       </div>
+
+      <ConfirmDangerModal
+        open={deleteTargetId !== null}
+        title={t("reportDraft:reportDraft.adminAttachments.deleteModalTitle")}
+        cancelLabel={t("common:confirmModal.cancel")}
+        confirmLabel={t("reportDraft:reportDraft.adminAttachments.deleteModalConfirm")}
+        confirming={deletingId !== null}
+        confirmingLabel={t("common:confirmModal.confirming")}
+        onCancel={() => {
+          if (deletingId === null) setDeleteTargetId(null);
+        }}
+        onConfirm={() => void onConfirmDelete()}
+      >
+        {t("reportDraft:reportDraft.adminAttachments.deleteModalBody")}
+      </ConfirmDangerModal>
     </article>
   );
 };

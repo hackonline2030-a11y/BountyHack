@@ -20,7 +20,9 @@
     },
     "deleteTitle": "Delete account",
     "deleteAria": "Delete account {{username}}",
+    "deleteConfirmTitle": "Delete this account?",
     "deleteConfirm": "Permanently delete account “{{username}}” and all related data (reports, teams, sessions)? This cannot be undone.",
+    "deleteConfirmAction": "Delete account",
     "deleteFailed": "Could not delete this account.",
     "values": {
       "noEmail": "—",

@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { rm } from 'fs/promises';
+import type { Prisma } from '../../../generated/prisma/client';
+import { ReportTeamMemberRole } from '../../../generated/prisma/enums';
 import { IUserRepository } from '../../ports/user-repository.interface';
 import { UserAdminSummary, UserRecord } from '../../models';
 import { CreateUserProfilePayload } from '../../payloads';
 import { PrismaService } from '../../../core/infrastructure/database/prisma/prisma.service';
 import { AppRoleCode } from '../../../shared/rbac/app-role.code';
 import { resolveReportImageAssetPath } from '../../../report-draft/application/attachments/report-draft-image-storage';
+import { ReportTeamEnumMapper } from '../../../report-team/adapters/postgre-prisma/report-team-enum.mapper';
+import { assertAtMostOneQualityChecker } from '../../../report-team/application/report-team-validity';
 
 @Injectable()
 export class PrismaUserRepository implements IUserRepository {
@@ -105,12 +110,7 @@ export class PrismaUserRepository implements IUserRepository {
    * UI cannot accidentally render an unknown role label.
    */
   async deleteCompletely(uid: string): Promise<void> {
-    const storageKeys = await this.prisma.reportDraftAttachment.findMany({
-      where: { reportDraftStep: { reportDraft: { hunterId: uid } } },
-      select: { storageKey: true },
-    });
-
-    await this.prisma.$transaction(async (tx) => {
+    const storageKeys = await this.prisma.$transaction(async (tx) => {
       const writerOnOthersDraft = await tx.reportDraft.findMany({
         where: {
           hunterWriterId: uid,
@@ -126,7 +126,15 @@ export class PrismaUserRepository implements IUserRepository {
         });
       }
 
+      await this.promotePrimaryHunterOnOwnedDraftsBeforeDelete(tx, uid);
+
+      const keys = await tx.reportDraftAttachment.findMany({
+        where: { reportDraftStep: { reportDraft: { hunterId: uid } } },
+        select: { storageKey: true },
+      });
+
       await tx.user.delete({ where: { id: uid } });
+      return keys;
     });
 
     await Promise.all(
@@ -136,6 +144,87 @@ export class PrismaUserRepository implements IUserRepository {
         ),
       ),
     );
+  }
+
+  /**
+   * When the deleted user owns report draft(s), transfer `hunter_id` to the earliest
+   * remaining squad hunter (by `joined_at`) so the team and draft survive. Drafts with
+   * no other hunter on the team are left unchanged and cascade-delete with the user.
+   */
+  private async promotePrimaryHunterOnOwnedDraftsBeforeDelete(
+    tx: Prisma.TransactionClient,
+    uid: string,
+  ): Promise<void> {
+    const ownedDrafts = await tx.reportDraft.findMany({
+      where: { hunterId: uid },
+      select: {
+        id: true,
+        hunterWriterId: true,
+        reportTeam: {
+          select: {
+            id: true,
+            members: {
+              where: {
+                userId: { not: uid },
+                role: ReportTeamMemberRole.HUNTER,
+              },
+              orderBy: { joinedAt: 'asc' },
+              take: 1,
+              select: { userId: true },
+            },
+          },
+        },
+      },
+    });
+
+    for (const draft of ownedDrafts) {
+      const teamId = draft.reportTeam?.id;
+      const nextHunterId = draft.reportTeam?.members[0]?.userId?.trim();
+      if (!teamId || !nextHunterId) {
+        continue;
+      }
+
+      const hunterUser = await tx.user.findUnique({
+        where: { id: nextHunterId },
+        select: { role: { select: { name: true } } },
+      });
+      if (hunterUser?.role?.name !== AppRoleCode.HUNTER) {
+        continue;
+      }
+
+      const data: { hunterId: string; hunterWriterId?: string } = {
+        hunterId: nextHunterId,
+      };
+      if (draft.hunterWriterId === uid) {
+        data.hunterWriterId = nextHunterId;
+      }
+
+      await tx.reportDraft.update({
+        where: { id: draft.id },
+        data,
+      });
+
+      const currentMembers = await tx.reportTeamMember.findMany({
+        where: { teamId },
+        select: { userId: true, role: true },
+      });
+      const nextRoles = currentMembers
+        .filter((m) => m.userId !== nextHunterId)
+        .map((m) => ReportTeamEnumMapper.memberRoleToWire(m.role));
+      nextRoles.push('hunter');
+      assertAtMostOneQualityChecker(nextRoles);
+
+      await tx.reportTeamMember.upsert({
+        where: { teamId_userId: { teamId, userId: nextHunterId } },
+        create: {
+          id: randomUUID(),
+          teamId,
+          userId: nextHunterId,
+          role: ReportTeamMemberRole.HUNTER,
+        },
+        update: { role: ReportTeamMemberRole.HUNTER },
+      });
+    }
   }
 
   private toAppRoleCode(name: string | null): AppRoleCode | null {

@@ -25,5 +25,17 @@
   "statusGenericError": "Une erreur s’est produite. Réessayez.",
   "statusInvalidCode": "Code incorrect. Vérifiez l’application et réessayez.",
   "statusNestUnavailable": "La configuration TOTP n’est pas disponible (base de données serveur et TOTP_ENCRYPTION_KEY).",
-  "nestError": "Échec de la requête (HTTP {{status}})."
+  "nestError": "Échec de la requête (HTTP {{status}}).",
+  "deleteAccount": {
+    "heading": "Supprimer mon compte",
+    "lead": "Supprime définitivement votre compte et vos sessions. Cette action est irréversible.",
+    "leadTeamsAndReports": "Sur une équipe de rapport : si vous êtes mentor ou quality checker, vous quittez seulement l’équipe — le brouillon et l’équipe restent pour le hunter principal et les autres membres. Si vous êtes hunter principal et qu’il reste au moins un autre hunter dans l’équipe, le premier hunter restant devient hunter principal du brouillon (vous le verrez sur votre espace rapport). Sinon, les brouillons dont vous êtes le seul propriétaire sont supprimés.",
+    "leadLastSuperAdmin": "Si vous êtes le dernier Lead (super-admin), la suppression est refusée.",
+    "button": "Supprimer mon compte",
+    "deleting": "Suppression…",
+    "confirmTitle": "Supprimer votre compte ?",
+    "confirm": "Supprimer définitivement votre compte et toutes les données associées ? Vous serez déconnecté et ne pourrez plus vous reconnecter avec cet identifiant.",
+    "confirmAction": "Supprimer mon compte",
+    "failed": "Impossible de supprimer votre compte."
+  }
 }

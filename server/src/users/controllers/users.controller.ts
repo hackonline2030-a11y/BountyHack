@@ -29,6 +29,7 @@ import { AppRoleCode } from '../../shared/rbac/app-role.code';
 
 import { AddUsername } from '../commands/add-username';
 import { DeleteUserCompletelyCommand } from '../commands/delete-user-completely.command';
+import { DeleteOwnAccountCommand } from '../commands/delete-own-account.command';
 import {
   CreateUserProfileBodyDto,
   UserAdminSummaryListResponseDto,
@@ -47,6 +48,7 @@ export class UsersController {
     private readonly getUserByIdQuery: GetUserByIdQuery,
     private readonly listUsersAdminSummariesQuery: ListUsersAdminSummariesQuery,
     private readonly deleteUserCompletely: DeleteUserCompletelyCommand,
+    private readonly deleteOwnAccountCommand: DeleteOwnAccountCommand,
   ) {}
 
   @Post()
@@ -115,6 +117,26 @@ export class UsersController {
     }
   }
 
+  @Delete('me/account')
+  @Auth()
+  @ApiOperation({
+    summary: 'Delete own account',
+    description:
+      'Permanently removes the authenticated user and cascaded data. Irreversible. ' +
+      'Blocked for the last remaining super-admin.',
+  })
+  @ApiOkResponse({ schema: { example: { ok: true } } })
+  @ApiHttpUnauthorized('Missing or invalid bearer token.')
+  @ApiHttpInternalServerError('Unexpected server error while deleting account.')
+  async deleteOwnAccount(
+    @Req() request: RequestWithIdentity,
+  ): Promise<{ ok: true }> {
+    await this.deleteOwnAccountCommand.execute(
+      this.getAuthenticatedIdentity(request),
+    );
+    return { ok: true };
+  }
+
   /**
    * Admin-only listing of every account for the user-management table.
    *
@@ -164,7 +186,7 @@ export class UsersController {
     summary: 'Permanently delete a user (admin)',
     description:
       'Removes the account and cascaded data (owned report drafts, team memberships, sessions, …). ' +
-      'Reassigns designated-writer on co-hunter drafts. Irreversible. SUPER_ADMIN only; cannot delete self or the last super-admin.',
+      'Reassigns designated-writer on co-hunter drafts. Irreversible. SUPER_ADMIN only; use DELETE users/me/account for self-service.',
   })
   @ApiOkResponse({ schema: { example: { ok: true } } })
   @ApiHttpUnauthorized('Missing or invalid bearer token.')

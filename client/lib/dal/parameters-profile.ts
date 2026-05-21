@@ -8,6 +8,7 @@ import { nestInternalApiUrl } from "@/lib/server/nest-internal-url";
 
 export type ParametersProfileDto = {
   twoFactorEnabled: boolean;
+  roleCode: string | null;
 };
 
 function loginHref(lng: string): string {
@@ -19,6 +20,14 @@ function twoFactorEnabledFromProfile(data: unknown): boolean {
     return false;
   }
   return (data as Record<string, unknown>).twoFactorEnabled === true;
+}
+
+function roleCodeFromProfile(data: unknown): string | null {
+  if (!data || typeof data !== "object") {
+    return null;
+  }
+  const raw = (data as Record<string, unknown>).roleCode;
+  return typeof raw === "string" && raw.trim() ? raw.trim() : null;
 }
 
 /**
@@ -42,13 +51,16 @@ export const getParametersProfile = cache(
       });
 
       if (!res.ok) {
-        return { twoFactorEnabled: false };
+        return { twoFactorEnabled: false, roleCode: null };
       }
 
       const data: unknown = await res.json().catch(() => null);
-      return { twoFactorEnabled: twoFactorEnabledFromProfile(data) };
+      return {
+        twoFactorEnabled: twoFactorEnabledFromProfile(data),
+        roleCode: roleCodeFromProfile(data),
+      };
     } catch {
-      return { twoFactorEnabled: false };
+      return { twoFactorEnabled: false, roleCode: null };
     }
   },
 );
