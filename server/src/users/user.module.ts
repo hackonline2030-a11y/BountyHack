@@ -17,6 +17,7 @@ import { variables } from '../shared/variables.config';
 import { GetUserByIdQuery } from './queries/get-user-by-id';
 import { ListUsersAdminSummariesQuery } from './queries/list-users-admin-summaries.query';
 import { DeleteUserCompletelyCommand } from './commands/delete-user-completely.command';
+import { DeleteOwnAccountCommand } from './commands/delete-own-account.command';
 import { InMemoryUserRepository } from './adapters/in-memory/in-memory-user-repository';
 
 function resolveUserRepositoryClass() {
@@ -82,6 +83,13 @@ const inMemoryAuthImports =
       inject: [I_USER_REPOSITORY],
       useFactory: (repository: IUserRepository) => {
         return new DeleteUserCompletelyCommand(repository);
+      },
+    },
+    {
+      provide: DeleteOwnAccountCommand,
+      inject: [I_USER_REPOSITORY],
+      useFactory: (repository: IUserRepository) => {
+        return new DeleteOwnAccountCommand(repository);
       },
     },
   ],

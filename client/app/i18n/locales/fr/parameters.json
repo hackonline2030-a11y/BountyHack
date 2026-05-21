@@ -25,5 +25,13 @@
   "statusGenericError": "Une erreur s’est produite. Réessayez.",
   "statusInvalidCode": "Code incorrect. Vérifiez l’application et réessayez.",
   "statusNestUnavailable": "La configuration TOTP n’est pas disponible (base de données serveur et TOTP_ENCRYPTION_KEY).",
-  "nestError": "Échec de la requête (HTTP {{status}})."
+  "nestError": "Échec de la requête (HTTP {{status}}).",
+  "deleteAccount": {
+    "heading": "Supprimer mon compte",
+    "lead": "Supprime définitivement votre compte, vos rapports, vos équipes et vos sessions. Cette action est irréversible. Si vous êtes le dernier Lead (super-admin), la suppression est refusée.",
+    "button": "Supprimer mon compte",
+    "deleting": "Suppression…",
+    "confirm": "Supprimer définitivement votre compte et toutes les données associées ? Vous serez déconnecté et ne pourrez plus vous reconnecter avec cet identifiant.",
+    "failed": "Impossible de supprimer votre compte."
+  }
 }
