@@ -144,6 +144,20 @@ export class UsersController {
     description: 'Authenticated user is not `SUPER_ADMIN`.',
   })
   @ApiHttpInternalServerError('Unexpected server error while listing users.')
+  async list(): Promise<UserAdminSummaryListResponseDto> {
+    try {
+      const summaries = await this.listUsersAdminSummariesQuery.execute();
+      return plainToInstance(
+        UserAdminSummaryListResponseDto,
+        { items: summaries },
+        { excludeExtraneousValues: true },
+      );
+    } catch (error) {
+      console.error('Error listing users:', error);
+      throw error;
+    }
+  }
+
   @Delete(':userId')
   @AuthRoles(AppRoleCode.SUPER_ADMIN)
   @ApiOperation({
@@ -167,20 +181,6 @@ export class UsersController {
       userId,
     );
     return { ok: true };
-  }
-
-  async list(): Promise<UserAdminSummaryListResponseDto> {
-    try {
-      const summaries = await this.listUsersAdminSummariesQuery.execute();
-      return plainToInstance(
-        UserAdminSummaryListResponseDto,
-        { items: summaries },
-        { excludeExtraneousValues: true },
-      );
-    } catch (error) {
-      console.error('Error listing users:', error);
-      throw error;
-    }
   }
 
   private getAuthenticatedIdentity(request: RequestWithIdentity): Identity {
