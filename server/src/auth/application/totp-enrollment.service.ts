@@ -157,12 +157,19 @@ export class TotpEnrollmentService {
   }
 
   /**
+   * Verifies a current TOTP code when 2FA is enabled (login step-up, profile edit, account deletion).
+   */
+  async verifyStepUpCode(userId: string, codeRaw: string): Promise<void> {
+    this.assertPrisma();
+    await this.verifyEnabledUserTotpCode(userId, codeRaw);
+  }
+
+  /**
    * Disables TOTP after verifying a current code (step-up).
    * Clears stored secret and disables the global 2FA flag on the user.
    */
   async disableEnrollment(userId: string, codeRaw: string): Promise<{ ok: true }> {
     this.assertPrisma();
-    const token = codeRaw.replace(/\s/g, '');
 
     const flags = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -175,6 +182,8 @@ export class TotpEnrollmentService {
       });
     }
 
+    await this.verifyEnabledUserTotpCode(userId, codeRaw);
+
     const twoFactor = await this.prisma.twoFactor.findUnique({
       where: {
         userId_method: {
@@ -182,29 +191,13 @@ export class TotpEnrollmentService {
           method: TwoFactorMethod.APP,
         },
       },
-      include: { totp: true },
+      select: { id: true },
     });
-
-    if (!twoFactor?.verified || !twoFactor.totp?.secret) {
+    if (!twoFactor) {
       throw new BadRequestException({
         error: 'totp_not_enabled',
         message: 'TOTP is not enabled for this account.',
       });
-    }
-
-    const secretPlain = openTotpSecretFromStorage(twoFactor.totp.secret);
-    const result = await verify({
-      secret: secretPlain,
-      token,
-      strategy: 'totp',
-      algorithm: TOTP_CONFIG.algorithm,
-      digits: TOTP_CONFIG.digits,
-      period: TOTP_CONFIG.period,
-      epochTolerance: TOTP_CONFIG.epochToleranceSeconds,
-    });
-
-    if (!result.valid) {
-      throw new UnauthorizedException('Invalid TOTP code');
     }
 
     await this.prisma.$transaction([
@@ -221,6 +214,45 @@ export class TotpEnrollmentService {
     ]);
 
     return { ok: true };
+  }
+
+  private async verifyEnabledUserTotpCode(
+    userId: string,
+    codeRaw: string,
+  ): Promise<void> {
+    const token = codeRaw.replace(/\s/g, '');
+    if (!/^\d{6,8}$/.test(token)) {
+      throw new UnauthorizedException('TOTP code required');
+    }
+
+    const twoFactor = await this.prisma.twoFactor.findUnique({
+      where: {
+        userId_method: {
+          userId,
+          method: TwoFactorMethod.APP,
+        },
+      },
+      include: { totp: true },
+    });
+
+    if (!twoFactor?.verified || !twoFactor.totp?.secret) {
+      throw new UnauthorizedException('TOTP is enabled but not configured');
+    }
+
+    const secretPlain = openTotpSecretFromStorage(twoFactor.totp.secret);
+    const result = await verify({
+      secret: secretPlain,
+      token,
+      strategy: 'totp',
+      algorithm: TOTP_CONFIG.algorithm,
+      digits: TOTP_CONFIG.digits,
+      period: TOTP_CONFIG.period,
+      epochTolerance: TOTP_CONFIG.epochToleranceSeconds,
+    });
+
+    if (!result.valid) {
+      throw new UnauthorizedException('Invalid TOTP code');
+    }
   }
 
   private assertPrisma(): void {

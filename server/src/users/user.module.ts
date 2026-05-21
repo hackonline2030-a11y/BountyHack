@@ -18,6 +18,8 @@ import { GetUserByIdQuery } from './queries/get-user-by-id';
 import { ListUsersAdminSummariesQuery } from './queries/list-users-admin-summaries.query';
 import { DeleteUserCompletelyCommand } from './commands/delete-user-completely.command';
 import { DeleteOwnAccountCommand } from './commands/delete-own-account.command';
+import { VerifyProfilePasswordCommand } from './commands/verify-profile-password.command';
+import { UpdateOwnProfileCommand } from './commands/update-own-profile.command';
 import { InMemoryUserRepository } from './adapters/in-memory/in-memory-user-repository';
 
 function resolveUserRepositoryClass() {
@@ -46,11 +48,12 @@ const mongoFeatureImports =
       ]
     : [];
 
-const inMemoryAuthImports =
-  variables.database === 'IN-MEMORY' ? [forwardRef(() => AuthModule)] : [];
-
 @Module({
-  imports: [CommonModule, ...mongoFeatureImports, ...inMemoryAuthImports],
+  imports: [
+    CommonModule,
+    forwardRef(() => AuthModule),
+    ...mongoFeatureImports,
+  ],
   controllers: [UsersController],
   providers: [
     {
@@ -85,13 +88,9 @@ const inMemoryAuthImports =
         return new DeleteUserCompletelyCommand(repository);
       },
     },
-    {
-      provide: DeleteOwnAccountCommand,
-      inject: [I_USER_REPOSITORY],
-      useFactory: (repository: IUserRepository) => {
-        return new DeleteOwnAccountCommand(repository);
-      },
-    },
+    DeleteOwnAccountCommand,
+    VerifyProfilePasswordCommand,
+    UpdateOwnProfileCommand,
   ],
   exports: [
     ...(variables.database === 'MONGODB' ? [MongooseModule] : []),

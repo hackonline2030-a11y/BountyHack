@@ -64,4 +64,13 @@ export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {
       where: { tokenHash: hashOpaqueRefreshRaw(rawToken) },
     });
   }
+
+  async revokeAllForUser(userId: string): Promise<void> {
+    if (!this.prisma) {
+      throw new InternalServerErrorException('Prisma service is not available');
+    }
+    await this.prisma.refreshToken.deleteMany({
+      where: { userId },
+    });
+  }
 }

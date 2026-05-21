@@ -69,4 +69,13 @@ export class MongoRefreshTokenRepository implements IRefreshTokenRepository {
       .deleteOne({ tokenHash: hashOpaqueRefreshRaw(rawToken) })
       .exec();
   }
+
+  async revokeAllForUser(userId: string): Promise<void> {
+    if (!this.model) {
+      throw new InternalServerErrorException(
+        'Mongo refresh token model is not available',
+      );
+    }
+    await this.model.deleteMany({ userId }).exec();
+  }
 }

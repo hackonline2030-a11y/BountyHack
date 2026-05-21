@@ -7,6 +7,9 @@ import { ACCESS_TOKEN_COOKIE_NAME } from "@modules/auth/core/model/session.const
 import { nestInternalApiUrl } from "@/lib/server/nest-internal-url";
 
 export type ParametersProfileDto = {
+  uid: string;
+  username: string;
+  email: string | null;
   twoFactorEnabled: boolean;
   roleCode: string | null;
 };
@@ -27,6 +30,25 @@ function roleCodeFromProfile(data: unknown): string | null {
     return null;
   }
   const raw = (data as Record<string, unknown>).roleCode;
+  return typeof raw === "string" && raw.trim() ? raw.trim() : null;
+}
+
+function stringField(data: unknown, key: string): string | null {
+  if (!data || typeof data !== "object") {
+    return null;
+  }
+  const raw = (data as Record<string, unknown>)[key];
+  return typeof raw === "string" && raw.trim() ? raw.trim() : null;
+}
+
+function emailFromProfile(data: unknown): string | null {
+  if (!data || typeof data !== "object") {
+    return null;
+  }
+  const raw = (data as Record<string, unknown>).email;
+  if (raw === null || raw === undefined) {
+    return null;
+  }
   return typeof raw === "string" && raw.trim() ? raw.trim() : null;
 }
 
@@ -51,16 +73,31 @@ export const getParametersProfile = cache(
       });
 
       if (!res.ok) {
-        return { twoFactorEnabled: false, roleCode: null };
+        return {
+          uid: "",
+          username: "",
+          email: null,
+          twoFactorEnabled: false,
+          roleCode: null,
+        };
       }
 
       const data: unknown = await res.json().catch(() => null);
       return {
+        uid: stringField(data, "uid") ?? "",
+        username: stringField(data, "username") ?? "",
+        email: emailFromProfile(data),
         twoFactorEnabled: twoFactorEnabledFromProfile(data),
         roleCode: roleCodeFromProfile(data),
       };
     } catch {
-      return { twoFactorEnabled: false, roleCode: null };
+      return {
+        uid: "",
+        username: "",
+        email: null,
+        twoFactorEnabled: false,
+        roleCode: null,
+      };
     }
   },
 );
