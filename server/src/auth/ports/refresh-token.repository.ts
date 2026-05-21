@@ -9,4 +9,7 @@ export interface IRefreshTokenRepository {
   findValidForRotation(rawToken: string): Promise<{ userId: string } | null>;
 
   revokeByRawToken(rawToken: string): Promise<void>;
+
+  /** Invalidates every refresh session for the user (e.g. after password/email change). */
+  revokeAllForUser(userId: string): Promise<void>;
 }

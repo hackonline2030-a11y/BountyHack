@@ -40,6 +40,7 @@ import { TotpEnrollmentController } from './controllers/totp-enrollment.controll
 import { PassportJwtAuthGuard } from './adapters/passport-jwt/guards/passport-jwt-auth.guard';
 import { RolesGuard } from './rbac/roles.guard';
 import { TotpEnrollmentService } from './application/totp-enrollment.service';
+import { ProfileStepUpTokenService } from './application/profile-step-up-token.service';
 
 const usesPersistedJwtStore =
   variables.database === DATABASE_MODES.MONGODB || isPrismaSqlMode();
@@ -130,6 +131,7 @@ const coreProviders = [
   PassportJwtStrategy,
   PassportJwtAuthGuard,
   RolesGuard,
+  ProfileStepUpTokenService,
 ];
 
 const authExports = [
@@ -137,6 +139,9 @@ const authExports = [
   JwtInMemoryRegistry,
   /** For `@Auth()` / `PassportJwtAuthGuard` on feature modules (e.g. async PDF enqueue). */
   PassportJwtAuthGuard,
+  ProfileStepUpTokenService,
+  REFRESH_TOKEN_REPOSITORY,
+  ...(isPrismaSqlMode() ? [TotpEnrollmentService] : []),
 ];
 
 @Module({

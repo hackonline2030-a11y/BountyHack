@@ -37,7 +37,12 @@ export class JwtInMemoryRegistry {
     if (!u) {
       return null;
     }
-    return { uid, username: u.username };
+    return {
+      uid,
+      username: u.username,
+      email: u.email,
+      twoFactorEnabled: false,
+    };
   }
 
   /** Full profile slice for JWT session / refresh (includes email from registry). */

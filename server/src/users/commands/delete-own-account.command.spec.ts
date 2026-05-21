@@ -1,4 +1,8 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  ProfileStepUpTokenService,
+  STEP_UP_PURPOSE_ACCOUNT_DELETE,
+} from '../../auth/application/profile-step-up-token.service';
 import { AppRoleCode } from '../../shared/rbac/app-role.code';
 import type { Identity } from '../../auth/domain/models/identity';
 import type { IUserRepository } from '../ports/user-repository.interface';
@@ -22,15 +26,21 @@ describe('DeleteOwnAccountCommand', () => {
     deleteCompletely: jest.fn(),
   };
 
+  const stepUpTokens: jest.Mocked<Pick<ProfileStepUpTokenService, 'assertValid'>> =
+    {
+      assertValid: jest.fn(),
+    };
+
   const command = new DeleteOwnAccountCommand(
     repository as unknown as IUserRepository,
+    stepUpTokens as unknown as ProfileStepUpTokenService,
   );
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('deletes the authenticated user', async () => {
+  it('deletes the authenticated user after step-up validation', async () => {
     repository.findSummaryById.mockResolvedValue({
       uid: hunter.uid,
       username: 'Junior',
@@ -38,8 +48,13 @@ describe('DeleteOwnAccountCommand', () => {
       roleCode: AppRoleCode.HUNTER,
     });
 
-    await command.execute(hunter);
+    await command.execute(hunter, 'delete-token');
 
+    expect(stepUpTokens.assertValid).toHaveBeenCalledWith(
+      'delete-token',
+      'hunter-1',
+      STEP_UP_PURPOSE_ACCOUNT_DELETE,
+    );
     expect(repository.deleteCompletely).toHaveBeenCalledWith('hunter-1');
   });
 
@@ -64,7 +79,7 @@ describe('DeleteOwnAccountCommand', () => {
       },
     ]);
 
-    await expect(command.execute(soleAdmin)).rejects.toBeInstanceOf(
+    await expect(command.execute(soleAdmin, 'delete-token')).rejects.toBeInstanceOf(
       ConflictException,
     );
   });
@@ -72,7 +87,7 @@ describe('DeleteOwnAccountCommand', () => {
   it('throws when profile is missing', async () => {
     repository.findSummaryById.mockResolvedValue(null);
 
-    await expect(command.execute(hunter)).rejects.toBeInstanceOf(
+    await expect(command.execute(hunter, 'delete-token')).rejects.toBeInstanceOf(
       NotFoundException,
     );
   });

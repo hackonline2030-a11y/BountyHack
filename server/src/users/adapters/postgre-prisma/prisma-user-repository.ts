@@ -1,11 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { rm } from 'fs/promises';
+import { hashPassword, verifyPassword } from '../../../auth/adapters/utils/password.util';
 import type { Prisma } from '../../../generated/prisma/client';
 import { ReportTeamMemberRole } from '../../../generated/prisma/enums';
 import { IUserRepository } from '../../ports/user-repository.interface';
 import { UserAdminSummary, UserRecord } from '../../models';
 import { CreateUserProfilePayload } from '../../payloads';
+import type { UpdateOwnProfilePayload } from '../../payloads/update-own-profile.payload';
 import { PrismaService } from '../../../core/infrastructure/database/prisma/prisma.service';
 import { AppRoleCode } from '../../../shared/rbac/app-role.code';
 import { resolveReportImageAssetPath } from '../../../report-draft/application/attachments/report-draft-image-storage';
@@ -27,7 +33,7 @@ export class PrismaUserRepository implements IUserRepository {
   async findById(id: string): Promise<UserRecord | null> {
     const row = await this.prisma.user.findUnique({
       where: { id },
-      select: { id: true, username: true, twoFactorEnabled: true },
+      select: { id: true, username: true, email: true, twoFactorEnabled: true },
     });
     if (!row) {
       return null;
@@ -35,8 +41,71 @@ export class PrismaUserRepository implements IUserRepository {
     return {
       uid: row.id,
       username: row.username,
+      email: row.email ?? null,
       twoFactorEnabled: row.twoFactorEnabled !== BigInt(0),
     };
+  }
+
+  async verifyPassword(uid: string, plainPassword: string): Promise<boolean> {
+    const row = await this.prisma.user.findUnique({
+      where: { id: uid },
+      select: { passwordHash: true },
+    });
+    if (!row?.passwordHash) {
+      return false;
+    }
+    return verifyPassword(plainPassword, row.passwordHash);
+  }
+
+  async updateOwnProfile(
+    uid: string,
+    patch: UpdateOwnProfilePayload,
+  ): Promise<UserRecord> {
+    const data: { username?: string; email?: string; passwordHash?: string } = {};
+    if (patch.username !== undefined) {
+      data.username = patch.username;
+    }
+    if (patch.email !== undefined) {
+      const email = patch.email.trim().toLowerCase();
+      const existing = await this.prisma.user.findUnique({
+        where: { email },
+        select: { id: true },
+      });
+      if (existing && existing.id !== uid) {
+        throw new ConflictException('Email is already in use');
+      }
+      data.email = email;
+    }
+    if (patch.newPassword !== undefined) {
+      data.passwordHash = await hashPassword(patch.newPassword);
+    }
+    if (
+      data.username === undefined &&
+      data.email === undefined &&
+      data.passwordHash === undefined
+    ) {
+      throw new BadRequestException('No profile fields to update');
+    }
+    try {
+      const row = await this.prisma.user.update({
+        where: { id: uid },
+        data,
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          twoFactorEnabled: true,
+        },
+      });
+      return {
+        uid: row.id,
+        username: row.username,
+        email: row.email ?? null,
+        twoFactorEnabled: row.twoFactorEnabled !== BigInt(0),
+      };
+    } catch {
+      throw new BadRequestException('Could not update profile');
+    }
   }
 
   async findSummaryById(uid: string): Promise<UserAdminSummary | null> {

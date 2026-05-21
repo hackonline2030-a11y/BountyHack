@@ -37,4 +37,12 @@ export class InMemoryRefreshTokenRepository implements IRefreshTokenRepository {
   async revokeByRawToken(rawToken: string): Promise<void> {
     this.byHash.delete(hashOpaqueRefreshRaw(rawToken));
   }
+
+  async revokeAllForUser(userId: string): Promise<void> {
+    for (const [hash, row] of this.byHash.entries()) {
+      if (row.userId === userId) {
+        this.byHash.delete(hash);
+      }
+    }
+  }
 }
