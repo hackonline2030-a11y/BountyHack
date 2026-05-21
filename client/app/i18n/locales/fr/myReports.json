@@ -115,6 +115,9 @@
         "button": "Soumettre le brouillon globalement",
         "hint": "Envoie toutes les étapes encore modifiables au quality checker en une fois.",
         "disabledNone": "Toutes les étapes sont déjà soumises ou validées."
+      },
+      "sectionBloc": {
+        "compressBeforeUpload": "Réduisez au maximum la taille de votre image avant envoi, par exemple avec <serviceLink>ce service</serviceLink>."
       }
     },
     "superAdminFeedback": {
