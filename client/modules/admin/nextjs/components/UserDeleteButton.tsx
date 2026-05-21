@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useT } from "next-i18next/client";
 import { TrashIcon } from "@modules/report-team/react/icons";
+import { ConfirmDangerModal } from "@modules/app/nextjs/components/ConfirmDangerModal";
 
 type Props = {
   userId: string;
@@ -11,18 +12,13 @@ type Props = {
 };
 
 export function UserDeleteButton({ userId, username }: Props) {
-  const { t } = useT("administration");
+  const { t } = useT(["administration", "common"]);
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
-  async function onDelete() {
-    if (busy) return;
-    const confirmed = window.confirm(
-      t("userManagementTable.deleteConfirm", { username }),
-    );
-    if (!confirmed) return;
-
+  async function performDelete() {
     setBusy(true);
     setError(null);
 
@@ -32,7 +28,7 @@ export function UserDeleteButton({ userId, username }: Props) {
         credentials: "same-origin",
       });
       if (!res.ok) {
-        let message = t("userManagementTable.deleteFailed");
+        let message = t("administration:userManagementTable.deleteFailed");
         try {
           const body: unknown = await res.json();
           if (
@@ -46,11 +42,14 @@ export function UserDeleteButton({ userId, username }: Props) {
           /* keep default */
         }
         setError(message);
+        setConfirmOpen(false);
         return;
       }
+      setConfirmOpen(false);
       router.refresh();
     } catch {
-      setError(t("userManagementTable.deleteFailed"));
+      setError(t("administration:userManagementTable.deleteFailed"));
+      setConfirmOpen(false);
     } finally {
       setBusy(false);
     }
@@ -61,10 +60,10 @@ export function UserDeleteButton({ userId, username }: Props) {
       <button
         type="button"
         className="inline-flex cursor-pointer items-center justify-center rounded-md border border-rose-200 bg-white p-2 text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
-        onClick={() => void onDelete()}
+        onClick={() => setConfirmOpen(true)}
         disabled={busy}
-        aria-label={t("userManagementTable.deleteAria", { username })}
-        title={t("userManagementTable.deleteTitle")}
+        aria-label={t("administration:userManagementTable.deleteAria", { username })}
+        title={t("administration:userManagementTable.deleteTitle")}
       >
         <TrashIcon className="size-4" />
       </button>
@@ -73,6 +72,21 @@ export function UserDeleteButton({ userId, username }: Props) {
           {error}
         </p>
       ) : null}
+
+      <ConfirmDangerModal
+        open={confirmOpen}
+        title={t("administration:userManagementTable.deleteConfirmTitle")}
+        cancelLabel={t("common:confirmModal.cancel")}
+        confirmLabel={t("administration:userManagementTable.deleteConfirmAction")}
+        confirming={busy}
+        confirmingLabel={t("common:confirmModal.confirming")}
+        onCancel={() => {
+          if (!busy) setConfirmOpen(false);
+        }}
+        onConfirm={() => void performDelete()}
+      >
+        {t("administration:userManagementTable.deleteConfirm", { username })}
+      </ConfirmDangerModal>
     </div>
   );
 }

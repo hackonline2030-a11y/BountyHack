@@ -10,7 +10,7 @@ import { loadAdminTeams } from "@modules/report-team/core/useCase/load-admin-tea
 import type { ReportTeamMemberRole } from "@modules/report-team/model/report-team.types";
 import { ReportDraftAggregateStatusBadge } from "@modules/report-draft/react/components/ReportDraftAggregateStatusBadge";
 import { CoordinatorAttachOrphanTeamPanel } from "@modules/report-team/react/CoordinatorAttachOrphanTeamPanel";
-import { ConfirmDangerModal } from "@modules/report-team/react/ConfirmDangerModal";
+import { ConfirmDangerModal } from "@modules/app/nextjs/components/ConfirmDangerModal";
 import { OrphanReportDraftsTable } from "@modules/report-team/react/OrphanReportDraftsTable";
 import { iconActionClass } from "@modules/report-team/react/icon-action-buttons";
 import { IconActionButton } from "@modules/app/nextjs/components/buttons/IconActionButton";
@@ -22,21 +22,28 @@ type DraftDeleteTarget = {
   label: string;
 };
 
+type TeamDeleteTarget = {
+  teamId: string;
+  label: string;
+};
+
 export const ReportTeamAdminBootstrap: FC = () => {
   const dispatch = useAppDispatch();
   const params = useParams<{ lng?: string }>();
   const lng = typeof params?.lng === "string" && params.lng.trim() !== "" ? params.lng : "fr";
-  const { t } = useT(["reportTeams", "myReports"]);
+  const { t } = useT(["reportTeams", "myReports", "common"]);
   const { allTeams, orphanDrafts, pendingJoinRequests, loadStatus, loadError, mutationError, mutationStatus } =
     useAppSelector((s) => s.reportTeams);
   const [attachDraftId, setAttachDraftId] = useState<string | null>(null);
   const [draftDeleteTarget, setDraftDeleteTarget] = useState<DraftDeleteTarget | null>(null);
+  const [teamDeleteTarget, setTeamDeleteTarget] = useState<TeamDeleteTarget | null>(null);
   const attachDraft = useMemo(
     () => orphanDrafts.find((d) => d.id === attachDraftId) ?? null,
     [orphanDrafts, attachDraftId],
   );
   const isReady = loadStatus === "success";
   const isDeletingDraft = mutationStatus === "loading" && draftDeleteTarget !== null;
+  const isDeletingTeam = mutationStatus === "loading" && teamDeleteTarget !== null;
 
   const roleLabels: Record<ReportTeamMemberRole, string> = {
     hunter: t("reportTeams.roles.hunter"),
@@ -49,16 +56,11 @@ export const ReportTeamAdminBootstrap: FC = () => {
     void dispatch(loadAdminTeams());
   }, [dispatch]);
 
-  async function onDeleteTeam(teamId: string, label: string) {
-    if (
-      !window.confirm(
-        t("reportTeams.admin.deleteTeamConfirm", { label }),
-      )
-    ) {
-      return;
-    }
+  async function onConfirmDeleteTeam() {
+    if (!teamDeleteTarget) return;
     try {
-      await dispatch(deleteReportTeam({ teamId }));
+      await dispatch(deleteReportTeam({ teamId: teamDeleteTarget.teamId }));
+      setTeamDeleteTarget(null);
     } catch {
       /* mutationError in slice */
     }
@@ -156,7 +158,9 @@ export const ReportTeamAdminBootstrap: FC = () => {
                       variant="danger"
                       aria-label={t("reportTeams.admin.deleteTeam")}
                       title={t("reportTeams.admin.deleteTeam")}
-                      onClick={() => void onDeleteTeam(team.id, team.label)}
+                      onClick={() =>
+                        setTeamDeleteTarget({ teamId: team.id, label: team.label })
+                      }
                     >
                       <TrashIcon className="size-4" />
                     </IconActionButton>
@@ -199,9 +203,10 @@ export const ReportTeamAdminBootstrap: FC = () => {
       <ConfirmDangerModal
         open={draftDeleteTarget !== null}
         title={t("reportTeams.admin.deleteDraftModalTitle")}
-        cancelLabel={t("reportTeams.admin.cancel")}
+        cancelLabel={t("common:confirmModal.cancel")}
         confirmLabel={t("reportTeams.admin.deleteDraftModalConfirm")}
         confirming={isDeletingDraft}
+        confirmingLabel={t("common:confirmModal.confirming")}
         onCancel={() => {
           if (!isDeletingDraft) setDraftDeleteTarget(null);
         }}
@@ -212,6 +217,22 @@ export const ReportTeamAdminBootstrap: FC = () => {
               label: draftDeleteTarget.label,
               draftId: draftDeleteTarget.draftId,
             })
+          : null}
+      </ConfirmDangerModal>
+      <ConfirmDangerModal
+        open={teamDeleteTarget !== null}
+        title={t("reportTeams.admin.deleteTeamModalTitle")}
+        cancelLabel={t("common:confirmModal.cancel")}
+        confirmLabel={t("reportTeams.admin.deleteTeamModalConfirm")}
+        confirming={isDeletingTeam}
+        confirmingLabel={t("common:confirmModal.confirming")}
+        onCancel={() => {
+          if (!isDeletingTeam) setTeamDeleteTarget(null);
+        }}
+        onConfirm={() => void onConfirmDeleteTeam()}
+      >
+        {teamDeleteTarget
+          ? t("reportTeams.admin.deleteTeamConfirm", { label: teamDeleteTarget.label })
           : null}
       </ConfirmDangerModal>
     </div>

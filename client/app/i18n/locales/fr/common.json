@@ -48,5 +48,9 @@
   },
   "errors": {
     "network": "Erreur réseau. Veuillez réessayer."
+  },
+  "confirmModal": {
+    "cancel": "Annuler",
+    "confirming": "En cours…"
   }
 }
