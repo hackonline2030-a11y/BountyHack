@@ -3,6 +3,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { AddUsername } from '../commands/add-username';
 import { DeleteUserCompletelyCommand } from '../commands/delete-user-completely.command';
+import { DeleteOwnAccountCommand } from '../commands/delete-own-account.command';
 import { GetUserByIdQuery } from '../queries/get-user-by-id';
 import { ListUsersAdminSummariesQuery } from '../queries/list-users-admin-summaries.query';
 import {
@@ -19,6 +20,7 @@ describe('UsersController', () => {
   let getUserByIdQuery: jest.Mocked<GetUserByIdQuery>;
   let listUsersAdminSummariesQuery: jest.Mocked<ListUsersAdminSummariesQuery>;
   let deleteUserCompletely: jest.Mocked<DeleteUserCompletelyCommand>;
+  let deleteOwnAccount: jest.Mocked<DeleteOwnAccountCommand>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -40,6 +42,10 @@ describe('UsersController', () => {
           provide: DeleteUserCompletelyCommand,
           useValue: { execute: jest.fn() },
         },
+        {
+          provide: DeleteOwnAccountCommand,
+          useValue: { execute: jest.fn() },
+        },
       ],
     }).compile();
 
@@ -48,6 +54,7 @@ describe('UsersController', () => {
     getUserByIdQuery = module.get(GetUserByIdQuery);
     listUsersAdminSummariesQuery = module.get(ListUsersAdminSummariesQuery);
     deleteUserCompletely = module.get(DeleteUserCompletelyCommand);
+    deleteOwnAccount = module.get(DeleteOwnAccountCommand);
   });
 
   it('should create user profile for authenticated user', async () => {
@@ -94,6 +101,24 @@ describe('UsersController', () => {
         roleCode: null,
       }),
     );
+  });
+
+  describe('deleteOwnAccount() — self-service', () => {
+    it('delegates to DeleteOwnAccountCommand', async () => {
+      const request = {
+        user: {
+          uid: 'hunter-1',
+          email: 'h@example.com',
+          roleCode: AppRoleCode.HUNTER,
+        },
+      } as RequestWithIdentity;
+
+      await expect(controller.deleteOwnAccount(request)).resolves.toEqual({
+        ok: true,
+      });
+
+      expect(deleteOwnAccount.execute).toHaveBeenCalledWith(request.user);
+    });
   });
 
   describe('deleteUser() — admin hard delete', () => {
