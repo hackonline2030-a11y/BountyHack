@@ -38,7 +38,7 @@ export default async function ParametersPage({ params }: PageProps) {
           <div className="mt-4">
             <TotpEnrollmentPanel initialTotpEnabled={profile.twoFactorEnabled} />
           </div>
-          <DeleteOwnAccountPanel />
+          <DeleteOwnAccountPanel roleCode={profile.roleCode} />
         </div>
       </Section>
     </main>

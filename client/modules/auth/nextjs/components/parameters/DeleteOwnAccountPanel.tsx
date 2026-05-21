@@ -4,8 +4,13 @@ import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useT } from "next-i18next/client";
 import { localePrefixFromPathname } from "@/lib/locale-path";
+import { AppRoleCode } from "@/lib/app-role-code";
 
-export function DeleteOwnAccountPanel() {
+type DeleteOwnAccountPanelProps = {
+  roleCode: string | null;
+};
+
+export function DeleteOwnAccountPanel({ roleCode }: DeleteOwnAccountPanelProps) {
   const { t } = useT("parameters");
   const router = useRouter();
   const pathname = usePathname();
@@ -59,6 +64,11 @@ export function DeleteOwnAccountPanel() {
         {t("deleteAccount.heading")}
       </h2>
       <p className="mt-2 text-sm text-rose-950/90">{t("deleteAccount.lead")}</p>
+      {roleCode === AppRoleCode.SUPER_ADMIN ? (
+        <p className="mt-2 text-sm text-rose-950/90">
+          {t("deleteAccount.leadLastSuperAdmin")}
+        </p>
+      ) : null}
       {error ? (
         <p role="alert" className="mt-3 text-sm text-rose-800">
           {error}

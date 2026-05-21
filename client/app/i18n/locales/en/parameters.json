@@ -28,7 +28,8 @@
   "nestError": "Request failed (HTTP {{status}}).",
   "deleteAccount": {
     "heading": "Delete my account",
-    "lead": "Permanently removes your account, reports, teams, and sessions. This cannot be undone. If you are the last Lead (super-admin), deletion is blocked.",
+    "lead": "Permanently removes your account, reports, teams, and sessions. This cannot be undone.",
+    "leadLastSuperAdmin": "If you are the last Lead (super-admin), deletion is blocked.",
     "button": "Delete my account",
     "deleting": "Deleting…",
     "confirm": "Permanently delete your account and all related data? You will be signed out and cannot sign in again with this identity.",
