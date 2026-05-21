@@ -1,5 +1,6 @@
 import { getT } from "next-i18next/server";
 import type { AdminUserSummary } from "@modules/admin/core/model/admin-users.domain-model";
+import { UserDeleteButton } from "@modules/admin/nextjs/components/UserDeleteButton";
 
 type UserManagementTableProps = {
   lng: string;
@@ -48,6 +49,9 @@ export async function UserManagementTable({ lng, users }: UserManagementTablePro
             <th scope="col" className="px-4 py-2 font-semibold">
               {t("userManagementTable.columns.role")}
             </th>
+            <th scope="col" className="px-4 py-2 font-semibold text-right">
+              <span className="sr-only">{t("userManagementTable.columns.actions")}</span>
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-dashboard-divider">
@@ -69,6 +73,9 @@ export async function UserManagementTable({ lng, users }: UserManagementTablePro
                     {t("userManagementTable.values.noRole")}
                   </span>
                 )}
+              </td>
+              <td className="px-4 py-2 text-right">
+                <UserDeleteButton userId={user.uid} username={user.username} />
               </td>
             </tr>
           ))}

@@ -58,4 +58,10 @@ export class MongoUserRepository implements IUserRepository {
       'Role-based user listing is not implemented on the Mongo adapter yet.',
     );
   }
+
+  async deleteCompletely(): Promise<void> {
+    throw new NotImplementedException(
+      'User deletion is not implemented on the Mongo adapter yet.',
+    );
+  }
 }

@@ -15,8 +15,13 @@
     "columns": {
       "username": "Nom d'utilisateur",
       "email": "E-mail",
-      "role": "Rôle"
+      "role": "Rôle",
+      "actions": "Actions"
     },
+    "deleteTitle": "Supprimer le compte",
+    "deleteAria": "Supprimer le compte {{username}}",
+    "deleteConfirm": "Supprimer définitivement le compte « {{username}} » et toutes ses données associées (rapports, équipes, sessions) ? Cette action est irréversible.",
+    "deleteFailed": "Impossible de supprimer ce compte.",
     "values": {
       "noEmail": "—",
       "noRole": "Sans rôle"

@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { rm } from 'fs/promises';
 import { IUserRepository } from '../../ports/user-repository.interface';
 import { UserAdminSummary, UserRecord } from '../../models';
 import { CreateUserProfilePayload } from '../../payloads';
 import { PrismaService } from '../../../core/infrastructure/database/prisma/prisma.service';
 import { AppRoleCode } from '../../../shared/rbac/app-role.code';
+import { resolveReportImageAssetPath } from '../../../report-draft/application/attachments/report-draft-image-storage';
 
 @Injectable()
 export class PrismaUserRepository implements IUserRepository {
@@ -102,6 +104,40 @@ export class PrismaUserRepository implements IUserRepository {
    * that the application explicitly recognises. Anything else is mapped to `null` so the
    * UI cannot accidentally render an unknown role label.
    */
+  async deleteCompletely(uid: string): Promise<void> {
+    const storageKeys = await this.prisma.reportDraftAttachment.findMany({
+      where: { reportDraftStep: { reportDraft: { hunterId: uid } } },
+      select: { storageKey: true },
+    });
+
+    await this.prisma.$transaction(async (tx) => {
+      const writerOnOthersDraft = await tx.reportDraft.findMany({
+        where: {
+          hunterWriterId: uid,
+          hunterId: { not: uid },
+        },
+        select: { id: true, hunterId: true },
+      });
+
+      for (const draft of writerOnOthersDraft) {
+        await tx.reportDraft.update({
+          where: { id: draft.id },
+          data: { hunterWriterId: draft.hunterId },
+        });
+      }
+
+      await tx.user.delete({ where: { id: uid } });
+    });
+
+    await Promise.all(
+      storageKeys.map((row) =>
+        rm(resolveReportImageAssetPath(row.storageKey), { force: true }).catch(
+          () => undefined,
+        ),
+      ),
+    );
+  }
+
   private toAppRoleCode(name: string | null): AppRoleCode | null {
     if (!name) {
       return null;
