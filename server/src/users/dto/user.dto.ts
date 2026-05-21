@@ -39,6 +39,14 @@ export class UserProfileResponseDto {
 
   @Expose()
   @ApiPropertyOptional({
+    example: 'amaury@example.com',
+    nullable: true,
+    description: 'Account email when stored for password login.',
+  })
+  email: string | null;
+
+  @Expose()
+  @ApiPropertyOptional({
     enum: AppRoleCode,
     description:
       'Current RBAC role (from JWT validation / Postgres `roles.name`). Absent when not persisted for this persistence layer.',

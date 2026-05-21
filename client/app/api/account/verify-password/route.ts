@@ -7,8 +7,8 @@ import { nestInternalApiUrl } from "@/lib/server/nest-internal-url";
 
 export const dynamic = "force-dynamic";
 
-/** Self-service account deletion (requires step-up token from verify-password). */
-export async function DELETE(request: NextRequest) {
+/** Step 1 — verify current password before account deletion. */
+export async function POST(request: NextRequest) {
   const auth = await requireReportDraftApiBearer();
   if ("response" in auth) return auth.response;
 
@@ -25,8 +25,8 @@ export async function DELETE(request: NextRequest) {
     );
   }
 
-  const nestRes = await fetch(nestInternalApiUrl("users/me/account"), {
-    method: "DELETE",
+  const nestRes = await fetch(nestInternalApiUrl("users/me/account/verify-password"), {
+    method: "POST",
     headers: {
       Authorization: `Bearer ${auth.token}`,
       Accept: "application/json",

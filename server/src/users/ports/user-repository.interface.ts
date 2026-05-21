@@ -1,5 +1,6 @@
 import type { AppRoleCode } from '../../shared/rbac/app-role.code';
 import { CreateUserProfilePayload } from '../payloads';
+import type { UpdateOwnProfilePayload } from '../payloads/update-own-profile.payload';
 import { UserAdminSummary, UserRecord } from '../models';
 
 export const I_USER_REPOSITORY = 'I_USER_REPOSITORY';
@@ -26,4 +27,13 @@ export interface IUserRepository {
    * SUPER_ADMIN, forbid self-delete, and protect the last super-admin.
    */
   deleteCompletely(uid: string): Promise<void>;
+
+  /** Verifies the account password for `uid` (password-login accounts only). */
+  verifyPassword(uid: string, plainPassword: string): Promise<boolean>;
+
+  /**
+   * Updates profile fields for `uid`. Caller must enforce self-service only
+   * (`uid` from JWT, never from client-supplied user id).
+   */
+  updateOwnProfile(uid: string, patch: UpdateOwnProfilePayload): Promise<UserRecord>;
 }

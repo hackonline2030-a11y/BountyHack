@@ -3,6 +3,7 @@ import { getT } from "next-i18next/server";
 import { notFound } from "next/navigation";
 import { Section } from "@modules/app/nextjs/components/sections/Section";
 import { DeleteOwnAccountPanel } from "@/modules/auth/nextjs/components/parameters/DeleteOwnAccountPanel";
+import { ProfileSettingsPanel } from "@/modules/auth/nextjs/components/parameters/ProfileSettingsPanel";
 import { TotpEnrollmentPanel } from "@/modules/auth/nextjs/components/parameters/TotpEnrollmentPanel";
 import { getParametersProfile } from "@/lib/dal/parameters-profile";
 import { verifySession } from "@/lib/dal/session";
@@ -32,13 +33,21 @@ export default async function ParametersPage({ params }: PageProps) {
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             {t("pageTitle")}
           </h1>
+          <ProfileSettingsPanel
+            initialUsername={profile.username}
+            initialEmail={profile.email}
+            twoFactorEnabled={profile.twoFactorEnabled}
+          />
           <h2 className="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">
             {t("securityHeading")}
           </h2>
           <div className="mt-4">
             <TotpEnrollmentPanel initialTotpEnabled={profile.twoFactorEnabled} />
           </div>
-          <DeleteOwnAccountPanel roleCode={profile.roleCode} />
+          <DeleteOwnAccountPanel
+            roleCode={profile.roleCode}
+            twoFactorEnabled={profile.twoFactorEnabled}
+          />
         </div>
       </Section>
     </main>
