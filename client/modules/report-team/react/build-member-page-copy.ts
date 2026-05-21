@@ -2,7 +2,7 @@ import type { TFunction } from "i18next";
 import type { ReportTeamMemberRole } from "@modules/report-team/model/report-team.types";
 
 export function buildMemberPageCopy(
-  t: TFunction<"reportTeams">,
+  t: TFunction<readonly ["reportTeams", "common"]>,
   options?: { backHref?: string; backLabel?: string },
 ) {
   const roleLabels: Record<ReportTeamMemberRole, string> = {
@@ -40,6 +40,7 @@ export function buildMemberPageCopy(
     askDescription: t("reportTeams.askJoin.description"),
     openReportDraft: t("reportTeams.myTeams.openReportDraft"),
     leaveTeam: t("reportTeams.myTeams.leaveTeam"),
+    leaveTeamModalTitle: t("reportTeams.myTeams.leaveTeamModalTitle"),
     leaveTeamConfirm: (teamLabel: string) =>
       t("reportTeams.myTeams.leaveTeamConfirm", { label: teamLabel }),
     leaveTeamSubmit: t("reportTeams.myTeams.leaveTeamSubmit"),
@@ -50,6 +51,8 @@ export function buildMemberPageCopy(
     requestLeavePending: t("reportTeams.myTeams.requestLeavePending"),
     requestLeaveType: t("reportTeams.myTeams.requestLeaveType"),
     roleLabels,
+    confirmModalCancel: t("common:confirmModal.cancel"),
+    confirmModalConfirming: t("common:confirmModal.confirming"),
     backHref: options?.backHref,
     backLabel: options?.backLabel,
   };

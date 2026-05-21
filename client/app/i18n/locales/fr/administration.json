@@ -20,7 +20,9 @@
     },
     "deleteTitle": "Supprimer le compte",
     "deleteAria": "Supprimer le compte {{username}}",
+    "deleteConfirmTitle": "Supprimer ce compte ?",
     "deleteConfirm": "Supprimer définitivement le compte « {{username}} » et toutes ses données associées (rapports, équipes, sessions) ? Cette action est irréversible.",
+    "deleteConfirmAction": "Supprimer le compte",
     "deleteFailed": "Impossible de supprimer ce compte.",
     "values": {
       "noEmail": "—",

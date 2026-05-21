@@ -48,5 +48,9 @@
   },
   "errors": {
     "network": "Network error. Please try again."
+  },
+  "confirmModal": {
+    "cancel": "Cancel",
+    "confirming": "Working…"
   }
 }

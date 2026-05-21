@@ -27,7 +27,7 @@ export const ReportTeamsMemberBootstrap: FC<Props> = ({
   roleOptions,
 }) => {
   const dispatch = useAppDispatch();
-  const { t } = useT("reportTeams");
+  const { t } = useT(["reportTeams", "common"]);
   const {
     myTeams,
     joinableTeams,
