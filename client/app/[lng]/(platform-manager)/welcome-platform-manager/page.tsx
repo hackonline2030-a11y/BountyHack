@@ -50,11 +50,13 @@ export default async function WelcomePlatformManagerPage({ params }: PageProps) 
     label: t("welcomePlatformManager.nav.label"),
     settings: t("welcomePlatformManager.nav.settings"),
     credits: t("welcomePlatformManager.nav.credits"),
+    criteria: t("welcomePlatformManager.nav.criteria"),
   };
 
   const navHrefs: PlatformManagerNavHrefs = {
     settings: `${prefix}/parameters`,
     credits: `${prefix}/credits`,
+    criteria: `${prefix}/quality-criteria`,
   };
 
   return (

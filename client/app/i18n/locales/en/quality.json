@@ -6,7 +6,17 @@
     "empty": "No published criteria yet.",
     "unclassified": "Unclassified",
     "manageLink": "Manage criteria (QC)",
-    "backHome": "Back"
+    "backHome": "Back",
+    "viewReportTargets": "Affected reports"
+  },
+  "reportTargets": {
+    "title": "Reports targeted by this criterion",
+    "loading": "Loading reports…",
+    "empty": "No report is individually targeted for this criterion.",
+    "close": "Close",
+    "colTargetId": "Target id",
+    "colTitle": "Report title",
+    "colTeam": "Report team"
   },
   "checklist": {
     "loading": "Loading criteria…",
@@ -44,7 +54,12 @@
     },
     "list": {
       "drafts": "Drafts",
-      "published": "Published"
+      "published": "Published",
+      "learnMore": "Learn more",
+      "reportTargetsTitle": "Affected reports",
+      "reportTargetsLoading": "Loading reports…",
+      "reportTargetsEmpty": "No report is individually targeted for this criterion.",
+      "reportTargetsClose": "Close"
     },
     "categories": {
       "title": "Categories",

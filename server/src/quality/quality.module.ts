@@ -7,6 +7,8 @@ import { ManageQualityCriteriaCommand } from './application/commands/manage-qual
 import { ManageQualityDistributionsCommand } from './application/commands/manage-quality-distributions.command';
 import { ManageQualityTargetTypesCommand } from './application/commands/manage-quality-target-types.command';
 import { UpsertQualityCheckCommand } from './application/commands/upsert-quality-check.command';
+import { ListQualityCriterionReportTargetsQuery } from './application/queries/list-quality-criterion-report-targets.query';
+import { ListQualityReportDistributionCountsQuery } from './application/queries/list-quality-report-distribution-counts.query';
 import { ListQualityReportDraftTargetsQuery } from './application/queries/list-quality-report-draft-targets.query';
 import { QualityAccessPolicy } from './application/quality-access.policy';
 import { PathCourseQualityTargetHandler } from './application/target-handlers/path-course-target.handler';
@@ -31,6 +33,8 @@ import { I_QUALITY_REPOSITORY } from './ports/quality-repository.interface';
   ],
   providers: [
     ListQualityReportDraftTargetsQuery,
+    ListQualityCriterionReportTargetsQuery,
+    ListQualityReportDistributionCountsQuery,
     QualityAccessPolicy,
     ReportQualityTargetHandler,
     PathCourseQualityTargetHandler,

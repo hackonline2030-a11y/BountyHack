@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { FC, SVGProps } from "react";
 import {
   ColleagueIcon,
+  CriteriaIcon,
   EmailIcon,
   ReportIcon,
   SettingsIcon,
@@ -15,6 +16,7 @@ export type DashboardNavLabels = {
   reports: string;
   teams: string;
   colleagues: string;
+  criteria: string;
   support: string;
   settings: string;
 };
@@ -24,6 +26,7 @@ export type DashboardNavHrefs = {
   reports: string;
   teams: string;
   colleagues: string;
+  criteria: string;
   support: string;
   settings: string;
 };
@@ -40,6 +43,7 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
   { key: "reports", Icon: ReportIcon },
   { key: "teams", Icon: TeamIcon },
   { key: "colleagues", Icon: ColleagueIcon },
+  { key: "criteria", Icon: CriteriaIcon },
   { key: "support", Icon: SupportIcon },
   { key: "settings", Icon: SettingsIcon },
 ];

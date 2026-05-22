@@ -57,6 +57,7 @@ export default async function WelcomeMentorPage({ params }: PageProps) {
     reports: t("welcomeMentor.nav.reports"),
     teams: t("welcomeMentor.nav.teams"),
     colleagues: t("welcomeMentor.nav.colleagues"),
+    criteria: t("welcomeMentor.nav.criteria"),
     support: t("welcomeMentor.nav.support"),
     settings: t("welcomeMentor.nav.settings"),
   };
@@ -66,6 +67,7 @@ export default async function WelcomeMentorPage({ params }: PageProps) {
     reports: `${prefix}/mentor-team-reports`,
     teams: `${prefix}/mentor-teams`,
     colleagues: `${prefix}/colleagues`,
+    criteria: `${prefix}/quality-criteria`,
     support: `${prefix}/support`,
     settings: `${prefix}/parameters`,
   };

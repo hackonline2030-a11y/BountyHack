@@ -154,6 +154,26 @@ export class HttpQualityRepository implements IQualityRepository {
     return parseJsonResponse(res);
   }
 
+  async listReportDistributionCounts(): Promise<
+    Array<{ criterionId: string; count: number }>
+  > {
+    const res = await fetchBff(`${base}/criteria/report-distribution-counts`, {
+      credentials: "include",
+      cache: "no-store",
+    });
+    return parseJsonResponse(res);
+  }
+
+  async listCriterionReportTargets(
+    criterionId: string,
+  ): Promise<QualityReportDraftTarget[]> {
+    const res = await fetchBff(
+      `${base}/criteria/${encodeURIComponent(criterionId)}/report-targets`,
+      { credentials: "include", cache: "no-store" },
+    );
+    return parseJsonResponse(res);
+  }
+
   async listInstanceCriteria(
     targetTypeCode: string,
     targetRefId: string | null,
