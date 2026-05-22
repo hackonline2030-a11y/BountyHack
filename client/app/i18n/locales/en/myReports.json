@@ -5,8 +5,14 @@
     "workspace": {
       "tabs": {
         "attachments": "Attachments",
-        "criteria": "Quality criteria",
-        "preview": "Preview"
+        "preview": "Preview",
+        "quality": "Quality"
+      },
+      "quality": {
+        "subTabsAria": "Quality feedback and checks",
+        "comments": "Comments",
+        "prePublication": "Pre-publication feedback",
+        "criteria": "Quality criteria"
       },
       "preview": {
         "subTabsAria": "Preview scope",
@@ -61,7 +67,7 @@
         "short": "Approved by QC or SA (#{{revision}}) — global resubmit available."
       },
       "openCommentsTab": "Comments",
-      "openSuperAdminTab": "Super-admin feedback"
+      "openSuperAdminTab": "Pre-publication feedback"
     },
     "globalComments": {
       "sectionTitle": "Global comments",
@@ -128,7 +134,7 @@
       "finalStep": {
         "awaitingLeadValidation": "Last step validated: awaiting final validation.",
         "leadValidated": "Report validated by the Lead.",
-        "globalRevisionInProgress": "Global revision in progress — see the “Super-admin feedback” tab."
+        "globalRevisionInProgress": "Global revision in progress — see Quality → “Pre-publication feedback”."
       },
       "globalSubmit": {
         "button": "Submit draft globally",

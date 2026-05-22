@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { type FC, type KeyboardEvent, useCallback, useMemo, useState } from "react";
+import {
+  type FC,
+  type KeyboardEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useT } from "next-i18next/client";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { reportDraftStepToStateKey } from "@modules/report-draft/core/model/report-draft-step-keys";
@@ -35,26 +42,20 @@ import { QualityCriteriaChecklistPanel } from "@modules/quality/react/QualityCri
 import { useAppSelector } from "@store/redux/store";
 
 /**
- * Enveloppe workspace : onglets Édition / aperçu (sous-onglets étape & global) /
- * **Commentaires** (retours reviewer pour l’étape wizard courante).
+ * Enveloppe workspace : Édition / Aperçu (étape & global) / Qualité (commentaires,
+ * retours avant publication, critères) / …
  */
-type WorkspaceTab =
-  | "form"
-  | "preview"
-  | "attachments"
-  | "comments"
-  | "criteria"
-  | "revisions"
-  | "superAdminFeedback";
+type WorkspaceTab = "form" | "preview" | "attachments" | "quality" | "revisions";
 
 type PreviewSubTab = "step" | "global";
+
+type QualitySubTab = "comments" | "prePublication" | "criteria";
 
 const BASE_TAB_ORDER: readonly WorkspaceTab[] = [
   "form",
   "preview",
   "attachments",
-  "comments",
-  "criteria",
+  "quality",
   "revisions",
 ] as const;
 
@@ -62,10 +63,8 @@ const TAB_LABELS: Record<WorkspaceTab, string> = {
   form: "Édition",
   preview: "Aperçu",
   attachments: "Médias (étape)",
-  comments: "Commentaires",
-  criteria: "Critères qualité",
+  quality: "Qualité",
   revisions: "Mes demandes",
-  superAdminFeedback: "Retours super-admin",
 };
 
 const STEP_LABELS: Record<ReportDraftDomainModel.ReportDraftStep, string> = {
@@ -83,6 +82,15 @@ const tabButtonId = (key: WorkspaceTab) => `report-draft-tab-${key}`;
 const tabPanelId = (key: WorkspaceTab) => `report-draft-panel-${key}`;
 const previewSubTabButtonId = (key: PreviewSubTab) => `report-draft-preview-subtab-${key}`;
 const previewSubTabPanelId = (key: PreviewSubTab) => `report-draft-preview-panel-${key}`;
+const qualitySubTabButtonId = (key: QualitySubTab) => `report-draft-quality-subtab-${key}`;
+const qualitySubTabPanelId = (key: QualitySubTab) => `report-draft-quality-panel-${key}`;
+
+const formSubTabPillClass = (active: boolean): string =>
+  `rounded-full border px-4 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent focus-visible:ring-offset-2 ${
+    active
+      ? "border-form-accent bg-emerald-50 text-form-accent"
+      : "border-form-border bg-form-overlay text-form-text-muted hover:border-form-border-strong hover:text-form-text"
+  }`;
 
 const WorkspaceStepStatusPill: FC = () => {
   const step = useAppSelector((s) => s.reportDraft.step);
@@ -178,25 +186,40 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
     globalReviewerCommentsById,
   ]);
 
-  const tabOrder = useMemo(
-    () =>
-      showSuperAdminTab
-        ? ([...BASE_TAB_ORDER, "superAdminFeedback"] as const)
-        : BASE_TAB_ORDER,
-    [showSuperAdminTab],
-  );
+  const qualitySubTabOrder = useMemo((): readonly QualitySubTab[] => {
+    if (showSuperAdminTab) {
+      return ["comments", "prePublication", "criteria"];
+    }
+    return ["comments", "criteria"];
+  }, [showSuperAdminTab]);
 
   const showHunterBack = Boolean(draft && draft.hunterId === viewerUserId);
   const reportsListHref = useMemo(() => `/${lng}/my-reports`, [lng]);
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("form");
   const [previewSubTab, setPreviewSubTab] = useState<PreviewSubTab>("step");
+  const [qualitySubTab, setQualitySubTab] = useState<QualitySubTab>("comments");
 
   const selectWorkspaceTab = useCallback((key: WorkspaceTab) => {
     setActiveTab(key);
     if (key === "preview") {
       setPreviewSubTab("step");
     }
+    if (key === "quality") {
+      setQualitySubTab("comments");
+    }
   }, []);
+
+  const openQualitySubTab = useCallback((sub: QualitySubTab) => {
+    setActiveTab("quality");
+    setQualitySubTab(sub);
+  }, []);
+
+  useEffect(() => {
+    if (activeTab !== "quality") return;
+    if (qualitySubTab === "prePublication" && !showSuperAdminTab) {
+      setQualitySubTab("comments");
+    }
+  }, [activeTab, qualitySubTab, showSuperAdminTab]);
 
   const onPreviewSubTabKeyDown = useCallback(
     (event: KeyboardEvent<HTMLButtonElement>) => {
@@ -207,17 +230,45 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
     [],
   );
 
+  const onQualitySubTabKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLButtonElement>) => {
+      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+      event.preventDefault();
+      setQualitySubTab((current) => {
+        const idx = qualitySubTabOrder.indexOf(current);
+        const offset = event.key === "ArrowRight" ? 1 : -1;
+        const next =
+          (idx + offset + qualitySubTabOrder.length) % qualitySubTabOrder.length;
+        return qualitySubTabOrder[next];
+      });
+    },
+    [qualitySubTabOrder],
+  );
+
   const onTabKeyDown = useCallback(
     (event: KeyboardEvent<HTMLButtonElement>) => {
       if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
       event.preventDefault();
-      const currentIndex = tabOrder.indexOf(activeTab);
+      const currentIndex = BASE_TAB_ORDER.indexOf(activeTab);
       const offset = event.key === "ArrowRight" ? 1 : -1;
       const nextIndex =
-        (currentIndex + offset + tabOrder.length) % tabOrder.length;
-      selectWorkspaceTab(tabOrder[nextIndex]);
+        (currentIndex + offset + BASE_TAB_ORDER.length) % BASE_TAB_ORDER.length;
+      selectWorkspaceTab(BASE_TAB_ORDER[nextIndex]);
     },
-    [activeTab, tabOrder, selectWorkspaceTab],
+    [activeTab, selectWorkspaceTab],
+  );
+
+  const qualitySubTabLabel = useCallback(
+    (subKey: QualitySubTab): string => {
+      if (subKey === "comments") {
+        return t("myReports.workspace.quality.comments");
+      }
+      if (subKey === "prePublication") {
+        return t("myReports.workspace.quality.prePublication");
+      }
+      return t("myReports.workspace.quality.criteria");
+    },
+    [t],
   );
 
   return (
@@ -239,7 +290,7 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
         aria-label="Espace de rédaction du rapport"
         className="flex w-full flex-wrap gap-4 border-b border-form-border sm:gap-6"
       >
-        {tabOrder.map((key) => {
+        {BASE_TAB_ORDER.map((key) => {
           const isActive = key === activeTab;
           return (
             <TabNavButton
@@ -254,10 +305,10 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
             >
               {key === "attachments"
                 ? t("myReports.workspace.tabs.attachments")
-                : key === "criteria"
-                  ? t("myReports.workspace.tabs.criteria")
-                  : key === "preview"
-                    ? t("myReports.workspace.tabs.preview")
+                : key === "preview"
+                  ? t("myReports.workspace.tabs.preview")
+                  : key === "quality"
+                    ? t("myReports.workspace.tabs.quality")
                     : TAB_LABELS[key]}
             </TabNavButton>
           );
@@ -280,8 +331,8 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
           {currentDraftId ? (
             <GlobalRevisionEventBanner
               draftId={currentDraftId}
-              onOpenCommentsTab={() => setActiveTab("comments")}
-              onOpenSuperAdminTab={() => setActiveTab("superAdminFeedback")}
+              onOpenCommentsTab={() => openQualitySubTab("comments")}
+              onOpenSuperAdminTab={() => openQualitySubTab("prePublication")}
             />
           ) : null}
           <HunterReviewActivityBanner />
@@ -314,11 +365,7 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
                 tabIndex={isSubActive ? 0 : -1}
                 onClick={() => setPreviewSubTab(subKey)}
                 onKeyDown={onPreviewSubTabKeyDown}
-                className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent focus-visible:ring-offset-2 ${
-                  isSubActive
-                    ? "border-form-accent bg-emerald-50 text-form-accent"
-                    : "border-form-border bg-form-overlay text-form-text-muted hover:border-form-border-strong hover:text-form-text"
-                }`}
+                className={formSubTabPillClass(isSubActive)}
               >
                 {subKey === "step"
                   ? t("myReports.workspace.preview.step")
@@ -360,29 +407,72 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
 
       <div
         role="tabpanel"
-        id={tabPanelId("comments")}
-        aria-labelledby={tabButtonId("comments")}
-        hidden={activeTab !== "comments"}
-        className="min-h-[120px]"
+        id={tabPanelId("quality")}
+        aria-labelledby={tabButtonId("quality")}
+        hidden={activeTab !== "quality"}
+        className="flex min-h-[120px] flex-col gap-4"
       >
-        <ReportDraftStepCommentsPanel />
-      </div>
-
-      <div
-        role="tabpanel"
-        id={tabPanelId("criteria")}
-        aria-labelledby={tabButtonId("criteria")}
-        hidden={activeTab !== "criteria"}
-        className="min-h-[120px] rounded-lg border border-form-border bg-form-surface p-4"
-      >
-        {currentDraftId ? (
-          <QualityCriteriaChecklistPanel
-            targetTypeCode="report"
-            targetRefId={currentDraftId}
-            context="submission_review"
-            panelIdPrefix="report-draft-workspace-criteria"
-          />
+        <div
+          role="tablist"
+          aria-label={t("myReports.workspace.quality.subTabsAria")}
+          className="flex flex-wrap gap-2"
+        >
+          {qualitySubTabOrder.map((subKey) => {
+            const isSubActive = qualitySubTab === subKey;
+            return (
+              <button
+                key={subKey}
+                type="button"
+                role="tab"
+                id={qualitySubTabButtonId(subKey)}
+                aria-selected={isSubActive}
+                aria-controls={qualitySubTabPanelId(subKey)}
+                tabIndex={isSubActive ? 0 : -1}
+                onClick={() => setQualitySubTab(subKey)}
+                onKeyDown={onQualitySubTabKeyDown}
+                className={formSubTabPillClass(isSubActive)}
+              >
+                {qualitySubTabLabel(subKey)}
+              </button>
+            );
+          })}
+        </div>
+        <div
+          role="tabpanel"
+          id={qualitySubTabPanelId("comments")}
+          aria-labelledby={qualitySubTabButtonId("comments")}
+          hidden={qualitySubTab !== "comments"}
+          className="min-h-[80px]"
+        >
+          <ReportDraftStepCommentsPanel />
+        </div>
+        {showSuperAdminTab ? (
+          <div
+            role="tabpanel"
+            id={qualitySubTabPanelId("prePublication")}
+            aria-labelledby={qualitySubTabButtonId("prePublication")}
+            hidden={qualitySubTab !== "prePublication"}
+            className="min-h-[80px]"
+          >
+            <ReportDraftSuperAdminFeedbackPanel />
+          </div>
         ) : null}
+        <div
+          role="tabpanel"
+          id={qualitySubTabPanelId("criteria")}
+          aria-labelledby={qualitySubTabButtonId("criteria")}
+          hidden={qualitySubTab !== "criteria"}
+          className="min-h-[80px] rounded-lg border border-form-border bg-form-surface p-4"
+        >
+          {currentDraftId ? (
+            <QualityCriteriaChecklistPanel
+              targetTypeCode="report"
+              targetRefId={currentDraftId}
+              context="submission_review"
+              panelIdPrefix="report-draft-workspace-criteria"
+            />
+          ) : null}
+        </div>
       </div>
 
       <div
@@ -395,17 +485,6 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
         <ReportDraftStepRevisionsListPanel />
       </div>
 
-      {showSuperAdminTab ? (
-        <div
-          role="tabpanel"
-          id={tabPanelId("superAdminFeedback")}
-          aria-labelledby={tabButtonId("superAdminFeedback")}
-          hidden={activeTab !== "superAdminFeedback"}
-          className="min-h-[120px]"
-        >
-          <ReportDraftSuperAdminFeedbackPanel />
-        </div>
-      ) : null}
     </div>
     </ReportDraftSessionProvider>
   );
