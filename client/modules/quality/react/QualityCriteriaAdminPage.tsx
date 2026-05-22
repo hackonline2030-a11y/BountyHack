@@ -12,9 +12,26 @@ import type {
   QualityTargetType,
 } from "@modules/quality/model/quality.types";
 import { CategoryPill } from "@modules/quality/react/CategoryPill";
-type AdminTab = "drafts" | "published" | "categories";
+type AdminTab = "drafts" | "published" | "distribution" | "categories";
 
-const ADMIN_TABS: readonly AdminTab[] = ["drafts", "published", "categories"] as const;
+const ADMIN_TABS: readonly AdminTab[] = [
+  "drafts",
+  "published",
+  "distribution",
+  "categories",
+] as const;
+
+/** Check contexts created per distribution — must match Nest target handlers. */
+const DISTRIBUTION_CONTEXTS: Record<string, readonly string[]> = {
+  report: ["submission_review", "global_submission_review"],
+  path_course: ["path_course_review"],
+};
+
+/** Consumer UI (checklist tab, etc.) shipped per target type. */
+const TARGET_WORKFLOW_READY: Record<string, boolean> = {
+  report: true,
+  path_course: false,
+};
 
 const adminTabButtonId = (key: AdminTab) => `quality-admin-tab-${key}`;
 const adminTabPanelId = (key: AdminTab) => `quality-admin-panel-${key}`;
@@ -24,7 +41,6 @@ type CriterionForm = {
   title: string;
   explanation: string;
   categoryId: string;
-  targetTypeIds: string[];
 };
 
 const emptyForm = (): CriterionForm => ({
@@ -32,7 +48,6 @@ const emptyForm = (): CriterionForm => ({
   title: "",
   explanation: "",
   categoryId: "",
-  targetTypeIds: [],
 });
 
 function countWords(text: string): number {
@@ -57,7 +72,9 @@ export const QualityCriteriaAdminPage: FC<Props> = ({ lng }) => {
   const [form, setForm] = useState<CriterionForm>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [distributeCriterionId, setDistributeCriterionId] = useState("");
+  const [distributeTargetTypeCode, setDistributeTargetTypeCode] = useState("");
   const [distributeDraftId, setDistributeDraftId] = useState("");
+  const [distributeSuccess, setDistributeSuccess] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{
     kind: "criterion" | "category";
     id: string;
@@ -97,7 +114,7 @@ export const QualityCriteriaAdminPage: FC<Props> = ({ lng }) => {
   }, [reload]);
 
   useEffect(() => {
-    if (tab !== "published") {
+    if (tab !== "distribution") {
       return;
     }
     let cancelled = false;
@@ -123,9 +140,9 @@ export const QualityCriteriaAdminPage: FC<Props> = ({ lng }) => {
     };
   }, [tab]);
 
-  const reportTargetType = useMemo(
-    () => targetTypes.find((tt) => tt.code === "report"),
-    [targetTypes],
+  const selectedDistributeTargetType = useMemo(
+    () => targetTypes.find((tt) => tt.code === distributeTargetTypeCode),
+    [targetTypes, distributeTargetTypeCode],
   );
 
   const resetForm = () => {
@@ -140,14 +157,23 @@ export const QualityCriteriaAdminPage: FC<Props> = ({ lng }) => {
       title: c.title,
       explanation: c.explanation ?? "",
       categoryId: c.categoryId ?? "",
-      targetTypeIds: c.targetTypes.map((tt) => tt.id),
     });
     setTab(c.status === "draft" ? "drafts" : "published");
+  };
+
+  const openDistributionForCriterion = (criterionId: string) => {
+    setDistributeCriterionId(criterionId);
+    setDistributeTargetTypeCode("");
+    setDistributeDraftId("");
+    setDistributeSuccess(null);
+    setTab("distribution");
+    setError(null);
   };
 
   const selectAdminTab = (key: AdminTab) => {
     setTab(key);
     setError(null);
+    setDistributeSuccess(null);
   };
 
   const saveCriterion = async () => {
@@ -160,27 +186,20 @@ export const QualityCriteriaAdminPage: FC<Props> = ({ lng }) => {
       setError(t("admin.errors.wordLimit"));
       return;
     }
-    if (form.targetTypeIds.length === 0) {
-      setError(t("admin.errors.targetTypes"));
-      return;
-    }
     try {
       const payload = {
         code: form.code.trim(),
         title: form.title.trim(),
         explanation: form.explanation.trim() || null,
         categoryId: form.categoryId || null,
-        targetTypeIds: form.targetTypeIds,
       };
       if (editingId) {
-        await httpQualityRepository.updateCriterion(editingId, {
-          title: payload.title,
-          explanation: payload.explanation,
-          categoryId: payload.categoryId,
-          targetTypeIds: payload.targetTypeIds,
-        });
+        await httpQualityRepository.updateCriterion(editingId, payload);
       } else {
-        await httpQualityRepository.createCriterion(payload);
+        await httpQualityRepository.createCriterion({
+          ...payload,
+          targetTypeIds: [],
+        });
       }
       resetForm();
       await reload();
@@ -200,21 +219,37 @@ export const QualityCriteriaAdminPage: FC<Props> = ({ lng }) => {
     }
   };
 
-  const distributeToReport = async () => {
-    if (!distributeCriterionId.trim() || !distributeDraftId.trim()) {
+  const submitDistribution = async () => {
+    setDistributeSuccess(null);
+    const tt = selectedDistributeTargetType;
+    if (!distributeCriterionId.trim() || !tt) {
+      setError(t("admin.errors.distribute"));
+      return;
+    }
+    if (!TARGET_WORKFLOW_READY[tt.code]) {
+      setError(t("admin.distribution.workflowPending"));
+      return;
+    }
+    const contexts = DISTRIBUTION_CONTEXTS[tt.code];
+    if (!contexts?.length) {
+      setError(t("admin.errors.distribute"));
+      return;
+    }
+    if (tt.requiresTargetRef && !distributeDraftId.trim()) {
       setError(t("admin.errors.distribute"));
       return;
     }
     try {
       await httpQualityRepository.createDistribution({
-        criterionId: distributeCriterionId,
-        targetTypeCode: "report",
-        targetRefId: distributeDraftId.trim(),
-        contexts: ["submission_review", "global_submission_review"],
+        criterionId: distributeCriterionId.trim(),
+        targetTypeCode: tt.code,
+        targetRefId: tt.requiresTargetRef ? distributeDraftId.trim() : null,
+        contexts: [...contexts],
       });
-      setDistributeCriterionId("");
       setDistributeDraftId("");
       setError(null);
+      setDistributeSuccess(t("admin.distribution.success"));
+      await reload();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
@@ -250,13 +285,10 @@ export const QualityCriteriaAdminPage: FC<Props> = ({ lng }) => {
     }
   };
 
-  const toggleTargetType = (id: string) => {
-    setForm((f) => ({
-      ...f,
-      targetTypeIds: f.targetTypeIds.includes(id)
-        ? f.targetTypeIds.filter((x) => x !== id)
-        : [...f.targetTypeIds, id],
-    }));
+  const workflowHintFor = (code: string): string => {
+    if (code === "report") return t("admin.distribution.workflowReport");
+    if (code === "path_course") return t("admin.distribution.workflowPathCourse");
+    return "";
   };
 
   return (
@@ -314,6 +346,152 @@ export const QualityCriteriaAdminPage: FC<Props> = ({ lng }) => {
 
           {loading ? (
             <p className="text-sm text-dashboard-text-muted">{t("admin.loading")}</p>
+          ) : tab === "distribution" ? (
+            <div
+              role="tabpanel"
+              id={adminTabPanelId("distribution")}
+              aria-labelledby={adminTabButtonId("distribution")}
+              className="dashboard-card p-4 sm:p-6"
+            >
+              <h2 className="text-lg font-semibold text-dashboard-text">
+                {t("admin.distribution.title")}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-dashboard-text-muted">
+                {t("admin.distribution.intro")}
+              </p>
+              {distributeSuccess ? (
+                <p className="mt-3 text-sm font-medium text-emerald-800" role="status">
+                  {distributeSuccess}
+                </p>
+              ) : null}
+              <div className="mt-6 flex flex-col gap-6">
+                <label className="flex max-w-xl flex-col gap-1 text-sm">
+                  {t("admin.distribution.criterion")}
+                  <select
+                    className="rounded border border-dashboard-divider px-3 py-2"
+                    value={distributeCriterionId}
+                    onChange={(e) => {
+                      setDistributeCriterionId(e.target.value);
+                      setDistributeSuccess(null);
+                    }}
+                  >
+                    <option value="">{t("admin.distribution.selectCriterion")}</option>
+                    {published.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.code} — {c.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <fieldset>
+                  <legend className="text-sm font-medium text-dashboard-text">
+                    {t("admin.distribution.targetTypes")}
+                  </legend>
+                  <div className="mt-3 flex flex-col gap-3">
+                    {targetTypes.map((tt) => {
+                      const workflowReady = TARGET_WORKFLOW_READY[tt.code] ?? false;
+                      return (
+                        <label
+                          key={tt.id}
+                          className={`flex cursor-pointer flex-col gap-1 rounded-lg border p-3 text-sm ${
+                            distributeTargetTypeCode === tt.code
+                              ? "border-dashboard-accent bg-dashboard-accent-soft/40"
+                              : "border-dashboard-divider"
+                          }`}
+                        >
+                          <span className="flex items-center gap-2 font-medium text-dashboard-text">
+                            <input
+                              type="radio"
+                              name="distribute-target-type"
+                              checked={distributeTargetTypeCode === tt.code}
+                              onChange={() => {
+                                setDistributeTargetTypeCode(tt.code);
+                                setDistributeDraftId("");
+                                setDistributeSuccess(null);
+                              }}
+                            />
+                            {tt.label}
+                          </span>
+                          <span className="text-xs text-dashboard-text-muted">
+                            {tt.requiresTargetRef
+                              ? t("admin.distribution.scopeSpecific")
+                              : t("admin.distribution.scopeGlobal")}
+                          </span>
+                          {workflowHintFor(tt.code) ? (
+                            <span className="text-xs text-dashboard-text-subtle">
+                              {workflowHintFor(tt.code)}
+                            </span>
+                          ) : null}
+                          {!workflowReady ? (
+                            <span className="text-xs font-medium text-amber-800">
+                              {t("admin.distribution.workflowPending")}
+                            </span>
+                          ) : null}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+                {selectedDistributeTargetType?.requiresTargetRef ? (
+                  <label className="flex max-w-xl flex-col gap-1 text-sm">
+                    {t("admin.distribution.draftId")}
+                    {reportDraftTargetsLoading ? (
+                      <span className="text-xs text-dashboard-text-muted">
+                        {t("admin.distribution.loadingDrafts")}
+                      </span>
+                    ) : reportDraftTargets.length === 0 ? (
+                      <span className="text-xs text-dashboard-text-muted">
+                        {t("admin.distribution.noDrafts")}
+                      </span>
+                    ) : (
+                      <select
+                        className="rounded border border-dashboard-divider px-3 py-2"
+                        value={distributeDraftId}
+                        onChange={(e) => setDistributeDraftId(e.target.value)}
+                      >
+                        <option value="">
+                          {t("admin.distribution.draftSelectPlaceholder")}
+                        </option>
+                        {reportDraftTargets.map((d) => {
+                          const statusLabel = t(
+                            `myReports.status.${d.aggregateStatus}`,
+                            { defaultValue: d.aggregateStatus },
+                          );
+                          const team = d.teamLabel?.trim();
+                          const label = team
+                            ? `${d.reportTitle} · ${team} · ${statusLabel}`
+                            : `${d.reportTitle} · ${statusLabel}`;
+                          return (
+                            <option key={d.id} value={d.id}>
+                              {label} ({d.id})
+                            </option>
+                          );
+                        })}
+                      </select>
+                    )}
+                  </label>
+                ) : selectedDistributeTargetType &&
+                  !selectedDistributeTargetType.requiresTargetRef ? (
+                  <p className="max-w-xl text-sm text-dashboard-text-muted">
+                    {t("admin.distribution.scopeGlobal")}
+                  </p>
+                ) : null}
+                <button
+                  type="button"
+                  className="w-fit rounded bg-violet-700 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={
+                    !distributeCriterionId ||
+                    !distributeTargetTypeCode ||
+                    !(TARGET_WORKFLOW_READY[distributeTargetTypeCode] ?? false) ||
+                    (selectedDistributeTargetType?.requiresTargetRef === true &&
+                      !distributeDraftId.trim())
+                  }
+                  onClick={() => void submitDistribution()}
+                >
+                  {t("admin.distribution.submit")}
+                </button>
+              </div>
+            </div>
           ) : tab === "categories" ? (
             <div
               role="tabpanel"
@@ -437,28 +615,6 @@ export const QualityCriteriaAdminPage: FC<Props> = ({ lng }) => {
                       ))}
                     </select>
                   </label>
-                  <fieldset>
-                    <legend className="text-sm font-medium">
-                      {t("admin.form.targetTypes")}
-                    </legend>
-                    <div className="mt-2 flex flex-col gap-1">
-                      {targetTypes.map((tt) => (
-                        <label key={tt.id} className="flex items-center gap-2 text-sm">
-                          <input
-                            type="checkbox"
-                            checked={form.targetTypeIds.includes(tt.id)}
-                            onChange={() => toggleTargetType(tt.id)}
-                          />
-                          {tt.label}
-                          {!tt.requiresTargetRef ? (
-                            <span className="text-xs text-dashboard-text-muted">
-                              ({t("admin.form.globalTarget")})
-                            </span>
-                          ) : null}
-                        </label>
-                      ))}
-                    </div>
-                  </fieldset>
                   <div className="flex flex-wrap gap-2 pt-2">
                     <button
                       type="button"
@@ -521,12 +677,11 @@ export const QualityCriteriaAdminPage: FC<Props> = ({ lng }) => {
                             {t("admin.publish")}
                           </button>
                         ) : null}
-                        {c.status === "published" &&
-                        c.targetTypes.some((tt) => tt.code === "report") ? (
+                        {c.status === "published" ? (
                           <button
                             type="button"
                             className="text-xs font-medium text-violet-700 hover:underline"
-                            onClick={() => setDistributeCriterionId(c.id)}
+                            onClick={() => openDistributionForCriterion(c.id)}
                           >
                             {t("admin.distribute")}
                           </button>
@@ -552,84 +707,6 @@ export const QualityCriteriaAdminPage: FC<Props> = ({ lng }) => {
             </div>
           )}
 
-          {tab === "published" && reportTargetType ? (
-            <div
-              role="tabpanel"
-              id="quality-admin-panel-distribute"
-              aria-labelledby={adminTabButtonId("published")}
-              className="dashboard-card mt-4 p-4 sm:p-6"
-            >
-              <h2 className="text-lg font-semibold text-dashboard-text">
-                {t("admin.distributeReport.title")}
-              </h2>
-              <p className="mt-1 text-sm text-dashboard-text-muted">
-                {t("admin.distributeReport.hint")}
-              </p>
-              <div className="mt-4 flex flex-wrap gap-3">
-                <label className="flex min-w-[200px] flex-1 flex-col gap-1 text-sm">
-                  {t("admin.distributeReport.criterion")}
-                  <select
-                    className="rounded border border-dashboard-divider px-3 py-2"
-                    value={distributeCriterionId}
-                    onChange={(e) => setDistributeCriterionId(e.target.value)}
-                  >
-                    <option value="">{t("admin.distributeReport.select")}</option>
-                    {published
-                      .filter((c) => c.targetTypes.some((tt) => tt.code === "report"))
-                      .map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.code} — {c.title}
-                        </option>
-                      ))}
-                  </select>
-                </label>
-                <label className="flex min-w-[240px] flex-1 flex-col gap-1 text-sm">
-                  {t("admin.distributeReport.draftId")}
-                  {reportDraftTargetsLoading ? (
-                    <span className="text-xs text-dashboard-text-muted">
-                      {t("admin.distributeReport.loadingDrafts")}
-                    </span>
-                  ) : reportDraftTargets.length === 0 ? (
-                    <span className="text-xs text-dashboard-text-muted">
-                      {t("admin.distributeReport.noDrafts")}
-                    </span>
-                  ) : (
-                    <select
-                      className="rounded border border-dashboard-divider px-3 py-2 text-sm"
-                      value={distributeDraftId}
-                      onChange={(e) => setDistributeDraftId(e.target.value)}
-                    >
-                      <option value="">
-                        {t("admin.distributeReport.draftSelectPlaceholder")}
-                      </option>
-                      {reportDraftTargets.map((d) => {
-                        const statusLabel = t(
-                          `myReports.status.${d.aggregateStatus}`,
-                          { defaultValue: d.aggregateStatus },
-                        );
-                        const team = d.teamLabel?.trim();
-                        const label = team
-                          ? `${d.reportTitle} · ${team} · ${statusLabel}`
-                          : `${d.reportTitle} · ${statusLabel}`;
-                        return (
-                          <option key={d.id} value={d.id}>
-                            {label} ({d.id})
-                          </option>
-                        );
-                      })}
-                    </select>
-                  )}
-                </label>
-                <button
-                  type="button"
-                  className="self-end rounded bg-violet-700 px-4 py-2 text-sm font-medium text-white"
-                  onClick={() => void distributeToReport()}
-                >
-                  {t("admin.distributeReport.submit")}
-                </button>
-              </div>
-            </div>
-          ) : null}
       </div>
 
       <ConfirmDangerModal

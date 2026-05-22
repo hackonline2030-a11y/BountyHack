@@ -1,5 +1,6 @@
 const path = require('path');
 const { composePlugins, withNx } = require('@nx/webpack');
+const nodeExternals = require('webpack-node-externals');
 
 module.exports = composePlugins(
   // Default Nx composable plugin

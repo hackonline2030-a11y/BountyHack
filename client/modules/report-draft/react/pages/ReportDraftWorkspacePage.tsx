@@ -31,6 +31,7 @@ import {
   isSuperAdminGlobalRevisionMode,
 } from "@modules/report-draft/core/model/super-admin-final-validation";
 import { ReportDraftSuperAdminFeedbackPanel } from "@modules/report-draft/react/pages/ReportDraftSuperAdminFeedbackPanel";
+import { QualityCriteriaChecklistPanel } from "@modules/quality/react/QualityCriteriaChecklistPanel";
 import { useAppSelector } from "@store/redux/store";
 
 /**
@@ -44,6 +45,7 @@ type WorkspaceTab =
   | "attachments"
   | "cumulativePreview"
   | "comments"
+  | "criteria"
   | "revisions"
   | "superAdminFeedback";
 
@@ -53,6 +55,7 @@ const BASE_TAB_ORDER: readonly WorkspaceTab[] = [
   "attachments",
   "cumulativePreview",
   "comments",
+  "criteria",
   "revisions",
 ] as const;
 
@@ -62,6 +65,7 @@ const TAB_LABELS: Record<WorkspaceTab, string> = {
   attachments: "Médias (étape)",
   cumulativePreview: "Aperçu",
   comments: "Commentaires",
+  criteria: "Critères qualité",
   revisions: "Mes demandes",
   superAdminFeedback: "Retours super-admin",
 };
@@ -235,7 +239,9 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
             >
               {key === "attachments"
                 ? t("myReports.workspace.tabs.attachments")
-                : TAB_LABELS[key]}
+                : key === "criteria"
+                  ? t("myReports.workspace.tabs.criteria")
+                  : TAB_LABELS[key]}
             </TabNavButton>
           );
         })}
@@ -302,6 +308,23 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
         className="min-h-[120px]"
       >
         <ReportDraftStepCommentsPanel />
+      </div>
+
+      <div
+        role="tabpanel"
+        id={tabPanelId("criteria")}
+        aria-labelledby={tabButtonId("criteria")}
+        hidden={activeTab !== "criteria"}
+        className="min-h-[120px] rounded-lg border border-form-border bg-form-surface p-4"
+      >
+        {currentDraftId ? (
+          <QualityCriteriaChecklistPanel
+            targetTypeCode="report"
+            targetRefId={currentDraftId}
+            context="submission_review"
+            panelIdPrefix="report-draft-workspace-criteria"
+          />
+        ) : null}
       </div>
 
       <div

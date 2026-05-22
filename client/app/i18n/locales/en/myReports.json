@@ -4,7 +4,8 @@
     "heading": "My reports",
     "workspace": {
       "tabs": {
-        "attachments": "Attachments"
+        "attachments": "Attachments",
+        "criteria": "Quality criteria"
       },
       "attachments": {
         "hint": "Private images for this step (authenticated access only).",

@@ -24,6 +24,7 @@
       "aria": "Sections de l’administration des critères",
       "drafts": "Brouillons",
       "published": "Publiés",
+      "distribution": "Distribution",
       "categories": "Catégories"
     },
     "edit": "Modifier",
@@ -38,8 +39,6 @@
       "explanation": "Explication (optionnel, max. 200 mots)",
       "wordCount": "{{count}} / 200 mots",
       "category": "Catégorie",
-      "targetTypes": "Objets cibles",
-      "globalTarget": "sans identifiant",
       "save": "Enregistrer",
       "cancel": "Annuler"
     },
@@ -53,16 +52,23 @@
       "color": "Couleur",
       "add": "Ajouter"
     },
-    "distributeReport": {
-      "title": "Distribuer sur un rapport",
-      "hint": "Active les cases à cocher sur le brouillon choisi (onglet Critères dans la revue).",
+    "distribution": {
+      "title": "Distribution",
+      "intro": "Étape distincte de la définition du critère : choisissez un critère publié, puis l’objet cible. Certains types ciblent un identifiant précis, d’autres s’appliquent à toutes les instances. Chaque type a son propre workflow (interface de contrôle).",
       "criterion": "Critère publié",
+      "targetTypes": "Objets cibles",
+      "selectCriterion": "— Choisir un critère —",
+      "scopeSpecific": "Ciblage par identifiant (une distribution par instance)",
+      "scopeGlobal": "S’applique à toutes les instances de ce type",
+      "workflowReport": "Workflow rapport : onglet « Critères » dans la revue du brouillon, cases cochables par le QC.",
+      "workflowPathCourse": "Workflow parcours : à implémenter (aucune interface de coche pour l’instant).",
+      "workflowPending": "Distribution désactivée tant que le workflow de ce type n’est pas livré.",
       "draftId": "Brouillon rapport",
       "draftSelectPlaceholder": "— Choisir un brouillon —",
       "loadingDrafts": "Chargement des brouillons…",
       "noDrafts": "Aucun brouillon disponible pour vos équipes.",
-      "select": "— Choisir —",
-      "submit": "Distribuer"
+      "submit": "Distribuer",
+      "success": "Distribution enregistrée."
     },
     "deleteConfirm": {
       "title": "Confirmer la suppression",
@@ -71,8 +77,7 @@
     "errors": {
       "required": "Code et titre sont obligatoires.",
       "wordLimit": "L’explication dépasse 200 mots.",
-      "targetTypes": "Sélectionnez au moins un objet cible.",
-      "distribute": "Choisissez un critère et un ID de brouillon."
+      "distribute": "Choisissez un critère publié, un objet cible et, si nécessaire, l’identifiant."
     }
   }
 }

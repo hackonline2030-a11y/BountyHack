@@ -24,6 +24,7 @@
       "aria": "Criteria administration sections",
       "drafts": "Drafts",
       "published": "Published",
+      "distribution": "Distribution",
       "categories": "Categories"
     },
     "edit": "Edit",
@@ -38,8 +39,6 @@
       "explanation": "Explanation (optional, max 200 words)",
       "wordCount": "{{count}} / 200 words",
       "category": "Category",
-      "targetTypes": "Target objects",
-      "globalTarget": "no instance id",
       "save": "Save",
       "cancel": "Cancel"
     },
@@ -53,16 +52,23 @@
       "color": "Color",
       "add": "Add"
     },
-    "distributeReport": {
-      "title": "Distribute to a report",
-      "hint": "Enables checkboxes on the chosen draft (Criteria tab in review).",
+    "distribution": {
+      "title": "Distribution",
+      "intro": "Separate from defining the criterion: pick a published criterion, then a target object. Some types require a specific instance id; others apply to all instances. Each type has its own workflow (check UI).",
       "criterion": "Published criterion",
+      "targetTypes": "Target objects",
+      "selectCriterion": "— Choose a criterion —",
+      "scopeSpecific": "Scoped to one instance id (one distribution per instance)",
+      "scopeGlobal": "Applies to all instances of this type",
+      "workflowReport": "Report workflow: Criteria tab on draft review, checkboxes for QC.",
+      "workflowPathCourse": "Path course workflow: not implemented yet (no checklist UI).",
+      "workflowPending": "Distribution disabled until this type’s workflow is shipped.",
       "draftId": "Report draft",
       "draftSelectPlaceholder": "— Choose a report draft —",
       "loadingDrafts": "Loading report drafts…",
       "noDrafts": "No report drafts available for your teams.",
-      "select": "— Select —",
-      "submit": "Distribute"
+      "submit": "Distribute",
+      "success": "Distribution saved."
     },
     "deleteConfirm": {
       "title": "Confirm deletion",
@@ -71,8 +77,7 @@
     "errors": {
       "required": "Code and title are required.",
       "wordLimit": "Explanation exceeds 200 words.",
-      "targetTypes": "Select at least one target type.",
-      "distribute": "Choose a criterion and a draft ID."
+      "distribute": "Choose a published criterion, a target type, and an id when required."
     }
   }
 }

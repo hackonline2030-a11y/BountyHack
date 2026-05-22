@@ -1,6 +1,7 @@
 import {
   Module,
 } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { HitLimitGuard, HitLimitModule } from './rate-limit/hitlimit';
 import { createHitLimitModuleOptions } from './rate-limit/hitlimit.factory';

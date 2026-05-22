@@ -332,11 +332,6 @@ export class PrismaQualityRepository implements IQualityRepository {
     if (row.status !== QualityCriterionStatus.DRAFT) {
       throw new BadRequestException('Only draft criteria can be published');
     }
-    if (row.targetTypeLinks.length === 0) {
-      throw new BadRequestException(
-        'Assign at least one target type before publishing',
-      );
-    }
     const updated = await this.prisma.qualityCriterion.update({
       where: { id },
       data: {
@@ -387,9 +382,9 @@ export class PrismaQualityRepository implements IQualityRepository {
       (l) => l.targetTypeId === targetTypeId,
     );
     if (!linked) {
-      throw new BadRequestException(
-        'Criterion is not eligible for this target type',
-      );
+      await this.prisma.qualityCriterionTargetTypeLink.create({
+        data: { criterionId: input.criterionId, targetTypeId },
+      });
     }
 
     const targetRefId = input.targetRefId?.trim() || null;

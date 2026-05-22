@@ -9,14 +9,21 @@ Bounded context **`server/src/quality`** — RBAC app role **`QUALITY_CHECKER`**
 | `quality_criterion_categories` | Pill color + name; `ON DELETE SET NULL` on criteria |
 | `quality_criterion_target_types` | Registry (`report`, `path_course`, …); `requires_target_ref` |
 | `quality_criteria` | Code, title, explanation, status `DRAFT` / `PUBLISHED` / `ARCHIVED` |
-| `quality_criterion_target_type_links` | Eligibility M:N; `ON DELETE CASCADE` from criterion |
-| `quality_criterion_distributions` | QC trigger; optional `target_ref_id` |
+| `quality_criterion_target_type_links` | Eligibility M:N (set at **distribution**, not when defining the criterion) |
+| `quality_criterion_distributions` | QC activation on a scope; optional `target_ref_id` |
 | `quality_criterion_checks` | Checkbox per context; `ON DELETE CASCADE` from distribution |
 
-### Optional `target_ref_id`
+### Lifecycle (three steps)
 
-- **`report`** (`requires_target_ref = true`): one distribution per report draft id.
-- **`path_course`** (`requires_target_ref = false`): global distribution (`target_ref_id` null) — same criteria for all path courses.
+1. **Define** — code, title, explanation, category (draft → published). No target objects yet.
+2. **Distribute** (admin tab *Distribution*) — pick published criterion + target type; scope is per-type:
+   - **`report`** (`requires_target_ref = true`): one row per report draft id (specific id).
+   - **`path_course`** (`requires_target_ref = false`): `target_ref_id` null — applies to **all** path courses.
+3. **Workflow** — each target type has its **own** UI (not shared). Example: `report` → Criteria tab on report-draft review with QC checkboxes. `path_course` → to be implemented in the course module.
+
+Eligibility links are created automatically on first distribution for that type.
+
+### Optional `target_ref_id`
 
 Uniqueness: `(criterion_id, target_type_id, COALESCE(target_ref_id, ''))`.
 

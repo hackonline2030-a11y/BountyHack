@@ -4,7 +4,8 @@
     "heading": "Mes rapports",
     "workspace": {
       "tabs": {
-        "attachments": "Pièces jointes"
+        "attachments": "Pièces jointes",
+        "criteria": "Critères qualité"
       },
       "attachments": {
         "hint": "Images privées de cette étape (accès authentifié uniquement).",
