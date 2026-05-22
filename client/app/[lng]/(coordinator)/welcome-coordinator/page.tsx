@@ -59,6 +59,7 @@ export default async function WelcomeCoordinatorPage({ params }: PageProps) {
     label: t("welcomeCoordinator.nav.label"),
     coordination: t("welcomeCoordinator.nav.coordination"),
     teams: t("welcomeCoordinator.nav.teams"),
+    criteria: t("welcomeCoordinator.nav.criteria"),
     support: t("welcomeCoordinator.nav.support"),
     settings: t("welcomeCoordinator.nav.settings"),
   };
@@ -66,6 +67,7 @@ export default async function WelcomeCoordinatorPage({ params }: PageProps) {
   const navHrefs: CoordinatorNavHrefs = {
     coordination: `${prefix}/coordination`,
     teams: `${prefix}/coordination`,
+    criteria: `${prefix}/quality-criteria`,
     support: `${prefix}/support`,
     settings: `${prefix}/parameters`,
   };

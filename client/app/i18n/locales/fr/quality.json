@@ -6,7 +6,17 @@
     "empty": "Aucun critère publié pour le moment.",
     "unclassified": "Non classé",
     "manageLink": "Gérer les critères (QC)",
-    "backHome": "Retour"
+    "backHome": "Retour",
+    "viewReportTargets": "Rapports concernés"
+  },
+  "reportTargets": {
+    "title": "Rapports concernés par ce critère",
+    "loading": "Chargement des rapports…",
+    "empty": "Aucun rapport ciblé individuellement pour ce critère.",
+    "close": "Fermer",
+    "colTargetId": "Identifiant cible",
+    "colTitle": "Titre du rapport",
+    "colTeam": "Équipe rapport"
   },
   "checklist": {
     "loading": "Chargement des critères…",
@@ -44,7 +54,12 @@
     },
     "list": {
       "drafts": "Brouillons",
-      "published": "Publiés"
+      "published": "Publiés",
+      "learnMore": "En savoir plus",
+      "reportTargetsTitle": "Rapports concernés",
+      "reportTargetsLoading": "Chargement des rapports…",
+      "reportTargetsEmpty": "Aucun rapport ciblé individuellement pour ce critère.",
+      "reportTargetsClose": "Fermer"
     },
     "categories": {
       "title": "Catégories",

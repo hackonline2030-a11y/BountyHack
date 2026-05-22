@@ -515,6 +515,51 @@ export class PrismaQualityRepository implements IQualityRepository {
     return rows.map((r) => QualityPrismaMapper.distributionToWire(r));
   }
 
+  async listReportDraftIdsForCriterionDistribution(
+    criterionId: string,
+  ): Promise<string[]> {
+    const reportType = await this.findTargetTypeByCode('report');
+    if (reportType === null) {
+      return [];
+    }
+    const rows = await this.prisma.qualityCriterionDistribution.findMany({
+      where: {
+        criterionId,
+        targetTypeId: reportType.id,
+        targetRefId: { not: null },
+      },
+      select: { targetRefId: true },
+      orderBy: { distributedAt: 'desc' },
+    });
+    const ids = new Set<string>();
+    for (const row of rows) {
+      const id = row.targetRefId?.trim();
+      if (id) ids.add(id);
+    }
+    return [...ids];
+  }
+
+  async listReportSpecificDistributionCounts(): Promise<
+    Array<{ criterionId: string; count: number }>
+  > {
+    const reportType = await this.findTargetTypeByCode('report');
+    if (reportType === null) {
+      return [];
+    }
+    const rows = await this.prisma.qualityCriterionDistribution.groupBy({
+      by: ['criterionId'],
+      where: {
+        targetTypeId: reportType.id,
+        targetRefId: { not: null },
+      },
+      _count: { _all: true },
+    });
+    return rows.map((r) => ({
+      criterionId: r.criterionId,
+      count: r._count._all,
+    }));
+  }
+
   async upsertCheck(
     distributionId: string,
     context: string,

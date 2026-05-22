@@ -51,6 +51,7 @@ export default async function WelcomeAdminPage({ params }: PageProps) {
     users: t("welcomeAdmin.nav.users"),
     register: t("welcomeAdmin.nav.register"),
     teams: t("welcomeAdmin.nav.teams"),
+    criteria: t("welcomeAdmin.nav.criteria"),
     settings: t("welcomeAdmin.nav.settings"),
   };
 
@@ -60,6 +61,7 @@ export default async function WelcomeAdminPage({ params }: PageProps) {
     users: `${prefix}/administration`,
     register: `${prefix}/administration/register`,
     teams: `${prefix}/administration/team-management`,
+    criteria: `${prefix}/quality-criteria`,
     settings: `${prefix}/parameters`,
   };
 

@@ -44,6 +44,12 @@ export interface IQualityRepository {
   archiveCriterion(id: string): Promise<QualityCriterion>;
 
   listReportDraftTargets(): Promise<QualityReportDraftTarget[]>;
+  listReportDistributionCounts(): Promise<
+    Array<{ criterionId: string; count: number }>
+  >;
+  listCriterionReportTargets(
+    criterionId: string,
+  ): Promise<QualityReportDraftTarget[]>;
 
   listInstanceCriteria(
     targetTypeCode: string,
