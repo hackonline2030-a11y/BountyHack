@@ -54,13 +54,13 @@ CREATE TABLE `quality_criterion_target_type_links` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
--- MariaDB/MySQL: expression UNIQUE (COALESCE(...)) is invalid; use a STORED generated column instead.
+-- MariaDB/MySQL: no expression UNIQUE; `target_ref_scope` = IFNULL(ref,'') is set by the app on insert.
 CREATE TABLE `quality_criterion_distributions` (
     `id` VARCHAR(191) NOT NULL,
     `criterion_id` VARCHAR(191) NOT NULL,
     `target_type_id` VARCHAR(191) NOT NULL,
     `target_ref_id` VARCHAR(191) NULL,
-    `target_ref_scope` VARCHAR(191) AS (IFNULL(`target_ref_id`, '')) STORED,
+    `target_ref_scope` VARCHAR(191) NOT NULL DEFAULT '',
     `distributed_by_user_id` VARCHAR(191) NOT NULL,
     `distributed_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 

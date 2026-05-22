@@ -563,6 +563,7 @@ model QualityCriterionDistribution {
   criterionId         String   @map("criterion_id")
   targetTypeId        String   @map("target_type_id")
   targetRefId         String?  @map("target_ref_id")
+  targetRefScope      String   @default("") @map("target_ref_scope")
   distributedByUserId String   @map("distributed_by_user_id")
   distributedAt       DateTime @default(now()) @map("distributed_at")
 
@@ -571,6 +572,7 @@ model QualityCriterionDistribution {
   distributedBy User                       @relation("QualityDistributionCreator", fields: [distributedByUserId], references: [id], onDelete: Restrict)
   checks        QualityCriterionCheck[]
 
+  @@unique([criterionId, targetTypeId, targetRefScope], map: "quality_criterion_distributions_scope_unique")
   @@index([criterionId])
   @@index([targetTypeId, targetRefId])
   @@map("quality_criterion_distributions")

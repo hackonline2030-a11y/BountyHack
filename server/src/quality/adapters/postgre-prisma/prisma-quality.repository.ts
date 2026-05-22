@@ -30,6 +30,13 @@ import { assertExplanationWordLimit } from '../../application/utils/word-count.u
 import type { IQualityRepository } from '../../ports/quality-repository.interface';
 import { QualityPrismaMapper } from './quality-prisma.mapper';
 
+/** DB uniqueness scope: NULL `target_ref_id` → global (`''`). */
+function distributionTargetRefScope(
+  targetRefId: string | null | undefined,
+): string {
+  return targetRefId?.trim() || '';
+}
+
 const criterionInclude = {
   category: true,
   targetTypeLinks: { include: { targetType: true } },
@@ -400,6 +407,7 @@ export class PrismaQualityRepository implements IQualityRepository {
           criterionId: input.criterionId,
           targetTypeId,
           targetRefId,
+          targetRefScope: distributionTargetRefScope(targetRefId),
           distributedByUserId,
           checks: {
             create: contexts.map((context) => ({
@@ -450,11 +458,18 @@ export class PrismaQualityRepository implements IQualityRepository {
       }
     }
     try {
+      const ref =
+        input.targetRefId !== undefined
+          ? input.targetRefId?.trim() || null
+          : undefined;
       const row = await this.prisma.qualityCriterionDistribution.update({
         where: { id },
         data: {
-          ...(input.targetRefId !== undefined
-            ? { targetRefId: input.targetRefId?.trim() || null }
+          ...(ref !== undefined
+            ? {
+                targetRefId: ref,
+                targetRefScope: distributionTargetRefScope(ref),
+              }
             : {}),
         },
         include: distributionInclude,

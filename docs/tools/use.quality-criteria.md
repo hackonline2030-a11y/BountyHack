@@ -64,30 +64,44 @@ DATABASE_NAME=MYSQL_PRISMA pnpm exec prisma db seed
 
 Use `pnpm run prisma:migrate:deploy:mysql` (not bare `pnpm migrate`).
 
-### MySQL / MariaDB: failed `20260522120000_quality_criteria` (P3018 / syntax near COALESCE)
+### MySQL / MariaDB: failed `20260522120000_quality_criteria` (P3018 / P3009)
 
-Older MariaDB rejects `UNIQUE (..., (COALESCE(target_ref_id, '')))`. The MySQL migration uses a **STORED** column `target_ref_scope` instead.
+MariaDB rejects `UNIQUE (..., (COALESCE(...)))` and often rejects **generated** columns too. The MySQL migration uses a plain column `target_ref_scope` (filled by the Nest API on insert).
 
-If deploy failed partway, clean up then redeploy:
+**P3009** = a failed row still exists in `_prisma_migrations`. You must resolve + drop partial tables, then redeploy.
+
+On the VPS (after `git pull`):
+
+```bash
+cd ~/bugbountyapp/server
+chmod +x scripts/vps-mysql-recover-quality-migration.sh
+./scripts/vps-mysql-recover-quality-migration.sh
+DATABASE_NAME=MYSQL_PRISMA pnpm exec prisma db seed
+```
+
+Manual equivalent:
 
 ```bash
 cd server
-DATABASE_NAME=MYSQL_PRISMA pnpm exec prisma migrate resolve --rolled-back 20260522120000_quality_criteria
-```
-
-Drop partial quality tables if they exist (MySQL CLI), then:
-
-```sql
+export DATABASE_NAME=MYSQL_PRISMA
+pnpm exec prisma migrate resolve --rolled-back 20260522120000_quality_criteria
+pnpm exec prisma db execute --stdin <<'SQL'
 DROP TABLE IF EXISTS quality_criterion_checks;
 DROP TABLE IF EXISTS quality_criterion_distributions;
 DROP TABLE IF EXISTS quality_criterion_target_type_links;
 DROP TABLE IF EXISTS quality_criteria;
 DROP TABLE IF EXISTS quality_criterion_target_types;
 DROP TABLE IF EXISTS quality_criterion_categories;
+SQL
+pnpm exec prisma migrate deploy
+pnpm exec prisma generate
 ```
 
+Verify the migration file on the server:
+
 ```bash
-DATABASE_NAME=MYSQL_PRISMA pnpm exec prisma migrate deploy
+grep target_ref_scope prisma/migrations-mysql/20260522120000_quality_criteria/migration.sql
+# must show: NOT NULL DEFAULT ''  (not COALESCE, not AS (IFNULL
 ```
 
 ## Next UI (not in this slice)
