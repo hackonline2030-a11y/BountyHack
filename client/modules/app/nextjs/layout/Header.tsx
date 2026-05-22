@@ -250,17 +250,6 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
               {t("header.dashboard")}
             </Link>
           ) : null}
-          {qualityCriteriaHref ? (
-            <Link
-              href={qualityCriteriaHref}
-              aria-current={isQualityCriteriaActive ? "page" : undefined}
-              className={`header-nav-link${
-                isQualityCriteriaActive ? " header-nav-link--active" : ""
-              }`}
-            >
-              {t("header.qualityCriteria")}
-            </Link>
-          ) : null}
           <LangLinks />
           {isAuthenticated ? (
             <button
@@ -305,18 +294,6 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {t("header.dashboard")}
-              </Link>
-            ) : null}
-            {qualityCriteriaHref ? (
-              <Link
-                href={qualityCriteriaHref}
-                aria-current={isQualityCriteriaActive ? "page" : undefined}
-                className={`header-mobile-nav-link${
-                  isQualityCriteriaActive ? " header-mobile-nav-link--active" : ""
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t("header.qualityCriteria")}
               </Link>
             ) : null}
             <div className="flex items-center justify-between rounded-md border border-black/10 px-3 py-2">

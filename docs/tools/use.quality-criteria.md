@@ -104,6 +104,26 @@ grep target_ref_scope prisma/migrations-mysql/20260522120000_quality_criteria/mi
 # must show: NOT NULL DEFAULT ''  (not COALESCE, not AS (IFNULL
 ```
 
+### Distribution fails (MariaDB 1906 — `target_ref_scope` ignored)
+
+An interim VPS migration created **GENERATED** `target_ref_scope`; the API writes that column on distribute → Prisma/MariaDB error **1906**.
+
+```bash
+cd server
+git pull
+DATABASE_NAME=MYSQL_PRISMA pnpm exec prisma migrate deploy   # applies 20260524120000_quality_target_ref_scope_plain
+pm2 restart api
+```
+
+Or in MySQL immediately:
+
+```sql
+ALTER TABLE quality_criterion_distributions
+  MODIFY target_ref_scope VARCHAR(191) NOT NULL DEFAULT '';
+UPDATE quality_criterion_distributions
+SET target_ref_scope = IFNULL(target_ref_id, '');
+```
+
 ## Next UI (not in this slice)
 
 - QC admin under `(quality-checker)/`
