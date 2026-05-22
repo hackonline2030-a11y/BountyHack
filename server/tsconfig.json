@@ -16,7 +16,12 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {},
+    "paths": {
+      "@joint-ops/hitlimit/nest": ["node_modules/@joint-ops/hitlimit/dist/nest"],
+      "@joint-ops/hitlimit/stores/redis": [
+        "node_modules/@joint-ops/hitlimit/dist/stores/redis"
+      ]
+    },
     "esModuleInterop": true
   },
   "files": [],

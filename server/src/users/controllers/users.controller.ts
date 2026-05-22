@@ -25,6 +25,8 @@ import {
 import { ApiValidationBadRequest } from '../../core/dto/http-validation-error.dto';
 import { RequestWithIdentity } from '../../auth/adapters/http/request-with-identity';
 import { STEP_UP_PURPOSE_ACCOUNT_DELETE } from '../../auth/application/profile-step-up-token.service';
+import { HitLimit } from '../../core/rate-limit/hitlimit';
+import { routeHitLimits } from '../../core/rate-limit/rate-limit.limits';
 import { Auth } from '../../auth/auth.decorator';
 import { AuthRoles } from '../../auth/rbac/roles.decorator';
 import { AppRoleCode } from '../../shared/rbac/app-role.code';
@@ -130,6 +132,7 @@ export class UsersController {
   }
 
   @Post('me/profile/verify-password')
+  @HitLimit(routeHitLimits.profileVerifyPassword)
   @Auth()
   @ApiOperation({
     summary: 'Verify password before profile edit',
@@ -198,6 +201,7 @@ export class UsersController {
   }
 
   @Post('me/account/verify-password')
+  @HitLimit(routeHitLimits.accountVerifyPassword)
   @Auth()
   @ApiOperation({
     summary: 'Verify password before account deletion',
