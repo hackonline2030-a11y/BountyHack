@@ -31,6 +31,14 @@ module.exports = composePlugins(
         allowlist: [/^@joint-ops\/hitlimit/, /^ioredis/],
       }),
     ];
+    // @joint-ops/hitlimit ships source maps pointing at unpublished .ts files — harmless noise.
+    config.ignoreWarnings = [
+      ...(Array.isArray(config.ignoreWarnings) ? config.ignoreWarnings : []),
+      {
+        module: /node_modules[/\\]@joint-ops[/\\]hitlimit/,
+        message: /Failed to parse source map/,
+      },
+    ];
     return config;
   }
 );

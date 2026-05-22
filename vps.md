@@ -196,8 +196,8 @@ git pull
 # API
 cd server
 pnpm install
-pnpm exec prisma generate   # DATABASE_NAME=MYSQL_PRISMA dans .env
-pnpm run build              # nx → dist/main.js
+# .env must have DATABASE_NAME=MYSQL_PRISMA — build runs `prisma generate` first (nx dependsOn)
+pnpm run build              # prisma generate + nx → dist/main.js
 pm2 restart api
 
 # Front (standalone : postbuild copie public/ et .next/static)
