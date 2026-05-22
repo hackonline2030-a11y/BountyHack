@@ -74,6 +74,16 @@
       "hunterFeedbackTitle": "Retours révision globale",
       "hunterFeedbackHint": "Révision n°{{revision}} — corrigez puis resoumettez globalement."
     },
+    "review": {
+      "tabs": {
+        "form": "Formulaire hunter",
+        "attachments": "Pièces jointes",
+        "comments": "Commentaires (QC + mentor)",
+        "stepPreview": "Aperçu étape",
+        "cumulativePreview": "Aperçu rapport",
+        "criteria": "Critères qualité"
+      }
+    },
     "globalRevisionReview": {
       "back": "← Retour aux soumissions",
       "badge": "Révision globale super-admin",
@@ -82,7 +92,8 @@
       "tablistAria": "Revue révision globale",
       "tabs": {
         "reportPreview": "Aperçu du rapport",
-        "superAdminFeedback": "Retours super-admin"
+        "superAdminFeedback": "Retours super-admin",
+        "criteria": "Critères qualité"
       },
       "table": {
         "report": "Rapport",

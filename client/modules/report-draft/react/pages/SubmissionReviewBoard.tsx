@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { type FC, type KeyboardEvent, useCallback, useMemo, useState } from "react";
+import { useT } from "next-i18next/client";
+import { QualityCriteriaChecklistPanel } from "@modules/quality/react/QualityCriteriaChecklistPanel";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import {
   GENERAL_REVIEW_COMMENT_FIELD,
@@ -35,23 +37,22 @@ type Props = {
   lng: string;
 };
 
-type ReviewTab = "form" | "attachments" | "comments" | "stepPreview" | "cumulativePreview";
+type ReviewTab =
+  | "form"
+  | "attachments"
+  | "comments"
+  | "criteria"
+  | "stepPreview"
+  | "cumulativePreview";
 
 const TAB_ORDER: readonly ReviewTab[] = [
   "form",
   "attachments",
   "comments",
+  "criteria",
   "stepPreview",
   "cumulativePreview",
 ] as const;
-
-const TAB_LABELS: Record<ReviewTab, string> = {
-  form: "Formulaire hunter",
-  attachments: "Pièces jointes",
-  comments: "Commentaires (QC + mentor)",
-  stepPreview: "Aperçu étape",
-  cumulativePreview: "Aperçu rapport",
-};
 
 type PendingFieldComment = { fieldId: string; body: string };
 
@@ -59,6 +60,7 @@ const tabButtonId = (key: ReviewTab) => `qc-review-tab-${key}`;
 const tabPanelId = (key: ReviewTab) => `qc-review-panel-${key}`;
 
 export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng }) => {
+  const { t } = useT("myReports");
   const dispatch = useAppDispatch();
   const transition = useAppSelector((s) => s.reportDrafts.transition);
   const submission = useAppSelector((s) => s.reportDrafts.submissionsById[submissionId]);
@@ -270,7 +272,7 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
               onClick={() => setActiveTab(key)}
               onKeyDown={onTabKeyDown}
             >
-              {TAB_LABELS[key]}
+              {t(`myReports.review.tabs.${key}`)}
             </TabNavButton>
           );
         })}
@@ -336,6 +338,23 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
           onPendingGeneralCommentChange={setPendingGeneralComment}
           introText="Uniquement le contenu réellement soumis, regroupé par section (comme l'aperçu). « Demander une révision » exige au moins un commentaire (section ou libre)."
         />
+      </div>
+
+      <div
+        role="tabpanel"
+        id={tabPanelId("criteria")}
+        hidden={activeTab !== "criteria"}
+        aria-labelledby={tabButtonId("criteria")}
+        className="min-h-[120px] rounded-lg border border-form-border bg-form-surface p-4"
+      >
+        {submission ? (
+          <QualityCriteriaChecklistPanel
+            targetTypeCode="report"
+            targetRefId={submission.reportDraftId}
+            context="submission_review"
+            panelIdPrefix="qc-review-criteria"
+          />
+        ) : null}
       </div>
 
       <div

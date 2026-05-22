@@ -11,7 +11,6 @@ import { PingModule } from '../ping/ping.module';
 
 import { AuthModule } from '../auth/auth.module';
 
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { UserModule } from '../users/user.module';
@@ -24,6 +23,7 @@ import { PrismaModule } from './infrastructure/database/prisma/prisma.module';
 import { ReportDraftModule } from '../report-draft/report-draft.module';
 import { ReportDraftDevModule } from '../report-draft/dev/report-draft-dev.module';
 import { ReportTeamModule } from '../report-team/report-team.module';
+import { QualityModule } from '../quality/quality.module';
 import { isReportDraftDevRoutesEnabled } from '../shared/dev-routes.util';
 
 const prismaImports = isPrismaSqlMode() ? [PrismaModule] : [];
@@ -37,6 +37,8 @@ const reportDraftDevImports =
 
 const reportTeamImports = isPrismaSqlMode() ? [ReportTeamModule] : [];
 
+const qualityImports = isPrismaSqlMode() ? [QualityModule] : [];
+
 const baseImports = [
   PingModule,
   AuthModule,
@@ -46,6 +48,7 @@ const baseImports = [
   ...reportDraftImports,
   ...reportDraftDevImports,
   ...reportTeamImports,
+  ...qualityImports,
 ];
 
 const mongooseRoot =

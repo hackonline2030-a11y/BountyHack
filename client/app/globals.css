@@ -493,6 +493,23 @@
   @apply rounded-sm outline-2 outline-offset-2 outline-dashboard-accent;
 }
 
+/* Tab pills on violet `.bg-pattern` (active = white tile, inactive = ghost on purple). */
+.dashboard-tab-pill {
+  @apply cursor-pointer rounded-full border border-white/50 bg-white/15 px-4 py-1.5 text-sm font-medium text-white transition-colors;
+}
+.dashboard-tab-pill:hover {
+  @apply border-white/80 bg-white/30 text-white;
+}
+.dashboard-tab-pill:focus-visible {
+  @apply outline-2 outline-offset-2 outline-white;
+}
+.dashboard-tab-pill--active {
+  @apply border-white bg-white text-dashboard-accent shadow-sm;
+}
+.dashboard-tab-pill--active:hover {
+  @apply border-white bg-white text-dashboard-accent-hover;
+}
+
 /* Native buttons without an explicit class still show a pointer cursor. */
 button:not(:disabled) {
   cursor: pointer;
@@ -503,7 +520,8 @@ button:disabled {
 
 @media (prefers-reduced-motion: reduce) {
   .dashboard-nav-link,
-  .dashboard-card-cta {
+  .dashboard-card-cta,
+  .dashboard-tab-pill {
     transition: none;
   }
 }

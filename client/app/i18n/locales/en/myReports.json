@@ -74,6 +74,16 @@
       "hunterFeedbackTitle": "Global revision feedback",
       "hunterFeedbackHint": "Revision #{{revision}} — fix then submit globally again."
     },
+    "review": {
+      "tabs": {
+        "form": "Hunter form",
+        "attachments": "Attachments",
+        "comments": "Comments (QC + mentor)",
+        "stepPreview": "Step preview",
+        "cumulativePreview": "Report preview",
+        "criteria": "Quality criteria"
+      }
+    },
     "globalRevisionReview": {
       "back": "← Back to submissions",
       "badge": "Super-admin global revision",
@@ -82,7 +92,8 @@
       "tablistAria": "Global revision review",
       "tabs": {
         "reportPreview": "Report preview",
-        "superAdminFeedback": "Super-admin feedback"
+        "superAdminFeedback": "Super-admin feedback",
+        "criteria": "Quality criteria"
       },
       "table": {
         "report": "Report",

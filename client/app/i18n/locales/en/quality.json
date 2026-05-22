@@ -1,0 +1,78 @@
+{
+  "catalog": {
+    "title": "Quality criteria catalog",
+    "subtitle": "Criteria published by the quality lead — read-only.",
+    "loading": "Loading…",
+    "empty": "No published criteria yet.",
+    "unclassified": "Unclassified",
+    "manageLink": "Manage criteria (QC)",
+    "backHome": "Back"
+  },
+  "checklist": {
+    "loading": "Loading criteria…",
+    "intro": "Check each criterion when the report meets the rule for this review.",
+    "emptyManager": "No criteria distributed to this report yet. Distribute them from quality administration.",
+    "emptyReader": "No active criteria on this report yet.",
+    "okLabel": "OK"
+  },
+  "admin": {
+    "title": "Criteria administration",
+    "subtitle": "Define, publish, and distribute quality rules (global quality checker role).",
+    "viewCatalog": "View public catalog",
+    "loading": "Loading…",
+    "tabs": {
+      "aria": "Criteria administration sections",
+      "drafts": "Drafts",
+      "published": "Published",
+      "categories": "Categories"
+    },
+    "edit": "Edit",
+    "publish": "Publish",
+    "distribute": "Distribute",
+    "delete": "Delete",
+    "form": {
+      "create": "New criterion",
+      "edit": "Edit criterion",
+      "code": "Code (e.g. A2290)",
+      "title": "Title",
+      "explanation": "Explanation (optional, max 200 words)",
+      "wordCount": "{{count}} / 200 words",
+      "category": "Category",
+      "targetTypes": "Target objects",
+      "globalTarget": "no instance id",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "list": {
+      "drafts": "Drafts",
+      "published": "Published"
+    },
+    "categories": {
+      "title": "Categories",
+      "name": "Name",
+      "color": "Color",
+      "add": "Add"
+    },
+    "distributeReport": {
+      "title": "Distribute to a report",
+      "hint": "Enables checkboxes on the chosen draft (Criteria tab in review).",
+      "criterion": "Published criterion",
+      "draftId": "Report draft",
+      "draftSelectPlaceholder": "— Choose a report draft —",
+      "loadingDrafts": "Loading report drafts…",
+      "noDrafts": "No report drafts available for your teams.",
+      "select": "— Select —",
+      "submit": "Distribute"
+    },
+    "deleteConfirm": {
+      "title": "Confirm deletion",
+      "message": "Delete “{{label}}”? Related distributions and checks will be removed."
+    },
+    "errors": {
+      "required": "Code and title are required.",
+      "wordLimit": "Explanation exceeds 200 words.",
+      "targetTypes": "Select at least one target type.",
+      "distribute": "Choose a criterion and a draft ID."
+    }
+  }
+}
