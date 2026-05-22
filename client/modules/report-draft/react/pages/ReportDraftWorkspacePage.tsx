@@ -35,25 +35,24 @@ import { QualityCriteriaChecklistPanel } from "@modules/quality/react/QualityCri
 import { useAppSelector } from "@store/redux/store";
 
 /**
- * Enveloppe workspace : onglets Édition / aperçus / **Commentaires** (retours
- * reviewer pour l’étape wizard courante). Sous la barre d’onglets : pill
- * d’état de l’étape (machine à états domaine).
+ * Enveloppe workspace : onglets Édition / aperçu (sous-onglets étape & global) /
+ * **Commentaires** (retours reviewer pour l’étape wizard courante).
  */
 type WorkspaceTab =
   | "form"
-  | "stepPreview"
+  | "preview"
   | "attachments"
-  | "cumulativePreview"
   | "comments"
   | "criteria"
   | "revisions"
   | "superAdminFeedback";
 
+type PreviewSubTab = "step" | "global";
+
 const BASE_TAB_ORDER: readonly WorkspaceTab[] = [
   "form",
-  "stepPreview",
+  "preview",
   "attachments",
-  "cumulativePreview",
   "comments",
   "criteria",
   "revisions",
@@ -61,9 +60,8 @@ const BASE_TAB_ORDER: readonly WorkspaceTab[] = [
 
 const TAB_LABELS: Record<WorkspaceTab, string> = {
   form: "Édition",
-  stepPreview: "Aperçu (étape)",
+  preview: "Aperçu",
   attachments: "Médias (étape)",
-  cumulativePreview: "Aperçu",
   comments: "Commentaires",
   criteria: "Critères qualité",
   revisions: "Mes demandes",
@@ -83,6 +81,8 @@ const STEP_LABELS: Record<ReportDraftDomainModel.ReportDraftStep, string> = {
 
 const tabButtonId = (key: WorkspaceTab) => `report-draft-tab-${key}`;
 const tabPanelId = (key: WorkspaceTab) => `report-draft-panel-${key}`;
+const previewSubTabButtonId = (key: PreviewSubTab) => `report-draft-preview-subtab-${key}`;
+const previewSubTabPanelId = (key: PreviewSubTab) => `report-draft-preview-panel-${key}`;
 
 const WorkspaceStepStatusPill: FC = () => {
   const step = useAppSelector((s) => s.reportDraft.step);
@@ -189,20 +189,35 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
   const showHunterBack = Boolean(draft && draft.hunterId === viewerUserId);
   const reportsListHref = useMemo(() => `/${lng}/my-reports`, [lng]);
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("form");
+  const [previewSubTab, setPreviewSubTab] = useState<PreviewSubTab>("step");
+
+  const selectWorkspaceTab = useCallback((key: WorkspaceTab) => {
+    setActiveTab(key);
+    if (key === "preview") {
+      setPreviewSubTab("step");
+    }
+  }, []);
+
+  const onPreviewSubTabKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLButtonElement>) => {
+      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+      event.preventDefault();
+      setPreviewSubTab((current) => (current === "step" ? "global" : "step"));
+    },
+    [],
+  );
 
   const onTabKeyDown = useCallback(
     (event: KeyboardEvent<HTMLButtonElement>) => {
       if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
       event.preventDefault();
-      setActiveTab((current) => {
-        const currentIndex = tabOrder.indexOf(current);
-        const offset = event.key === "ArrowRight" ? 1 : -1;
-        const nextIndex =
-          (currentIndex + offset + tabOrder.length) % tabOrder.length;
-        return tabOrder[nextIndex];
-      });
+      const currentIndex = tabOrder.indexOf(activeTab);
+      const offset = event.key === "ArrowRight" ? 1 : -1;
+      const nextIndex =
+        (currentIndex + offset + tabOrder.length) % tabOrder.length;
+      selectWorkspaceTab(tabOrder[nextIndex]);
     },
-    [tabOrder],
+    [activeTab, tabOrder, selectWorkspaceTab],
   );
 
   return (
@@ -234,14 +249,16 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
               aria-selected={isActive}
               aria-controls={tabPanelId(key)}
               tabIndex={isActive ? 0 : -1}
-              onClick={() => setActiveTab(key)}
+              onClick={() => selectWorkspaceTab(key)}
               onKeyDown={onTabKeyDown}
             >
               {key === "attachments"
                 ? t("myReports.workspace.tabs.attachments")
                 : key === "criteria"
                   ? t("myReports.workspace.tabs.criteria")
-                  : TAB_LABELS[key]}
+                  : key === "preview"
+                    ? t("myReports.workspace.tabs.preview")
+                    : TAB_LABELS[key]}
             </TabNavButton>
           );
         })}
@@ -274,11 +291,61 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
 
       <div
         role="tabpanel"
-        id={tabPanelId("stepPreview")}
-        aria-labelledby={tabButtonId("stepPreview")}
-        hidden={activeTab !== "stepPreview"}
+        id={tabPanelId("preview")}
+        aria-labelledby={tabButtonId("preview")}
+        hidden={activeTab !== "preview"}
+        className="flex flex-col gap-4"
       >
-        <ReportDraftPreview />
+        <div
+          role="tablist"
+          aria-label={t("myReports.workspace.preview.subTabsAria")}
+          className="flex flex-wrap gap-2"
+        >
+          {(["step", "global"] as const).map((subKey) => {
+            const isSubActive = previewSubTab === subKey;
+            return (
+              <button
+                key={subKey}
+                type="button"
+                role="tab"
+                id={previewSubTabButtonId(subKey)}
+                aria-selected={isSubActive}
+                aria-controls={previewSubTabPanelId(subKey)}
+                tabIndex={isSubActive ? 0 : -1}
+                onClick={() => setPreviewSubTab(subKey)}
+                onKeyDown={onPreviewSubTabKeyDown}
+                className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent focus-visible:ring-offset-2 ${
+                  isSubActive
+                    ? "border-form-accent bg-emerald-50 text-form-accent"
+                    : "border-form-border bg-form-overlay text-form-text-muted hover:border-form-border-strong hover:text-form-text"
+                }`}
+              >
+                {subKey === "step"
+                  ? t("myReports.workspace.preview.step")
+                  : t("myReports.workspace.preview.global")}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-sm italic leading-relaxed text-form-text-muted">
+          {t("myReports.workspace.preview.globalHint")}
+        </p>
+        <div
+          role="tabpanel"
+          id={previewSubTabPanelId("step")}
+          aria-labelledby={previewSubTabButtonId("step")}
+          hidden={previewSubTab !== "step"}
+        >
+          <ReportDraftPreview />
+        </div>
+        <div
+          role="tabpanel"
+          id={previewSubTabPanelId("global")}
+          aria-labelledby={previewSubTabButtonId("global")}
+          hidden={previewSubTab !== "global"}
+        >
+          <ReportDraftCumulativePreview />
+        </div>
       </div>
 
       <div
@@ -289,15 +356,6 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
         className="min-h-[120px]"
       >
         <ReportDraftStepAttachmentsPanel step={step} />
-      </div>
-
-      <div
-        role="tabpanel"
-        id={tabPanelId("cumulativePreview")}
-        aria-labelledby={tabButtonId("cumulativePreview")}
-        hidden={activeTab !== "cumulativePreview"}
-      >
-        <ReportDraftCumulativePreview />
       </div>
 
       <div

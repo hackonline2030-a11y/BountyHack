@@ -5,7 +5,14 @@
     "workspace": {
       "tabs": {
         "attachments": "Attachments",
-        "criteria": "Quality criteria"
+        "criteria": "Quality criteria",
+        "preview": "Preview"
+      },
+      "preview": {
+        "subTabsAria": "Preview scope",
+        "step": "Step",
+        "global": "Full report",
+        "globalHint": "The global preview cumulates the steps before the step you are currently on."
       },
       "attachments": {
         "hint": "Private images for this step (authenticated access only).",

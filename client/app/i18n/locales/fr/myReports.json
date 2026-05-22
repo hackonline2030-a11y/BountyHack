@@ -5,7 +5,14 @@
     "workspace": {
       "tabs": {
         "attachments": "Pièces jointes",
-        "criteria": "Critères qualité"
+        "criteria": "Critères qualité",
+        "preview": "Aperçu"
+      },
+      "preview": {
+        "subTabsAria": "Portée de l’aperçu",
+        "step": "Étape",
+        "global": "Global",
+        "globalHint": "L’aperçu global est l’aperçu qui cumule les étapes précédant l’étape sur laquelle vous êtes actuellement positionné."
       },
       "attachments": {
         "hint": "Images privées de cette étape (accès authentifié uniquement).",
