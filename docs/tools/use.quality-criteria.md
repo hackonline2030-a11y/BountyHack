@@ -53,7 +53,42 @@ BFF proxy: `client/app/api/quality/[[...path]]/route.ts` → Nest.
 - Postgres: `prisma/migrations/20260522120000_quality_criteria`
 - MySQL: `prisma/migrations-mysql/20260522120000_quality_criteria`
 
-Run `pnpm prisma:migrate:deploy` (or MySQL variant) then `pnpm prisma:seed` for target types.
+Run migrations then seed target types:
+
+```bash
+cd server
+# MySQL / MariaDB (prod VPS)
+DATABASE_NAME=MYSQL_PRISMA pnpm exec prisma migrate deploy
+DATABASE_NAME=MYSQL_PRISMA pnpm exec prisma db seed
+```
+
+Use `pnpm run prisma:migrate:deploy:mysql` (not bare `pnpm migrate`).
+
+### MySQL / MariaDB: failed `20260522120000_quality_criteria` (P3018 / syntax near COALESCE)
+
+Older MariaDB rejects `UNIQUE (..., (COALESCE(target_ref_id, '')))`. The MySQL migration uses a **STORED** column `target_ref_scope` instead.
+
+If deploy failed partway, clean up then redeploy:
+
+```bash
+cd server
+DATABASE_NAME=MYSQL_PRISMA pnpm exec prisma migrate resolve --rolled-back 20260522120000_quality_criteria
+```
+
+Drop partial quality tables if they exist (MySQL CLI), then:
+
+```sql
+DROP TABLE IF EXISTS quality_criterion_checks;
+DROP TABLE IF EXISTS quality_criterion_distributions;
+DROP TABLE IF EXISTS quality_criterion_target_type_links;
+DROP TABLE IF EXISTS quality_criteria;
+DROP TABLE IF EXISTS quality_criterion_target_types;
+DROP TABLE IF EXISTS quality_criterion_categories;
+```
+
+```bash
+DATABASE_NAME=MYSQL_PRISMA pnpm exec prisma migrate deploy
+```
 
 ## Next UI (not in this slice)
 

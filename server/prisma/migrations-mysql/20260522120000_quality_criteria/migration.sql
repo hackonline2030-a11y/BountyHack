@@ -54,17 +54,19 @@ CREATE TABLE `quality_criterion_target_type_links` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+-- MariaDB/MySQL: expression UNIQUE (COALESCE(...)) is invalid; use a STORED generated column instead.
 CREATE TABLE `quality_criterion_distributions` (
     `id` VARCHAR(191) NOT NULL,
     `criterion_id` VARCHAR(191) NOT NULL,
     `target_type_id` VARCHAR(191) NOT NULL,
     `target_ref_id` VARCHAR(191) NULL,
+    `target_ref_scope` VARCHAR(191) AS (IFNULL(`target_ref_id`, '')) STORED,
     `distributed_by_user_id` VARCHAR(191) NOT NULL,
     `distributed_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     INDEX `quality_criterion_distributions_criterion_id_idx`(`criterion_id`),
     INDEX `quality_criterion_distributions_target_type_id_target_ref_id_idx`(`target_type_id`, `target_ref_id`),
-    UNIQUE INDEX `quality_criterion_distributions_scope_unique`(`criterion_id`, `target_type_id`, (COALESCE(`target_ref_id`, ''))),
+    UNIQUE INDEX `quality_criterion_distributions_scope_unique`(`criterion_id`, `target_type_id`, `target_ref_scope`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
