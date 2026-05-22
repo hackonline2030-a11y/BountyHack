@@ -72,4 +72,16 @@ pnpm prisma:seed:dev-draft
 Migrations MySQL : `prisma/migrations-mysql/` (schéma : `schema.mysql.prisma`).  
 **Ne pas** mélanger les dossiers `migrations/` (Postgres) et `migrations-mysql/` sur la même base.
 
+### Dev MySQL : échec `20260524120000` (colonne `target_ref_scope` absente)
+
+Si la base Docker locale a été créée avec l’ancien unique `COALESCE(target_ref_id)` (sans colonne `target_ref_scope`) et que `prisma migrate deploy` échoue avec **1054 Unknown column 'target_ref_scope'** :
+
+```bash
+cd bugbountyapp/server
+chmod +x scripts/dev-mysql-repair-quality-distributions.sh
+DATABASE_NAME=MYSQL_PRISMA ./scripts/dev-mysql-repair-quality-distributions.sh
+```
+
+Le script aligne la table sur le schéma actuel **sans supprimer** les données qualité, puis marque la migration comme appliquée. La prod (déjà à jour) n’a pas besoin de ce script.
+
 Production : décider si vous exécutez les seeds SQL une fois après déploiement, et **`SEED_DEMO_USER=false`** (recommandé) pour éviter tout compte démo.

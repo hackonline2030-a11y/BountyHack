@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { FC, SVGProps } from "react";
 import {
   CoordinationIcon,
+  CriteriaIcon,
   SettingsIcon,
   SupportIcon,
   TeamIcon,
@@ -11,6 +12,7 @@ export type CoordinatorNavLabels = {
   label: string;
   coordination: string;
   teams: string;
+  criteria: string;
   support: string;
   settings: string;
 };
@@ -18,6 +20,7 @@ export type CoordinatorNavLabels = {
 export type CoordinatorNavHrefs = {
   coordination: string;
   teams: string;
+  criteria: string;
   support: string;
   settings: string;
 };
@@ -32,6 +35,7 @@ type NavItem = {
 const NAV_ITEMS: ReadonlyArray<NavItem> = [
   { key: "coordination", Icon: CoordinationIcon },
   { key: "teams", Icon: TeamIcon },
+  { key: "criteria", Icon: CriteriaIcon },
   { key: "support", Icon: SupportIcon },
   { key: "settings", Icon: SettingsIcon },
 ];

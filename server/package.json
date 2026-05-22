@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "start": "nx serve",
-    "build": "nx build",
+    "build": "nx run web-api:build",
     "test": "nx run web-api:test --verbose",
     "test:e2e": "nx run e2e:e2e",
     "test:all": "nx run-many -t test --projects web-api,e2e",

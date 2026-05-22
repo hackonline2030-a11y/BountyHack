@@ -15,6 +15,8 @@ import {
   AuthQualityCriteriaReader,
 } from '../../shared/rbac/quality-auth.decorator';
 import { ManageQualityCriteriaCommand } from '../application/commands/manage-quality-criteria.command';
+import { ListQualityCriterionReportTargetsQuery } from '../application/queries/list-quality-criterion-report-targets.query';
+import { ListQualityReportDistributionCountsQuery } from '../application/queries/list-quality-report-distribution-counts.query';
 import {
   CreateQualityCriterionDto,
   UpdateQualityCriterionDto,
@@ -24,7 +26,11 @@ import {
 @ApiBearerAuth()
 @Controller('quality/criteria')
 export class QualityCriteriaController {
-  constructor(private readonly criteria: ManageQualityCriteriaCommand) {}
+  constructor(
+    private readonly criteria: ManageQualityCriteriaCommand,
+    private readonly reportDistributionCounts: ListQualityReportDistributionCountsQuery,
+    private readonly criterionReportTargets: ListQualityCriterionReportTargetsQuery,
+  ) {}
 
   @Get('mine/drafts')
   @AuthQualityCriteriaManager()
@@ -38,6 +44,29 @@ export class QualityCriteriaController {
   @ApiOperation({ summary: 'Published criteria catalog (authenticated readers)' })
   listPublished(@Req() req: RequestWithIdentity) {
     return this.criteria.listPublished(req.user);
+  }
+
+  @Get('report-distribution-counts')
+  @AuthQualityCriteriaReader()
+  @ApiOperation({
+    summary:
+      'Per published criterion: count of report distributions with a target id',
+  })
+  listReportDistributionCounts(@Req() req: RequestWithIdentity) {
+    return this.reportDistributionCounts.execute(req.user);
+  }
+
+  @Get(':criterionId/report-targets')
+  @AuthQualityCriteriaReader()
+  @ApiOperation({
+    summary:
+      'Report drafts targeted by this criterion (distribution with target id)',
+  })
+  listCriterionReportTargets(
+    @Req() req: RequestWithIdentity,
+    @Param('criterionId') criterionId: string,
+  ) {
+    return this.criterionReportTargets.execute(req.user, criterionId);
   }
 
   @Get(':criterionId')

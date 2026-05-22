@@ -11,7 +11,6 @@ import {
   localePrefixFromPathname,
 } from "@/lib/locale-path";
 import { SESSION_REFRESHED_EVENT } from "@/lib/session-refresh";
-import { QUALITY_CRITERIA_READER_ROLES } from "@/lib/quality-role-sets";
 
 /** `/{lng}/welcome-…` segment for the signed-in role, or `null` when there is no dashboard route. */
 function welcomeDashboardPathFromRoleCode(roleCode: string | null): string | null {
@@ -32,11 +31,6 @@ function welcomeDashboardPathFromRoleCode(roleCode: string | null): string | nul
     default:
       return null;
   }
-}
-
-function canAccessQualityCriteriaCatalog(roleCode: string | null): boolean {
-  if (!roleCode) return false;
-  return (QUALITY_CRITERIA_READER_ROLES as readonly string[]).includes(roleCode);
 }
 
 export const Header: React.FC<{ className?: string }> = ({ className = "" }) => {
@@ -67,14 +61,6 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
     isAuthenticated && dashboardSegment ? `${prefix}/${dashboardSegment}` : null;
   const isDashboardActive =
     !!dashboardHref && (pathname === dashboardHref || pathname.startsWith(`${dashboardHref}/`));
-  const qualityCriteriaHref =
-    isAuthenticated && canAccessQualityCriteriaCatalog(currentRoleCode)
-      ? `${prefix}/quality-criteria`
-      : null;
-  const isQualityCriteriaActive =
-    !!qualityCriteriaHref &&
-    (pathname === qualityCriteriaHref ||
-      pathname.startsWith(`${qualityCriteriaHref}/`));
 
   const roleLabelFromRoleCode = (roleCode: string | null): string | null => {
     if (!roleCode) return null;
