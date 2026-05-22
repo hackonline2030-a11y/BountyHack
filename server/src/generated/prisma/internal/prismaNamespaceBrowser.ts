@@ -72,7 +72,13 @@ export const ModelName = {
   ReportTeam: 'ReportTeam',
   ReportTeamMember: 'ReportTeamMember',
   ReportTeamJoinRequest: 'ReportTeamJoinRequest',
-  ReportTeamLeaveRequest: 'ReportTeamLeaveRequest'
+  ReportTeamLeaveRequest: 'ReportTeamLeaveRequest',
+  QualityCriterionCategory: 'QualityCriterionCategory',
+  QualityCriterionTargetType: 'QualityCriterionTargetType',
+  QualityCriterion: 'QualityCriterion',
+  QualityCriterionTargetTypeLink: 'QualityCriterionTargetTypeLink',
+  QualityCriterionDistribution: 'QualityCriterionDistribution',
+  QualityCriterionCheck: 'QualityCriterionCheck'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -366,6 +372,81 @@ export const ReportTeamLeaveRequestScalarFieldEnum = {
 export type ReportTeamLeaveRequestScalarFieldEnum = (typeof ReportTeamLeaveRequestScalarFieldEnum)[keyof typeof ReportTeamLeaveRequestScalarFieldEnum]
 
 
+export const QualityCriterionCategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  color: 'color',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QualityCriterionCategoryScalarFieldEnum = (typeof QualityCriterionCategoryScalarFieldEnum)[keyof typeof QualityCriterionCategoryScalarFieldEnum]
+
+
+export const QualityCriterionTargetTypeScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  label: 'label',
+  requiresTargetRef: 'requiresTargetRef',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QualityCriterionTargetTypeScalarFieldEnum = (typeof QualityCriterionTargetTypeScalarFieldEnum)[keyof typeof QualityCriterionTargetTypeScalarFieldEnum]
+
+
+export const QualityCriterionScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  title: 'title',
+  explanation: 'explanation',
+  status: 'status',
+  categoryId: 'categoryId',
+  createdByUserId: 'createdByUserId',
+  publishedAt: 'publishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QualityCriterionScalarFieldEnum = (typeof QualityCriterionScalarFieldEnum)[keyof typeof QualityCriterionScalarFieldEnum]
+
+
+export const QualityCriterionTargetTypeLinkScalarFieldEnum = {
+  criterionId: 'criterionId',
+  targetTypeId: 'targetTypeId'
+} as const
+
+export type QualityCriterionTargetTypeLinkScalarFieldEnum = (typeof QualityCriterionTargetTypeLinkScalarFieldEnum)[keyof typeof QualityCriterionTargetTypeLinkScalarFieldEnum]
+
+
+export const QualityCriterionDistributionScalarFieldEnum = {
+  id: 'id',
+  criterionId: 'criterionId',
+  targetTypeId: 'targetTypeId',
+  targetRefId: 'targetRefId',
+  distributedByUserId: 'distributedByUserId',
+  distributedAt: 'distributedAt'
+} as const
+
+export type QualityCriterionDistributionScalarFieldEnum = (typeof QualityCriterionDistributionScalarFieldEnum)[keyof typeof QualityCriterionDistributionScalarFieldEnum]
+
+
+export const QualityCriterionCheckScalarFieldEnum = {
+  id: 'id',
+  distributionId: 'distributionId',
+  context: 'context',
+  checked: 'checked',
+  checkedByUserId: 'checkedByUserId',
+  checkedAt: 'checkedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QualityCriterionCheckScalarFieldEnum = (typeof QualityCriterionCheckScalarFieldEnum)[keyof typeof QualityCriterionCheckScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -610,4 +691,63 @@ export const ReportTeamLeaveRequestOrderByRelevanceFieldEnum = {
 } as const
 
 export type ReportTeamLeaveRequestOrderByRelevanceFieldEnum = (typeof ReportTeamLeaveRequestOrderByRelevanceFieldEnum)[keyof typeof ReportTeamLeaveRequestOrderByRelevanceFieldEnum]
+
+
+export const QualityCriterionCategoryOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  color: 'color'
+} as const
+
+export type QualityCriterionCategoryOrderByRelevanceFieldEnum = (typeof QualityCriterionCategoryOrderByRelevanceFieldEnum)[keyof typeof QualityCriterionCategoryOrderByRelevanceFieldEnum]
+
+
+export const QualityCriterionTargetTypeOrderByRelevanceFieldEnum = {
+  id: 'id',
+  code: 'code',
+  label: 'label'
+} as const
+
+export type QualityCriterionTargetTypeOrderByRelevanceFieldEnum = (typeof QualityCriterionTargetTypeOrderByRelevanceFieldEnum)[keyof typeof QualityCriterionTargetTypeOrderByRelevanceFieldEnum]
+
+
+export const QualityCriterionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  code: 'code',
+  title: 'title',
+  explanation: 'explanation',
+  categoryId: 'categoryId',
+  createdByUserId: 'createdByUserId'
+} as const
+
+export type QualityCriterionOrderByRelevanceFieldEnum = (typeof QualityCriterionOrderByRelevanceFieldEnum)[keyof typeof QualityCriterionOrderByRelevanceFieldEnum]
+
+
+export const QualityCriterionTargetTypeLinkOrderByRelevanceFieldEnum = {
+  criterionId: 'criterionId',
+  targetTypeId: 'targetTypeId'
+} as const
+
+export type QualityCriterionTargetTypeLinkOrderByRelevanceFieldEnum = (typeof QualityCriterionTargetTypeLinkOrderByRelevanceFieldEnum)[keyof typeof QualityCriterionTargetTypeLinkOrderByRelevanceFieldEnum]
+
+
+export const QualityCriterionDistributionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  criterionId: 'criterionId',
+  targetTypeId: 'targetTypeId',
+  targetRefId: 'targetRefId',
+  distributedByUserId: 'distributedByUserId'
+} as const
+
+export type QualityCriterionDistributionOrderByRelevanceFieldEnum = (typeof QualityCriterionDistributionOrderByRelevanceFieldEnum)[keyof typeof QualityCriterionDistributionOrderByRelevanceFieldEnum]
+
+
+export const QualityCriterionCheckOrderByRelevanceFieldEnum = {
+  id: 'id',
+  distributionId: 'distributionId',
+  context: 'context',
+  checkedByUserId: 'checkedByUserId'
+} as const
+
+export type QualityCriterionCheckOrderByRelevanceFieldEnum = (typeof QualityCriterionCheckOrderByRelevanceFieldEnum)[keyof typeof QualityCriterionCheckOrderByRelevanceFieldEnum]
 

@@ -1,0 +1,83 @@
+{
+  "catalog": {
+    "title": "Quality criteria catalog",
+    "subtitle": "Criteria published by the quality lead — read-only.",
+    "loading": "Loading…",
+    "empty": "No published criteria yet.",
+    "unclassified": "Unclassified",
+    "manageLink": "Manage criteria (QC)",
+    "backHome": "Back"
+  },
+  "checklist": {
+    "loading": "Loading criteria…",
+    "intro": "Check each criterion when the report meets the rule for this review.",
+    "emptyManager": "No criteria distributed to this report yet. Distribute them from quality administration.",
+    "emptyReader": "No active criteria on this report yet.",
+    "okLabel": "OK"
+  },
+  "admin": {
+    "title": "Criteria administration",
+    "subtitle": "Define, publish, and distribute quality rules (global quality checker role).",
+    "viewCatalog": "View public catalog",
+    "loading": "Loading…",
+    "tabs": {
+      "aria": "Criteria administration sections",
+      "drafts": "Drafts",
+      "published": "Published",
+      "distribution": "Distribution",
+      "categories": "Categories"
+    },
+    "edit": "Edit",
+    "publish": "Publish",
+    "distribute": "Distribute",
+    "delete": "Delete",
+    "form": {
+      "create": "New criterion",
+      "edit": "Edit criterion",
+      "code": "Code (e.g. A2290)",
+      "title": "Title",
+      "explanation": "Explanation (optional, max 200 words)",
+      "wordCount": "{{count}} / 200 words",
+      "category": "Category",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "list": {
+      "drafts": "Drafts",
+      "published": "Published"
+    },
+    "categories": {
+      "title": "Categories",
+      "name": "Name",
+      "color": "Color",
+      "add": "Add"
+    },
+    "distribution": {
+      "title": "Distribution",
+      "intro": "Separate from defining the criterion: pick a published criterion, then a target object. Some types require a specific instance id; others apply to all instances. Each type has its own workflow (check UI).",
+      "criterion": "Published criterion",
+      "targetTypes": "Target objects",
+      "selectCriterion": "— Choose a criterion —",
+      "scopeSpecific": "Scoped to one instance id (one distribution per instance)",
+      "scopeGlobal": "Applies to all instances of this type",
+      "workflowReport": "Report workflow: Criteria tab on draft review, checkboxes for QC.",
+      "workflowPathCourse": "Path course workflow: not implemented yet (no checklist UI).",
+      "workflowPending": "Distribution disabled until this type’s workflow is shipped.",
+      "draftId": "Report draft",
+      "draftSelectPlaceholder": "— Choose a report draft —",
+      "loadingDrafts": "Loading report drafts…",
+      "noDrafts": "No report drafts available for your teams.",
+      "submit": "Distribute",
+      "success": "Distribution saved."
+    },
+    "deleteConfirm": {
+      "title": "Confirm deletion",
+      "message": "Delete “{{label}}”? Related distributions and checks will be removed."
+    },
+    "errors": {
+      "required": "Code and title are required.",
+      "wordLimit": "Explanation exceeds 200 words.",
+      "distribute": "Choose a published criterion, a target type, and an id when required."
+    }
+  }
+}

@@ -4,7 +4,21 @@
     "heading": "Mes rapports",
     "workspace": {
       "tabs": {
-        "attachments": "Pièces jointes"
+        "attachments": "Pièces jointes",
+        "preview": "Aperçu",
+        "quality": "Qualité"
+      },
+      "quality": {
+        "subTabsAria": "Retours qualité et contrôle",
+        "comments": "Commentaires",
+        "prePublication": "Retour avant publication",
+        "criteria": "Critères qualité"
+      },
+      "preview": {
+        "subTabsAria": "Portée de l’aperçu",
+        "step": "Étape",
+        "global": "Global",
+        "globalHint": "L’aperçu global est l’aperçu qui cumule les étapes précédant l’étape sur laquelle vous êtes actuellement positionné."
       },
       "attachments": {
         "hint": "Images privées de cette étape (accès authentifié uniquement).",
@@ -53,7 +67,7 @@
         "short": "Validée QC ou SA (n°{{revision}}) — resoumission globale possible."
       },
       "openCommentsTab": "Commentaires",
-      "openSuperAdminTab": "Retours super-admin"
+      "openSuperAdminTab": "Retour avant publication"
     },
     "globalComments": {
       "sectionTitle": "Commentaires globaux",
@@ -74,6 +88,16 @@
       "hunterFeedbackTitle": "Retours révision globale",
       "hunterFeedbackHint": "Révision n°{{revision}} — corrigez puis resoumettez globalement."
     },
+    "review": {
+      "tabs": {
+        "form": "Formulaire hunter",
+        "attachments": "Pièces jointes",
+        "comments": "Commentaires (QC + mentor)",
+        "stepPreview": "Aperçu étape",
+        "cumulativePreview": "Aperçu rapport",
+        "criteria": "Critères qualité"
+      }
+    },
     "globalRevisionReview": {
       "back": "← Retour aux soumissions",
       "badge": "Révision globale super-admin",
@@ -82,7 +106,8 @@
       "tablistAria": "Revue révision globale",
       "tabs": {
         "reportPreview": "Aperçu du rapport",
-        "superAdminFeedback": "Retours super-admin"
+        "superAdminFeedback": "Retours super-admin",
+        "criteria": "Critères qualité"
       },
       "table": {
         "report": "Rapport",
@@ -109,7 +134,7 @@
       "finalStep": {
         "awaitingLeadValidation": "Dernière étape validée : en attente de validation finale.",
         "leadValidated": "Rapport validé par le Lead.",
-        "globalRevisionInProgress": "Révision globale en cours — consulte l’onglet « Retours super-admin »."
+        "globalRevisionInProgress": "Révision globale en cours — consulte l’onglet Qualité → « Retour avant publication »."
       },
       "globalSubmit": {
         "button": "Soumettre le brouillon globalement",

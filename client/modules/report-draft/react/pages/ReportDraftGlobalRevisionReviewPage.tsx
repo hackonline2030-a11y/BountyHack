@@ -10,11 +10,16 @@ import { ReportDraftAggregateStatusBadge } from "@modules/report-draft/react/com
 import { ReportDraftGeneralPreview } from "@modules/report-draft/react/components/ReportDraftGeneralPreview";
 import { ReportDraftTeamContextBanner } from "@modules/report-draft/react/components/ReportDraftTeamContextBanner";
 import { ReportDraftSuperAdminFeedbackPanel } from "@modules/report-draft/react/pages/ReportDraftSuperAdminFeedbackPanel";
+import { QualityCriteriaChecklistPanel } from "@modules/quality/react/QualityCriteriaChecklistPanel";
 import { TabNavButton } from "@modules/app/nextjs/components/buttons/TabNavButton";
 
-type ReviewTab = "reportPreview" | "superAdminFeedback";
+type ReviewTab = "reportPreview" | "superAdminFeedback" | "criteria";
 
-const TAB_ORDER: readonly ReviewTab[] = ["reportPreview", "superAdminFeedback"] as const;
+const TAB_ORDER: readonly ReviewTab[] = [
+  "reportPreview",
+  "superAdminFeedback",
+  "criteria",
+] as const;
 
 type Props = {
   draft: ReportDraftDomainModel.ReportDraft;
@@ -145,6 +150,21 @@ export const ReportDraftGlobalRevisionReviewPage: FC<Props> = ({
         className="min-h-[120px]"
       >
         <ReportDraftSuperAdminFeedbackPanel draftId={draft.id} />
+      </div>
+
+      <div
+        role="tabpanel"
+        id={tabPanelId("criteria")}
+        aria-labelledby={tabButtonId("criteria")}
+        hidden={activeTab !== "criteria"}
+        className="min-h-[120px] rounded-lg border border-form-border bg-form-surface p-4"
+      >
+        <QualityCriteriaChecklistPanel
+          targetTypeCode="report"
+          targetRefId={draft.id}
+          context="global_submission_review"
+          panelIdPrefix="global-revision-criteria"
+        />
       </div>
     </div>
   );

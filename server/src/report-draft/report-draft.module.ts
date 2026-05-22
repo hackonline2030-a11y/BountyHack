@@ -393,6 +393,7 @@ import { ReportDraftImageAssetService } from './application/attachments/report-d
     I_GLOBAL_SUBMISSION_REPOSITORY,
     I_GLOBAL_REVIEWER_COMMENT_REPOSITORY,
     I_REVIEWER_COMMENT_REPOSITORY,
+    ReportDraftAccessPolicy,
   ],
 })
 export class ReportDraftModule {}

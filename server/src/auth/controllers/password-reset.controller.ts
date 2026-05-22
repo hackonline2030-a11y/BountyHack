@@ -20,6 +20,8 @@ import {
   PasswordResetConfirmSuccessDto,
   PasswordResetRequestAcceptedDto,
 } from '../dto/password-reset-response.dto';
+import { HitLimit } from '../../core/rate-limit/hitlimit';
+import { routeHitLimits } from '../../core/rate-limit/rate-limit.limits';
 
 /**
  * Réinitialisation mot de passe (PostgreSQL + Prisma uniquement — voir ADR `docs/adr/architecture_server_adr.md`).
@@ -34,6 +36,7 @@ export class PasswordResetController {
   ) {}
 
   @Post('password-reset/request')
+  @HitLimit(routeHitLimits.passwordResetRequest)
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
     summary: 'Demander un lien de réinitialisation (e-mail)',
@@ -65,6 +68,7 @@ export class PasswordResetController {
   }
 
   @Post('password-reset/confirm')
+  @HitLimit(routeHitLimits.passwordResetConfirm)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Confirmer un nouveau mot de passe avec le jeton reçu par e-mail',
