@@ -462,7 +462,7 @@ export const ReportDraftWorkspacePage: FC<{ viewerUserId: string }> = ({
           id={qualitySubTabPanelId("criteria")}
           aria-labelledby={qualitySubTabButtonId("criteria")}
           hidden={qualitySubTab !== "criteria"}
-          className="min-h-[80px] rounded-lg border border-form-border bg-form-surface p-4"
+          className="min-h-[80px] rounded-lg bg-purple-50 p-4"
         >
           {currentDraftId ? (
             <QualityCriteriaChecklistPanel

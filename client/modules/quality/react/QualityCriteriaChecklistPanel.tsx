@@ -115,7 +115,7 @@ export const QualityCriteriaChecklistPanel: FC<Props> = ({
             return (
               <li
                 key={row.id}
-                className="rounded-lg border border-form-border bg-white/80 p-4 shadow-sm"
+                className="rounded-lg border border-form-border bg-white/80 p-4"
               >
                 <div className="flex flex-wrap items-start gap-3">
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
