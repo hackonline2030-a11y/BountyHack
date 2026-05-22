@@ -11,14 +11,17 @@ import { submitMentorAdvice } from "@modules/report-draft/core/useCase/submit-me
 import { submitStepForReview } from "@modules/report-draft/core/useCase/submit-step-for-review.usecase";
 import { isStepValidationReviewerRole } from "@modules/report-draft/core/model/step-validation-reviewer";
 import { ReportDraftFinalStepStatusBanner } from "@modules/report-draft/react/components/ReportDraftFinalStepStatusBanner";
-import { ReportDraftGlobalSubmitButton } from "@modules/report-draft/react/components/ReportDraftGlobalSubmitButton";
+import { ReportDraftStepNav } from "@modules/report-draft/react/components/ReportDraftStepNav";
 import { SectionBlocRepeater } from "@modules/report-draft/react/components/section-bloc/SectionBlocRepeater";
+import { useStepSectionImageUpload } from "@modules/report-draft/react/hooks/use-step-section-image-upload";
+import { LAST_HUNTER_WIZARD_STEP } from "@modules/report-draft/core/model/hunter-wizard-steps";
 import { reviewerRoleFromDraftStep } from "@modules/report-draft/react/wizard/reviewer-role-from-draft";
 import {
   canWizardNavigateNext,
   isSuperAdminGlobalRevisionMode,
 } from "@modules/report-draft/core/model/super-admin-final-validation";
 import { isWizardStepEditable } from "@modules/report-draft/react/wizard/wizard-step-status";
+import { useReportDraftStepSave } from "@modules/report-draft/react/hooks/use-report-draft-step-save";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 import { useReportDraftSession } from "@modules/report-draft/react/context/report-draft-session.context";
 
@@ -30,7 +33,7 @@ type Props = {
 };
 
 /**
- * Long-form wizard steps (COLLECTION → FINAL) — free section blocs repeater only.
+ * Long-form wizard steps (COLLECTION → REMEDIATION) — section blocs with image upload.
  */
 export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
   const { t } = useT("myReports");
@@ -81,13 +84,34 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
   const editable = stepEditableByWorkflow && isDesignatedStepWriter;
   const hidePerStepSubmit = isSuperAdminGlobalRevisionMode(draftRow);
   const canNavigateNext = canWizardNavigateNext(draftRow, stepStatus);
-  const isLast = step === Step.FINAL;
+  const isLast = step === LAST_HUNTER_WIZARD_STEP;
+
+  const { stepAttachments, imageUploadByBlocId, onUploadSectionImage } =
+    useStepSectionImageUpload({
+      step,
+      draftPayload: draft,
+      setDraftPayload: setDraft,
+    });
+
+  const { saveDraft, persistThen, hasUnsavedChanges } = useReportDraftStepSave({
+    draftId: currentDraftId,
+    step,
+    localPayload: draft,
+    persistedPayload,
+    canSave: editable,
+  });
 
   const onNext = useCallback(() => {
-    if (isLast || !canNavigateNext) return;
-    const next = (step + 1) as ReportDraftDomainModel.ReportDraftStep;
-    dispatch(reportDraftSlice.actions.setStep(next));
-  }, [dispatch, step, isLast, canNavigateNext]);
+    void persistThen(() => {
+      if (isLast || !canNavigateNext) return;
+      const next = (step + 1) as ReportDraftDomainModel.ReportDraftStep;
+      dispatch(reportDraftSlice.actions.setStep(next));
+    });
+  }, [dispatch, step, isLast, canNavigateNext, persistThen]);
+
+  const onSaveDraft = useCallback(async () => {
+    await saveDraft();
+  }, [saveDraft]);
 
   const submitForReview = useCallback(async () => {
     if (!currentDraftId || !submittedBy) return;
@@ -115,9 +139,11 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
   }, [dispatch, currentDraftId, step, reviewerRole, submittedBy, draft]);
 
   const onBack = useCallback(() => {
-    const prev = (step - 1) as ReportDraftDomainModel.ReportDraftStep;
-    dispatch(reportDraftSlice.actions.setStep(prev));
-  }, [dispatch, step]);
+    void persistThen(() => {
+      const prev = (step - 1) as ReportDraftDomainModel.ReportDraftStep;
+      dispatch(reportDraftSlice.actions.setStep(prev));
+    });
+  }, [dispatch, step, persistThen]);
 
   const transitionBusy = transition.status === "loading";
   const transitionErr =
@@ -159,6 +185,9 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
         <SectionBlocRepeater
           blocs={draft.sectionBlocs}
           editable={editable}
+          attachments={stepAttachments}
+          imageUploadByBlocId={imageUploadByBlocId}
+          onImageUpload={editable ? onUploadSectionImage : undefined}
           onChange={(sectionBlocs) => setDraft({ sectionBlocs })}
         />
       </div>
@@ -186,42 +215,32 @@ export const LongFormReportStepSection: FC<Props> = ({ step, label }) => {
         </select>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <button
-          type="button"
-          className="rounded-md border border-form-border bg-form-surface px-4 py-2 text-form-text-muted hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={onBack}
-          disabled={transitionBusy}
-        >
-          Retour
-        </button>
-        {!isLast ? (
-          <button
-            type="button"
-            className="rounded-md border border-form-border bg-form-surface px-4 py-2 font-medium text-form-text hover:bg-form-overlay disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={onNext}
-            disabled={transitionBusy || !canNavigateNext}
-            title={
-              canNavigateNext
-                ? undefined
-                : "Disponible uniquement après validation de cette étape par le quality checker."
-            }
-          >
-            Suivant
-          </button>
-        ) : null}
-        {!hidePerStepSubmit ? (
-          <button
-            type="button"
-            className="rounded-md bg-form-accent px-4 py-2 font-medium text-white hover:bg-form-accent-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-form-accent-strong focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-form-accent-disabled"
-            onClick={() => void submitForReview()}
-            disabled={transitionBusy || !editable || !submittedBy}
-          >
-            Soumettre cette étape pour revue
-          </button>
-        ) : null}
-        <ReportDraftGlobalSubmitButton currentStep={step} currentPayload={draft} />
-      </div>
+      <ReportDraftStepNav
+        transitionBusy={transitionBusy}
+        onBack={onBack}
+        showSaveDraft={editable && currentDraftId != null}
+        onSaveDraft={onSaveDraft}
+        saveDraftLabel={
+          hasUnsavedChanges
+            ? t("myReports.wizard.saveDraft.button")
+            : t("myReports.wizard.saveDraft.saved")
+        }
+        saveDraftTitle={t("myReports.wizard.saveDraft.hint")}
+        showNext={!isLast}
+        onNext={onNext}
+        canNavigateNext={canNavigateNext}
+        nextTitle={
+          canNavigateNext
+            ? undefined
+            : "Disponible uniquement après validation de cette étape par le quality checker."
+        }
+        hidePerStepSubmit={hidePerStepSubmit}
+        onSubmitForReview={submitForReview}
+        submitDisabled={!editable || !submittedBy}
+        currentStep={step}
+        currentPayload={draft}
+        className="pt-0"
+      />
     </>
   );
 };

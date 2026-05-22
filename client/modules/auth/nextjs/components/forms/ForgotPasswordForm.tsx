@@ -1,5 +1,7 @@
 "use client";
 
+import { PrimaryButton } from "@modules/app/nextjs/components/buttons/PrimaryButton";
+
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -92,13 +94,13 @@ export function ForgotPasswordForm() {
         </p>
       ) : null}
 
-      <button
+      <PrimaryButton
         type="submit"
         disabled={status === "loading" || status === "success"}
-        className="btn-common-styles btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+        className="disabled:opacity-50"
       >
         {status === "loading" ? t("forgotForm.submitting") : t("forgotForm.submit")}
-      </button>
+      </PrimaryButton>
 
       <Link
         href={`${prefix}/login`}

@@ -1,5 +1,7 @@
 "use client";
 
+import { PrimaryButton } from "@modules/app/nextjs/components/buttons/PrimaryButton";
+
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -136,13 +138,13 @@ export function ResetPasswordForm({ tokenFromQuery }: Props) {
         </p>
       ) : null}
 
-      <button
+      <PrimaryButton
         type="submit"
         disabled={status === "loading" || password.length < 8 || confirm.length < 8}
-        className="btn-common-styles btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+        className="disabled:opacity-50"
       >
         {status === "loading" ? t("resetForm.submitting") : t("resetForm.submit")}
-      </button>
+      </PrimaryButton>
 
       <Link
         href={`${prefix}/login`}

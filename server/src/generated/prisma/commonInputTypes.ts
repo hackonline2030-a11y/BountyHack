@@ -501,6 +501,23 @@ export type EnumReportTeamJoinRequestStatusWithAggregatesFilter<$PrismaModel = n
   _max?: Prisma.NestedEnumReportTeamJoinRequestStatusFilter<$PrismaModel>
 }
 
+export type EnumQualityCriterionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.QualityCriterionStatus | Prisma.EnumQualityCriterionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.QualityCriterionStatus[]
+  notIn?: $Enums.QualityCriterionStatus[]
+  not?: Prisma.NestedEnumQualityCriterionStatusFilter<$PrismaModel> | $Enums.QualityCriterionStatus
+}
+
+export type EnumQualityCriterionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.QualityCriterionStatus | Prisma.EnumQualityCriterionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.QualityCriterionStatus[]
+  notIn?: $Enums.QualityCriterionStatus[]
+  not?: Prisma.NestedEnumQualityCriterionStatusWithAggregatesFilter<$PrismaModel> | $Enums.QualityCriterionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumQualityCriterionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumQualityCriterionStatusFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[]
@@ -949,6 +966,23 @@ export type NestedEnumReportTeamJoinRequestStatusWithAggregatesFilter<$PrismaMod
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumReportTeamJoinRequestStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumReportTeamJoinRequestStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumQualityCriterionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.QualityCriterionStatus | Prisma.EnumQualityCriterionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.QualityCriterionStatus[]
+  notIn?: $Enums.QualityCriterionStatus[]
+  not?: Prisma.NestedEnumQualityCriterionStatusFilter<$PrismaModel> | $Enums.QualityCriterionStatus
+}
+
+export type NestedEnumQualityCriterionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.QualityCriterionStatus | Prisma.EnumQualityCriterionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.QualityCriterionStatus[]
+  notIn?: $Enums.QualityCriterionStatus[]
+  not?: Prisma.NestedEnumQualityCriterionStatusWithAggregatesFilter<$PrismaModel> | $Enums.QualityCriterionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumQualityCriterionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumQualityCriterionStatusFilter<$PrismaModel>
 }
 
 

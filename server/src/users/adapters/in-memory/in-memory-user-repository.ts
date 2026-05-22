@@ -3,6 +3,7 @@ import { AppRoleCode } from '../../../shared/rbac/app-role.code';
 import { IUserRepository } from '../../ports/user-repository.interface';
 import { UserAdminSummary, UserRecord } from '../../models';
 import { CreateUserProfilePayload } from '../../payloads';
+import type { UpdateOwnProfilePayload } from '../../payloads/update-own-profile.payload';
 import { User } from '../../entities/user.entity';
 import { JwtInMemoryRegistry } from '../../../auth/adapters/passport-jwt/repositories/in-memory/jwt-in-memory-registry';
 
@@ -30,7 +31,7 @@ export class InMemoryUserRepository implements IUserRepository {
     if (fromJwt) {
       return fromJwt;
     }
-    return { uid: id, username: 'test-user' };
+    return { uid: id, username: 'test-user', email: null };
   }
 
   /**
@@ -57,5 +58,29 @@ export class InMemoryUserRepository implements IUserRepository {
 
   async listSummariesByRoleCode(_roleCode: AppRoleCode): Promise<UserAdminSummary[]> {
     return [];
+  }
+
+  async deleteCompletely(uid: string): Promise<void> {
+    this.users.delete(uid);
+  }
+
+  async verifyPassword(_uid: string, _plainPassword: string): Promise<boolean> {
+    return true;
+  }
+
+  async updateOwnProfile(
+    uid: string,
+    patch: UpdateOwnProfilePayload,
+  ): Promise<UserRecord> {
+    const base = (await this.findById(uid)) ?? {
+      uid,
+      username: 'test-user',
+      email: null,
+    };
+    return {
+      ...base,
+      username: patch.username ?? base.username,
+      email: patch.email ?? base.email,
+    };
   }
 }

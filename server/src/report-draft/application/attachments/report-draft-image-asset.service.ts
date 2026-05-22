@@ -23,8 +23,16 @@ import {
   type UploadedReportImageFile,
   validateReportImageUpload,
 } from './report-draft-image-storage';
-
-const DESCRIPTION_STEP_KEY = 'description';
+import {
+  draftStepForStateKey,
+  parseReportDraftStepStateKey,
+} from './report-draft-step-keys';
+import type {
+  ReportDraftStepStateKeyWire,
+  ReportDraftWire,
+} from '../../models/report-draft-api.types';
+import { ReportDraftPrismaMapper } from '../../adapters/postgre-prisma/report-draft-prisma.mapper';
+import { stripAttachmentIdFromPayload } from './report-draft-attachment-payload';
 
 export type ReportDraftImageFile = {
   buffer: Buffer;
@@ -41,9 +49,10 @@ export class ReportDraftImageAssetService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async uploadDescriptionImage(
+  async uploadStepSectionImage(
     identity: Identity,
     draftId: string,
+    stepKey: ReportDraftStepStateKeyWire,
     file: UploadedReportImageFile,
   ): Promise<AttachmentWire> {
     const draft = await this.reportDraftRepository.findById(draftId);
@@ -55,11 +64,13 @@ export class ReportDraftImageAssetService {
     const attachmentId = randomUUID();
     const storageKey = reportImageStorageKey({
       draftId,
-      stepKey: DESCRIPTION_STEP_KEY,
+      stepKey,
       attachmentId,
       extension: validated.extension,
     });
     const absolutePath = resolveReportImageAssetPath(storageKey);
+    const draftStep = draftStepForStateKey(stepKey);
+    const stepPayload = draft[stepKey].payload as object;
 
     const attachment: AttachmentWire = {
       id: attachmentId,
@@ -83,13 +94,13 @@ export class ReportDraftImageAssetService {
         where: {
           reportDraftId_step: {
             reportDraftId: draftId,
-            step: DraftStep.DESCRIPTION,
+            step: draftStep,
           },
         },
         create: {
           reportDraftId: draftId,
-          step: DraftStep.DESCRIPTION,
-          payload: draft.description.payload as object,
+          step: draftStep,
+          payload: stepPayload,
         },
         update: {},
       });
@@ -113,6 +124,83 @@ export class ReportDraftImageAssetService {
       await rm(absolutePath, { force: true }).catch(() => undefined);
       throw error;
     }
+  }
+
+  /** @deprecated Use {@link uploadStepSectionImage} with `stepKey: 'description'`. */
+  async uploadDescriptionImage(
+    identity: Identity,
+    draftId: string,
+    file: UploadedReportImageFile,
+  ): Promise<AttachmentWire> {
+    return this.uploadStepSectionImage(identity, draftId, 'description', file);
+  }
+
+  parseStepKeyParam(stepKey: string): ReportDraftStepStateKeyWire {
+    const parsed = parseReportDraftStepStateKey(stepKey);
+    if (parsed === null || parsed === 'meta' || parsed === 'final') {
+      throw new BadRequestException(
+        'Invalid step key for image upload (use description, collection, exploitation, proofOfConcept, risks, or remediation).',
+      );
+    }
+    return parsed;
+  }
+
+  async findAttachmentDraftId(attachmentId: string): Promise<{ draftId: string }> {
+    const row = await this.prisma.reportDraftAttachment.findUnique({
+      where: { id: attachmentId },
+      include: { reportDraftStep: true },
+    });
+    if (row === null) {
+      throw new NotFoundException('Report image not found');
+    }
+    return { draftId: row.reportDraftStep.reportDraftId };
+  }
+
+  async deleteDraftAttachment(
+    identity: Identity,
+    draftId: string,
+    attachmentId: string,
+  ): Promise<ReportDraftWire> {
+    const draft = await this.reportDraftRepository.findById(draftId);
+    if (draft === null) {
+      throw new NotFoundException('Report draft not found');
+    }
+
+    const row = await this.prisma.reportDraftAttachment.findFirst({
+      where: {
+        id: attachmentId,
+        reportDraftStep: { reportDraftId: draftId },
+      },
+      include: { reportDraftStep: true },
+    });
+    if (row === null) {
+      throw new NotFoundException('Report image not found');
+    }
+
+    const stepKey = ReportDraftPrismaMapper.stateKeyFromDraftStep(row.reportDraftStep.step);
+    await this.accessPolicy.assertCanDeleteAttachment(identity, draft, stepKey);
+
+    await rm(resolveReportImageAssetPath(row.storageKey), { force: true }).catch(
+      () => undefined,
+    );
+    await this.prisma.reportDraftAttachment.delete({ where: { id: attachmentId } });
+
+    const stepState = draft[stepKey];
+    const nextAttachments = stepState.attachments.filter((a) => a.id !== attachmentId);
+    const nextPayload = stripAttachmentIdFromPayload(stepState.payload, attachmentId);
+    const nextDraft: ReportDraftWire = {
+      ...draft,
+      [stepKey]: {
+        ...stepState,
+        attachments: nextAttachments,
+        payload: nextPayload,
+      },
+      updatedAt: new Date().toISOString(),
+      version: draft.version + 1,
+    };
+
+    await this.reportDraftRepository.save(nextDraft);
+    return nextDraft;
   }
 
   async readDraftImage(

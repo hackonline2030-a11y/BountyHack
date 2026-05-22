@@ -40,6 +40,9 @@ model User {
   reportTeamJoinRequestsDecided ReportTeamJoinRequest[] @relation("JoinRequestDecider")
   reportTeamLeaveRequests ReportTeamLeaveRequest[] @relation("LeaveRequestUser")
   reportTeamLeaveRequestsDecided ReportTeamLeaveRequest[] @relation("LeaveRequestDecider")
+  qualityCriteriaCreated            QualityCriterion[]             @relation("QualityCriterionCreator")
+  qualityCriterionDistributions     QualityCriterionDistribution[] @relation("QualityDistributionCreator")
+  qualityCriterionChecks            QualityCriterionCheck[]        @relation("QualityCheckUpdater")
 
   @@index([roleId])
   @@map("users")
@@ -470,4 +473,113 @@ model ReportTeamLeaveRequest {
   @@index([teamId, status])
   @@index([userId, status])
   @@map("report_team_leave_requests")
+}
+
+// ─── Quality criteria (RBAC QUALITY_CHECKER; independent of report-team roles) ───
+
+enum QualityCriterionStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model QualityCriterionCategory {
+  id        String   @id @default(uuid())
+  name      String
+  color     String
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  criteria QualityCriterion[]
+
+  @@map("quality_criterion_categories")
+}
+
+model QualityCriterionTargetType {
+  id                String   @id @default(uuid())
+  code              String   @unique
+  label             String
+  requiresTargetRef Boolean  @default(true) @map("requires_target_ref")
+  sortOrder         Int      @default(0) @map("sort_order")
+  isActive          Boolean  @default(true) @map("is_active")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  criterionLinks QualityCriterionTargetTypeLink[]
+  distributions  QualityCriterionDistribution[]
+
+  @@map("quality_criterion_target_types")
+}
+
+model QualityCriterion {
+  id              String                 @id @default(uuid())
+  code            String                 @unique
+  title           String
+  explanation     String?                @db.Text
+  status          QualityCriterionStatus @default(DRAFT)
+  categoryId      String?                @map("category_id")
+  createdByUserId String                 @map("created_by_user_id")
+  publishedAt     DateTime?              @map("published_at")
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+
+  category        QualityCriterionCategory?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdBy       User                             @relation("QualityCriterionCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  targetTypeLinks QualityCriterionTargetTypeLink[]
+  distributions   QualityCriterionDistribution[]
+
+  @@index([status])
+  @@index([createdByUserId])
+  @@index([categoryId])
+  @@map("quality_criteria")
+}
+
+model QualityCriterionTargetTypeLink {
+  criterionId  String @map("criterion_id")
+  targetTypeId String @map("target_type_id")
+
+  criterion  QualityCriterion           @relation(fields: [criterionId], references: [id], onDelete: Cascade)
+  targetType QualityCriterionTargetType @relation(fields: [targetTypeId], references: [id], onDelete: Restrict)
+
+  @@id([criterionId, targetTypeId])
+  @@map("quality_criterion_target_type_links")
+}
+
+model QualityCriterionDistribution {
+  id                  String   @id @default(uuid())
+  criterionId         String   @map("criterion_id")
+  targetTypeId        String   @map("target_type_id")
+  targetRefId         String?  @map("target_ref_id")
+  /// Uniqueness scope: same value as `targetRefId` or `''` when global (`targetRefId` null). Set by the API layer.
+  targetRefScope      String   @default("") @map("target_ref_scope")
+  distributedByUserId String   @map("distributed_by_user_id")
+  distributedAt       DateTime @default(now()) @map("distributed_at")
+
+  criterion     QualityCriterion           @relation(fields: [criterionId], references: [id], onDelete: Cascade)
+  targetType    QualityCriterionTargetType @relation(fields: [targetTypeId], references: [id], onDelete: Restrict)
+  distributedBy User                       @relation("QualityDistributionCreator", fields: [distributedByUserId], references: [id], onDelete: Restrict)
+  checks        QualityCriterionCheck[]
+
+  @@unique([criterionId, targetTypeId, targetRefScope], map: "quality_criterion_distributions_scope_unique")
+  @@index([criterionId])
+  @@index([targetTypeId, targetRefId])
+  @@map("quality_criterion_distributions")
+}
+
+model QualityCriterionCheck {
+  id              String    @id @default(uuid())
+  distributionId  String    @map("distribution_id")
+  context         String
+  checked         Boolean   @default(false)
+  checkedByUserId String?   @map("checked_by_user_id")
+  checkedAt       DateTime? @map("checked_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  distribution QualityCriterionDistribution @relation(fields: [distributionId], references: [id], onDelete: Cascade)
+  checkedBy    User?                        @relation("QualityCheckUpdater", fields: [checkedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([distributionId, context])
+  @@index([distributionId])
+  @@map("quality_criterion_checks")
 }

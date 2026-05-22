@@ -265,6 +265,10 @@ export class ReportDraftPrismaMapper {
     };
   }
 
+  static stateKeyFromDraftStep(step: DraftStep): ReportDraftStepStateKeyWire {
+    return STATE_KEY_BY_DRAFT_STEP[step];
+  }
+
   static attachmentCreateInput(
     stepId: string,
     attachment: AttachmentWire,

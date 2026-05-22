@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0",
     "i18next": "^26.0.4",
     "immer": "^11.1.8",
     "jose": "^6.2.3",

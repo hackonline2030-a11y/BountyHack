@@ -39,6 +39,10 @@ function runSeedFile(relativeFromServerRoot) {
 }
 
 runSeedFile(rolesFile);
+const qualityTargetTypesFile = useMysql
+  ? 'prisma/seed/quality-target-types.mysql.sql'
+  : 'prisma/seed/quality-target-types.sql';
+runSeedFile(qualityTargetTypesFile);
 
 if (process.env.SEED_DEMO_USER !== 'false') {
   runSeedFile(demoFile);

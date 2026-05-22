@@ -1,11 +1,15 @@
 "use client";
 
 import { type FC } from "react";
+import { Trans, useT } from "next-i18next/client";
 import type { SectionBloc } from "@modules/report-draft/core/model/section-bloc";
 import { createEmptySectionBloc } from "@modules/report-draft/core/model/section-bloc";
 import type { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import { SectionBlocHeadingFields } from "@modules/report-draft/react/components/section-bloc/SectionBlocHeadingFields";
 import { SectionBlocListsEditor } from "@modules/report-draft/react/components/section-bloc/SectionBlocListsEditor";
+
+const IMAGE_COMPRESS_SERVICE_URL =
+  "https://www.iloveimg.com/compress-image/compress-jpg";
 
 const fieldLabel =
   "text-xs font-medium uppercase tracking-wide text-form-text-muted";
@@ -153,7 +157,10 @@ const SectionBlocImageUpload: FC<{
   attachment?: ReportDraftDomainModel.Attachment;
   uploadState?: { status: "uploading" | "error"; message?: string };
   onUpload: (blocId: string, file: File) => Promise<void>;
-}> = ({ bloc, editable, attachment, uploadState, onUpload }) => (
+}> = ({ bloc, editable, attachment, uploadState, onUpload }) => {
+  const { t } = useT("myReports");
+
+  return (
   <div className="flex flex-col gap-2 border-t border-form-border pt-3">
     <div className="flex flex-col gap-0.5">
       <p className="text-sm font-medium text-form-text">Image de la section</p>
@@ -168,6 +175,22 @@ const SectionBlocImageUpload: FC<{
     ) : null}
     {editable ? (
       <label className="flex max-w-md flex-col gap-1">
+        <p className="text-xs text-form-text-muted">
+          <Trans
+            t={t}
+            i18nKey="wizard.sectionBloc.compressBeforeUpload"
+            components={{
+              serviceLink: (
+                <a
+                  href={IMAGE_COMPRESS_SERVICE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-form-text underline underline-offset-2 hover:text-form-accent"
+                />
+              ),
+            }}
+          />
+        </p>
         <span className={fieldLabel}>Téléverser une image</span>
         <input
           type="file"
@@ -192,4 +215,5 @@ const SectionBlocImageUpload: FC<{
       </p>
     ) : null}
   </div>
-);
+  );
+};

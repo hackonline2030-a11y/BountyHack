@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type FC, useCallback, useMemo, useState } from "react";
 import { useT } from "next-i18next/client";
+import { FormPanelButton } from "@modules/app/nextjs/components/buttons/FormPanelButton";
 import { globalSubmissionRowStatusLabel } from "@modules/report-draft/core/model/global-submission-review-status";
 import { canDecideOnGlobalSubmission } from "@modules/report-draft/core/model/super-admin-final-validation";
 import { approveGlobalSubmission } from "@modules/report-draft/core/useCase/approve-global-submission.usecase";
@@ -10,6 +11,7 @@ import { requestGlobalSubmissionChanges } from "@modules/report-draft/core/useCa
 import { ReportDraftAggregateStatusBadge } from "@modules/report-draft/react/components/ReportDraftAggregateStatusBadge";
 import { ReportDraftGeneralPreview } from "@modules/report-draft/react/components/ReportDraftGeneralPreview";
 import { ReportDraftTeamContextBanner } from "@modules/report-draft/react/components/ReportDraftTeamContextBanner";
+import { QualityCriteriaChecklistPanel } from "@modules/quality/react/QualityCriteriaChecklistPanel";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
 const roleLabelFr = (role: string): string => {
@@ -134,6 +136,18 @@ export const GlobalSubmissionReviewBoard: FC<Props> = ({
         <ReportDraftTeamContextBanner team={draft.reportTeam} className="mt-0 mb-0" />
       ) : null}
 
+      <section className="rounded-lg border border-form-border bg-form-surface p-4">
+        <h2 className="mb-3 text-sm font-semibold text-form-text">
+          {t("myReports.review.tabs.criteria")}
+        </h2>
+        <QualityCriteriaChecklistPanel
+          targetTypeCode="report"
+          targetRefId={draft.id}
+          context="global_submission_review"
+          panelIdPrefix="global-submission-criteria"
+        />
+      </section>
+
       {isSuperAdmin && finalValidationHref ? (
         <p className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
           {t("myReports.globalSubmissionReview.superAdminReportHint")}{" "}
@@ -196,22 +210,16 @@ export const GlobalSubmissionReviewBoard: FC<Props> = ({
             />
           </label>
           <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              disabled={busy}
-              onClick={onApproveRevision}
-              className="cursor-pointer rounded-md bg-form-accent px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-            >
+            <FormPanelButton variant="accent" disabled={busy} onClick={onApproveRevision}>
               {t("myReports.globalSubmissionReview.approveRevision")}
-            </button>
-            <button
-              type="button"
+            </FormPanelButton>
+            <FormPanelButton
+              variant="surface"
               disabled={busy || revisionComment.trim().length === 0}
               onClick={onRequestChanges}
-              className="cursor-pointer rounded-md border border-form-border bg-form-surface px-4 py-2 text-sm font-semibold text-form-text hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               {t("myReports.globalSubmissionReview.requestRevision")}
-            </button>
+            </FormPanelButton>
           </div>
         </section>
       ) : (

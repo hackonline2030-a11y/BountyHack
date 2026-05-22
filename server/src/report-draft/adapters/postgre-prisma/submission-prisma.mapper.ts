@@ -10,7 +10,32 @@ export type SubmissionWithSnapshots = Submission & {
   attachmentSnapshots: SubmissionAttachmentSnapshot[];
 };
 
+/** Separates submission id from draft attachment id in snapshot PKs. */
+const SNAPSHOT_ID_SEP = '__';
+
 export class SubmissionPrismaMapper {
+  /**
+   * DB primary key for `submission_attachment_snapshots`.
+   * Must be unique per submission round — re-submitting the same draft
+   * attachment after QC revision must not reuse the attachment id alone.
+   */
+  static snapshotPersistedId(submissionId: string, draftAttachmentId: string): string {
+    return `${submissionId}${SNAPSHOT_ID_SEP}${draftAttachmentId}`;
+  }
+
+  /**
+   * Wire / API attachment id (draft row id for image URLs).
+   * Legacy rows used the draft attachment id as the snapshot PK.
+   */
+  static draftAttachmentIdFromSnapshotRow(
+    row: SubmissionAttachmentSnapshot,
+  ): string {
+    const idx = row.id.indexOf(SNAPSHOT_ID_SEP);
+    if (idx >= 0) {
+      return row.id.slice(idx + SNAPSHOT_ID_SEP.length);
+    }
+    return row.id;
+  }
   static toDomain(row: SubmissionWithSnapshots): SubmissionWire {
     return {
       id: row.id,
@@ -71,7 +96,7 @@ export class SubmissionPrismaMapper {
     row: SubmissionAttachmentSnapshot,
   ): AttachmentWire {
     return {
-      id: row.id,
+      id: this.draftAttachmentIdFromSnapshotRow(row),
       filename: row.filename,
       mimeType: row.mimeType,
       sizeBytes: row.sizeBytes,
@@ -87,7 +112,7 @@ export class SubmissionPrismaMapper {
     attachment: AttachmentWire,
   ) {
     return {
-      id: attachment.id,
+      id: this.snapshotPersistedId(submissionId, attachment.id),
       submissionId,
       filename: attachment.filename,
       mimeType: attachment.mimeType,

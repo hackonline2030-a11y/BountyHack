@@ -29,7 +29,11 @@ export class MongoUserRepository implements IUserRepository {
       throw new HttpException('Utilisateur non trouvé', HttpStatus.NOT_FOUND);
     }
 
-    return { uid: String(record._id), username: record.username };
+    return {
+      uid: String(record._id),
+      username: record.username,
+      email: record.email ?? null,
+    };
   }
 
   /**
@@ -56,6 +60,24 @@ export class MongoUserRepository implements IUserRepository {
   async listSummariesByRoleCode(_roleCode: AppRoleCode): Promise<UserAdminSummary[]> {
     throw new NotImplementedException(
       'Role-based user listing is not implemented on the Mongo adapter yet.',
+    );
+  }
+
+  async deleteCompletely(): Promise<void> {
+    throw new NotImplementedException(
+      'User deletion is not implemented on the Mongo adapter yet.',
+    );
+  }
+
+  async verifyPassword(): Promise<boolean> {
+    throw new NotImplementedException(
+      'Profile password verification is not implemented on the Mongo adapter yet.',
+    );
+  }
+
+  async updateOwnProfile(): Promise<UserRecord> {
+    throw new NotImplementedException(
+      'Profile update is not implemented on the Mongo adapter yet.',
     );
   }
 }

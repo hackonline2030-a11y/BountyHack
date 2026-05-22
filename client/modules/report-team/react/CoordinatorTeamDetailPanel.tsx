@@ -15,6 +15,7 @@ import { setReportDraftPrimaryHunter } from "@modules/report-draft/core/useCase/
 import { reportTeamsSlice } from "@modules/report-team/core/store/report-teams.slice";
 import type { ReportTeamMemberRole } from "@modules/report-team/model/report-team.types";
 import { ReportTeamValidityBadge } from "@modules/report-team/react/ReportTeamValidityBadge";
+import { ConfirmDangerModal } from "@modules/app/nextjs/components/ConfirmDangerModal";
 import type { AppState } from "@store/redux/store";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
@@ -28,7 +29,7 @@ type Props = {
 export const CoordinatorTeamDetailPanel: FC<Props> = ({ teamId }) => {
   const dispatch = useAppDispatch();
   const store = useStore();
-  const { t } = useT("reportTeams");
+  const { t } = useT(["reportTeams", "common"]);
   const params = useParams<{ lng?: string }>();
   const lng =
     typeof params?.lng === "string" && params.lng.trim() !== "" ? params.lng : "fr";
@@ -43,6 +44,10 @@ export const CoordinatorTeamDetailPanel: FC<Props> = ({ teamId }) => {
   const [selectedWriterId, setSelectedWriterId] = useState("");
   const [selectedPrimaryHunterId, setSelectedPrimaryHunterId] = useState("");
   const [hunterPicker, setHunterPicker] = useState<CoordinatorHunterUserOption[]>([]);
+  const [memberRemoveTarget, setMemberRemoveTarget] = useState<{
+    userId: string;
+    displayName: string;
+  } | null>(null);
 
   const team = teamDetail?.id === teamId ? teamDetail : null;
 
@@ -137,18 +142,18 @@ export const CoordinatorTeamDetailPanel: FC<Props> = ({ teamId }) => {
   const writerBusy = transition.status === "loading" || teamPageLoading;
   const memberBusy = mutationStatus === "loading" || teamPageLoading;
 
-  async function onRemoveMember(memberUserId: string, displayName: string) {
-    if (!team) return;
-    const ok = window.confirm(
-      t("reportTeams.coordinator.teamDetail.membersRemoveConfirm", { name: displayName }),
-    );
-    if (!ok) return;
+  async function onConfirmRemoveMember() {
+    if (!team || !memberRemoveTarget) return;
     setMemberFeedback("");
     try {
       await dispatch(
-        removeMemberFromReportTeamAsCoordinator({ teamId: team.id, memberUserId }),
+        removeMemberFromReportTeamAsCoordinator({
+          teamId: team.id,
+          memberUserId: memberRemoveTarget.userId,
+        }),
       );
       setMemberFeedback(t("reportTeams.coordinator.teamDetail.membersRemoved"));
+      setMemberRemoveTarget(null);
     } catch {
       /* mutationFailed sets global mutationError */
     }
@@ -198,6 +203,7 @@ export const CoordinatorTeamDetailPanel: FC<Props> = ({ teamId }) => {
   );
 
   return (
+    <>
     <div className="flex flex-col gap-6">
       <Link href={`${prefix}/coordination`} className="dashboard-card-cta w-fit text-sm">
         ← {t("reportTeams.coordinator.teamDetail.back")}
@@ -264,7 +270,12 @@ export const CoordinatorTeamDetailPanel: FC<Props> = ({ teamId }) => {
                       type="button"
                       className="shrink-0 rounded-md border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-900 hover:bg-red-100 disabled:opacity-50"
                       disabled={memberBusy}
-                      onClick={() => void onRemoveMember(m.userId, m.displayName)}
+                      onClick={() =>
+                        setMemberRemoveTarget({
+                          userId: m.userId,
+                          displayName: m.displayName,
+                        })
+                      }
                     >
                       {memberBusy
                         ? t("reportTeams.coordinator.teamDetail.membersRemoveBusy")
@@ -417,5 +428,25 @@ export const CoordinatorTeamDetailPanel: FC<Props> = ({ teamId }) => {
         ) : null}
       </section>
     </div>
+
+    <ConfirmDangerModal
+      open={memberRemoveTarget !== null}
+      title={t("reportTeams.coordinator.teamDetail.membersRemoveModalTitle")}
+      cancelLabel={t("common:confirmModal.cancel")}
+      confirmLabel={t("reportTeams.coordinator.teamDetail.membersRemove")}
+      confirming={memberBusy}
+      confirmingLabel={t("reportTeams.coordinator.teamDetail.membersRemoveBusy")}
+      onCancel={() => {
+        if (!memberBusy) setMemberRemoveTarget(null);
+      }}
+      onConfirm={() => void onConfirmRemoveMember()}
+    >
+      {memberRemoveTarget
+        ? t("reportTeams.coordinator.teamDetail.membersRemoveConfirm", {
+            name: memberRemoveTarget.displayName,
+          })
+        : null}
+    </ConfirmDangerModal>
+    </>
   );
 };

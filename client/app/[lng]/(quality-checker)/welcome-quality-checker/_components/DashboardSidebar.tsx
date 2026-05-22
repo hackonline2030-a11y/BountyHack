@@ -4,6 +4,7 @@ import {
   ColleagueIcon,
   EmailIcon,
   ReportIcon,
+  CriteriaIcon,
   SettingsIcon,
   SupportIcon,
   TeamIcon,
@@ -14,6 +15,7 @@ export type DashboardNavLabels = {
   emails: string;
   reports: string;
   teams: string;
+  criteria: string;
   colleagues: string;
   support: string;
   settings: string;
@@ -23,6 +25,7 @@ export type DashboardNavHrefs = {
   emails: string;
   reports: string;
   teams: string;
+  criteria: string;
   colleagues: string;
   support: string;
   settings: string;
@@ -39,12 +42,13 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
   { key: "emails", Icon: EmailIcon },
   { key: "reports", Icon: ReportIcon },
   { key: "teams", Icon: TeamIcon },
+  { key: "criteria", Icon: CriteriaIcon },
   { key: "colleagues", Icon: ColleagueIcon },
   { key: "support", Icon: SupportIcon },
   { key: "settings", Icon: SettingsIcon },
 ];
 
-const GROUP_BREAKS: ReadonlySet<NavKey> = new Set(["emails", "teams"]);
+const GROUP_BREAKS: ReadonlySet<NavKey> = new Set(["emails", "teams", "criteria"]);
 
 type Props = {
   labels: DashboardNavLabels;

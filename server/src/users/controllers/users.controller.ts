@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
+  Patch,
   Post,
   Req,
   UnauthorizedException,
@@ -21,11 +24,24 @@ import {
 } from '../../core/dto/api-http-responses';
 import { ApiValidationBadRequest } from '../../core/dto/http-validation-error.dto';
 import { RequestWithIdentity } from '../../auth/adapters/http/request-with-identity';
+import { STEP_UP_PURPOSE_ACCOUNT_DELETE } from '../../auth/application/profile-step-up-token.service';
+import { HitLimit } from '../../core/rate-limit/hitlimit';
+import { routeHitLimits } from '../../core/rate-limit/rate-limit.limits';
 import { Auth } from '../../auth/auth.decorator';
 import { AuthRoles } from '../../auth/rbac/roles.decorator';
 import { AppRoleCode } from '../../shared/rbac/app-role.code';
 
 import { AddUsername } from '../commands/add-username';
+import { DeleteUserCompletelyCommand } from '../commands/delete-user-completely.command';
+import { DeleteOwnAccountCommand } from '../commands/delete-own-account.command';
+import { VerifyProfilePasswordCommand } from '../commands/verify-profile-password.command';
+import { UpdateOwnProfileCommand } from '../commands/update-own-profile.command';
+import {
+  DeleteOwnAccountBodyDto,
+  ProfileStepUpResponseDto,
+  UpdateOwnProfileBodyDto,
+  VerifyProfilePasswordBodyDto,
+} from '../dto/profile.dto';
 import {
   CreateUserProfileBodyDto,
   UserAdminSummaryListResponseDto,
@@ -43,6 +59,10 @@ export class UsersController {
     private readonly addUsername: AddUsername,
     private readonly getUserByIdQuery: GetUserByIdQuery,
     private readonly listUsersAdminSummariesQuery: ListUsersAdminSummariesQuery,
+    private readonly deleteUserCompletely: DeleteUserCompletelyCommand,
+    private readonly deleteOwnAccountCommand: DeleteOwnAccountCommand,
+    private readonly verifyProfilePasswordCommand: VerifyProfilePasswordCommand,
+    private readonly updateOwnProfileCommand: UpdateOwnProfileCommand,
   ) {}
 
   @Post()
@@ -111,6 +131,128 @@ export class UsersController {
     }
   }
 
+  @Post('me/profile/verify-password')
+  @HitLimit(routeHitLimits.profileVerifyPassword)
+  @Auth()
+  @ApiOperation({
+    summary: 'Verify password before profile edit',
+    description:
+      'Step 1 of self-service profile update. Returns a short-lived step-up token. ' +
+      'Only the authenticated user (JWT `sub`) may call this; admins cannot edit another user.',
+  })
+  @ApiBody({ type: VerifyProfilePasswordBodyDto })
+  @ApiOkResponse({
+    description: 'Password verified; step-up token issued.',
+    type: ProfileStepUpResponseDto,
+  })
+  @ApiValidationBadRequest('Request body does not pass validation.')
+  @ApiHttpUnauthorized('Missing or invalid bearer token, or wrong password.')
+  @ApiHttpInternalServerError('Unexpected server error.')
+  async verifyProfilePassword(
+    @Req() request: RequestWithIdentity,
+    @Body() body: VerifyProfilePasswordBodyDto,
+  ): Promise<ProfileStepUpResponseDto> {
+    return this.verifyProfilePasswordCommand.execute(
+      this.getAuthenticatedIdentity(request),
+      body.password,
+      undefined,
+      body.totpCode,
+    );
+  }
+
+  @Patch('me/profile')
+  @Auth()
+  @ApiOperation({
+    summary: 'Update own profile',
+    description:
+      'Step 2: change username, email, and/or password using a step-up token from verify-password. ' +
+      'Identity is taken only from the JWT. Changing email or password revokes all refresh tokens.',
+  })
+  @ApiBody({ type: UpdateOwnProfileBodyDto })
+  @ApiOkResponse({
+    description: 'Profile updated.',
+    type: UserProfileResponseDto,
+  })
+  @ApiValidationBadRequest('Request body does not pass validation.')
+  @ApiHttpUnauthorized('Missing or invalid bearer token, or invalid/expired step-up token.')
+  @ApiHttpInternalServerError('Unexpected server error while updating profile.')
+  async updateOwnProfile(
+    @Req() request: RequestWithIdentity,
+    @Body() body: UpdateOwnProfileBodyDto,
+  ): Promise<UserProfileResponseDto> {
+    const identity = this.getAuthenticatedIdentity(request);
+    const record = await this.updateOwnProfileCommand.execute(
+      identity,
+      body.stepUpToken,
+      {
+        username: body.username,
+        email: body.email,
+        newPassword: body.newPassword,
+      },
+    );
+    return plainToInstance(
+      UserProfileResponseDto,
+      {
+        ...record,
+        roleCode: identity.roleCode ?? null,
+      },
+      { excludeExtraneousValues: true },
+    );
+  }
+
+  @Post('me/account/verify-password')
+  @HitLimit(routeHitLimits.accountVerifyPassword)
+  @Auth()
+  @ApiOperation({
+    summary: 'Verify password before account deletion',
+    description:
+      'Step 1 of self-service account deletion. Returns a short-lived step-up token. ' +
+      'Only the authenticated user may call this.',
+  })
+  @ApiBody({ type: VerifyProfilePasswordBodyDto })
+  @ApiOkResponse({
+    description: 'Password verified; step-up token issued.',
+    type: ProfileStepUpResponseDto,
+  })
+  @ApiValidationBadRequest('Request body does not pass validation.')
+  @ApiHttpUnauthorized('Missing or invalid bearer token, or wrong password.')
+  @ApiHttpInternalServerError('Unexpected server error.')
+  async verifyAccountDeletePassword(
+    @Req() request: RequestWithIdentity,
+    @Body() body: VerifyProfilePasswordBodyDto,
+  ): Promise<ProfileStepUpResponseDto> {
+    return this.verifyProfilePasswordCommand.execute(
+      this.getAuthenticatedIdentity(request),
+      body.password,
+      STEP_UP_PURPOSE_ACCOUNT_DELETE,
+      body.totpCode,
+    );
+  }
+
+  @Delete('me/account')
+  @Auth()
+  @ApiOperation({
+    summary: 'Delete own account',
+    description:
+      'Step 2: permanently removes the authenticated user and cascaded data. Requires a step-up token ' +
+      'from verify-password. Irreversible. Blocked for the last remaining super-admin.',
+  })
+  @ApiBody({ type: DeleteOwnAccountBodyDto })
+  @ApiOkResponse({ schema: { example: { ok: true } } })
+  @ApiValidationBadRequest('Request body does not pass validation.')
+  @ApiHttpUnauthorized('Missing or invalid bearer token, or invalid/expired step-up token.')
+  @ApiHttpInternalServerError('Unexpected server error while deleting account.')
+  async deleteOwnAccount(
+    @Req() request: RequestWithIdentity,
+    @Body() body: DeleteOwnAccountBodyDto,
+  ): Promise<{ ok: true }> {
+    await this.deleteOwnAccountCommand.execute(
+      this.getAuthenticatedIdentity(request),
+      body.stepUpToken,
+    );
+    return { ok: true };
+  }
+
   /**
    * Admin-only listing of every account for the user-management table.
    *
@@ -152,6 +294,31 @@ export class UsersController {
       console.error('Error listing users:', error);
       throw error;
     }
+  }
+
+  @Delete(':userId')
+  @AuthRoles(AppRoleCode.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Permanently delete a user (admin)',
+    description:
+      'Removes the account and cascaded data (owned report drafts, team memberships, sessions, …). ' +
+      'Reassigns designated-writer on co-hunter drafts. Irreversible. SUPER_ADMIN only; use DELETE users/me/account for self-service.',
+  })
+  @ApiOkResponse({ schema: { example: { ok: true } } })
+  @ApiHttpUnauthorized('Missing or invalid bearer token.')
+  @ApiForbiddenResponse({
+    description: 'Authenticated user is not `SUPER_ADMIN`.',
+  })
+  @ApiHttpInternalServerError('Unexpected server error while deleting user.')
+  async deleteUser(
+    @Req() request: RequestWithIdentity,
+    @Param('userId') userId: string,
+  ): Promise<{ ok: true }> {
+    await this.deleteUserCompletely.execute(
+      this.getAuthenticatedIdentity(request),
+      userId,
+    );
+    return { ok: true };
   }
 
   private getAuthenticatedIdentity(request: RequestWithIdentity): Identity {

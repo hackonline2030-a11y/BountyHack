@@ -15,6 +15,13 @@ import {
 const inputBase =
   "w-full bg-white placeholder:text-gray-500 text-gray-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow";
 
+/**
+ * Login-only submit — native `<button>`, black pill, centered.
+ * Intentionally not using PrimaryButton / ActionButton so refactors elsewhere cannot break login.
+ */
+const loginSubmitClass =
+  "btn-common-styles btn-primary-dark self-center w-fit min-w-[10rem] disabled:opacity-50";
+
 type PostLoginTarget =
   | "welcome-admin"
   | "welcome-hunter"
@@ -244,33 +251,38 @@ export function LoginForm() {
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={status === "loading" || (step === "totp" && code.trim().length < 6)}
-        className="btn-common-styles btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {status === "loading"
-          ? t("loginForm.submitting")
-          : step === "totp"
-            ? t("loginForm.submitTotp")
-            : t("loginForm.submit")}
-      </button>
-
       {step === "totp" ? (
+        <>
+          <button
+            type="submit"
+            className={loginSubmitClass}
+            disabled={status === "loading" || code.trim().length < 6}
+          >
+            {status === "loading" ? t("loginForm.submitting") : t("loginForm.submitTotp")}
+          </button>
+          <button
+            type="button"
+            className="btn-common-styles self-center w-fit rounded-full border border-white/30 bg-white/10 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={status === "loading"}
+            onClick={() => {
+              setStep("credentials");
+              setCode("");
+              setMessage("");
+              setStatus("idle");
+            }}
+          >
+            {t("loginForm.backToPassword")}
+          </button>
+        </>
+      ) : (
         <button
-          type="button"
-          onClick={() => {
-            setStep("credentials");
-            setCode("");
-            setMessage("");
-            setStatus("idle");
-          }}
-          className="btn-common-styles bg-white/10 text-white hover:bg-white/20"
+          type="submit"
+          className={loginSubmitClass}
           disabled={status === "loading"}
         >
-          {t("loginForm.backToPassword")}
+          {status === "loading" ? t("loginForm.submitting") : t("loginForm.submit")}
         </button>
-      ) : null}
+      )}
 
       <p className="text-sm text-white/80">
         {t("loginForm.noAccount")}{" "}

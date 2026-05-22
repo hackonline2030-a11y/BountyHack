@@ -1,0 +1,83 @@
+{
+  "catalog": {
+    "title": "Référentiel des critères qualité",
+    "subtitle": "Critères publiés par le responsable qualité — lecture seule.",
+    "loading": "Chargement…",
+    "empty": "Aucun critère publié pour le moment.",
+    "unclassified": "Non classé",
+    "manageLink": "Gérer les critères (QC)",
+    "backHome": "Retour"
+  },
+  "checklist": {
+    "loading": "Chargement des critères…",
+    "intro": "Cochez chaque critère lorsque le rapport respecte la règle pour cette revue.",
+    "emptyManager": "Aucun critère n’a encore été distribué sur ce rapport. Distribuez-les depuis l’administration qualité.",
+    "emptyReader": "Aucun critère actif sur ce rapport pour l’instant.",
+    "okLabel": "Conforme"
+  },
+  "admin": {
+    "title": "Administration des critères",
+    "subtitle": "Définir, publier et distribuer les règles qualité (rôle contrôle qualité global).",
+    "viewCatalog": "Voir le référentiel public",
+    "loading": "Chargement…",
+    "tabs": {
+      "aria": "Sections de l’administration des critères",
+      "drafts": "Brouillons",
+      "published": "Publiés",
+      "distribution": "Distribution",
+      "categories": "Catégories"
+    },
+    "edit": "Modifier",
+    "publish": "Publier",
+    "distribute": "Distribuer",
+    "delete": "Supprimer",
+    "form": {
+      "create": "Nouveau critère",
+      "edit": "Modifier le critère",
+      "code": "Code (ex. A2290)",
+      "title": "Titre",
+      "explanation": "Explication (optionnel, max. 200 mots)",
+      "wordCount": "{{count}} / 200 mots",
+      "category": "Catégorie",
+      "save": "Enregistrer",
+      "cancel": "Annuler"
+    },
+    "list": {
+      "drafts": "Brouillons",
+      "published": "Publiés"
+    },
+    "categories": {
+      "title": "Catégories",
+      "name": "Nom",
+      "color": "Couleur",
+      "add": "Ajouter"
+    },
+    "distribution": {
+      "title": "Distribution",
+      "intro": "Étape distincte de la définition du critère : choisissez un critère publié, puis l’objet cible. Certains types ciblent un identifiant précis, d’autres s’appliquent à toutes les instances. Chaque type a son propre workflow (interface de contrôle).",
+      "criterion": "Critère publié",
+      "targetTypes": "Objets cibles",
+      "selectCriterion": "— Choisir un critère —",
+      "scopeSpecific": "Ciblage par identifiant (une distribution par instance)",
+      "scopeGlobal": "S’applique à toutes les instances de ce type",
+      "workflowReport": "Workflow rapport : onglet « Critères » dans la revue du brouillon, cases cochables par le QC.",
+      "workflowPathCourse": "Workflow parcours : à implémenter (aucune interface de coche pour l’instant).",
+      "workflowPending": "Distribution désactivée tant que le workflow de ce type n’est pas livré.",
+      "draftId": "Brouillon rapport",
+      "draftSelectPlaceholder": "— Choisir un brouillon —",
+      "loadingDrafts": "Chargement des brouillons…",
+      "noDrafts": "Aucun brouillon disponible pour vos équipes.",
+      "submit": "Distribuer",
+      "success": "Distribution enregistrée."
+    },
+    "deleteConfirm": {
+      "title": "Confirmer la suppression",
+      "message": "Supprimer « {{label}} » ? Les distributions et coches associées seront supprimées."
+    },
+    "errors": {
+      "required": "Code et titre sont obligatoires.",
+      "wordLimit": "L’explication dépasse 200 mots.",
+      "distribute": "Choisissez un critère publié, un objet cible et, si nécessaire, l’identifiant."
+    }
+  }
+}

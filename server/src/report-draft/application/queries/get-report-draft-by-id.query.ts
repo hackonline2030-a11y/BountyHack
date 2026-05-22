@@ -8,6 +8,7 @@ import {
   reportDraftWorkflowChanged,
 } from '../report-draft-reviewer-sync';
 import { ReportDraftAccessPolicy } from '../report-draft-access.policy';
+import { syncSkippedFinalWizardStep } from '../hunter-wizard-steps';
 
 @Injectable()
 export class GetReportDraftByIdQuery {
@@ -28,12 +29,13 @@ export class GetReportDraftByIdQuery {
     await this.access.assertCanReadDraft(identity, draft);
 
     const submissions = await this.submissionRepository.findByDraftId(draftId);
-    const repaired = repairDraftWorkflowDriftFromSubmissions(draft, submissions);
-    if (reportDraftWorkflowChanged(draft, repaired)) {
-      await this.repository.save(repaired);
-      return repaired;
+    let next = repairDraftWorkflowDriftFromSubmissions(draft, submissions);
+    next = syncSkippedFinalWizardStep(next);
+    if (reportDraftWorkflowChanged(draft, next)) {
+      await this.repository.save(next);
+      return next;
     }
 
-    return draft;
+    return next;
   }
 }

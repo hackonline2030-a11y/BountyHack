@@ -83,6 +83,11 @@
           }
         }
       }
+    },
+    "adminAttachments": {
+      "deleteModalTitle": "Supprimer cette pièce jointe ?",
+      "deleteModalBody": "Supprimer définitivement cette pièce jointe du stockage ? Cette action est irréversible.",
+      "deleteModalConfirm": "Supprimer"
     }
   }
 }

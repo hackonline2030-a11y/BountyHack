@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { type FC, type KeyboardEvent, useCallback, useMemo, useState } from "react";
+import { useT } from "next-i18next/client";
+import { QualityCriteriaChecklistPanel } from "@modules/quality/react/QualityCriteriaChecklistPanel";
 import { ReportDraftDomainModel } from "@modules/report-draft/core/model/report-draft.domain-model";
 import {
   GENERAL_REVIEW_COMMENT_FIELD,
@@ -12,6 +14,8 @@ import {
   stepCommentGroupsFromPayload,
 } from "@modules/report-draft/core/model/step-field-catalog";
 import { SubmissionStepPreview } from "@modules/report-draft/react/components/SubmissionStepPreview";
+import { ReportDraftStepAttachmentsPanel } from "@modules/report-draft/react/pages/ReportDraftStepAttachmentsPanel";
+import { ReportDraftSessionProvider } from "@modules/report-draft/react/context/report-draft-session.context";
 import { SubmissionStepFieldCommentsPanel } from "@modules/report-draft/react/components/review/SubmissionStepFieldCommentsPanel";
 import {
   SubmissionReviewCumulativePreview,
@@ -23,6 +27,8 @@ import { rejectDraft } from "@modules/report-draft/core/useCase/reject-draft.use
 import { requestStepRevisions } from "@modules/report-draft/core/useCase/request-step-revisions.usecase";
 import type { ReviewerCommentDraft } from "@modules/report-draft/core/model/report-draft.aggregate";
 import { ReportDraftTeamContextBanner } from "@modules/report-draft/react/components/ReportDraftTeamContextBanner";
+import { SubmissionDecisionButton } from "@modules/app/nextjs/components/buttons/SubmissionDecisionButton";
+import { TabNavButton } from "@modules/app/nextjs/components/buttons/TabNavButton";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
 type Props = {
@@ -31,21 +37,22 @@ type Props = {
   lng: string;
 };
 
-type ReviewTab = "form" | "comments" | "stepPreview" | "cumulativePreview";
+type ReviewTab =
+  | "form"
+  | "attachments"
+  | "comments"
+  | "criteria"
+  | "stepPreview"
+  | "cumulativePreview";
 
 const TAB_ORDER: readonly ReviewTab[] = [
   "form",
+  "attachments",
   "comments",
+  "criteria",
   "stepPreview",
   "cumulativePreview",
 ] as const;
-
-const TAB_LABELS: Record<ReviewTab, string> = {
-  form: "Formulaire hunter",
-  comments: "Commentaires (QC + mentor)",
-  stepPreview: "Aperçu étape",
-  cumulativePreview: "Aperçu rapport",
-};
 
 type PendingFieldComment = { fieldId: string; body: string };
 
@@ -53,6 +60,7 @@ const tabButtonId = (key: ReviewTab) => `qc-review-tab-${key}`;
 const tabPanelId = (key: ReviewTab) => `qc-review-panel-${key}`;
 
 export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng }) => {
+  const { t } = useT("myReports");
   const dispatch = useAppDispatch();
   const transition = useAppSelector((s) => s.reportDrafts.transition);
   const submission = useAppSelector((s) => s.reportDrafts.submissionsById[submissionId]);
@@ -197,6 +205,7 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
   const isMentorPeerView = submission.reviewerRole === "mentor";
 
   return (
+    <ReportDraftSessionProvider viewerUserId={reviewerId}>
     <div className="mx-auto w-full max-w-4xl px-2 py-4 sm:px-4">
       <div className="dashboard-card flex flex-col gap-6 p-5 sm:p-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
@@ -253,24 +262,18 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
         {TAB_ORDER.map((key) => {
           const isActive = key === activeTab;
           return (
-            <button
+            <TabNavButton
               key={key}
-              type="button"
-              role="tab"
+              active={isActive}
               id={tabButtonId(key)}
               aria-selected={isActive}
               aria-controls={tabPanelId(key)}
               tabIndex={isActive ? 0 : -1}
               onClick={() => setActiveTab(key)}
               onKeyDown={onTabKeyDown}
-              className={`-mb-px border-b-2 px-1 py-3 text-sm font-medium transition-colors ${
-                isActive
-                  ? "border-form-accent text-form-text"
-                  : "border-transparent text-form-text-muted hover:text-form-text"
-              }`}
             >
-              {TAB_LABELS[key]}
-            </button>
+              {t(`myReports.review.tabs.${key}`)}
+            </TabNavButton>
           );
         })}
       </div>
@@ -289,7 +292,21 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
           step={submission.step}
           payload={submission.payload}
           reportTitle={reportTitle}
+          draftId={submission.reportDraftId}
+          attachments={submission.attachmentsSnapshot}
         />
+      </div>
+
+      <div
+        role="tabpanel"
+        id={tabPanelId("attachments")}
+        hidden={activeTab !== "attachments"}
+        aria-labelledby={tabButtonId("attachments")}
+        className="min-h-[120px]"
+      >
+        {draft ? (
+          <ReportDraftStepAttachmentsPanel step={submission.step} />
+        ) : null}
       </div>
 
       <div
@@ -325,6 +342,23 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
 
       <div
         role="tabpanel"
+        id={tabPanelId("criteria")}
+        hidden={activeTab !== "criteria"}
+        aria-labelledby={tabButtonId("criteria")}
+        className="min-h-[120px] rounded-lg border border-form-border bg-form-surface p-4"
+      >
+        {submission ? (
+          <QualityCriteriaChecklistPanel
+            targetTypeCode="report"
+            targetRefId={submission.reportDraftId}
+            context="submission_review"
+            panelIdPrefix="qc-review-criteria"
+          />
+        ) : null}
+      </div>
+
+      <div
+        role="tabpanel"
         id={tabPanelId("stepPreview")}
         hidden={activeTab !== "stepPreview"}
         aria-labelledby={tabButtonId("stepPreview")}
@@ -334,6 +368,7 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
             step={submission.step}
             draft={draft}
             submissionPayload={submission.payload}
+            attachmentsSnapshot={submission.attachmentsSnapshot}
           />
         ) : null}
       </div>
@@ -349,36 +384,34 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
             submissionStep={submission.step}
             draft={draft}
             submissionPayload={submission.payload}
+            attachmentsSnapshot={submission.attachmentsSnapshot}
           />
         ) : null}
       </div>
 
       {canDecide ? (
         <div className="flex flex-wrap gap-3 border-t border-form-border pt-4">
-          <button
-            type="button"
-            className="cursor-pointer rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+          <SubmissionDecisionButton
+            variant="approve"
             disabled={transitionBusy}
             onClick={() => void onApprove()}
           >
             Valider l&apos;étape (QC — active Suivant)
-          </button>
-          <button
-            type="button"
-            className="cursor-pointer rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+          </SubmissionDecisionButton>
+          <SubmissionDecisionButton
+            variant="revision"
             disabled={transitionBusy || !hasPendingRevisionComments}
             onClick={() => void onRequestRevisions()}
           >
             Demander une révision
-          </button>
-          <button
-            type="button"
-            className="cursor-pointer rounded-md border border-rose-400 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-900 disabled:cursor-not-allowed disabled:opacity-50"
+          </SubmissionDecisionButton>
+          <SubmissionDecisionButton
+            variant="reject"
             disabled={transitionBusy}
             onClick={() => void onReject()}
           >
             Rejeter le rapport
-          </button>
+          </SubmissionDecisionButton>
         </div>
       ) : null}
 
@@ -397,5 +430,6 @@ export const SubmissionReviewBoard: FC<Props> = ({ submissionId, reviewerId, lng
       ) : null}
       </div>
     </div>
+    </ReportDraftSessionProvider>
   );
 };

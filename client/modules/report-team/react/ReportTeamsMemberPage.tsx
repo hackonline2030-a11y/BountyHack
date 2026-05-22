@@ -1,4 +1,6 @@
-import type { FC } from "react";
+"use client";
+
+import { useState, type FC } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { localePrefixFromPathname } from "@/lib/locale-path";
@@ -15,6 +17,7 @@ import type { buildAskJoinLabels } from "@modules/report-team/react/build-ask-jo
 import { ReportTeamMockBanner } from "@modules/report-team/react/ReportTeamMockBanner";
 import { ReportTeamValidityBadge } from "@modules/report-team/react/ReportTeamValidityBadge";
 import { isEnrollmentJoinRequest } from "@modules/report-team/model/report-team-join-request.utils";
+import { ConfirmDangerModal } from "@modules/app/nextjs/components/ConfirmDangerModal";
 
 type Copy = {
   heading: string;
@@ -45,7 +48,10 @@ type Copy = {
   openReportDraft: string;
   /** Leave team (current user). */
   leaveTeam: string;
+  leaveTeamModalTitle: string;
   leaveTeamConfirm: (teamLabel: string) => string;
+  confirmModalCancel: string;
+  confirmModalConfirming: string;
   leaveTeamSubmit: string;
   leaveTeamBusy: string;
   primaryHunterLeaveAlert: string;
@@ -95,6 +101,11 @@ export const ReportTeamsMemberPage: FC<Props> = ({
   leaveTeamBusy = false,
   leaveTeamError = null,
 }) => {
+  const [leaveConfirmTarget, setLeaveConfirmTarget] = useState<{
+    teamId: string;
+    label: string;
+  } | null>(null);
+
   const pendingLeaveByTeamId = new Set(
     leaveRequests.filter((r) => r.status === "pending").map((r) => r.teamId),
   );
@@ -183,13 +194,31 @@ export const ReportTeamsMemberPage: FC<Props> = ({
                       {copy.updatedLabel}:{" "}
                       {dateFormatter.format(new Date(team.updatedAt))}
                     </p>
-                    {showOpenReportDraftLink ? (
-                      <Link
-                        href={`${prefix}/report-draft/${team.reportDraftId}`}
-                        className="dashboard-card-cta mt-3 inline-block text-sm"
-                      >
-                        {copy.openReportDraft} →
-                      </Link>
+                    {showOpenReportDraftLink || (!isPrimaryHunter && onLeaveTeam) ? (
+                      <div className="mt-3 flex flex-row flex-wrap items-center justify-between gap-2.5">
+                        {showOpenReportDraftLink ? (
+                          <Link
+                            href={`${prefix}/report-draft/${team.reportDraftId}`}
+                            className="dashboard-card-cta shrink-0 text-sm"
+                          >
+                            {copy.openReportDraft} →
+                          </Link>
+                        ) : (
+                          <span className="min-w-0 flex-1" aria-hidden />
+                        )}
+                        {!isPrimaryHunter && onLeaveTeam ? (
+                          <button
+                            type="button"
+                            className="shrink-0 rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-900 hover:bg-red-100 disabled:opacity-50"
+                            disabled={leaveTeamBusy}
+                            onClick={() =>
+                              setLeaveConfirmTarget({ teamId: team.id, label: team.label })
+                            }
+                          >
+                            {leaveTeamBusy ? copy.leaveTeamBusy : copy.leaveTeamSubmit}
+                          </button>
+                        ) : null}
+                      </div>
                     ) : null}
                     {isPrimaryHunter ? (
                       <div
@@ -210,18 +239,6 @@ export const ReportTeamsMemberPage: FC<Props> = ({
                           </button>
                         ) : null}
                       </div>
-                    ) : onLeaveTeam ? (
-                      <button
-                        type="button"
-                        className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-900 hover:bg-red-100 disabled:opacity-50"
-                        disabled={leaveTeamBusy}
-                        onClick={() => {
-                          const ok = window.confirm(copy.leaveTeamConfirm(team.label));
-                          if (ok) onLeaveTeam(team.id);
-                        }}
-                      >
-                        {leaveTeamBusy ? copy.leaveTeamBusy : copy.leaveTeamSubmit}
-                      </button>
                     ) : null}
                   </li>
                   );
@@ -331,6 +348,27 @@ export const ReportTeamsMemberPage: FC<Props> = ({
           ) : null}
         </div>
       </Section>
+
+      <ConfirmDangerModal
+        open={leaveConfirmTarget !== null}
+        title={copy.leaveTeamModalTitle}
+        cancelLabel={copy.confirmModalCancel}
+        confirmLabel={copy.leaveTeamSubmit}
+        confirming={leaveTeamBusy}
+        confirmingLabel={copy.confirmModalConfirming}
+        onCancel={() => {
+          if (!leaveTeamBusy) setLeaveConfirmTarget(null);
+        }}
+        onConfirm={() => {
+          if (!leaveConfirmTarget || !onLeaveTeam) return;
+          onLeaveTeam(leaveConfirmTarget.teamId);
+          setLeaveConfirmTarget(null);
+        }}
+      >
+        {leaveConfirmTarget
+          ? copy.leaveTeamConfirm(leaveConfirmTarget.label)
+          : null}
+      </ConfirmDangerModal>
     </main>
   );
 };

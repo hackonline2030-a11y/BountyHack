@@ -104,3 +104,12 @@ export const ReportTeamJoinRequestStatus = {
 } as const
 
 export type ReportTeamJoinRequestStatus = (typeof ReportTeamJoinRequestStatus)[keyof typeof ReportTeamJoinRequestStatus]
+
+
+export const QualityCriterionStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  ARCHIVED: 'ARCHIVED'
+} as const
+
+export type QualityCriterionStatus = (typeof QualityCriterionStatus)[keyof typeof QualityCriterionStatus]

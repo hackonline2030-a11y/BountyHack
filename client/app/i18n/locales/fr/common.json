@@ -31,6 +31,7 @@
     "brand": "BugBountyApp",
     "home": "Accueil",
     "dashboard": "Tableau de bord",
+    "qualityCriteria": "Critères qualité",
     "admin": "Admin",
     "language": "Langue",
     "openMenu": "Ouvrir le menu",
@@ -42,11 +43,15 @@
   },
   "footer": {
     "copyright": "© 2026 BugBountyApp",
-    "privacy": "Politique de confidentialite",
+    "privacy": "Politique de confidentialité",
     "notice": "Mentions legales",
     "credits": "Credits"
   },
   "errors": {
     "network": "Erreur réseau. Veuillez réessayer."
+  },
+  "confirmModal": {
+    "cancel": "Annuler",
+    "confirming": "En cours…"
   }
 }

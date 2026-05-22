@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useT } from "next-i18next/client";
 import { Section } from "@modules/app/nextjs/components/sections/Section";
 import i18nConfig from "@/i18n.config";
@@ -21,6 +21,7 @@ export default function RouteError({
   reset?: () => void;
 }) {
   const { t } = useT("common");
+  const router = useRouter();
   const pathname = usePathname();
   const rawSeg = pathname?.split("/").filter(Boolean)[0];
   const lng =
@@ -32,6 +33,12 @@ export default function RouteError({
   useEffect(() => {
     console.error("[route-error]", error);
   }, [error]);
+
+  /** Re-fetch Server Components (e.g. after API was down); `reset()` alone does not. */
+  const handleRetry = useCallback(() => {
+    router.refresh();
+    reset?.();
+  }, [router, reset]);
 
   const isDev = process.env.NODE_ENV === "development";
 
@@ -64,7 +71,7 @@ export default function RouteError({
           ) : null}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             {reset ? (
-              <button type="button" onClick={() => reset()} className="btn-common-styles btn-primary">
+              <button type="button" onClick={handleRetry} className="btn-common-styles btn-primary">
                 {t("routeError.retry")}
               </button>
             ) : null}

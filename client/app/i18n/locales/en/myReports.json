@@ -3,8 +3,30 @@
     "metaTitle": "My reports",
     "heading": "My reports",
     "workspace": {
+      "tabs": {
+        "attachments": "Attachments",
+        "preview": "Preview",
+        "quality": "Quality"
+      },
+      "quality": {
+        "subTabsAria": "Quality feedback and checks",
+        "comments": "Comments",
+        "prePublication": "Pre-publication feedback",
+        "criteria": "Quality criteria"
+      },
+      "preview": {
+        "subTabsAria": "Preview scope",
+        "step": "Step",
+        "global": "Full report",
+        "globalHint": "The global preview cumulates the steps before the step you are currently on."
+      },
+      "attachments": {
+        "hint": "Private images for this step (authenticated access only).",
+        "empty": "No attachments for this step.",
+        "noStepImages": "This step does not support attachments."
+      },
       "backToReports": "← Back to my reports",
-      "backToReportsAria": "Go back to the list of my report drafts",
+      "backToReportsAria": "Go back to my report drafts",
       "hunterWriter": {
         "title": "Designated step writer",
         "current": "Step edits and submissions are restricted to: {{name}}.",
@@ -45,7 +67,7 @@
         "short": "Approved by QC or SA (#{{revision}}) — global resubmit available."
       },
       "openCommentsTab": "Comments",
-      "openSuperAdminTab": "Super-admin feedback"
+      "openSuperAdminTab": "Pre-publication feedback"
     },
     "globalComments": {
       "sectionTitle": "Global comments",
@@ -66,6 +88,16 @@
       "hunterFeedbackTitle": "Global revision feedback",
       "hunterFeedbackHint": "Revision #{{revision}} — fix then submit globally again."
     },
+    "review": {
+      "tabs": {
+        "form": "Hunter form",
+        "attachments": "Attachments",
+        "comments": "Comments (QC + mentor)",
+        "stepPreview": "Step preview",
+        "cumulativePreview": "Report preview",
+        "criteria": "Quality criteria"
+      }
+    },
     "globalRevisionReview": {
       "back": "← Back to submissions",
       "badge": "Super-admin global revision",
@@ -74,7 +106,8 @@
       "tablistAria": "Global revision review",
       "tabs": {
         "reportPreview": "Report preview",
-        "superAdminFeedback": "Super-admin feedback"
+        "superAdminFeedback": "Super-admin feedback",
+        "criteria": "Quality criteria"
       },
       "table": {
         "report": "Report",
@@ -93,15 +126,23 @@
       "openSubmissions": "View this report’s submissions"
     },
     "wizard": {
+      "saveDraft": {
+        "button": "Save draft",
+        "saved": "Draft saved",
+        "hint": "Saves this step without submitting it for review. You can come back later, even when “Next” is disabled."
+      },
       "finalStep": {
         "awaitingLeadValidation": "Last step validated: awaiting final validation.",
         "leadValidated": "Report validated by the Lead.",
-        "globalRevisionInProgress": "Global revision in progress — see the “Super-admin feedback” tab."
+        "globalRevisionInProgress": "Global revision in progress — see Quality → “Pre-publication feedback”."
       },
       "globalSubmit": {
         "button": "Submit draft globally",
         "hint": "Sends every step still editable to the quality checker in one action.",
         "disabledNone": "All steps are already submitted or approved."
+      },
+      "sectionBloc": {
+        "compressBeforeUpload": "Compress your image as much as possible before uploading, for example using <serviceLink>this service</serviceLink>."
       }
     },
     "superAdminFeedback": {

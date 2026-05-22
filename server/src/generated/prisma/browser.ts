@@ -127,3 +127,33 @@ export type ReportTeamJoinRequest = Prisma.ReportTeamJoinRequestModel
  * Primary hunter asks the coordinator to remove them from the squad (cannot self-leave while `hunter_id`).
  */
 export type ReportTeamLeaveRequest = Prisma.ReportTeamLeaveRequestModel
+/**
+ * Model QualityCriterionCategory
+ * 
+ */
+export type QualityCriterionCategory = Prisma.QualityCriterionCategoryModel
+/**
+ * Model QualityCriterionTargetType
+ * 
+ */
+export type QualityCriterionTargetType = Prisma.QualityCriterionTargetTypeModel
+/**
+ * Model QualityCriterion
+ * 
+ */
+export type QualityCriterion = Prisma.QualityCriterionModel
+/**
+ * Model QualityCriterionTargetTypeLink
+ * 
+ */
+export type QualityCriterionTargetTypeLink = Prisma.QualityCriterionTargetTypeLinkModel
+/**
+ * Model QualityCriterionDistribution
+ * 
+ */
+export type QualityCriterionDistribution = Prisma.QualityCriterionDistributionModel
+/**
+ * Model QualityCriterionCheck
+ * 
+ */
+export type QualityCriterionCheck = Prisma.QualityCriterionCheckModel

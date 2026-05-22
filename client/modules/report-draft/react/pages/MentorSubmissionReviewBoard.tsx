@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { type FC, type KeyboardEvent, useCallback, useMemo, useState } from "react";
+import { useT } from "next-i18next/client";
+import { QualityCriteriaChecklistPanel } from "@modules/quality/react/QualityCriteriaChecklistPanel";
 import {
   GENERAL_REVIEW_COMMENT_FIELD,
   submissionRowStatusLabel,
@@ -11,6 +13,8 @@ import {
   stepCommentGroupsFromPayload,
 } from "@modules/report-draft/core/model/step-field-catalog";
 import { SubmissionStepPreview } from "@modules/report-draft/react/components/SubmissionStepPreview";
+import { ReportDraftStepAttachmentsPanel } from "@modules/report-draft/react/pages/ReportDraftStepAttachmentsPanel";
+import { ReportDraftSessionProvider } from "@modules/report-draft/react/context/report-draft-session.context";
 import { SubmissionStepFieldCommentsPanel } from "@modules/report-draft/react/components/review/SubmissionStepFieldCommentsPanel";
 import {
   SubmissionReviewCumulativePreview,
@@ -21,6 +25,8 @@ import { listReviewerSubmissions } from "@modules/report-draft/core/useCase/list
 import { requestStepRevisions } from "@modules/report-draft/core/useCase/request-step-revisions.usecase";
 import type { ReviewerCommentDraft } from "@modules/report-draft/core/model/report-draft.aggregate";
 import { ReportDraftTeamContextBanner } from "@modules/report-draft/react/components/ReportDraftTeamContextBanner";
+import { SubmissionDecisionButton } from "@modules/app/nextjs/components/buttons/SubmissionDecisionButton";
+import { TabNavButton } from "@modules/app/nextjs/components/buttons/TabNavButton";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
 type Props = {
@@ -29,21 +35,22 @@ type Props = {
   lng: string;
 };
 
-type ReviewTab = "form" | "comments" | "stepPreview" | "cumulativePreview";
+type ReviewTab =
+  | "form"
+  | "attachments"
+  | "comments"
+  | "criteria"
+  | "stepPreview"
+  | "cumulativePreview";
 
 const TAB_ORDER: readonly ReviewTab[] = [
   "form",
+  "attachments",
   "comments",
+  "criteria",
   "stepPreview",
   "cumulativePreview",
 ] as const;
-
-const TAB_LABELS: Record<ReviewTab, string> = {
-  form: "Formulaire hunter",
-  comments: "Commentaires (mentor + QC)",
-  stepPreview: "Aperçu étape",
-  cumulativePreview: "Aperçu rapport",
-};
 
 type PendingFieldComment = { fieldId: string; body: string };
 
@@ -55,6 +62,7 @@ export const MentorSubmissionReviewBoard: FC<Props> = ({
   reviewerId,
   lng,
 }) => {
+  const { t } = useT("myReports");
   const dispatch = useAppDispatch();
   const transition = useAppSelector((s) => s.reportDrafts.transition);
   const submission = useAppSelector((s) => s.reportDrafts.submissionsById[submissionId]);
@@ -192,6 +200,7 @@ export const MentorSubmissionReviewBoard: FC<Props> = ({
   const statusLabel = submissionRowStatusLabel(submission, draft);
 
   return (
+    <ReportDraftSessionProvider viewerUserId={reviewerId}>
     <div className="mx-auto w-full max-w-4xl px-2 py-4 sm:px-4">
       <div className="dashboard-card flex flex-col gap-6 p-5 sm:p-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
@@ -237,24 +246,18 @@ export const MentorSubmissionReviewBoard: FC<Props> = ({
         {TAB_ORDER.map((key) => {
           const isActive = key === activeTab;
           return (
-            <button
+            <TabNavButton
               key={key}
-              type="button"
-              role="tab"
+              active={isActive}
               id={tabButtonId(key)}
               aria-selected={isActive}
               aria-controls={tabPanelId(key)}
               tabIndex={isActive ? 0 : -1}
               onClick={() => setActiveTab(key)}
               onKeyDown={onTabKeyDown}
-              className={`-mb-px border-b-2 px-1 py-3 text-sm font-medium transition-colors ${
-                isActive
-                  ? "border-form-accent text-form-text"
-                  : "border-transparent text-form-text-muted hover:text-form-text"
-              }`}
             >
-              {TAB_LABELS[key]}
-            </button>
+              {t(`myReports.review.tabs.${key}`)}
+            </TabNavButton>
           );
         })}
       </div>
@@ -273,7 +276,19 @@ export const MentorSubmissionReviewBoard: FC<Props> = ({
           step={submission.step}
           payload={submission.payload}
           reportTitle={reportTitle}
+          draftId={submission.reportDraftId}
+          attachments={submission.attachmentsSnapshot}
         />
+      </div>
+
+      <div
+        role="tabpanel"
+        id={tabPanelId("attachments")}
+        hidden={activeTab !== "attachments"}
+        aria-labelledby={tabButtonId("attachments")}
+        className="min-h-[120px]"
+      >
+        <ReportDraftStepAttachmentsPanel step={submission.step} />
       </div>
 
       <div
@@ -309,6 +324,23 @@ export const MentorSubmissionReviewBoard: FC<Props> = ({
 
       <div
         role="tabpanel"
+        id={tabPanelId("criteria")}
+        hidden={activeTab !== "criteria"}
+        aria-labelledby={tabButtonId("criteria")}
+        className="min-h-[120px] rounded-lg border border-form-border bg-form-surface p-4"
+      >
+        {submission ? (
+          <QualityCriteriaChecklistPanel
+            targetTypeCode="report"
+            targetRefId={submission.reportDraftId}
+            context="submission_review"
+            panelIdPrefix="mentor-review-criteria"
+          />
+        ) : null}
+      </div>
+
+      <div
+        role="tabpanel"
         id={tabPanelId("stepPreview")}
         hidden={activeTab !== "stepPreview"}
         aria-labelledby={tabButtonId("stepPreview")}
@@ -318,6 +350,7 @@ export const MentorSubmissionReviewBoard: FC<Props> = ({
             step={submission.step}
             draft={draft}
             submissionPayload={submission.payload}
+            attachmentsSnapshot={submission.attachmentsSnapshot}
           />
         ) : null}
       </div>
@@ -333,28 +366,27 @@ export const MentorSubmissionReviewBoard: FC<Props> = ({
             submissionStep={submission.step}
             draft={draft}
             submissionPayload={submission.payload}
+            attachmentsSnapshot={submission.attachmentsSnapshot}
           />
         ) : null}
       </div>
 
       {canDecide ? (
         <div className="flex flex-wrap gap-3 border-t border-form-border pt-4">
-          <button
-            type="button"
-            className="cursor-pointer rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+          <SubmissionDecisionButton
+            variant="approve"
             disabled={transitionBusy}
             onClick={() => void onEndorse()}
           >
             Avis favorable (sans valider l&apos;étape)
-          </button>
-          <button
-            type="button"
-            className="cursor-pointer rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+          </SubmissionDecisionButton>
+          <SubmissionDecisionButton
+            variant="revision"
             disabled={transitionBusy || !hasPendingRevisionComments}
             onClick={() => void onRequestRevisions()}
           >
             Demander une révision au hunter
-          </button>
+          </SubmissionDecisionButton>
         </div>
       ) : null}
 
@@ -365,5 +397,6 @@ export const MentorSubmissionReviewBoard: FC<Props> = ({
       ) : null}
       </div>
     </div>
+    </ReportDraftSessionProvider>
   );
 };

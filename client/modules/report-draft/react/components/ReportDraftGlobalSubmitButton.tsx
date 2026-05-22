@@ -10,6 +10,7 @@ import {
 import { submitDraftGloballyForReview } from "@modules/report-draft/core/useCase/submit-draft-globally-for-review.usecase";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 import { useReportDraftSession } from "@modules/report-draft/react/context/report-draft-session.context";
+import { globalRevisionSubmitClass } from "@modules/app/nextjs/components/buttons/button-styles";
 
 type Props = {
   currentStep?: ReportDraftDomainModel.ReportDraftStep;
@@ -52,7 +53,7 @@ export const ReportDraftGlobalSubmitButton: FC<Props> = ({
   return (
     <button
       type="button"
-      className="cursor-pointer rounded-md border border-violet-700 bg-violet-50 px-4 py-2 font-medium text-violet-900 hover:bg-violet-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+      className={globalRevisionSubmitClass}
       onClick={() => void onGlobalSubmit()}
       disabled={transitionBusy || eligible === 0 || !isDesignatedStepWriter}
       title={

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import "./globals.css";
 
 /**
@@ -16,9 +17,16 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset?: () => void;
 }) {
+  const router = useRouter();
+
   useEffect(() => {
     console.error("[global-error]", error);
   }, [error]);
+
+  const handleRetry = useCallback(() => {
+    router.refresh();
+    reset?.();
+  }, [router, reset]);
 
   return (
     <html lang="en">
@@ -40,7 +48,7 @@ export default function GlobalError({
             ) : null}
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               {reset ? (
-                <button type="button" onClick={() => reset()} className="btn-common-styles btn-primary">
+                <button type="button" onClick={handleRetry} className="btn-common-styles btn-primary">
                   Try again
                 </button>
               ) : null}

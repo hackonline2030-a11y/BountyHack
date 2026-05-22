@@ -7,11 +7,11 @@ import { useElementHeightCssVar } from "@/modules/app/nextjs/hooks/useElementHei
 import { LangLinks } from "@/modules/app/nextjs/layout/LangLinks";
 import { logoutFromBrowser } from "@modules/auth/core/browser-logout.factory";
 import {
-  isAdministrationPath,
   isAuthHeaderLoginHighlightPath,
   localePrefixFromPathname,
 } from "@/lib/locale-path";
 import { SESSION_REFRESHED_EVENT } from "@/lib/session-refresh";
+import { QUALITY_CRITERIA_READER_ROLES } from "@/lib/quality-role-sets";
 
 /** `/{lng}/welcome-…` segment for the signed-in role, or `null` when there is no dashboard route. */
 function welcomeDashboardPathFromRoleCode(roleCode: string | null): string | null {
@@ -32,6 +32,11 @@ function welcomeDashboardPathFromRoleCode(roleCode: string | null): string | nul
     default:
       return null;
   }
+}
+
+function canAccessQualityCriteriaCatalog(roleCode: string | null): boolean {
+  if (!roleCode) return false;
+  return (QUALITY_CRITERIA_READER_ROLES as readonly string[]).includes(roleCode);
 }
 
 export const Header: React.FC<{ className?: string }> = ({ className = "" }) => {
@@ -55,16 +60,21 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
 
   const prefix = localePrefixFromPathname(pathname);
   const localeHome = prefix;
-  const adminHref = `${prefix}/administration`;
   const loginHref = `${prefix}/login`;
   const isLoginActive = isAuthHeaderLoginHighlightPath(pathname);
-  const isAdminActive = isAdministrationPath(pathname);
-  const isSuperAdmin = currentRoleCode === "SUPER_ADMIN";
   const dashboardSegment = welcomeDashboardPathFromRoleCode(currentRoleCode);
   const dashboardHref =
     isAuthenticated && dashboardSegment ? `${prefix}/${dashboardSegment}` : null;
   const isDashboardActive =
     !!dashboardHref && (pathname === dashboardHref || pathname.startsWith(`${dashboardHref}/`));
+  const qualityCriteriaHref =
+    isAuthenticated && canAccessQualityCriteriaCatalog(currentRoleCode)
+      ? `${prefix}/quality-criteria`
+      : null;
+  const isQualityCriteriaActive =
+    !!qualityCriteriaHref &&
+    (pathname === qualityCriteriaHref ||
+      pathname.startsWith(`${qualityCriteriaHref}/`));
 
   const roleLabelFromRoleCode = (roleCode: string | null): string | null => {
     if (!roleCode) return null;
@@ -240,16 +250,18 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
               {t("header.dashboard")}
             </Link>
           ) : null}
-          <LangLinks />
-          {isSuperAdmin ? (
+          {qualityCriteriaHref ? (
             <Link
-              href={adminHref}
-              aria-current={isAdminActive ? "page" : undefined}
-              className={`header-nav-link${isAdminActive ? " header-nav-link--active" : ""}`}
+              href={qualityCriteriaHref}
+              aria-current={isQualityCriteriaActive ? "page" : undefined}
+              className={`header-nav-link${
+                isQualityCriteriaActive ? " header-nav-link--active" : ""
+              }`}
             >
-              {t("header.admin")}
+              {t("header.qualityCriteria")}
             </Link>
           ) : null}
+          <LangLinks />
           {isAuthenticated ? (
             <button
               type="button"
@@ -295,16 +307,16 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
                 {t("header.dashboard")}
               </Link>
             ) : null}
-            {isSuperAdmin ? (
+            {qualityCriteriaHref ? (
               <Link
-                href={adminHref}
-                aria-current={isAdminActive ? "page" : undefined}
+                href={qualityCriteriaHref}
+                aria-current={isQualityCriteriaActive ? "page" : undefined}
                 className={`header-mobile-nav-link${
-                  isAdminActive ? " header-mobile-nav-link--active" : ""
+                  isQualityCriteriaActive ? " header-mobile-nav-link--active" : ""
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                {t("header.admin")}
+                {t("header.qualityCriteria")}
               </Link>
             ) : null}
             <div className="flex items-center justify-between rounded-md border border-black/10 px-3 py-2">
