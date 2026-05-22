@@ -405,7 +405,13 @@ export const ModelName = {
   ReportTeam: 'ReportTeam',
   ReportTeamMember: 'ReportTeamMember',
   ReportTeamJoinRequest: 'ReportTeamJoinRequest',
-  ReportTeamLeaveRequest: 'ReportTeamLeaveRequest'
+  ReportTeamLeaveRequest: 'ReportTeamLeaveRequest',
+  QualityCriterionCategory: 'QualityCriterionCategory',
+  QualityCriterionTargetType: 'QualityCriterionTargetType',
+  QualityCriterion: 'QualityCriterion',
+  QualityCriterionTargetTypeLink: 'QualityCriterionTargetTypeLink',
+  QualityCriterionDistribution: 'QualityCriterionDistribution',
+  QualityCriterionCheck: 'QualityCriterionCheck'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -421,7 +427,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "globalSubmission" | "globalReviewerComment" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "reportTeam" | "reportTeamMember" | "reportTeamJoinRequest" | "reportTeamLeaveRequest"
+    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "globalSubmission" | "globalReviewerComment" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "reportTeam" | "reportTeamMember" | "reportTeamJoinRequest" | "reportTeamLeaveRequest" | "qualityCriterionCategory" | "qualityCriterionTargetType" | "qualityCriterion" | "qualityCriterionTargetTypeLink" | "qualityCriterionDistribution" | "qualityCriterionCheck"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1877,6 +1883,402 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    QualityCriterionCategory: {
+      payload: Prisma.$QualityCriterionCategoryPayload<ExtArgs>
+      fields: Prisma.QualityCriterionCategoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.QualityCriterionCategoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCategoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.QualityCriterionCategoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCategoryPayload>
+        }
+        findFirst: {
+          args: Prisma.QualityCriterionCategoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCategoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.QualityCriterionCategoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCategoryPayload>
+        }
+        findMany: {
+          args: Prisma.QualityCriterionCategoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCategoryPayload>[]
+        }
+        create: {
+          args: Prisma.QualityCriterionCategoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCategoryPayload>
+        }
+        createMany: {
+          args: Prisma.QualityCriterionCategoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.QualityCriterionCategoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCategoryPayload>
+        }
+        update: {
+          args: Prisma.QualityCriterionCategoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCategoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.QualityCriterionCategoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.QualityCriterionCategoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.QualityCriterionCategoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCategoryPayload>
+        }
+        aggregate: {
+          args: Prisma.QualityCriterionCategoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateQualityCriterionCategory>
+        }
+        groupBy: {
+          args: Prisma.QualityCriterionCategoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QualityCriterionCategoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.QualityCriterionCategoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QualityCriterionCategoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    QualityCriterionTargetType: {
+      payload: Prisma.$QualityCriterionTargetTypePayload<ExtArgs>
+      fields: Prisma.QualityCriterionTargetTypeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.QualityCriterionTargetTypeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.QualityCriterionTargetTypeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypePayload>
+        }
+        findFirst: {
+          args: Prisma.QualityCriterionTargetTypeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.QualityCriterionTargetTypeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypePayload>
+        }
+        findMany: {
+          args: Prisma.QualityCriterionTargetTypeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypePayload>[]
+        }
+        create: {
+          args: Prisma.QualityCriterionTargetTypeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypePayload>
+        }
+        createMany: {
+          args: Prisma.QualityCriterionTargetTypeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.QualityCriterionTargetTypeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypePayload>
+        }
+        update: {
+          args: Prisma.QualityCriterionTargetTypeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypePayload>
+        }
+        deleteMany: {
+          args: Prisma.QualityCriterionTargetTypeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.QualityCriterionTargetTypeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.QualityCriterionTargetTypeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypePayload>
+        }
+        aggregate: {
+          args: Prisma.QualityCriterionTargetTypeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateQualityCriterionTargetType>
+        }
+        groupBy: {
+          args: Prisma.QualityCriterionTargetTypeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QualityCriterionTargetTypeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.QualityCriterionTargetTypeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QualityCriterionTargetTypeCountAggregateOutputType> | number
+        }
+      }
+    }
+    QualityCriterion: {
+      payload: Prisma.$QualityCriterionPayload<ExtArgs>
+      fields: Prisma.QualityCriterionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.QualityCriterionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.QualityCriterionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionPayload>
+        }
+        findFirst: {
+          args: Prisma.QualityCriterionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.QualityCriterionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionPayload>
+        }
+        findMany: {
+          args: Prisma.QualityCriterionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionPayload>[]
+        }
+        create: {
+          args: Prisma.QualityCriterionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionPayload>
+        }
+        createMany: {
+          args: Prisma.QualityCriterionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.QualityCriterionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionPayload>
+        }
+        update: {
+          args: Prisma.QualityCriterionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionPayload>
+        }
+        deleteMany: {
+          args: Prisma.QualityCriterionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.QualityCriterionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.QualityCriterionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionPayload>
+        }
+        aggregate: {
+          args: Prisma.QualityCriterionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateQualityCriterion>
+        }
+        groupBy: {
+          args: Prisma.QualityCriterionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QualityCriterionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.QualityCriterionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QualityCriterionCountAggregateOutputType> | number
+        }
+      }
+    }
+    QualityCriterionTargetTypeLink: {
+      payload: Prisma.$QualityCriterionTargetTypeLinkPayload<ExtArgs>
+      fields: Prisma.QualityCriterionTargetTypeLinkFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.QualityCriterionTargetTypeLinkFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypeLinkPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.QualityCriterionTargetTypeLinkFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypeLinkPayload>
+        }
+        findFirst: {
+          args: Prisma.QualityCriterionTargetTypeLinkFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypeLinkPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.QualityCriterionTargetTypeLinkFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypeLinkPayload>
+        }
+        findMany: {
+          args: Prisma.QualityCriterionTargetTypeLinkFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypeLinkPayload>[]
+        }
+        create: {
+          args: Prisma.QualityCriterionTargetTypeLinkCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypeLinkPayload>
+        }
+        createMany: {
+          args: Prisma.QualityCriterionTargetTypeLinkCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.QualityCriterionTargetTypeLinkDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypeLinkPayload>
+        }
+        update: {
+          args: Prisma.QualityCriterionTargetTypeLinkUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypeLinkPayload>
+        }
+        deleteMany: {
+          args: Prisma.QualityCriterionTargetTypeLinkDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.QualityCriterionTargetTypeLinkUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.QualityCriterionTargetTypeLinkUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionTargetTypeLinkPayload>
+        }
+        aggregate: {
+          args: Prisma.QualityCriterionTargetTypeLinkAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateQualityCriterionTargetTypeLink>
+        }
+        groupBy: {
+          args: Prisma.QualityCriterionTargetTypeLinkGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QualityCriterionTargetTypeLinkGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.QualityCriterionTargetTypeLinkCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QualityCriterionTargetTypeLinkCountAggregateOutputType> | number
+        }
+      }
+    }
+    QualityCriterionDistribution: {
+      payload: Prisma.$QualityCriterionDistributionPayload<ExtArgs>
+      fields: Prisma.QualityCriterionDistributionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.QualityCriterionDistributionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionDistributionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.QualityCriterionDistributionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionDistributionPayload>
+        }
+        findFirst: {
+          args: Prisma.QualityCriterionDistributionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionDistributionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.QualityCriterionDistributionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionDistributionPayload>
+        }
+        findMany: {
+          args: Prisma.QualityCriterionDistributionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionDistributionPayload>[]
+        }
+        create: {
+          args: Prisma.QualityCriterionDistributionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionDistributionPayload>
+        }
+        createMany: {
+          args: Prisma.QualityCriterionDistributionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.QualityCriterionDistributionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionDistributionPayload>
+        }
+        update: {
+          args: Prisma.QualityCriterionDistributionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionDistributionPayload>
+        }
+        deleteMany: {
+          args: Prisma.QualityCriterionDistributionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.QualityCriterionDistributionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.QualityCriterionDistributionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionDistributionPayload>
+        }
+        aggregate: {
+          args: Prisma.QualityCriterionDistributionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateQualityCriterionDistribution>
+        }
+        groupBy: {
+          args: Prisma.QualityCriterionDistributionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QualityCriterionDistributionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.QualityCriterionDistributionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QualityCriterionDistributionCountAggregateOutputType> | number
+        }
+      }
+    }
+    QualityCriterionCheck: {
+      payload: Prisma.$QualityCriterionCheckPayload<ExtArgs>
+      fields: Prisma.QualityCriterionCheckFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.QualityCriterionCheckFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCheckPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.QualityCriterionCheckFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCheckPayload>
+        }
+        findFirst: {
+          args: Prisma.QualityCriterionCheckFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCheckPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.QualityCriterionCheckFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCheckPayload>
+        }
+        findMany: {
+          args: Prisma.QualityCriterionCheckFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCheckPayload>[]
+        }
+        create: {
+          args: Prisma.QualityCriterionCheckCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCheckPayload>
+        }
+        createMany: {
+          args: Prisma.QualityCriterionCheckCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.QualityCriterionCheckDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCheckPayload>
+        }
+        update: {
+          args: Prisma.QualityCriterionCheckUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCheckPayload>
+        }
+        deleteMany: {
+          args: Prisma.QualityCriterionCheckDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.QualityCriterionCheckUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.QualityCriterionCheckUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QualityCriterionCheckPayload>
+        }
+        aggregate: {
+          args: Prisma.QualityCriterionCheckAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateQualityCriterionCheck>
+        }
+        groupBy: {
+          args: Prisma.QualityCriterionCheckGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QualityCriterionCheckGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.QualityCriterionCheckCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.QualityCriterionCheckCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2191,6 +2593,81 @@ export const ReportTeamLeaveRequestScalarFieldEnum = {
 export type ReportTeamLeaveRequestScalarFieldEnum = (typeof ReportTeamLeaveRequestScalarFieldEnum)[keyof typeof ReportTeamLeaveRequestScalarFieldEnum]
 
 
+export const QualityCriterionCategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  color: 'color',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QualityCriterionCategoryScalarFieldEnum = (typeof QualityCriterionCategoryScalarFieldEnum)[keyof typeof QualityCriterionCategoryScalarFieldEnum]
+
+
+export const QualityCriterionTargetTypeScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  label: 'label',
+  requiresTargetRef: 'requiresTargetRef',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QualityCriterionTargetTypeScalarFieldEnum = (typeof QualityCriterionTargetTypeScalarFieldEnum)[keyof typeof QualityCriterionTargetTypeScalarFieldEnum]
+
+
+export const QualityCriterionScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  title: 'title',
+  explanation: 'explanation',
+  status: 'status',
+  categoryId: 'categoryId',
+  createdByUserId: 'createdByUserId',
+  publishedAt: 'publishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QualityCriterionScalarFieldEnum = (typeof QualityCriterionScalarFieldEnum)[keyof typeof QualityCriterionScalarFieldEnum]
+
+
+export const QualityCriterionTargetTypeLinkScalarFieldEnum = {
+  criterionId: 'criterionId',
+  targetTypeId: 'targetTypeId'
+} as const
+
+export type QualityCriterionTargetTypeLinkScalarFieldEnum = (typeof QualityCriterionTargetTypeLinkScalarFieldEnum)[keyof typeof QualityCriterionTargetTypeLinkScalarFieldEnum]
+
+
+export const QualityCriterionDistributionScalarFieldEnum = {
+  id: 'id',
+  criterionId: 'criterionId',
+  targetTypeId: 'targetTypeId',
+  targetRefId: 'targetRefId',
+  distributedByUserId: 'distributedByUserId',
+  distributedAt: 'distributedAt'
+} as const
+
+export type QualityCriterionDistributionScalarFieldEnum = (typeof QualityCriterionDistributionScalarFieldEnum)[keyof typeof QualityCriterionDistributionScalarFieldEnum]
+
+
+export const QualityCriterionCheckScalarFieldEnum = {
+  id: 'id',
+  distributionId: 'distributionId',
+  context: 'context',
+  checked: 'checked',
+  checkedByUserId: 'checkedByUserId',
+  checkedAt: 'checkedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QualityCriterionCheckScalarFieldEnum = (typeof QualityCriterionCheckScalarFieldEnum)[keyof typeof QualityCriterionCheckScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2437,6 +2914,65 @@ export const ReportTeamLeaveRequestOrderByRelevanceFieldEnum = {
 export type ReportTeamLeaveRequestOrderByRelevanceFieldEnum = (typeof ReportTeamLeaveRequestOrderByRelevanceFieldEnum)[keyof typeof ReportTeamLeaveRequestOrderByRelevanceFieldEnum]
 
 
+export const QualityCriterionCategoryOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  color: 'color'
+} as const
+
+export type QualityCriterionCategoryOrderByRelevanceFieldEnum = (typeof QualityCriterionCategoryOrderByRelevanceFieldEnum)[keyof typeof QualityCriterionCategoryOrderByRelevanceFieldEnum]
+
+
+export const QualityCriterionTargetTypeOrderByRelevanceFieldEnum = {
+  id: 'id',
+  code: 'code',
+  label: 'label'
+} as const
+
+export type QualityCriterionTargetTypeOrderByRelevanceFieldEnum = (typeof QualityCriterionTargetTypeOrderByRelevanceFieldEnum)[keyof typeof QualityCriterionTargetTypeOrderByRelevanceFieldEnum]
+
+
+export const QualityCriterionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  code: 'code',
+  title: 'title',
+  explanation: 'explanation',
+  categoryId: 'categoryId',
+  createdByUserId: 'createdByUserId'
+} as const
+
+export type QualityCriterionOrderByRelevanceFieldEnum = (typeof QualityCriterionOrderByRelevanceFieldEnum)[keyof typeof QualityCriterionOrderByRelevanceFieldEnum]
+
+
+export const QualityCriterionTargetTypeLinkOrderByRelevanceFieldEnum = {
+  criterionId: 'criterionId',
+  targetTypeId: 'targetTypeId'
+} as const
+
+export type QualityCriterionTargetTypeLinkOrderByRelevanceFieldEnum = (typeof QualityCriterionTargetTypeLinkOrderByRelevanceFieldEnum)[keyof typeof QualityCriterionTargetTypeLinkOrderByRelevanceFieldEnum]
+
+
+export const QualityCriterionDistributionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  criterionId: 'criterionId',
+  targetTypeId: 'targetTypeId',
+  targetRefId: 'targetRefId',
+  distributedByUserId: 'distributedByUserId'
+} as const
+
+export type QualityCriterionDistributionOrderByRelevanceFieldEnum = (typeof QualityCriterionDistributionOrderByRelevanceFieldEnum)[keyof typeof QualityCriterionDistributionOrderByRelevanceFieldEnum]
+
+
+export const QualityCriterionCheckOrderByRelevanceFieldEnum = {
+  id: 'id',
+  distributionId: 'distributionId',
+  context: 'context',
+  checkedByUserId: 'checkedByUserId'
+} as const
+
+export type QualityCriterionCheckOrderByRelevanceFieldEnum = (typeof QualityCriterionCheckOrderByRelevanceFieldEnum)[keyof typeof QualityCriterionCheckOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -2552,6 +3088,13 @@ export type EnumReportTeamMemberRoleFieldRefInput<$PrismaModel> = FieldRefInputT
  * Reference to a field of type 'ReportTeamJoinRequestStatus'
  */
 export type EnumReportTeamJoinRequestStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReportTeamJoinRequestStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'QualityCriterionStatus'
+ */
+export type EnumQualityCriterionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QualityCriterionStatus'>
     
 
 
@@ -2693,6 +3236,12 @@ export type GlobalOmitConfig = {
   reportTeamMember?: Prisma.ReportTeamMemberOmit
   reportTeamJoinRequest?: Prisma.ReportTeamJoinRequestOmit
   reportTeamLeaveRequest?: Prisma.ReportTeamLeaveRequestOmit
+  qualityCriterionCategory?: Prisma.QualityCriterionCategoryOmit
+  qualityCriterionTargetType?: Prisma.QualityCriterionTargetTypeOmit
+  qualityCriterion?: Prisma.QualityCriterionOmit
+  qualityCriterionTargetTypeLink?: Prisma.QualityCriterionTargetTypeLinkOmit
+  qualityCriterionDistribution?: Prisma.QualityCriterionDistributionOmit
+  qualityCriterionCheck?: Prisma.QualityCriterionCheckOmit
 }
 
 /* Types for Logging */

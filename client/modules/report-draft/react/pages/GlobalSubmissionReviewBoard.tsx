@@ -11,6 +11,7 @@ import { requestGlobalSubmissionChanges } from "@modules/report-draft/core/useCa
 import { ReportDraftAggregateStatusBadge } from "@modules/report-draft/react/components/ReportDraftAggregateStatusBadge";
 import { ReportDraftGeneralPreview } from "@modules/report-draft/react/components/ReportDraftGeneralPreview";
 import { ReportDraftTeamContextBanner } from "@modules/report-draft/react/components/ReportDraftTeamContextBanner";
+import { QualityCriteriaChecklistPanel } from "@modules/quality/react/QualityCriteriaChecklistPanel";
 import { useAppDispatch, useAppSelector } from "@store/redux/store";
 
 const roleLabelFr = (role: string): string => {
@@ -134,6 +135,18 @@ export const GlobalSubmissionReviewBoard: FC<Props> = ({
       {draft.reportTeam ? (
         <ReportDraftTeamContextBanner team={draft.reportTeam} className="mt-0 mb-0" />
       ) : null}
+
+      <section className="rounded-lg border border-form-border bg-form-surface p-4">
+        <h2 className="mb-3 text-sm font-semibold text-form-text">
+          {t("myReports.review.tabs.criteria")}
+        </h2>
+        <QualityCriteriaChecklistPanel
+          targetTypeCode="report"
+          targetRefId={draft.id}
+          context="global_submission_review"
+          panelIdPrefix="global-submission-criteria"
+        />
+      </section>
 
       {isSuperAdmin && finalValidationHref ? (
         <p className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
