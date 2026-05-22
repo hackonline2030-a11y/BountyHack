@@ -21,6 +21,10 @@ async function bootstrap() {
 
   const app = await NestFactory.create<NestExpressApplication>(MainModule);
 
+  if (process.env.RATE_LIMIT_TRUST_PROXY === '1') {
+    app.set('trust proxy', 1);
+  }
+
   app.use(cookieParser());
 
   app.useGlobalPipes(

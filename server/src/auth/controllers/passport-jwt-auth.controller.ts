@@ -39,6 +39,8 @@ import {
   JwtLoginRequestDto,
   JwtRegisterRequestDto,
 } from '../dto/jwt-auth.dto';
+import { HitLimit } from '../../core/rate-limit/hitlimit';
+import { routeHitLimits } from '../../core/rate-limit/rate-limit.limits';
 import { AuthRoles } from '../rbac/roles.decorator';
 import { AppRoleCode } from '../../shared/rbac/app-role.code';
 
@@ -85,6 +87,7 @@ export class PassportJwtAuthController {
   }
 
   @Post('login')
+  @HitLimit(routeHitLimits.login)
   @UseGuards(PassportAuthGuard('local'))
   @ApiOperation({
     summary: 'Login with Passport + JWT credentials',
@@ -112,6 +115,7 @@ export class PassportJwtAuthController {
   }
 
   @Post('refresh')
+  @HitLimit(routeHitLimits.refresh)
   @ApiOperation({
     summary: 'Refresh access JWT (opaque refresh cookie)',
     description:

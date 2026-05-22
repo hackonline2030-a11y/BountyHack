@@ -1,6 +1,7 @@
 import { Ratelimit, type Duration } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import type { NextRequest } from "next/server";
+import { isBffRateLimitEnabled } from "@/lib/server/is-rate-limit-enabled";
 
 function positiveInt(raw: string | undefined, fallback: number): number {
   const n = Number(raw);
@@ -59,7 +60,7 @@ let redisClient: Redis | null | undefined;
 let warnedMissingRedis = false;
 
 function upstashConfigured(): boolean {
-  if (process.env.BFF_RATE_LIMIT_DISABLED === "1") {
+  if (!isBffRateLimitEnabled()) {
     return false;
   }
   return Boolean(
@@ -168,7 +169,7 @@ export async function checkBffRateLimit(
     if (
       process.env.NODE_ENV === "production" &&
       !warnedMissingRedis &&
-      process.env.BFF_RATE_LIMIT_DISABLED !== "1"
+      isBffRateLimitEnabled()
     ) {
       warnedMissingRedis = true;
       console.warn(

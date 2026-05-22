@@ -1,6 +1,9 @@
 import {
   Module,
 } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { HitLimitGuard, HitLimitModule } from './rate-limit/hitlimit';
+import { createHitLimitModuleOptions } from './rate-limit/hitlimit.factory';
 
 import { AppService } from './app.service';
 
@@ -59,8 +62,20 @@ const mongooseRoot =
     : [];
 
 @Module({
-  imports: [...prismaImports, ...mongooseRoot, ...baseImports],
+  imports: [
+    HitLimitModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => createHitLimitModuleOptions(config),
+    }),
+    ...prismaImports,
+    ...mongooseRoot,
+    ...baseImports,
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: HitLimitGuard },
+  ],
 })
 export class AppModule {}
