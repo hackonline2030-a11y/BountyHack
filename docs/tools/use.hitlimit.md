@@ -42,5 +42,10 @@ RATE_LIMIT_DEFAULT=100
 RATE_LIMIT_WINDOW=1m
 RATE_LIMIT_LOGIN=5
 RATE_LIMIT_LOGIN_WINDOW=15m
+RATE_LIMIT_PASSWORD_RESET_REQUEST=10
+RATE_LIMIT_PASSWORD_RESET_REQUEST_WINDOW=15m
 REDIS_URL=redis://127.0.0.1:6379
+# RATE_LIMIT_TRUST_PROXY=1
 ```
+
+Plafonds par route : voir `server/src/core/rate-limit/rate-limit.limits.ts` et `server/.env.example` (refresh, password-reset confirm, verify-password, etc.).

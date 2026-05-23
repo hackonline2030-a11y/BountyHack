@@ -115,7 +115,7 @@ Pourquoi ne pas garder les secrets refresh en JSON ?
 | `LogoutSessionCommand` | revocation du refresh opaque pour le cookie courant (`POST /auth/logout`). |
 | `PassportJwtTokenService` | **uniquement** verification / emission du JWT **access**. |
 | `PASSWORD_RESET_REPOSITORY` / `IPasswordResetRepository` | jeton opaque « mot de passe oublié » (hash SHA-256), table **`password_reset_tokens`**, transaction avec `users` + `refresh_tokens`. **Uniquement si `DATABASE_NAME=POSTGRESQL_PRISMA`**. |
-| `TRANSACTIONAL_MAIL_PORT` / `ITransactionalMailPort` | envoi e-mail : un fournisseur actif via **`MAIL_PROVIDER`** (`console` \| `mailgun` \| `brevo`) ; une seule clé **`MAIL_TRANSACTIONAL_API_KEY`** pour Mailgun/Brevo/autre API (domaine Mailgun : **`MAILGUN_DOMAIN`**). |
+| `TRANSACTIONAL_MAIL_PORT` / `ITransactionalMailPort` | envoi e-mail : un fournisseur actif via **`MAIL_PROVIDER`** (`console` \| `mailgun` \| `brevo` \| `smtp`) ; clé **`MAIL_TRANSACTIONAL_API_KEY`** pour Mailgun/Brevo ; **`SMTP_HOST`**, **`SMTP_USER`**, **`SMTP_PASSWORD`** pour SMTP (ex. LWS). |
 | `RequestPasswordResetCommand` | enregistre un jeton + envoie le lien (anti-énumération : pas de fuite d’existence du compte dans la réponse HTTP). |
 | `CompletePasswordResetCommand` | valide le jeton, met à jour le mot de passe, supprime **toutes** les lignes `refresh_tokens` de l’utilisateur. |
 
