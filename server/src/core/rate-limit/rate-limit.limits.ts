@@ -3,35 +3,67 @@ function positiveInt(raw: string | undefined, fallback: number): number {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
-/** Per-route limits; login reads `RATE_LIMIT_LOGIN` / `RATE_LIMIT_LOGIN_WINDOW` from `.env`. */
+function windowFromEnv(
+  envKey: string,
+  fallback: string,
+): string {
+  const value = process.env[envKey]?.trim();
+  return value && value.length > 0 ? value : fallback;
+}
+
+function routeLimit(
+  limitEnv: string,
+  windowEnv: string,
+  defaultLimit: number,
+  defaultWindow: string,
+): { limit: number; window: string } {
+  return {
+    limit: positiveInt(process.env[limitEnv], defaultLimit),
+    window: windowFromEnv(windowEnv, defaultWindow),
+  };
+}
+
+/** Per-route limits — all tunable via `.env` (see `.env.example`). */
 export const routeHitLimits = {
-  login: {
-    limit: positiveInt(process.env.RATE_LIMIT_LOGIN, 5),
-    window: process.env.RATE_LIMIT_LOGIN_WINDOW?.trim() || '15m',
-  },
+  login: routeLimit(
+    'RATE_LIMIT_LOGIN',
+    'RATE_LIMIT_LOGIN_WINDOW',
+    5,
+    '15m',
+  ),
 
-  refresh: {
-    limit: 30,
-    window: '15m',
-  },
+  refresh: routeLimit(
+    'RATE_LIMIT_REFRESH',
+    'RATE_LIMIT_REFRESH_WINDOW',
+    30,
+    '15m',
+  ),
 
-  passwordResetRequest: {
-    limit: 3,
-    window: '1h',
-  },
+  passwordResetRequest: routeLimit(
+    'RATE_LIMIT_PASSWORD_RESET_REQUEST',
+    'RATE_LIMIT_PASSWORD_RESET_REQUEST_WINDOW',
+    10,
+    '15m',
+  ),
 
-  passwordResetConfirm: {
-    limit: 10,
-    window: '15m',
-  },
+  passwordResetConfirm: routeLimit(
+    'RATE_LIMIT_PASSWORD_RESET_CONFIRM',
+    'RATE_LIMIT_PASSWORD_RESET_CONFIRM_WINDOW',
+    10,
+    '15m',
+  ),
 
-  profileVerifyPassword: {
-    limit: 10,
-    window: '15m',
-  },
+  profileVerifyPassword: routeLimit(
+    'RATE_LIMIT_PROFILE_VERIFY_PASSWORD',
+    'RATE_LIMIT_PROFILE_VERIFY_PASSWORD_WINDOW',
+    10,
+    '15m',
+  ),
 
-  accountVerifyPassword: {
-    limit: 5,
-    window: '15m',
-  },
+  accountVerifyPassword: routeLimit(
+    'RATE_LIMIT_ACCOUNT_VERIFY_PASSWORD',
+    'RATE_LIMIT_ACCOUNT_VERIFY_PASSWORD_WINDOW',
+    5,
+    '15m',
+  ),
 } as const;
