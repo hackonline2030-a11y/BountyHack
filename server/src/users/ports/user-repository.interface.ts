@@ -1,7 +1,7 @@
 import type { AppRoleCode } from '../../shared/rbac/app-role.code';
 import { CreateUserProfilePayload } from '../payloads';
 import type { UpdateOwnProfilePayload } from '../payloads/update-own-profile.payload';
-import { UserAdminSummary, UserRecord } from '../models';
+import { UserAdminActivation, UserAdminSummary, UserRecord } from '../models';
 
 export const I_USER_REPOSITORY = 'I_USER_REPOSITORY';
 
@@ -18,6 +18,10 @@ export interface IUserRepository {
    * enough that a single response becomes too heavy.
    */
   listAdminSummaries(): Promise<UserAdminSummary[]>;
+  /** Activation state for admin resend / force-reset (Prisma SQL only). */
+  findAdminActivationById(uid: string): Promise<UserAdminActivation | null>;
+  /** Clears password hash and revokes refresh tokens before admin-initiated reset. */
+  clearPasswordForAdminReset(uid: string): Promise<void>;
   /** Lookup by `users.id` with role resolved (coordinator workflows). */
   findSummaryById(uid: string): Promise<UserAdminSummary | null>;
   /** Users whose global role matches `roleCode` (e.g. all hunters). */

@@ -1,4 +1,5 @@
 import type { AppRoleCode } from '../../shared/rbac/app-role.code';
+import type { UserAccountStatus } from './user-account-status';
 
 /**
  * Admin-facing read model for the user-management table.
@@ -21,4 +22,18 @@ export type UserAdminSummary = {
   email: string | null;
   /** Resolved from `roles.name` via the `users.role_id` FK; `null` when no role is attached. */
   roleCode: AppRoleCode | null;
+  /**
+   * Derived from `password_hash` and the latest `password_reset_tokens.expires_at`.
+   * Never exposes the hash or token material.
+   */
+  accountStatus: UserAccountStatus;
+};
+
+/** Internal read model for admin invitation / force-reset commands. */
+export type UserAdminActivation = {
+  userId: string;
+  username: string;
+  email: string | null;
+  hasPasswordHash: boolean;
+  latestTokenExpiresAt: Date | null;
 };

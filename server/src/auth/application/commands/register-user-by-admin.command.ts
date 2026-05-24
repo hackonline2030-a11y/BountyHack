@@ -15,18 +15,11 @@ import { IssuePasswordSetupTokenService } from '../services/issue-password-setup
 import type { ITransactionalMailPort } from '../../ports/transactional-mail.port';
 import { TRANSACTIONAL_MAIL_PORT } from '../../ports/transactional-mail.port';
 import { AuthRepository } from '../../ports/auth.repository';
+import { buildWelcomeInvitationEmail } from '../../adapters/transactional-mail/welcome-invitation-mail.util';
 import {
   normalizeAccountSetupLocale,
   type SupportedPasswordResetLocale,
 } from '../../config/account-setup-public-url';
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
 
 @Injectable()
 export class RegisterUserByAdminCommand {
@@ -93,15 +86,10 @@ export class RegisterUserByAdminCommand {
     locale: SupportedPasswordResetLocale,
     link: string,
   ): Promise<void> {
-    const plainName = user.username;
-    const htmlSafeName = escapeHtml(user.username);
-    const href = escapeHtml(link);
-    const { subject, text, html } = this.buildWelcomeEmail(
+    const { subject, text, html } = buildWelcomeInvitationEmail(
       locale,
-      plainName,
-      htmlSafeName,
+      user.username,
       link,
-      href,
     );
 
     try {
@@ -118,40 +106,5 @@ export class RegisterUserByAdminCommand {
       );
       throw new ServiceUnavailableException('Email delivery failed');
     }
-  }
-
-  private buildWelcomeEmail(
-    locale: SupportedPasswordResetLocale,
-    plainUsername: string,
-    htmlSafeUsername: string,
-    link: string,
-    href: string,
-  ): { subject: string; text: string; html: string } {
-    if (locale === 'fr') {
-      return {
-        subject: 'Bienvenue sur BugBountyApp — activez votre compte',
-        text: [
-          `Bonjour ${plainUsername},`,
-          '',
-          'Un compte BugBountyApp a été créé pour vous.',
-          'Pour vous connecter, définissez votre mot de passe via le lien ci-dessous (valide un temps limité) :',
-          '',
-          link,
-        ].join('\n'),
-        html: `<p>Bonjour ${htmlSafeUsername},</p><p>Un compte BugBountyApp a été créé pour vous.</p><p><a href="${href}">Définir mon mot de passe</a></p>`,
-      };
-    }
-    return {
-      subject: 'Welcome to BugBountyApp — activate your account',
-      text: [
-        `Hello ${plainUsername},`,
-        '',
-        'A BugBountyApp account has been created for you.',
-        'To sign in, set your password using the link below (valid for a limited time):',
-        '',
-        link,
-      ].join('\n'),
-      html: `<p>Hello ${htmlSafeUsername},</p><p>A BugBountyApp account has been created for you.</p><p><a href="${href}">Set my password</a></p>`,
-    };
   }
 }

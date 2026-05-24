@@ -1,6 +1,9 @@
 import { getT } from "next-i18next/server";
 import type { AdminUserSummary } from "@modules/admin/core/model/admin-users.domain-model";
+import { UserAccountStatusBadge } from "@modules/admin/nextjs/components/UserAccountStatusBadge";
 import { UserDeleteButton } from "@modules/admin/nextjs/components/UserDeleteButton";
+import { UserForcePasswordResetButton } from "@modules/admin/nextjs/components/UserForcePasswordResetButton";
+import { UserResendInvitationButton } from "@modules/admin/nextjs/components/UserResendInvitationButton";
 
 type UserManagementTableProps = {
   lng: string;
@@ -49,6 +52,9 @@ export async function UserManagementTable({ lng, users }: UserManagementTablePro
             <th scope="col" className="px-4 py-2 font-semibold">
               {t("userManagementTable.columns.role")}
             </th>
+            <th scope="col" className="px-4 py-2 font-semibold">
+              {t("userManagementTable.columns.status")}
+            </th>
             <th scope="col" className="px-4 py-2 font-semibold text-right">
               <span className="sr-only">{t("userManagementTable.columns.actions")}</span>
             </th>
@@ -74,8 +80,30 @@ export async function UserManagementTable({ lng, users }: UserManagementTablePro
                   </span>
                 )}
               </td>
+              <td className="px-4 py-2">
+                <UserAccountStatusBadge
+                  status={user.accountStatus}
+                  label={t(`userManagementTable.status.${user.accountStatus}`)}
+                />
+              </td>
               <td className="px-4 py-2 text-right">
-                <UserDeleteButton userId={user.uid} username={user.username} />
+                <div className="flex flex-wrap items-center justify-end gap-1">
+                  {user.accountStatus === "unvalid" ? (
+                    <UserResendInvitationButton
+                      userId={user.uid}
+                      username={user.username}
+                      locale={lng}
+                    />
+                  ) : null}
+                  {user.accountStatus === "valid" ? (
+                    <UserForcePasswordResetButton
+                      userId={user.uid}
+                      username={user.username}
+                      locale={lng}
+                    />
+                  ) : null}
+                  <UserDeleteButton userId={user.uid} username={user.username} />
+                </div>
               </td>
             </tr>
           ))}

@@ -54,7 +54,18 @@ export class MongoUserRepository implements IUserRepository {
       username: record.username,
       email: null,
       roleCode: AppRoleCode.HUNTER,
+      accountStatus: 'valid',
     };
+  }
+
+  async findAdminActivationById(): Promise<null> {
+    return null;
+  }
+
+  async clearPasswordForAdminReset(): Promise<void> {
+    throw new NotImplementedException(
+      'Admin password reset is not implemented on the Mongo adapter yet.',
+    );
   }
 
   async listSummariesByRoleCode(_roleCode: AppRoleCode): Promise<UserAdminSummary[]> {

@@ -28,6 +28,8 @@ import { createTransactionalMailPort } from './adapters/transactional-mail/trans
 import { RegisterWithPasswordCommand } from './application/commands/register-with-password.command';
 import { RegisterUserByAdminCommand } from './application/commands/register-user-by-admin.command';
 import { IssuePasswordSetupTokenService } from './application/services/issue-password-setup-token.service';
+import { ResendUserInvitationCommand } from './application/commands/resend-user-invitation.command';
+import { AdminForcePasswordResetCommand } from './application/commands/admin-force-password-reset.command';
 import { LogoutSessionCommand } from './application/commands/logout-session.command';
 import { CompletePasswordResetCommand } from './application/commands/complete-password-reset.command';
 import { RequestPasswordResetCommand } from './application/commands/request-password-reset.command';
@@ -125,6 +127,8 @@ const coreProviders = [
   PostgrePrismaPassportJwtRepository,
   RegisterWithPasswordCommand,
   RegisterUserByAdminCommand,
+  ResendUserInvitationCommand,
+  AdminForcePasswordResetCommand,
   LoginWithPasswordCommand,
   GetUserByUidQuery,
   GetUserFromTokenQuery,
