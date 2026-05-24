@@ -3,7 +3,7 @@ import { PassportJwtAuthController } from './passport-jwt-auth.controller';
 import type { JwtLoginRequestDto, JwtRegisterRequestDto } from '../dto/jwt-auth.dto';
 import type { AuthenticatedSession } from '../application/models/authenticated-session';
 import type { Request, Response } from 'express';
-import { RegisterWithPasswordCommand } from '../application/commands/register-with-password.command';
+import { RegisterUserByAdminCommand } from '../application/commands/register-user-by-admin.command';
 import { LogoutSessionCommand } from '../application/commands/logout-session.command';
 import { RefreshAccessTokenQuery } from '../application/queries/get-refresh-access-token.query';
 import { getJwtRefreshCookieName } from '../config/auth-env';
@@ -14,7 +14,7 @@ const FAKE_JWT =
 
 describe('PassportJwtAuthController', () => {
   let controller: PassportJwtAuthController;
-  let registerWithPassword: jest.Mocked<RegisterWithPasswordCommand>;
+  let registerUserByAdmin: jest.Mocked<RegisterUserByAdminCommand>;
   let refreshAccessToken: jest.Mocked<Pick<RefreshAccessTokenQuery, 'execute'>>;
   let logoutSession: jest.Mocked<Pick<LogoutSessionCommand, 'execute'>>;
 
@@ -26,7 +26,7 @@ describe('PassportJwtAuthController', () => {
       controllers: [PassportJwtAuthController],
       providers: [
         {
-          provide: RegisterWithPasswordCommand,
+          provide: RegisterUserByAdminCommand,
           useValue: {
             execute: jest.fn(),
           },
@@ -43,14 +43,41 @@ describe('PassportJwtAuthController', () => {
     }).compile();
 
     controller = module.get(PassportJwtAuthController);
-    registerWithPassword = module.get(RegisterWithPasswordCommand);
+    registerUserByAdmin = module.get(RegisterUserByAdminCommand);
   });
 
-  it('delegates register, sets refresh cookie, returns JSON without refresh field', async () => {
+  it('delegates register and returns invitation payload without session cookie', async () => {
     const payload: JwtRegisterRequestDto = {
       email: 'john@example.com',
       username: 'john',
-      password: 'password123',
+      locale: 'fr',
+    };
+    const user = {
+      uid: 'uid-1',
+      email: payload.email,
+      username: payload.username,
+    };
+    registerUserByAdmin.execute.mockResolvedValue({
+      kind: 'invitation',
+      user,
+      invitationSent: true,
+    });
+
+    const result = await controller.register(payload);
+
+    expect(registerUserByAdmin.execute).toHaveBeenCalledWith({
+      email: payload.email,
+      username: payload.username,
+      roleCode: AppRoleCode.USER,
+      locale: 'fr',
+    });
+    expect(result).toEqual({ user, invitationSent: true });
+  });
+
+  it('returns JWT body when register command yields a session (legacy password path)', async () => {
+    const payload: JwtRegisterRequestDto = {
+      email: 'john@example.com',
+      username: 'john',
     };
     const session = {
       token: FAKE_JWT,
@@ -62,25 +89,10 @@ describe('PassportJwtAuthController', () => {
       },
       require2FA: false,
     };
-    registerWithPassword.execute.mockResolvedValue(session);
-    const res = { cookie: jest.fn() } as unknown as Response;
+    registerUserByAdmin.execute.mockResolvedValue({ kind: 'session', session });
 
-    const result = await controller.register(payload, res);
+    const result = await controller.register(payload);
 
-    expect(registerWithPassword.execute).toHaveBeenCalledWith({
-      email: payload.email,
-      username: payload.username,
-      password: payload.password,
-      roleCode: AppRoleCode.USER,
-    });
-    expect(res.cookie).toHaveBeenCalledWith(
-      getJwtRefreshCookieName(),
-      'opaque-refresh',
-      expect.objectContaining({
-        httpOnly: true,
-        path: expect.stringMatching(/\/auth$/),
-      }),
-    );
     expect(result).toEqual({
       token: FAKE_JWT,
       user: session.user,
@@ -127,7 +139,7 @@ describe('PassportJwtAuthController', () => {
 
     controller.login(req as never, res);
 
-    expect(registerWithPassword.execute).not.toHaveBeenCalled();
+    expect(registerUserByAdmin.execute).not.toHaveBeenCalled();
   });
 
   it('refresh reads cookie name, rotates via query, returns access-only JSON', async () => {

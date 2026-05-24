@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -59,6 +60,12 @@ export class InMemoryPassportJwtRepository
       user: { email, uid, username },
       require2FA: false,
     };
+  }
+
+  async registerPendingActivation(): Promise<never> {
+    throw new BadRequestException(
+      'Admin invitation is not supported with IN-MEMORY',
+    );
   }
 
   async login(input: PassportJwtLoginInput): Promise<AuthenticatedSession> {

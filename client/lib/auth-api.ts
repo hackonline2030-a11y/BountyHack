@@ -11,9 +11,10 @@ export type NestAuthLoginBody = { email: string; password: string; code?: string
 export type NestAuthRegisterBody = {
   username: string;
   email: string;
-  password: string;
   /** Optional; Nest defaults to USER when omitted. */
   roleCode?: string;
+  /** Locale for invitation email link (`en` | `fr`). */
+  locale?: string;
 };
 
 /** Normalizes Nest `HttpException` / validation payloads for UI copy. */

@@ -24,6 +24,7 @@ import {
   PassportJwtLoginInput,
   PassportJwtPersistence,
   PassportJwtRegisterInput,
+  PassportJwtRegisterPendingInput,
 } from '../passport-jwt-persistence.repository';
 import {
   APP_ROLE_CODE_VALUES,
@@ -90,7 +91,11 @@ export class PostgrePrismaPassportJwtRepository
     const email = input.email.trim().toLowerCase();
     const username = input.username.trim();
     const uid = randomUUID();
-    const passwordHash = await hashPassword(input.password);
+    const passwordPlain = input.password?.trim();
+    if (!passwordPlain) {
+      throw new BadRequestException('Password is required');
+    }
+    const passwordHash = await hashPassword(passwordPlain);
     const roleCode = input.roleCode ?? AppRoleCode.USER;
     const role = await this.prisma.role.findUnique({
       where: { name: roleCode },
@@ -127,6 +132,49 @@ export class PostgrePrismaPassportJwtRepository
       user: { email, uid, username },
       require2FA: false,
     };
+  }
+
+  async registerPendingActivation(
+    input: PassportJwtRegisterPendingInput,
+  ): Promise<AuthenticatedUserProfile> {
+    if (!this.prisma) {
+      throw new InternalServerErrorException('Prisma service is not available');
+    }
+    const email = input.email.trim().toLowerCase();
+    const username = input.username.trim();
+    const uid = randomUUID();
+    const roleCode = input.roleCode ?? AppRoleCode.USER;
+    const role = await this.prisma.role.findUnique({
+      where: { name: roleCode },
+      select: { id: true },
+    });
+    if (!role) {
+      throw new BadRequestException(
+        `Role "${roleCode}" not found — run migrations and seed (\`roles\` table).`,
+      );
+    }
+
+    try {
+      await this.prisma.user.create({
+        data: {
+          id: uid,
+          username,
+          email,
+          passwordHash: null,
+          roleId: role.id,
+        },
+      });
+    } catch (error: unknown) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException('Email already registered');
+      }
+      throw error;
+    }
+
+    return { email, uid, username };
   }
 
   async login(input: PassportJwtLoginInput): Promise<AuthenticatedSession> {

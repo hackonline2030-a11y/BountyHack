@@ -16,9 +16,10 @@ const inputBase =
 
 type Props = {
   tokenFromQuery: string;
+  isAccountSetup?: boolean;
 };
 
-export function ResetPasswordForm({ tokenFromQuery }: Props) {
+export function ResetPasswordForm({ tokenFromQuery, isAccountSetup = false }: Props) {
   const { t } = useT("passwordReset");
   const router = useRouter();
   const pathname = usePathname();
@@ -62,7 +63,11 @@ export function ResetPasswordForm({ tokenFromQuery }: Props) {
       }
 
       setStatus("success");
-      router.replace(`${prefix}/login?passwordReset=success`);
+      router.replace(
+        isAccountSetup
+          ? `${prefix}/login?accountSetup=success`
+          : `${prefix}/login?passwordReset=success`,
+      );
     } catch {
       setStatus("error");
       setMessage(t("resetForm.errorNetwork"));
@@ -143,7 +148,13 @@ export function ResetPasswordForm({ tokenFromQuery }: Props) {
         disabled={status === "loading" || password.length < 8 || confirm.length < 8}
         className="disabled:opacity-50"
       >
-        {status === "loading" ? t("resetForm.submitting") : t("resetForm.submit")}
+        {status === "loading"
+          ? isAccountSetup
+            ? t("resetForm.setupSubmitting")
+            : t("resetForm.submitting")
+          : isAccountSetup
+            ? t("resetForm.setupSubmit")
+            : t("resetForm.submit")}
       </PrimaryButton>
 
       <Link
