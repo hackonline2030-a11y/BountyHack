@@ -13,6 +13,11 @@ export interface IPasswordResetRepository {
     email: string,
   ): Promise<PasswordResetAccountSnapshot | null>;
 
+  /** Any account with email (with or without password) — invitation / setup link. */
+  findAccountByEmailForPasswordSetup(
+    email: string,
+  ): Promise<PasswordResetAccountSnapshot | null>;
+
   /** Drops any previous pending token for this user, then stores the new hash and expiry. */
   savePendingResetToken(
     userId: string,

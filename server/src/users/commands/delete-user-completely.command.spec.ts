@@ -54,6 +54,7 @@ describe('DeleteUserCompletelyCommand', () => {
       username: 'Lead',
       email: 'lead@example.com',
       roleCode: AppRoleCode.SUPER_ADMIN,
+      accountStatus: 'valid',
     });
     repository.listSummariesByRoleCode.mockResolvedValue([
       {
@@ -61,6 +62,7 @@ describe('DeleteUserCompletelyCommand', () => {
         username: 'Lead',
         email: 'lead@example.com',
         roleCode: AppRoleCode.SUPER_ADMIN,
+        accountStatus: 'valid',
       },
     ]);
 
@@ -76,6 +78,7 @@ describe('DeleteUserCompletelyCommand', () => {
       username: 'Junior',
       email: 'junior@example.com',
       roleCode: AppRoleCode.HUNTER,
+      accountStatus: 'valid',
     });
 
     await command.execute(superAdmin, 'hunter-1');

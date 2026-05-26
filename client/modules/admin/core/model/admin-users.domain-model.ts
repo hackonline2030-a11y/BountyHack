@@ -1,5 +1,7 @@
 import { AppRoleCode } from "@/lib/app-role-code";
 
+export type AdminUserAccountStatus = "valid" | "pending" | "unvalid";
+
 /**
  * Admin-facing user row, exposed to the user-management table.
  *
@@ -11,6 +13,7 @@ export type AdminUserSummary = {
   username: string;
   email: string | null;
   roleCode: AppRoleCode | null;
+  accountStatus: AdminUserAccountStatus;
 };
 
 /**

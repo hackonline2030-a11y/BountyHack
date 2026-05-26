@@ -7,8 +7,12 @@ import {
   Patch,
   Post,
   Req,
+  Optional,
   UnauthorizedException,
 } from '@nestjs/common';
+import { isPrismaSqlMode } from '../../shared/database-mode';
+import { ResendUserInvitationCommand } from '../../auth/application/commands/resend-user-invitation.command';
+import { AdminForcePasswordResetCommand } from '../../auth/application/commands/admin-force-password-reset.command';
 import { plainToInstance } from 'class-transformer';
 import {
   ApiBearerAuth,
@@ -42,6 +46,7 @@ import {
   UpdateOwnProfileBodyDto,
   VerifyProfilePasswordBodyDto,
 } from '../dto/profile.dto';
+import { AdminUserActionBodyDto } from '../dto/admin-user-action.dto';
 import {
   CreateUserProfileBodyDto,
   UserAdminSummaryListResponseDto,
@@ -63,6 +68,10 @@ export class UsersController {
     private readonly deleteOwnAccountCommand: DeleteOwnAccountCommand,
     private readonly verifyProfilePasswordCommand: VerifyProfilePasswordCommand,
     private readonly updateOwnProfileCommand: UpdateOwnProfileCommand,
+    @Optional()
+    private readonly resendUserInvitation: ResendUserInvitationCommand | null,
+    @Optional()
+    private readonly adminForcePasswordReset: AdminForcePasswordResetCommand | null,
   ) {}
 
   @Post()
@@ -294,6 +303,46 @@ export class UsersController {
       console.error('Error listing users:', error);
       throw error;
     }
+  }
+
+  @Post(':userId/resend-invitation')
+  @AuthRoles(AppRoleCode.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Resend account-setup invitation (admin)',
+    description:
+      'For users without a password whose setup link expired (`unvalid`). Sends a new welcome e-mail with `flow=setup` link.',
+  })
+  @ApiOkResponse({ schema: { example: { ok: true } } })
+  @ApiHttpUnauthorized('Missing or invalid bearer token.')
+  @ApiForbiddenResponse({ description: 'Authenticated user is not `SUPER_ADMIN`.' })
+  async resendInvitation(
+    @Param('userId') userId: string,
+    @Body() body: AdminUserActionBodyDto,
+  ): Promise<{ ok: true }> {
+    if (!isPrismaSqlMode() || !this.resendUserInvitation) {
+      throw new UnauthorizedException('Not available for this database mode');
+    }
+    return this.resendUserInvitation.execute({ userId, locale: body.locale });
+  }
+
+  @Post(':userId/force-password-reset')
+  @AuthRoles(AppRoleCode.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Force password renewal (admin)',
+    description:
+      'Clears the stored password hash, revokes refresh sessions, and emails a short-lived reset link. For `valid` users only.',
+  })
+  @ApiOkResponse({ schema: { example: { ok: true } } })
+  @ApiHttpUnauthorized('Missing or invalid bearer token.')
+  @ApiForbiddenResponse({ description: 'Authenticated user is not `SUPER_ADMIN`.' })
+  async forcePasswordReset(
+    @Param('userId') userId: string,
+    @Body() body: AdminUserActionBodyDto,
+  ): Promise<{ ok: true }> {
+    if (!isPrismaSqlMode() || !this.adminForcePasswordReset) {
+      throw new UnauthorizedException('Not available for this database mode');
+    }
+    return this.adminForcePasswordReset.execute({ userId, locale: body.locale });
   }
 
   @Delete(':userId')

@@ -5,7 +5,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { variables } from '../../../shared/variables.config';
-import type { AuthenticatedSession } from '../../application/models/authenticated-session';
+import type {
+  AuthenticatedSession,
+  AuthenticatedUserProfile,
+} from '../../application/models/authenticated-session';
 import type { LoginWithPasswordInput } from '../../application/models/login-with-password.input';
 import type { RegisterWithPasswordInput } from '../../application/models/register-with-password.input';
 import { Identity } from '../../domain/models/identity';
@@ -23,6 +26,7 @@ import {
   PassportJwtPersistence,
   PassportJwtLoginInput,
   PassportJwtRegisterInput,
+  PassportJwtRegisterPendingInput,
 } from './repositories/passport-jwt-persistence.repository';
 
 /**
@@ -65,6 +69,12 @@ export class PassportJwtAuthRepository implements AuthRepository {
     const session =
       await this.resolvePersistenceRepository().register(command);
     return attachOpaqueRefreshToSession(this.refreshTokenRepository, session);
+  }
+
+  async registerPendingActivation(
+    input: PassportJwtRegisterPendingInput,
+  ): Promise<AuthenticatedUserProfile> {
+    return this.resolvePersistenceRepository().registerPendingActivation(input);
   }
 
   async login(input: LoginWithPasswordInput): Promise<AuthenticatedSession> {

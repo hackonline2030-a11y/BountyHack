@@ -9,7 +9,7 @@ export function toRegisterWithPasswordInput(
   return {
     email: body.email,
     username: body.username,
-    password: body.password,
     roleCode: body.roleCode ?? AppRoleCode.USER,
+    locale: body.locale,
   };
 }
