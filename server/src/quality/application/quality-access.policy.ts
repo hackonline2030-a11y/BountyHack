@@ -25,6 +25,20 @@ export class QualityAccessPolicy {
     }
   }
 
+  /** Catalog readers: published only; QC manager: any criterion. */
+  assertCanReadCriterionReportTargets(
+    identity: Identity,
+    criterionStatus: 'draft' | 'published' | 'archived',
+  ): void {
+    if (identity.roleCode === QUALITY_CRITERIA_MANAGER_ROLE) {
+      return;
+    }
+    this.assertCanReadPublishedCatalog(identity);
+    if (criterionStatus !== 'published') {
+      throw new ForbiddenException('Criterion not in catalog');
+    }
+  }
+
   assertCanReadOwnDraftCriterion(
     identity: Identity,
     createdByUserId: string,

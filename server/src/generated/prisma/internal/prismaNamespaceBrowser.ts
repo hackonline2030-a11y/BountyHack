@@ -427,6 +427,7 @@ export const QualityCriterionDistributionScalarFieldEnum = {
   criterionId: 'criterionId',
   targetTypeId: 'targetTypeId',
   targetRefId: 'targetRefId',
+  targetRefScope: 'targetRefScope',
   distributedByUserId: 'distributedByUserId',
   distributedAt: 'distributedAt'
 } as const
@@ -736,6 +737,7 @@ export const QualityCriterionDistributionOrderByRelevanceFieldEnum = {
   criterionId: 'criterionId',
   targetTypeId: 'targetTypeId',
   targetRefId: 'targetRefId',
+  targetRefScope: 'targetRefScope',
   distributedByUserId: 'distributedByUserId'
 } as const
 

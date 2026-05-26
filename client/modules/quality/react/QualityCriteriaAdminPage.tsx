@@ -12,6 +12,7 @@ import type {
   QualityTargetType,
 } from "@modules/quality/model/quality.types";
 import { CategoryPill } from "@modules/quality/react/CategoryPill";
+import { QualityCriterionReportTargetsModal } from "@modules/quality/react/QualityCriterionReportTargetsModal";
 type AdminTab = "drafts" | "published" | "distribution" | "categories";
 
 const ADMIN_TABS: readonly AdminTab[] = [
@@ -87,21 +88,38 @@ export const QualityCriteriaAdminPage: FC<Props> = ({ lng }) => {
   >([]);
   const [reportDraftTargetsLoading, setReportDraftTargetsLoading] =
     useState(false);
+  const [reportDistCounts, setReportDistCounts] = useState<
+    Record<string, number>
+  >({});
+  const [reportTargetsModal, setReportTargetsModal] = useState<{
+    id: string;
+    code: string;
+    title: string;
+  } | null>(null);
+  const [reportTargetsModalRows, setReportTargetsModalRows] = useState<
+    QualityReportDraftTarget[]
+  >([]);
+  const [reportTargetsModalLoading, setReportTargetsModalLoading] =
+    useState(false);
 
   const reload = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [d, p, c, tt] = await Promise.all([
+      const [d, p, c, tt, counts] = await Promise.all([
         httpQualityRepository.listDraftCriteria(),
         httpQualityRepository.listPublishedCriteria(),
         httpQualityRepository.listCategories(),
         httpQualityRepository.listTargetTypes(true),
+        httpQualityRepository.listReportDistributionCounts(),
       ]);
       setDrafts(d);
       setPublished(p);
       setCategories(c);
       setTargetTypes(tt);
+      setReportDistCounts(
+        Object.fromEntries(counts.map((row) => [row.criterionId, row.count])),
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -168,6 +186,23 @@ export const QualityCriteriaAdminPage: FC<Props> = ({ lng }) => {
     setDistributeSuccess(null);
     setTab("distribution");
     setError(null);
+  };
+
+  const openReportTargetsModal = (c: QualityCriterion) => {
+    setReportTargetsModal({ id: c.id, code: c.code, title: c.title });
+    setReportTargetsModalRows([]);
+    setReportTargetsModalLoading(true);
+    void (async () => {
+      try {
+        const rows = await httpQualityRepository.listCriterionReportTargets(c.id);
+        setReportTargetsModalRows(rows);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : String(e));
+        setReportTargetsModal(null);
+      } finally {
+        setReportTargetsModalLoading(false);
+      }
+    })();
   };
 
   const selectAdminTab = (key: AdminTab) => {
@@ -686,6 +721,16 @@ export const QualityCriteriaAdminPage: FC<Props> = ({ lng }) => {
                             {t("admin.distribute")}
                           </button>
                         ) : null}
+                        {tab === "published" &&
+                        (reportDistCounts[c.id] ?? 0) > 0 ? (
+                          <button
+                            type="button"
+                            className="text-xs font-medium text-dashboard-text hover:underline"
+                            onClick={() => openReportTargetsModal(c)}
+                          >
+                            {t("catalog.viewReportTargets")}
+                          </button>
+                        ) : null}
                         <button
                           type="button"
                           className="text-xs text-rose-700 hover:underline"
@@ -721,6 +766,18 @@ export const QualityCriteriaAdminPage: FC<Props> = ({ lng }) => {
           ? t("admin.deleteConfirm.message", { label: deleteTarget.label })
           : null}
       </ConfirmDangerModal>
+
+      {reportTargetsModal ? (
+        <QualityCriterionReportTargetsModal
+          criterion={{
+            code: reportTargetsModal.code,
+            title: reportTargetsModal.title,
+          }}
+          rows={reportTargetsModalRows}
+          loading={reportTargetsModalLoading}
+          onClose={() => setReportTargetsModal(null)}
+        />
+      ) : null}
     </div>
   );
 };

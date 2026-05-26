@@ -56,6 +56,7 @@ export default async function WelcomeHunterPage({ params }: PageProps) {
     courses: t("welcomeHunter.nav.courses"),
     teams: t("welcomeHunter.nav.teams"),
     mentors: t("welcomeHunter.nav.mentors"),
+    criteria: t("welcomeHunter.nav.criteria"),
     support: t("welcomeHunter.nav.support"),
     settings: t("welcomeHunter.nav.settings"),
   };
@@ -72,6 +73,7 @@ export default async function WelcomeHunterPage({ params }: PageProps) {
     courses: `${prefix}/courses`,
     teams: `${prefix}/hunter-teams`,
     mentors: `${prefix}/mentors`,
+    criteria: `${prefix}/quality-criteria`,
     support: `${prefix}/support`,
     settings: `${prefix}/parameters`,
   };

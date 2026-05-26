@@ -80,6 +80,12 @@ export interface IQualityRepository {
     targetTypeCode: string,
     targetRefId: string | null,
   ): Promise<QualityDistributionWire[]>;
+  listReportDraftIdsForCriterionDistribution(
+    criterionId: string,
+  ): Promise<string[]>;
+  listReportSpecificDistributionCounts(): Promise<
+    Array<{ criterionId: string; count: number }>
+  >;
 
   // Checks
   upsertCheck(

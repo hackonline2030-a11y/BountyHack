@@ -1,16 +1,18 @@
 import Link from "next/link";
 import type { FC, SVGProps } from "react";
-import { BookIcon, SettingsIcon } from "./icons";
+import { BookIcon, CriteriaIcon, SettingsIcon } from "./icons";
 
 export type PlatformManagerNavLabels = {
   label: string;
   settings: string;
   credits: string;
+  criteria: string;
 };
 
 export type PlatformManagerNavHrefs = {
   settings: string;
   credits: string;
+  criteria: string;
 };
 
 type NavKey = Exclude<keyof PlatformManagerNavLabels, "label">;
@@ -23,6 +25,7 @@ type NavItem = {
 const NAV_ITEMS: ReadonlyArray<NavItem> = [
   { key: "settings", Icon: SettingsIcon },
   { key: "credits", Icon: BookIcon },
+  { key: "criteria", Icon: CriteriaIcon },
 ];
 
 type Props = {

@@ -1,12 +1,19 @@
 import Link from "next/link";
 import type { FC, SVGProps } from "react";
-import { SettingsIcon, TeamIcon, UserPlusIcon, UsersIcon } from "./icons";
+import {
+  CriteriaIcon,
+  SettingsIcon,
+  TeamIcon,
+  UserPlusIcon,
+  UsersIcon,
+} from "./icons";
 
 export type AdminNavLabels = {
   label: string;
   users: string;
   register: string;
   teams: string;
+  criteria: string;
   settings: string;
 };
 
@@ -14,6 +21,7 @@ export type AdminNavHrefs = {
   users: string;
   register: string;
   teams: string;
+  criteria: string;
   settings: string;
 };
 
@@ -28,6 +36,7 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
   { key: "users", Icon: UsersIcon },
   { key: "register", Icon: UserPlusIcon },
   { key: "teams", Icon: TeamIcon },
+  { key: "criteria", Icon: CriteriaIcon },
   { key: "settings", Icon: SettingsIcon },
 ];
 

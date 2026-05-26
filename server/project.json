@@ -6,7 +6,15 @@
   "projectType": "application",
   "tags": [],
   "targets": {
+      "prisma-generate": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "prisma generate",
+          "cwd": "{projectRoot}"
+        }
+      },
       "build": {
+        "dependsOn": ["prisma-generate"],
         "executor": "@nx/webpack:webpack",
         "options": {
           "webpackConfig": "webpack.config.js",

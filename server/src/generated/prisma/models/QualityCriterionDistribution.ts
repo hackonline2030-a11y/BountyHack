@@ -29,6 +29,7 @@ export type QualityCriterionDistributionMinAggregateOutputType = {
   criterionId: string | null
   targetTypeId: string | null
   targetRefId: string | null
+  targetRefScope: string | null
   distributedByUserId: string | null
   distributedAt: Date | null
 }
@@ -38,6 +39,7 @@ export type QualityCriterionDistributionMaxAggregateOutputType = {
   criterionId: string | null
   targetTypeId: string | null
   targetRefId: string | null
+  targetRefScope: string | null
   distributedByUserId: string | null
   distributedAt: Date | null
 }
@@ -47,6 +49,7 @@ export type QualityCriterionDistributionCountAggregateOutputType = {
   criterionId: number
   targetTypeId: number
   targetRefId: number
+  targetRefScope: number
   distributedByUserId: number
   distributedAt: number
   _all: number
@@ -58,6 +61,7 @@ export type QualityCriterionDistributionMinAggregateInputType = {
   criterionId?: true
   targetTypeId?: true
   targetRefId?: true
+  targetRefScope?: true
   distributedByUserId?: true
   distributedAt?: true
 }
@@ -67,6 +71,7 @@ export type QualityCriterionDistributionMaxAggregateInputType = {
   criterionId?: true
   targetTypeId?: true
   targetRefId?: true
+  targetRefScope?: true
   distributedByUserId?: true
   distributedAt?: true
 }
@@ -76,6 +81,7 @@ export type QualityCriterionDistributionCountAggregateInputType = {
   criterionId?: true
   targetTypeId?: true
   targetRefId?: true
+  targetRefScope?: true
   distributedByUserId?: true
   distributedAt?: true
   _all?: true
@@ -158,6 +164,7 @@ export type QualityCriterionDistributionGroupByOutputType = {
   criterionId: string
   targetTypeId: string
   targetRefId: string | null
+  targetRefScope: string
   distributedByUserId: string
   distributedAt: Date
   _count: QualityCriterionDistributionCountAggregateOutputType | null
@@ -188,6 +195,7 @@ export type QualityCriterionDistributionWhereInput = {
   criterionId?: Prisma.StringFilter<"QualityCriterionDistribution"> | string
   targetTypeId?: Prisma.StringFilter<"QualityCriterionDistribution"> | string
   targetRefId?: Prisma.StringNullableFilter<"QualityCriterionDistribution"> | string | null
+  targetRefScope?: Prisma.StringFilter<"QualityCriterionDistribution"> | string
   distributedByUserId?: Prisma.StringFilter<"QualityCriterionDistribution"> | string
   distributedAt?: Prisma.DateTimeFilter<"QualityCriterionDistribution"> | Date | string
   criterion?: Prisma.XOR<Prisma.QualityCriterionScalarRelationFilter, Prisma.QualityCriterionWhereInput>
@@ -201,6 +209,7 @@ export type QualityCriterionDistributionOrderByWithRelationInput = {
   criterionId?: Prisma.SortOrder
   targetTypeId?: Prisma.SortOrder
   targetRefId?: Prisma.SortOrderInput | Prisma.SortOrder
+  targetRefScope?: Prisma.SortOrder
   distributedByUserId?: Prisma.SortOrder
   distributedAt?: Prisma.SortOrder
   criterion?: Prisma.QualityCriterionOrderByWithRelationInput
@@ -212,25 +221,28 @@ export type QualityCriterionDistributionOrderByWithRelationInput = {
 
 export type QualityCriterionDistributionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  criterionId_targetTypeId_targetRefScope?: Prisma.QualityCriterionDistributionCriterionIdTargetTypeIdTargetRefScopeCompoundUniqueInput
   AND?: Prisma.QualityCriterionDistributionWhereInput | Prisma.QualityCriterionDistributionWhereInput[]
   OR?: Prisma.QualityCriterionDistributionWhereInput[]
   NOT?: Prisma.QualityCriterionDistributionWhereInput | Prisma.QualityCriterionDistributionWhereInput[]
   criterionId?: Prisma.StringFilter<"QualityCriterionDistribution"> | string
   targetTypeId?: Prisma.StringFilter<"QualityCriterionDistribution"> | string
   targetRefId?: Prisma.StringNullableFilter<"QualityCriterionDistribution"> | string | null
+  targetRefScope?: Prisma.StringFilter<"QualityCriterionDistribution"> | string
   distributedByUserId?: Prisma.StringFilter<"QualityCriterionDistribution"> | string
   distributedAt?: Prisma.DateTimeFilter<"QualityCriterionDistribution"> | Date | string
   criterion?: Prisma.XOR<Prisma.QualityCriterionScalarRelationFilter, Prisma.QualityCriterionWhereInput>
   targetType?: Prisma.XOR<Prisma.QualityCriterionTargetTypeScalarRelationFilter, Prisma.QualityCriterionTargetTypeWhereInput>
   distributedBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   checks?: Prisma.QualityCriterionCheckListRelationFilter
-}, "id">
+}, "id" | "criterionId_targetTypeId_targetRefScope">
 
 export type QualityCriterionDistributionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   criterionId?: Prisma.SortOrder
   targetTypeId?: Prisma.SortOrder
   targetRefId?: Prisma.SortOrderInput | Prisma.SortOrder
+  targetRefScope?: Prisma.SortOrder
   distributedByUserId?: Prisma.SortOrder
   distributedAt?: Prisma.SortOrder
   _count?: Prisma.QualityCriterionDistributionCountOrderByAggregateInput
@@ -246,6 +258,7 @@ export type QualityCriterionDistributionScalarWhereWithAggregatesInput = {
   criterionId?: Prisma.StringWithAggregatesFilter<"QualityCriterionDistribution"> | string
   targetTypeId?: Prisma.StringWithAggregatesFilter<"QualityCriterionDistribution"> | string
   targetRefId?: Prisma.StringNullableWithAggregatesFilter<"QualityCriterionDistribution"> | string | null
+  targetRefScope?: Prisma.StringWithAggregatesFilter<"QualityCriterionDistribution"> | string
   distributedByUserId?: Prisma.StringWithAggregatesFilter<"QualityCriterionDistribution"> | string
   distributedAt?: Prisma.DateTimeWithAggregatesFilter<"QualityCriterionDistribution"> | Date | string
 }
@@ -253,6 +266,7 @@ export type QualityCriterionDistributionScalarWhereWithAggregatesInput = {
 export type QualityCriterionDistributionCreateInput = {
   id?: string
   targetRefId?: string | null
+  targetRefScope?: string
   distributedAt?: Date | string
   criterion: Prisma.QualityCriterionCreateNestedOneWithoutDistributionsInput
   targetType: Prisma.QualityCriterionTargetTypeCreateNestedOneWithoutDistributionsInput
@@ -265,6 +279,7 @@ export type QualityCriterionDistributionUncheckedCreateInput = {
   criterionId: string
   targetTypeId: string
   targetRefId?: string | null
+  targetRefScope?: string
   distributedByUserId: string
   distributedAt?: Date | string
   checks?: Prisma.QualityCriterionCheckUncheckedCreateNestedManyWithoutDistributionInput
@@ -273,6 +288,7 @@ export type QualityCriterionDistributionUncheckedCreateInput = {
 export type QualityCriterionDistributionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   targetRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetRefScope?: Prisma.StringFieldUpdateOperationsInput | string
   distributedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   criterion?: Prisma.QualityCriterionUpdateOneRequiredWithoutDistributionsNestedInput
   targetType?: Prisma.QualityCriterionTargetTypeUpdateOneRequiredWithoutDistributionsNestedInput
@@ -285,6 +301,7 @@ export type QualityCriterionDistributionUncheckedUpdateInput = {
   criterionId?: Prisma.StringFieldUpdateOperationsInput | string
   targetTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   targetRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetRefScope?: Prisma.StringFieldUpdateOperationsInput | string
   distributedByUserId?: Prisma.StringFieldUpdateOperationsInput | string
   distributedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   checks?: Prisma.QualityCriterionCheckUncheckedUpdateManyWithoutDistributionNestedInput
@@ -295,6 +312,7 @@ export type QualityCriterionDistributionCreateManyInput = {
   criterionId: string
   targetTypeId: string
   targetRefId?: string | null
+  targetRefScope?: string
   distributedByUserId: string
   distributedAt?: Date | string
 }
@@ -302,6 +320,7 @@ export type QualityCriterionDistributionCreateManyInput = {
 export type QualityCriterionDistributionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   targetRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetRefScope?: Prisma.StringFieldUpdateOperationsInput | string
   distributedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -310,6 +329,7 @@ export type QualityCriterionDistributionUncheckedUpdateManyInput = {
   criterionId?: Prisma.StringFieldUpdateOperationsInput | string
   targetTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   targetRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetRefScope?: Prisma.StringFieldUpdateOperationsInput | string
   distributedByUserId?: Prisma.StringFieldUpdateOperationsInput | string
   distributedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -330,11 +350,18 @@ export type QualityCriterionDistributionOrderByRelevanceInput = {
   search: string
 }
 
+export type QualityCriterionDistributionCriterionIdTargetTypeIdTargetRefScopeCompoundUniqueInput = {
+  criterionId: string
+  targetTypeId: string
+  targetRefScope: string
+}
+
 export type QualityCriterionDistributionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   criterionId?: Prisma.SortOrder
   targetTypeId?: Prisma.SortOrder
   targetRefId?: Prisma.SortOrder
+  targetRefScope?: Prisma.SortOrder
   distributedByUserId?: Prisma.SortOrder
   distributedAt?: Prisma.SortOrder
 }
@@ -344,6 +371,7 @@ export type QualityCriterionDistributionMaxOrderByAggregateInput = {
   criterionId?: Prisma.SortOrder
   targetTypeId?: Prisma.SortOrder
   targetRefId?: Prisma.SortOrder
+  targetRefScope?: Prisma.SortOrder
   distributedByUserId?: Prisma.SortOrder
   distributedAt?: Prisma.SortOrder
 }
@@ -353,6 +381,7 @@ export type QualityCriterionDistributionMinOrderByAggregateInput = {
   criterionId?: Prisma.SortOrder
   targetTypeId?: Prisma.SortOrder
   targetRefId?: Prisma.SortOrder
+  targetRefScope?: Prisma.SortOrder
   distributedByUserId?: Prisma.SortOrder
   distributedAt?: Prisma.SortOrder
 }
@@ -505,6 +534,7 @@ export type QualityCriterionDistributionUpdateOneRequiredWithoutChecksNestedInpu
 export type QualityCriterionDistributionCreateWithoutDistributedByInput = {
   id?: string
   targetRefId?: string | null
+  targetRefScope?: string
   distributedAt?: Date | string
   criterion: Prisma.QualityCriterionCreateNestedOneWithoutDistributionsInput
   targetType: Prisma.QualityCriterionTargetTypeCreateNestedOneWithoutDistributionsInput
@@ -516,6 +546,7 @@ export type QualityCriterionDistributionUncheckedCreateWithoutDistributedByInput
   criterionId: string
   targetTypeId: string
   targetRefId?: string | null
+  targetRefScope?: string
   distributedAt?: Date | string
   checks?: Prisma.QualityCriterionCheckUncheckedCreateNestedManyWithoutDistributionInput
 }
@@ -554,6 +585,7 @@ export type QualityCriterionDistributionScalarWhereInput = {
   criterionId?: Prisma.StringFilter<"QualityCriterionDistribution"> | string
   targetTypeId?: Prisma.StringFilter<"QualityCriterionDistribution"> | string
   targetRefId?: Prisma.StringNullableFilter<"QualityCriterionDistribution"> | string | null
+  targetRefScope?: Prisma.StringFilter<"QualityCriterionDistribution"> | string
   distributedByUserId?: Prisma.StringFilter<"QualityCriterionDistribution"> | string
   distributedAt?: Prisma.DateTimeFilter<"QualityCriterionDistribution"> | Date | string
 }
@@ -561,6 +593,7 @@ export type QualityCriterionDistributionScalarWhereInput = {
 export type QualityCriterionDistributionCreateWithoutTargetTypeInput = {
   id?: string
   targetRefId?: string | null
+  targetRefScope?: string
   distributedAt?: Date | string
   criterion: Prisma.QualityCriterionCreateNestedOneWithoutDistributionsInput
   distributedBy: Prisma.UserCreateNestedOneWithoutQualityCriterionDistributionsInput
@@ -571,6 +604,7 @@ export type QualityCriterionDistributionUncheckedCreateWithoutTargetTypeInput = 
   id?: string
   criterionId: string
   targetRefId?: string | null
+  targetRefScope?: string
   distributedByUserId: string
   distributedAt?: Date | string
   checks?: Prisma.QualityCriterionCheckUncheckedCreateNestedManyWithoutDistributionInput
@@ -605,6 +639,7 @@ export type QualityCriterionDistributionUpdateManyWithWhereWithoutTargetTypeInpu
 export type QualityCriterionDistributionCreateWithoutCriterionInput = {
   id?: string
   targetRefId?: string | null
+  targetRefScope?: string
   distributedAt?: Date | string
   targetType: Prisma.QualityCriterionTargetTypeCreateNestedOneWithoutDistributionsInput
   distributedBy: Prisma.UserCreateNestedOneWithoutQualityCriterionDistributionsInput
@@ -615,6 +650,7 @@ export type QualityCriterionDistributionUncheckedCreateWithoutCriterionInput = {
   id?: string
   targetTypeId: string
   targetRefId?: string | null
+  targetRefScope?: string
   distributedByUserId: string
   distributedAt?: Date | string
   checks?: Prisma.QualityCriterionCheckUncheckedCreateNestedManyWithoutDistributionInput
@@ -649,6 +685,7 @@ export type QualityCriterionDistributionUpdateManyWithWhereWithoutCriterionInput
 export type QualityCriterionDistributionCreateWithoutChecksInput = {
   id?: string
   targetRefId?: string | null
+  targetRefScope?: string
   distributedAt?: Date | string
   criterion: Prisma.QualityCriterionCreateNestedOneWithoutDistributionsInput
   targetType: Prisma.QualityCriterionTargetTypeCreateNestedOneWithoutDistributionsInput
@@ -660,6 +697,7 @@ export type QualityCriterionDistributionUncheckedCreateWithoutChecksInput = {
   criterionId: string
   targetTypeId: string
   targetRefId?: string | null
+  targetRefScope?: string
   distributedByUserId: string
   distributedAt?: Date | string
 }
@@ -683,6 +721,7 @@ export type QualityCriterionDistributionUpdateToOneWithWhereWithoutChecksInput =
 export type QualityCriterionDistributionUpdateWithoutChecksInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   targetRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetRefScope?: Prisma.StringFieldUpdateOperationsInput | string
   distributedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   criterion?: Prisma.QualityCriterionUpdateOneRequiredWithoutDistributionsNestedInput
   targetType?: Prisma.QualityCriterionTargetTypeUpdateOneRequiredWithoutDistributionsNestedInput
@@ -694,6 +733,7 @@ export type QualityCriterionDistributionUncheckedUpdateWithoutChecksInput = {
   criterionId?: Prisma.StringFieldUpdateOperationsInput | string
   targetTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   targetRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetRefScope?: Prisma.StringFieldUpdateOperationsInput | string
   distributedByUserId?: Prisma.StringFieldUpdateOperationsInput | string
   distributedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -703,12 +743,14 @@ export type QualityCriterionDistributionCreateManyDistributedByInput = {
   criterionId: string
   targetTypeId: string
   targetRefId?: string | null
+  targetRefScope?: string
   distributedAt?: Date | string
 }
 
 export type QualityCriterionDistributionUpdateWithoutDistributedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   targetRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetRefScope?: Prisma.StringFieldUpdateOperationsInput | string
   distributedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   criterion?: Prisma.QualityCriterionUpdateOneRequiredWithoutDistributionsNestedInput
   targetType?: Prisma.QualityCriterionTargetTypeUpdateOneRequiredWithoutDistributionsNestedInput
@@ -720,6 +762,7 @@ export type QualityCriterionDistributionUncheckedUpdateWithoutDistributedByInput
   criterionId?: Prisma.StringFieldUpdateOperationsInput | string
   targetTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   targetRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetRefScope?: Prisma.StringFieldUpdateOperationsInput | string
   distributedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   checks?: Prisma.QualityCriterionCheckUncheckedUpdateManyWithoutDistributionNestedInput
 }
@@ -729,6 +772,7 @@ export type QualityCriterionDistributionUncheckedUpdateManyWithoutDistributedByI
   criterionId?: Prisma.StringFieldUpdateOperationsInput | string
   targetTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   targetRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetRefScope?: Prisma.StringFieldUpdateOperationsInput | string
   distributedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -736,6 +780,7 @@ export type QualityCriterionDistributionCreateManyTargetTypeInput = {
   id?: string
   criterionId: string
   targetRefId?: string | null
+  targetRefScope?: string
   distributedByUserId: string
   distributedAt?: Date | string
 }
@@ -743,6 +788,7 @@ export type QualityCriterionDistributionCreateManyTargetTypeInput = {
 export type QualityCriterionDistributionUpdateWithoutTargetTypeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   targetRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetRefScope?: Prisma.StringFieldUpdateOperationsInput | string
   distributedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   criterion?: Prisma.QualityCriterionUpdateOneRequiredWithoutDistributionsNestedInput
   distributedBy?: Prisma.UserUpdateOneRequiredWithoutQualityCriterionDistributionsNestedInput
@@ -753,6 +799,7 @@ export type QualityCriterionDistributionUncheckedUpdateWithoutTargetTypeInput = 
   id?: Prisma.StringFieldUpdateOperationsInput | string
   criterionId?: Prisma.StringFieldUpdateOperationsInput | string
   targetRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetRefScope?: Prisma.StringFieldUpdateOperationsInput | string
   distributedByUserId?: Prisma.StringFieldUpdateOperationsInput | string
   distributedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   checks?: Prisma.QualityCriterionCheckUncheckedUpdateManyWithoutDistributionNestedInput
@@ -762,6 +809,7 @@ export type QualityCriterionDistributionUncheckedUpdateManyWithoutTargetTypeInpu
   id?: Prisma.StringFieldUpdateOperationsInput | string
   criterionId?: Prisma.StringFieldUpdateOperationsInput | string
   targetRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetRefScope?: Prisma.StringFieldUpdateOperationsInput | string
   distributedByUserId?: Prisma.StringFieldUpdateOperationsInput | string
   distributedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -770,6 +818,7 @@ export type QualityCriterionDistributionCreateManyCriterionInput = {
   id?: string
   targetTypeId: string
   targetRefId?: string | null
+  targetRefScope?: string
   distributedByUserId: string
   distributedAt?: Date | string
 }
@@ -777,6 +826,7 @@ export type QualityCriterionDistributionCreateManyCriterionInput = {
 export type QualityCriterionDistributionUpdateWithoutCriterionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   targetRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetRefScope?: Prisma.StringFieldUpdateOperationsInput | string
   distributedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   targetType?: Prisma.QualityCriterionTargetTypeUpdateOneRequiredWithoutDistributionsNestedInput
   distributedBy?: Prisma.UserUpdateOneRequiredWithoutQualityCriterionDistributionsNestedInput
@@ -787,6 +837,7 @@ export type QualityCriterionDistributionUncheckedUpdateWithoutCriterionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   targetTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   targetRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetRefScope?: Prisma.StringFieldUpdateOperationsInput | string
   distributedByUserId?: Prisma.StringFieldUpdateOperationsInput | string
   distributedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   checks?: Prisma.QualityCriterionCheckUncheckedUpdateManyWithoutDistributionNestedInput
@@ -796,6 +847,7 @@ export type QualityCriterionDistributionUncheckedUpdateManyWithoutCriterionInput
   id?: Prisma.StringFieldUpdateOperationsInput | string
   targetTypeId?: Prisma.StringFieldUpdateOperationsInput | string
   targetRefId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetRefScope?: Prisma.StringFieldUpdateOperationsInput | string
   distributedByUserId?: Prisma.StringFieldUpdateOperationsInput | string
   distributedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -836,6 +888,7 @@ export type QualityCriterionDistributionSelect<ExtArgs extends runtime.Types.Ext
   criterionId?: boolean
   targetTypeId?: boolean
   targetRefId?: boolean
+  targetRefScope?: boolean
   distributedByUserId?: boolean
   distributedAt?: boolean
   criterion?: boolean | Prisma.QualityCriterionDefaultArgs<ExtArgs>
@@ -852,11 +905,12 @@ export type QualityCriterionDistributionSelectScalar = {
   criterionId?: boolean
   targetTypeId?: boolean
   targetRefId?: boolean
+  targetRefScope?: boolean
   distributedByUserId?: boolean
   distributedAt?: boolean
 }
 
-export type QualityCriterionDistributionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "criterionId" | "targetTypeId" | "targetRefId" | "distributedByUserId" | "distributedAt", ExtArgs["result"]["qualityCriterionDistribution"]>
+export type QualityCriterionDistributionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "criterionId" | "targetTypeId" | "targetRefId" | "targetRefScope" | "distributedByUserId" | "distributedAt", ExtArgs["result"]["qualityCriterionDistribution"]>
 export type QualityCriterionDistributionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   criterion?: boolean | Prisma.QualityCriterionDefaultArgs<ExtArgs>
   targetType?: boolean | Prisma.QualityCriterionTargetTypeDefaultArgs<ExtArgs>
@@ -878,6 +932,10 @@ export type $QualityCriterionDistributionPayload<ExtArgs extends runtime.Types.E
     criterionId: string
     targetTypeId: string
     targetRefId: string | null
+    /**
+     * Uniqueness scope: same value as `targetRefId` or `''` when global (`targetRefId` null). Set by the API layer.
+     */
+    targetRefScope: string
     distributedByUserId: string
     distributedAt: Date
   }, ExtArgs["result"]["qualityCriterionDistribution"]>
@@ -1257,6 +1315,7 @@ export interface QualityCriterionDistributionFieldRefs {
   readonly criterionId: Prisma.FieldRef<"QualityCriterionDistribution", 'String'>
   readonly targetTypeId: Prisma.FieldRef<"QualityCriterionDistribution", 'String'>
   readonly targetRefId: Prisma.FieldRef<"QualityCriterionDistribution", 'String'>
+  readonly targetRefScope: Prisma.FieldRef<"QualityCriterionDistribution", 'String'>
   readonly distributedByUserId: Prisma.FieldRef<"QualityCriterionDistribution", 'String'>
   readonly distributedAt: Prisma.FieldRef<"QualityCriterionDistribution", 'DateTime'>
 }

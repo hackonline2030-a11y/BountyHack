@@ -3,6 +3,7 @@ import type { FC, SVGProps } from "react";
 import {
   CourseIcon,
   EmailIcon,
+  CriteriaIcon,
   MentorIcon,
   ReportIcon,
   SettingsIcon,
@@ -19,6 +20,7 @@ export type DashboardNavLabels = {
   courses: string;
   teams: string;
   mentors: string;
+  criteria: string;
   support: string;
   settings: string;
 };
@@ -30,6 +32,7 @@ export type DashboardNavHrefs = {
   courses: string;
   teams: string;
   mentors: string;
+  criteria: string;
   support: string;
   settings: string;
 };
@@ -53,11 +56,17 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
   { key: "courses", Icon: CourseIcon },
   { key: "teams", Icon: TeamIcon },
   { key: "mentors", Icon: MentorIcon },
+  { key: "criteria", Icon: CriteriaIcon },
   { key: "support", Icon: SupportIcon },
   { key: "settings", Icon: SettingsIcon },
 ];
 
-const GROUP_BREAKS: ReadonlySet<NavKey> = new Set(["reports", "courses", "mentors"]);
+const GROUP_BREAKS: ReadonlySet<NavKey> = new Set([
+  "reports",
+  "courses",
+  "mentors",
+  "criteria",
+]);
 
 type Props = {
   labels: DashboardNavLabels;

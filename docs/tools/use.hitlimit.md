@@ -1,5 +1,9 @@
 # Rate limiting Nest — `@joint-ops/hitlimit`
 
+## Build
+
+`pnpm run build` in `server/` runs `prisma generate` first. Warnings about hitlimit source maps are harmless (ignored in `webpack.config.js`). If TypeScript complains that `targetRefScope` is unknown, run `DATABASE_NAME=MYSQL_PRISMA pnpm exec prisma generate` then rebuild.
+
 ## Activation
 
 Limitation **désactivée** automatiquement si `NODE_ENV` vaut `development` ou `test` (`server/src/shared/is-rate-limit-enabled.ts` : toutes les routes sont ignorées via `skip` dans `hitlimit.factory.ts`).
@@ -38,5 +42,10 @@ RATE_LIMIT_DEFAULT=100
 RATE_LIMIT_WINDOW=1m
 RATE_LIMIT_LOGIN=5
 RATE_LIMIT_LOGIN_WINDOW=15m
+RATE_LIMIT_PASSWORD_RESET_REQUEST=10
+RATE_LIMIT_PASSWORD_RESET_REQUEST_WINDOW=15m
 REDIS_URL=redis://127.0.0.1:6379
+# RATE_LIMIT_TRUST_PROXY=1
 ```
+
+Plafonds par route : voir `server/src/core/rate-limit/rate-limit.limits.ts` et `server/.env.example` (refresh, password-reset confirm, verify-password, etc.).

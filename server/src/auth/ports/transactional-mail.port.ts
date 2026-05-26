@@ -1,4 +1,4 @@
-/** Outbound transactional email (password reset, etc.) — implementation chooses Mailgun, Brevo, or console. */
+/** Outbound transactional email (password reset, etc.) — implementation chooses Mailgun, Brevo, SMTP, or console. */
 export const TRANSACTIONAL_MAIL_PORT = Symbol('TRANSACTIONAL_MAIL_PORT');
 
 export type OutboundEmailPayload = {

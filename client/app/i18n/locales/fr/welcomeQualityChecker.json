@@ -21,7 +21,8 @@
       "emails": "Emails",
       "reports": "Mes rapports",
       "teams": "Mes équipes",
-      "criteria": "Critères qualité",
+      "criteriaAdmin": "Administration critères",
+      "criteriaCatalog": "Référentiel critères",
       "colleagues": "Mes collègues",
       "support": "Support",
       "settings": "Paramètres"
