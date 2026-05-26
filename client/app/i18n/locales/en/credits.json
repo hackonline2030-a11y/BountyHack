@@ -6,6 +6,7 @@
   "groupsLead": "References are organized by media family.",
   "entry": {
     "author": "Author",
+    "contributors": "Contributors",
     "source": "Source",
     "license": "License"
   },

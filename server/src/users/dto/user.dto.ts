@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose, Transform, Type } from 'class-transformer';
 import { IsString, MinLength } from 'class-validator';
 import { AppRoleCode } from '../../shared/rbac/app-role.code';
+import type { UserAccountStatus } from '../models/user-account-status';
 
 /**
  * HTTP body for `POST /api/users` — only what the client sends; `user_id` / `uid` come from the JWT, not the body.
@@ -107,6 +108,15 @@ export class UserAdminSummaryDto {
       '`null` when no role is attached or the persisted name is not known to the app.',
   })
   roleCode: AppRoleCode | null;
+
+  @Expose()
+  @ApiProperty({
+    enum: ['valid', 'pending', 'unvalid'],
+    example: 'pending',
+    description:
+      'Account activation state: `valid` (password set), `pending` (invitation link still valid), `unvalid` (no password and link expired or missing).',
+  })
+  accountStatus: UserAccountStatus;
 }
 
 /**

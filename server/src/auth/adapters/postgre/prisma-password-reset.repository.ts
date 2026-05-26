@@ -36,6 +36,26 @@ export class PrismaPasswordResetRepository implements IPasswordResetRepository {
     };
   }
 
+  async findAccountByEmailForPasswordSetup(
+    email: string,
+  ): Promise<PasswordResetAccountSnapshot | null> {
+    if (!this.prisma) {
+      throw new InternalServerErrorException('Prisma service is not available');
+    }
+    const row = await this.prisma.user.findUnique({
+      where: { email },
+      select: { id: true, username: true, email: true },
+    });
+    if (!row?.email) {
+      return null;
+    }
+    return {
+      userId: row.id,
+      username: row.username,
+      email: row.email,
+    };
+  }
+
   async savePendingResetToken(
     userId: string,
     tokenHash: string,

@@ -7,6 +7,7 @@ This project includes third-party resources and tools used in both the client an
 ### Logo and Visual Assets
 
 - **Main logo icon**: [Icon by Izwar Muis](https://www.magnific.com/icon/web_14552247#fromView=search&page=2&position=84&uuid=097fd2df-5ba7-48c3-a18c-04be63e0a8b7)
+- **[mail](https://lucide.dev/icons/mail) icon** (admin user-management email actions) — [Lucide Icons](https://lucide.dev/icons/mail), ISC License. Contributors: [Eric Fennis](https://github.com/ericfennis), [Karsa](https://github.com/karsa-mistmere), [Cole Bemis](https://github.com/colebemis), [Jakob Guddas](https://github.com/jguddas).
 
 ## Server
 

@@ -16,11 +16,16 @@ export class JwtRegisterRequestDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: 'StrongPassword123!', description: 'Plain password.' })
+  @ApiPropertyOptional({
+    example: 'en',
+    description:
+      'Locale for the account-setup email link (`en` | `fr`). Defaults to `en`.',
+  })
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsOptional()
   @IsString()
-  @MinLength(1)
-  password: string;
+  @Matches(/^(en|fr)$/i)
+  locale?: string;
 
   @ApiPropertyOptional({
     enum: AppRoleCode,
@@ -111,4 +116,13 @@ export class JwtAuthResponseDto {
       'When true, the account expects a second factor; client should complete 2FA before relying on the session.',
   })
   require2FA?: boolean;
+}
+
+/** JSON returned when super-admin registers a user without password (invitation email). */
+export class JwtRegisterInvitationResponseDto {
+  @ApiProperty({ type: JwtAuthUserDto })
+  user: JwtAuthUserDto;
+
+  @ApiProperty({ example: true })
+  invitationSent: true;
 }
