@@ -81,14 +81,8 @@ export function ResetPasswordForm({ tokenFromQuery, isAccountSetup = false }: Pr
           {t("resetPage.missingToken")}
         </p>
         <Link
-          href={`${prefix}/forgot-password`}
-          className="text-sm text-white/90 underline-offset-2 hover:underline"
-        >
-          {t("resetPage.requestNewLink")}
-        </Link>
-        <Link
           href={`${prefix}/login`}
-          className="text-sm text-white/80 hover:text-white hover:underline"
+          className="text-sm text-white/90 underline-offset-2 hover:text-white hover:underline"
         >
           {t("resetForm.backToLogin")}
         </Link>

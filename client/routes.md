@@ -10,8 +10,7 @@ All user-facing pages live under the dynamic segment **`[lng]`** (supported loca
 |------|--------|
 | `/{lng}` | Home |
 | `/{lng}/login` | Login (public) |
-| `/{lng}/forgot-password` | Forgot password — `POST …/auth/password-reset/request` (Nest direct from browser; neutral success copy) |
-| `/{lng}/password-reset` | Set new password from e-mail link (`?token=…`) — `POST …/auth/password-reset/confirm` |
+| `/{lng}/password-reset` | Set new password from super-admin e-mail link (`?token=…`, optional `?flow=setup` for invitation) — `POST …/auth/password-reset/confirm` |
 | `/{lng}/administration` | **Admin:** user-management table (username / email / roleCode) backed by Nest `GET …/users`; **`verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN])`**; others → **`notFound()`** (404) |
 | `/{lng}/administration/register` | **Admin:** register a new user via Nest; **`verifySessionForRoles(lng, [AppRoleCode.SUPER_ADMIN])`**; others → **`notFound()`** (404) (see [`lib/dal/session.ts`](lib/dal/session.ts)). Successful submit redirects back to `/{lng}/administration` and refreshes the table. |
 | `/{lng}/welcome-hunter` | Hunter welcome dashboard under `(hunter)`; **`verifySessionForRoles(lng, [AppRoleCode.HUNTER])`**; others → **`notFound()`** (404) |
@@ -92,10 +91,10 @@ These are **requested by the browser** (or by client code) and therefore appear 
   - Role refused → **HTTP 403** with `{ error: "role_not_allowed", roleCode }`, **no cookie is set**, the user stays on `/{lng}/login` with `loginForm.errorRoleNotAllowed` visible. There is no fallback dashboard and no create-then-revoke window.
   - Nest unreachable / token rejected → standard 401/502 error path. The role-resolution helper lives in [`lib/server/fetch-role-from-nest.ts`](lib/server/fetch-role-from-nest.ts).
 
-## Password reset (Nest direct)
+## Password reset (Nest direct, super-admin e-mail links only)
 
-- **Request link:** `POST …/auth/password-reset/request` with JSON `{ "email", "locale" }` — implemented in [`modules/auth`](modules/auth) (gateway → use case); UI: [`ForgotPasswordForm`](modules/auth/nextjs/components/forms/ForgotPasswordForm.tsx) on `/{lng}/forgot-password`. Success is always the same neutral message (anti-enumeration); errors use Nest body parsing via [`messageFromNestBody`](lib/auth-api.ts).
-- **Confirm:** `POST …/auth/password-reset/confirm` with `{ "token", "password" }` — [`ResetPasswordForm`](modules/auth/nextjs/components/forms/ResetPasswordForm.tsx) on `/{lng}/password-reset?token=…`. On success, redirect to `/{lng}/login?passwordReset=success` (banner then URL is cleaned client-side).
+- **Confirm:** `POST …/auth/password-reset/confirm` with `{ "token", "password" }` — [`ResetPasswordForm`](modules/auth/nextjs/components/forms/ResetPasswordForm.tsx) on `/{lng}/password-reset?token=…` (optional `flow=setup` for first-time password). On success, redirect to `/{lng}/login?passwordReset=success` or `?accountSetup=success` (banner then URL is cleaned client-side).
+- **Issue link (server only):** super-admin actions on Nest — register without password, `resend-invitation`, `force-password-reset` — send e-mails with the same `password-reset` page; no public “forgot password” form.
 
 ## Nest calls from the server (“GET system” / `users/me`)
 

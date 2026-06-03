@@ -39,13 +39,6 @@ export const routeHitLimits = {
     '15m',
   ),
 
-  passwordResetRequest: routeLimit(
-    'RATE_LIMIT_PASSWORD_RESET_REQUEST',
-    'RATE_LIMIT_PASSWORD_RESET_REQUEST_WINDOW',
-    10,
-    '15m',
-  ),
-
   passwordResetConfirm: routeLimit(
     'RATE_LIMIT_PASSWORD_RESET_CONFIRM',
     'RATE_LIMIT_PASSWORD_RESET_CONFIRM_WINDOW',

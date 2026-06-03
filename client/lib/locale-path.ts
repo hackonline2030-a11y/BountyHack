@@ -11,11 +11,7 @@ export function isAuthLoginPath(pathname: string): boolean {
 
 /** Highlight header « Login » on login and password-reset flows (same nav group). */
 export function isAuthHeaderLoginHighlightPath(pathname: string): boolean {
-  return /^\/(en|fr)\/(login|forgot-password|password-reset)$/.test(pathname);
-}
-
-export function isForgotPasswordPath(pathname: string): boolean {
-  return /^\/(en|fr)\/forgot-password$/.test(pathname);
+  return /^\/(en|fr)\/(login|password-reset)$/.test(pathname);
 }
 
 export function isPasswordResetPath(pathname: string): boolean {

@@ -25,9 +25,9 @@ C’est **normal** lorsque ce contexte délimité gère surtout **la vérificati
 
 ---
 
-## Réinitialisation de mot de passe (« forgot / reset »)
+## Réinitialisation / activation mot de passe (super-admin + confirm public)
 
-Cette fonctionnalité illustre les règles ci-dessus : **pas de nouveau modèle dans `auth/domain`** (pas d’agrégat « PasswordReset » au sens DDD strict) — les invariants portent surtout sur **l’absence de fuite d’information** (anti-énumération), **la durée de vie** et **l’usage unique** du jeton, gérés en **application** + **persistance Prisma**.
+Cette fonctionnalité illustre les règles ci-dessus : **pas de nouveau modèle dans `auth/domain`** — les invariants portent sur **la durée de vie** et **l’usage unique** du jeton. Les liens sont émis **uniquement** par le super-admin (invitation, renvoi, renouvellement forcé) ; le client public n’expose que **`POST …/password-reset/confirm`** (pas de demande « mot de passe oublié » par e-mail).
 
 ### Périmètre d’exécution
 
@@ -39,17 +39,16 @@ Cette fonctionnalité illustre les règles ci-dessus : **pas de nouveau modèle 
 |--------|------|------------------------|
 | **Domaine** | Inchangé : pas d’entité dédiée tant que les règles restent « jeton + e-mail + credential » sans vocabulaire métier partagé ailleurs. | — |
 | **Ports** | Contrats stables : envoi transactionnel, persistance reset + transaction avec `users` / `refresh_tokens`. | `auth/ports/transactional-mail.port.ts`, `auth/ports/password-reset.repository.ts` |
-| **Application** | Orchestration : demande (jeton opaque, hash, TTL, e-mail) ; confirmation (hash mot de passe, transaction). Types d’entrée simples (`RequestPasswordResetInput`, etc.), **pas** les DTO Swagger. | `auth/application/commands/request-password-reset.command.ts`, `complete-password-reset.command.ts` |
+| **Application** | Émission jeton + e-mail (admin) ; confirmation (hash mot de passe, transaction). | `admin-force-password-reset.command.ts`, `register-user-by-admin.command.ts`, `resend-user-invitation.command.ts`, `issue-password-setup-token.service.ts`, `complete-password-reset.command.ts` |
 | **DTO HTTP** | Validation (`class-validator`) + **OpenAPI** (`@ApiProperty`, schémas de réponse). | `auth/dto/password-reset.dto.ts`, `password-reset-response.dto.ts` |
 | **Adapters** | Prisma (`password_reset_tokens`), e-mail transactionnel : un fournisseur parmi **console / mailgun / brevo / smtp** (`MAIL_PROVIDER`) ; clé **`MAIL_TRANSACTIONAL_API_KEY`** (API) ou **`SMTP_*`** (SMTP, ex. LWS). | `auth/adapters/postgre/prisma-password-reset.repository.ts`, `auth/adapters/transactional-mail/*`, `transactional-mail.factory.ts` |
 | **Config** | URL publique du front, locale du lien, TTL du jeton — hors domaine. | `auth/config/password-reset-public-url.ts`, `adapters/utils/password-reset-token-expiry.util.ts` |
 
-Le **contrôleur** (`auth/controllers/password-reset.controller.ts`) ne fait que : valider le corps (DTO), appeler `execute({ ... })` avec des champs primitifs, renvoyer le corps HTTP de succès. **OpenAPI** : tag **`auth`**, `@ApiBody`, réponses typées (`PasswordResetRequestAcceptedDto`, `PasswordResetConfirmSuccessDto`), erreurs **400** / **503** / **500** documentées avec `HttpExceptionBodyDto` où pertinent.
+Le **contrôleur** (`auth/controllers/password-reset.controller.ts`) expose **`POST …/password-reset/confirm`** uniquement.
 
 ### Sécurité (intention documentaire)
 
-- **Anti-énumération** : `POST …/password-reset/request` renvoie toujours la même réponse de succès pour un corps valide ; aucune indication « compte inconnu ».
-- **Pas de secret dans le JSON** : le lien et le jeton brut ne sont jamais renvoyés dans la réponse HTTP de la demande.
+- **Pas de secret dans le JSON** : le lien et le jeton brut ne sont jamais renvoyés dans une réponse HTTP d’émission (e-mail uniquement).
 - **Jeton** : opaque, **hash SHA-256** en base (même utilitaire que les refresh opaques), TTL configurable, **une consommation** valide invalide les autres jetons pending du même utilisateur via la transaction.
 - **Après confirmation** : toutes les lignes **`refresh_tokens`** de l’utilisateur sont supprimées (déconnexion effective des sessions longues côté API).
 
@@ -60,7 +59,7 @@ Si le produit exige des invariants métier réutilisables (ex. « compte verroui
 ### Alternatives envisagées
 
 1. **Stocker le jeton de reset dans un JWT signé** — Rejeté. Un JWT n’est pas révocable côté serveur ; un attaquant qui intercepte le lien ne peut être stoppé qu’en attendant l’expiration. L’approche jeton opaque + hash SHA-256 en base permet une invalidation transactionnelle (consommation d’un jeton invalide les autres jetons pending du même utilisateur).
-2. **Renvoyer le jeton brut dans la réponse HTTP de `password-reset/request`** — Rejeté. Casserait l’anti-énumération (un attaquant qui POST des emails apprendrait lesquels existent) et exposerait le secret hors du canal mail. Le lien et le jeton brut ne quittent jamais le serveur autrement que par l’email envoyé.
+2. **Renvoyer le jeton brut dans une réponse HTTP d’émission** — Rejeté. Le lien et le jeton brut ne quittent le serveur autrement que par l’e-mail transactionnel.
 3. **Activer le module en mode `MONGODB` ou `IN-MEMORY`** — Rejeté. Demanderait des dépôts « no-op » qui mentiraient sur l’état du reset (succès silencieux sans persistance). Mieux : le module entier n’est enregistré que sous `DATABASE_NAME=POSTGRESQL_PRISMA`.
 4. **Conserver les `refresh_tokens` actifs après reset** — Rejeté. Une réinitialisation est un signal fort de compromission probable du compte ; révoquer toutes les sessions longues côté API est la posture par défaut. Reconnecter coûte un login, garder des refresh ouverts coûterait potentiellement une chaîne complète de prises de contrôle.
 
