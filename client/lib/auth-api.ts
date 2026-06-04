@@ -15,6 +15,15 @@ export type NestAuthRegisterBody = {
   roleCode?: string;
   /** Locale for invitation email link (`en` | `fr`). */
   locale?: string;
+  /** When true, Nest returns `accountSetupLink` instead of sending email. */
+  fakeUser?: boolean;
+};
+
+export type NestAuthRegisterInvitationResponse = {
+  user: { uid: string; email: string; username: string };
+  invitationSent: boolean;
+  fakeUser?: boolean;
+  accountSetupLink?: string;
 };
 
 /** Normalizes Nest `HttpException` / validation payloads for UI copy. */

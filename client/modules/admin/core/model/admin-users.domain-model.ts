@@ -14,6 +14,7 @@ export type AdminUserSummary = {
   email: string | null;
   roleCode: AppRoleCode | null;
   accountStatus: AdminUserAccountStatus;
+  isFakeUser: boolean;
 };
 
 /**

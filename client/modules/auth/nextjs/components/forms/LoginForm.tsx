@@ -20,7 +20,7 @@ const inputBase =
  * Intentionally not using PrimaryButton / ActionButton so refactors elsewhere cannot break login.
  */
 const loginSubmitClass =
-  "btn-common-styles btn-primary-dark self-center w-fit min-w-[10rem] disabled:opacity-50";
+  "btn-common-styles btn-primary-dark self-center w-fit min-w-[10rem]";
 
 type PostLoginTarget =
   | "welcome-admin"

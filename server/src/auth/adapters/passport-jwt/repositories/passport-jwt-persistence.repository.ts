@@ -24,6 +24,7 @@ export type PassportJwtRegisterPendingInput = {
   email: string;
   username: string;
   roleCode?: AppRoleCode;
+  isFakeUser?: boolean;
 };
 
 export type PassportJwtPersistence = {

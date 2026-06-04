@@ -140,7 +140,6 @@ export function ResetPasswordForm({ tokenFromQuery, isAccountSetup = false }: Pr
       <PrimaryButton
         type="submit"
         disabled={status === "loading" || password.length < 8 || confirm.length < 8}
-        className="disabled:opacity-50"
       >
         {status === "loading"
           ? isAccountSetup

@@ -43,6 +43,7 @@ export type UserMinAggregateOutputType = {
   passwordHash: string | null
   twoFactorEnabled: bigint | null
   roleId: number | null
+  isFakeUser: boolean | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -52,6 +53,7 @@ export type UserMaxAggregateOutputType = {
   passwordHash: string | null
   twoFactorEnabled: bigint | null
   roleId: number | null
+  isFakeUser: boolean | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -61,6 +63,7 @@ export type UserCountAggregateOutputType = {
   passwordHash: number
   twoFactorEnabled: number
   roleId: number
+  isFakeUser: number
   _all: number
 }
 
@@ -82,6 +85,7 @@ export type UserMinAggregateInputType = {
   passwordHash?: true
   twoFactorEnabled?: true
   roleId?: true
+  isFakeUser?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -91,6 +95,7 @@ export type UserMaxAggregateInputType = {
   passwordHash?: true
   twoFactorEnabled?: true
   roleId?: true
+  isFakeUser?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -100,6 +105,7 @@ export type UserCountAggregateInputType = {
   passwordHash?: true
   twoFactorEnabled?: true
   roleId?: true
+  isFakeUser?: true
   _all?: true
 }
 
@@ -196,6 +202,7 @@ export type UserGroupByOutputType = {
   passwordHash: string | null
   twoFactorEnabled: bigint
   roleId: number | null
+  isFakeUser: boolean
   _count: UserCountAggregateOutputType | null
   _avg: UserAvgAggregateOutputType | null
   _sum: UserSumAggregateOutputType | null
@@ -228,6 +235,7 @@ export type UserWhereInput = {
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
   twoFactorEnabled?: Prisma.BigIntFilter<"User"> | bigint | number
   roleId?: Prisma.IntNullableFilter<"User"> | number | null
+  isFakeUser?: Prisma.BoolFilter<"User"> | boolean
   twoFactors?: Prisma.TwoFactorListRelationFilter
   refreshTokens?: Prisma.RefreshTokenListRelationFilter
   passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
@@ -251,6 +259,7 @@ export type UserOrderByWithRelationInput = {
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
   twoFactorEnabled?: Prisma.SortOrder
   roleId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isFakeUser?: Prisma.SortOrder
   twoFactors?: Prisma.TwoFactorOrderByRelationAggregateInput
   refreshTokens?: Prisma.RefreshTokenOrderByRelationAggregateInput
   passwordResetTokens?: Prisma.PasswordResetTokenOrderByRelationAggregateInput
@@ -278,6 +287,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
   twoFactorEnabled?: Prisma.BigIntFilter<"User"> | bigint | number
   roleId?: Prisma.IntNullableFilter<"User"> | number | null
+  isFakeUser?: Prisma.BoolFilter<"User"> | boolean
   twoFactors?: Prisma.TwoFactorListRelationFilter
   refreshTokens?: Prisma.RefreshTokenListRelationFilter
   passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
@@ -301,6 +311,7 @@ export type UserOrderByWithAggregationInput = {
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
   twoFactorEnabled?: Prisma.SortOrder
   roleId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isFakeUser?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -318,6 +329,7 @@ export type UserScalarWhereWithAggregatesInput = {
   passwordHash?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   twoFactorEnabled?: Prisma.BigIntWithAggregatesFilter<"User"> | bigint | number
   roleId?: Prisma.IntNullableWithAggregatesFilter<"User"> | number | null
+  isFakeUser?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
 }
 
 export type UserCreateInput = {
@@ -326,6 +338,7 @@ export type UserCreateInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -349,6 +362,7 @@ export type UserUncheckedCreateInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   roleId?: number | null
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -370,6 +384,7 @@ export type UserUpdateInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -393,6 +408,7 @@ export type UserUncheckedUpdateInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -415,6 +431,7 @@ export type UserCreateManyInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   roleId?: number | null
+  isFakeUser?: boolean
 }
 
 export type UserUpdateManyMutationInput = {
@@ -423,6 +440,7 @@ export type UserUpdateManyMutationInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -432,6 +450,7 @@ export type UserUncheckedUpdateManyInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type UserOrderByRelevanceInput = {
@@ -447,6 +466,7 @@ export type UserCountOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder
   twoFactorEnabled?: Prisma.SortOrder
   roleId?: Prisma.SortOrder
+  isFakeUser?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
@@ -461,6 +481,7 @@ export type UserMaxOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder
   twoFactorEnabled?: Prisma.SortOrder
   roleId?: Prisma.SortOrder
+  isFakeUser?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -470,6 +491,7 @@ export type UserMinOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder
   twoFactorEnabled?: Prisma.SortOrder
   roleId?: Prisma.SortOrder
+  isFakeUser?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
@@ -511,6 +533,10 @@ export type BigIntFieldUpdateOperationsInput = {
   decrement?: bigint | number
   multiply?: bigint | number
   divide?: bigint | number
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type NullableIntFieldUpdateOperationsInput = {
@@ -757,6 +783,7 @@ export type UserCreateWithoutRoleInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -778,6 +805,7 @@ export type UserUncheckedCreateWithoutRoleInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -829,6 +857,7 @@ export type UserScalarWhereInput = {
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
   twoFactorEnabled?: Prisma.BigIntFilter<"User"> | bigint | number
   roleId?: Prisma.IntNullableFilter<"User"> | number | null
+  isFakeUser?: Prisma.BoolFilter<"User"> | boolean
 }
 
 export type UserCreateWithoutRefreshTokensInput = {
@@ -837,6 +866,7 @@ export type UserCreateWithoutRefreshTokensInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
@@ -859,6 +889,7 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   roleId?: number | null
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportDraftsOwned?: Prisma.ReportDraftUncheckedCreateNestedManyWithoutHunterInput
@@ -895,6 +926,7 @@ export type UserUpdateWithoutRefreshTokensInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
@@ -917,6 +949,7 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reportDraftsOwned?: Prisma.ReportDraftUncheckedUpdateManyWithoutHunterNestedInput
@@ -937,6 +970,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
@@ -959,6 +993,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   roleId?: number | null
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   reportDraftsOwned?: Prisma.ReportDraftUncheckedCreateNestedManyWithoutHunterInput
@@ -995,6 +1030,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
@@ -1017,6 +1053,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   reportDraftsOwned?: Prisma.ReportDraftUncheckedUpdateManyWithoutHunterNestedInput
@@ -1037,6 +1074,7 @@ export type UserCreateWithoutTwoFactorsInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
@@ -1059,6 +1097,7 @@ export type UserUncheckedCreateWithoutTwoFactorsInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   roleId?: number | null
+  isFakeUser?: boolean
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   reportDraftsOwned?: Prisma.ReportDraftUncheckedCreateNestedManyWithoutHunterInput
@@ -1095,6 +1134,7 @@ export type UserUpdateWithoutTwoFactorsInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
@@ -1117,6 +1157,7 @@ export type UserUncheckedUpdateWithoutTwoFactorsInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   reportDraftsOwned?: Prisma.ReportDraftUncheckedUpdateManyWithoutHunterNestedInput
@@ -1137,6 +1178,7 @@ export type UserCreateWithoutReportDraftsOwnedInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1159,6 +1201,7 @@ export type UserUncheckedCreateWithoutReportDraftsOwnedInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   roleId?: number | null
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1184,6 +1227,7 @@ export type UserCreateWithoutReportDraftsAsHunterWriterInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1206,6 +1250,7 @@ export type UserUncheckedCreateWithoutReportDraftsAsHunterWriterInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   roleId?: number | null
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1242,6 +1287,7 @@ export type UserUpdateWithoutReportDraftsOwnedInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -1264,6 +1310,7 @@ export type UserUncheckedUpdateWithoutReportDraftsOwnedInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1295,6 +1342,7 @@ export type UserUpdateWithoutReportDraftsAsHunterWriterInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -1317,6 +1365,7 @@ export type UserUncheckedUpdateWithoutReportDraftsAsHunterWriterInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1337,6 +1386,7 @@ export type UserCreateWithoutReportTeamMembersInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1359,6 +1409,7 @@ export type UserUncheckedCreateWithoutReportTeamMembersInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   roleId?: number | null
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1395,6 +1446,7 @@ export type UserUpdateWithoutReportTeamMembersInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -1417,6 +1469,7 @@ export type UserUncheckedUpdateWithoutReportTeamMembersInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1437,6 +1490,7 @@ export type UserCreateWithoutReportTeamJoinRequestsInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1459,6 +1513,7 @@ export type UserUncheckedCreateWithoutReportTeamJoinRequestsInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   roleId?: number | null
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1484,6 +1539,7 @@ export type UserCreateWithoutReportTeamJoinRequestsDecidedInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1506,6 +1562,7 @@ export type UserUncheckedCreateWithoutReportTeamJoinRequestsDecidedInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   roleId?: number | null
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1542,6 +1599,7 @@ export type UserUpdateWithoutReportTeamJoinRequestsInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -1564,6 +1622,7 @@ export type UserUncheckedUpdateWithoutReportTeamJoinRequestsInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1595,6 +1654,7 @@ export type UserUpdateWithoutReportTeamJoinRequestsDecidedInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -1617,6 +1677,7 @@ export type UserUncheckedUpdateWithoutReportTeamJoinRequestsDecidedInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1637,6 +1698,7 @@ export type UserCreateWithoutReportTeamLeaveRequestsInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1659,6 +1721,7 @@ export type UserUncheckedCreateWithoutReportTeamLeaveRequestsInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   roleId?: number | null
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1684,6 +1747,7 @@ export type UserCreateWithoutReportTeamLeaveRequestsDecidedInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1706,6 +1770,7 @@ export type UserUncheckedCreateWithoutReportTeamLeaveRequestsDecidedInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   roleId?: number | null
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1742,6 +1807,7 @@ export type UserUpdateWithoutReportTeamLeaveRequestsInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -1764,6 +1830,7 @@ export type UserUncheckedUpdateWithoutReportTeamLeaveRequestsInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1795,6 +1862,7 @@ export type UserUpdateWithoutReportTeamLeaveRequestsDecidedInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -1817,6 +1885,7 @@ export type UserUncheckedUpdateWithoutReportTeamLeaveRequestsDecidedInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1837,6 +1906,7 @@ export type UserCreateWithoutQualityCriteriaCreatedInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1859,6 +1929,7 @@ export type UserUncheckedCreateWithoutQualityCriteriaCreatedInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   roleId?: number | null
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1895,6 +1966,7 @@ export type UserUpdateWithoutQualityCriteriaCreatedInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -1917,6 +1989,7 @@ export type UserUncheckedUpdateWithoutQualityCriteriaCreatedInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1937,6 +2010,7 @@ export type UserCreateWithoutQualityCriterionDistributionsInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -1959,6 +2033,7 @@ export type UserUncheckedCreateWithoutQualityCriterionDistributionsInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   roleId?: number | null
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1995,6 +2070,7 @@ export type UserUpdateWithoutQualityCriterionDistributionsInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -2017,6 +2093,7 @@ export type UserUncheckedUpdateWithoutQualityCriterionDistributionsInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2037,6 +2114,7 @@ export type UserCreateWithoutQualityCriterionChecksInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
@@ -2059,6 +2137,7 @@ export type UserUncheckedCreateWithoutQualityCriterionChecksInput = {
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
   roleId?: number | null
+  isFakeUser?: boolean
   twoFactors?: Prisma.TwoFactorUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2095,6 +2174,7 @@ export type UserUpdateWithoutQualityCriterionChecksInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -2117,6 +2197,7 @@ export type UserUncheckedUpdateWithoutQualityCriterionChecksInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2137,6 +2218,7 @@ export type UserCreateManyRoleInput = {
   email?: string | null
   passwordHash?: string | null
   twoFactorEnabled?: bigint | number
+  isFakeUser?: boolean
 }
 
 export type UserUpdateWithoutRoleInput = {
@@ -2145,6 +2227,7 @@ export type UserUpdateWithoutRoleInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
@@ -2166,6 +2249,7 @@ export type UserUncheckedUpdateWithoutRoleInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
   twoFactors?: Prisma.TwoFactorUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2187,6 +2271,7 @@ export type UserUncheckedUpdateManyWithoutRoleInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   twoFactorEnabled?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  isFakeUser?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -2335,6 +2420,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   passwordHash?: boolean
   twoFactorEnabled?: boolean
   roleId?: boolean
+  isFakeUser?: boolean
   twoFactors?: boolean | Prisma.User$twoFactorsArgs<ExtArgs>
   refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
@@ -2361,9 +2447,10 @@ export type UserSelectScalar = {
   passwordHash?: boolean
   twoFactorEnabled?: boolean
   roleId?: boolean
+  isFakeUser?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "email" | "passwordHash" | "twoFactorEnabled" | "roleId", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "email" | "passwordHash" | "twoFactorEnabled" | "roleId" | "isFakeUser", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   twoFactors?: boolean | Prisma.User$twoFactorsArgs<ExtArgs>
   refreshTokens?: boolean | Prisma.User$refreshTokensArgs<ExtArgs>
@@ -2413,6 +2500,10 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
      * Optional RBAC role (`roles.id`). Nullable for existing rows until backfill.
      */
     roleId: number | null
+    /**
+     * True when created via super-admin fake-user flow (test account; no invitation email).
+     */
+    isFakeUser: boolean
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -2802,6 +2893,7 @@ export interface UserFieldRefs {
   readonly passwordHash: Prisma.FieldRef<"User", 'String'>
   readonly twoFactorEnabled: Prisma.FieldRef<"User", 'BigInt'>
   readonly roleId: Prisma.FieldRef<"User", 'Int'>
+  readonly isFakeUser: Prisma.FieldRef<"User", 'Boolean'>
 }
     
 

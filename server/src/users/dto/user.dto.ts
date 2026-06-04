@@ -117,6 +117,14 @@ export class UserAdminSummaryDto {
       'Account activation state: `valid` (password set), `pending` (invitation link still valid), `unvalid` (no password and link expired or missing).',
   })
   accountStatus: UserAccountStatus;
+
+  @Expose()
+  @ApiProperty({
+    example: false,
+    description:
+      'True when the account was created as a fake / test user (super-admin registration with `fakeUser`).',
+  })
+  isFakeUser: boolean;
 }
 
 /**

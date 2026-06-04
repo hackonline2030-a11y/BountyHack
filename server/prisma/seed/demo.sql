@@ -1,5 +1,8 @@
--- Local-only demo account (super-admin). Do NOT run in production unless intended.
--- Keep in sync with docker dump / docs if you change credentials.
+-- Local-only demo accounts (super-admin). Do NOT run in production unless intended.
+--
+-- demo-user@example.local — password from existing demo seed hash (unchanged).
+-- admin@example.com — Jéremy / password (scrypt, fixed salt for reproducible seed).
+
 INSERT INTO "users" ("id", "username", "email", "password_hash")
 VALUES (
   'demo-user',
@@ -12,7 +15,19 @@ ON CONFLICT ("id") DO UPDATE SET
   "email" = EXCLUDED."email",
   "password_hash" = EXCLUDED."password_hash";
 
+INSERT INTO "users" ("id", "username", "email", "password_hash")
+VALUES (
+  'local-admin-jeremy',
+  'Jéremy',
+  'admin@example.com',
+  'seedadminlocal0000000000000001:978ee4be802dae139294bd6e018208e45a7335f8194cd39a0335a6039afb9ef5a245d5cc5be53dad5b55fd0966cb2c749437977ff2f867f519f4b072552f7d45'
+)
+ON CONFLICT ("id") DO UPDATE SET
+  "username" = EXCLUDED."username",
+  "email" = EXCLUDED."email",
+  "password_hash" = EXCLUDED."password_hash";
+
 UPDATE "users"
 SET "role_id" = 2
-WHERE "id" = 'demo-user'
+WHERE "id" IN ('demo-user', 'local-admin-jeremy')
   AND EXISTS (SELECT 1 FROM "roles" WHERE "id" = 2 AND "name" = 'SUPER_ADMIN');

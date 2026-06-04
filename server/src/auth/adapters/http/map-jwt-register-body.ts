@@ -11,5 +11,6 @@ export function toRegisterWithPasswordInput(
     username: body.username,
     roleCode: body.roleCode ?? AppRoleCode.USER,
     locale: body.locale,
+    fakeUser: body.fakeUser === true,
   };
 }

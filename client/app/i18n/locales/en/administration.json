@@ -24,6 +24,7 @@
       "pending": "Pending",
       "unvalid": "Invalid"
     },
+    "fakeUserBadge": "Fake",
     "resendTitle": "Resend activation email",
     "resendTooltip": "Send a new activation email with a fresh link (previous link expired or invalid).",
     "resendAria": "Resend activation email to {{username}}",
