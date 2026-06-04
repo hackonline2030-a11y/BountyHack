@@ -23,13 +23,10 @@ const inputBase =
 function isFakeUserRegisterResponse(
   data: unknown,
 ): data is NestAuthRegisterInvitationResponse & { accountSetupLink: string } {
-  return (
-    typeof data === "object" &&
-    data !== null &&
-    (data as NestAuthRegisterInvitationResponse).fakeUser === true &&
-    typeof (data as NestAuthRegisterInvitationResponse).accountSetupLink === "string" &&
-    (data as NestAuthRegisterInvitationResponse).accountSetupLink.length > 0
-  );
+  if (typeof data !== "object" || data === null) return false;
+  const body = data as NestAuthRegisterInvitationResponse;
+  const link = body.accountSetupLink;
+  return body.fakeUser === true && typeof link === "string" && link.length > 0;
 }
 
 export function RegisterForm() {
