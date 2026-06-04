@@ -1,9 +1,12 @@
 import { AppRoleCode, APP_ROLE_CODE_VALUES } from "@/lib/app-role-code";
 import type { IAdminUsersGateway } from "../gateway/admin-users.gateway";
 import type {
+  AdminUserAccountStatus,
   AdminUserSummary,
   ListAdminUsersResult,
 } from "../model/admin-users.domain-model";
+
+const ACCOUNT_STATUS_VALUES = ["valid", "pending", "unvalid"] as const;
 
 export type ListAdminUsersDependencies = {
   gateway: IAdminUsersGateway;
@@ -34,6 +37,17 @@ function readRoleCode(record: Record<string, unknown>): AppRoleCode | null {
     : null;
 }
 
+function readAccountStatus(record: Record<string, unknown>): AdminUserAccountStatus {
+  const raw = record["accountStatus"];
+  if (
+    typeof raw === "string" &&
+    (ACCOUNT_STATUS_VALUES as readonly string[]).includes(raw)
+  ) {
+    return raw as AdminUserAccountStatus;
+  }
+  return "valid";
+}
+
 function parseSummary(raw: unknown): AdminUserSummary | null {
   if (!isRecord(raw)) return null;
   const uid = readNullableString(raw, "uid");
@@ -44,6 +58,7 @@ function parseSummary(raw: unknown): AdminUserSummary | null {
     username,
     email: readNullableString(raw, "email"),
     roleCode: readRoleCode(raw),
+    accountStatus: readAccountStatus(raw),
   };
 }
 

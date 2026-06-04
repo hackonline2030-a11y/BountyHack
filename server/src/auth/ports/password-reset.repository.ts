@@ -1,4 +1,4 @@
-/** Postgres + Prisma persistence for the “forgot password” flow (opaque token, hash at rest). */
+/** Postgres + Prisma persistence for admin-issued password setup / reset tokens (opaque token, hash at rest). */
 export const PASSWORD_RESET_REPOSITORY = Symbol('PASSWORD_RESET_REPOSITORY');
 
 export type PasswordResetAccountSnapshot = {
@@ -10,6 +10,11 @@ export type PasswordResetAccountSnapshot = {
 export interface IPasswordResetRepository {
   /** Accounts that can reset password locally (must have a stored password hash). */
   findPasswordAccountByEmail(
+    email: string,
+  ): Promise<PasswordResetAccountSnapshot | null>;
+
+  /** Any account with email (with or without password) — invitation / setup link. */
+  findAccountByEmailForPasswordSetup(
     email: string,
   ): Promise<PasswordResetAccountSnapshot | null>;
 

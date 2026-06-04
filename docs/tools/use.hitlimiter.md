@@ -58,7 +58,6 @@ Certaines routes ont un plafond **plus strict** que le global (défini dans `rat
 |-----------|------------|--------|---------|------------------|
 | **login** | `POST /api/auth/login` | 5 | 15m | `RATE_LIMIT_LOGIN`, `RATE_LIMIT_LOGIN_WINDOW` |
 | **refresh** | `POST /api/auth/refresh` | 30 | 15m | `RATE_LIMIT_REFRESH`, `RATE_LIMIT_REFRESH_WINDOW` |
-| **passwordResetRequest** | `POST /api/auth/password-reset/request` | 10 | 15m | `RATE_LIMIT_PASSWORD_RESET_REQUEST`, `RATE_LIMIT_PASSWORD_RESET_REQUEST_WINDOW` |
 | **passwordResetConfirm** | `POST /api/auth/password-reset/confirm` | 10 | 15m | `RATE_LIMIT_PASSWORD_RESET_CONFIRM`, `RATE_LIMIT_PASSWORD_RESET_CONFIRM_WINDOW` |
 | **profileVerifyPassword** | `POST /api/users/me/profile/verify-password` | 10 | 15m | `RATE_LIMIT_PROFILE_VERIFY_PASSWORD`, `RATE_LIMIT_PROFILE_VERIFY_PASSWORD_WINDOW` |
 | **accountVerifyPassword** | `POST /api/users/me/account/verify-password` | 5 | 15m | `RATE_LIMIT_ACCOUNT_VERIFY_PASSWORD`, `RATE_LIMIT_ACCOUNT_VERIFY_PASSWORD_WINDOW` |
@@ -89,8 +88,8 @@ RATE_LIMIT_DEFAULT=100
 RATE_LIMIT_WINDOW=1m
 RATE_LIMIT_LOGIN=5
 RATE_LIMIT_LOGIN_WINDOW=15m
-RATE_LIMIT_PASSWORD_RESET_REQUEST=10
-RATE_LIMIT_PASSWORD_RESET_REQUEST_WINDOW=15m
+RATE_LIMIT_PASSWORD_RESET_CONFIRM=10
+RATE_LIMIT_PASSWORD_RESET_CONFIRM_WINDOW=15m
 REDIS_URL=redis://127.0.0.1:6379
 # RATE_LIMIT_TRUST_PROXY=1
 ```

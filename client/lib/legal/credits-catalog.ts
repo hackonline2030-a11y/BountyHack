@@ -1,8 +1,15 @@
 export type CreditCategory = "images" | "videos" | "fonts" | "audio" | "other";
 
+export type CreditContributor = {
+  name: string;
+  profileUrl: string;
+};
+
 export type CreditItem = {
   name: string;
   author?: string;
+  /** When set, shown as linked contributor list (e.g. Lucide icon authors). */
+  contributors?: CreditContributor[];
   sourceUrl?: string;
   license?: string;
 };
@@ -45,6 +52,17 @@ export const CREDITS_CATALOG: Record<CreditCategory, CreditItem[]> = {
       author: "SVGBackgrounds.com (Matt Visiwig)",
       sourceUrl: "https://www.svgbackgrounds.com/set/free-svg-backgrounds-and-patterns/",
       license: "Free SVG Backgrounds and Patterns",
+    },
+    {
+      name: "mail icon (admin user-management actions)",
+      sourceUrl: "https://lucide.dev/icons/mail",
+      license: "ISC License — Lucide Icons",
+      contributors: [
+        { name: "Eric Fennis", profileUrl: "https://github.com/ericfennis" },
+        { name: "Karsa", profileUrl: "https://github.com/karsa-mistmere" },
+        { name: "Cole Bemis", profileUrl: "https://github.com/colebemis" },
+        { name: "Jakob Guddas", profileUrl: "https://github.com/jguddas" },
+      ],
     },
   ],
   videos: [],

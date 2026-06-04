@@ -29,7 +29,7 @@ import {
   clearHttpOnlyRefreshCookies,
 } from '../adapters/http/jwt-refresh-cookie';
 import { toJwtAuthAccessBody } from '../adapters/http/jwt-auth-access-response';
-import { RegisterWithPasswordCommand } from '../application/commands/register-with-password.command';
+import { RegisterUserByAdminCommand } from '../application/commands/register-user-by-admin.command';
 import { LogoutSessionCommand } from '../application/commands/logout-session.command';
 import { RefreshAccessTokenQuery } from '../application/queries/get-refresh-access-token.query';
 import type { AuthenticatedSession } from '../application/models/authenticated-session';
@@ -37,6 +37,7 @@ import { getJwtRefreshCookieName } from '../config/auth-env';
 import {
   JwtAuthResponseDto,
   JwtLoginRequestDto,
+  JwtRegisterInvitationResponseDto,
   JwtRegisterRequestDto,
 } from '../dto/jwt-auth.dto';
 import { HitLimit } from '../../core/rate-limit/hitlimit';
@@ -52,7 +53,7 @@ type LoginRequestWithIdentity = Request & {
 @Controller('auth')
 export class PassportJwtAuthController {
   constructor(
-    private readonly registerWithPassword: RegisterWithPasswordCommand,
+    private readonly registerUserByAdmin: RegisterUserByAdminCommand,
     private readonly refreshAccessTokenQuery: RefreshAccessTokenQuery,
     private readonly logoutSession: LogoutSessionCommand,
   ) {}
@@ -63,27 +64,26 @@ export class PassportJwtAuthController {
   @ApiOperation({
     summary: 'Register with Passport + JWT credentials',
     description:
-      'Creates a user (RBAC: **SUPER_ADMIN** access JWT required). Returns short-lived access JWT in JSON and sets opaque refresh on the API origin.',
+      'Creates a user (RBAC: **SUPER_ADMIN**). Sends a welcome email with an account-setup link; no password in the request body. Does not issue a session for the new user.',
   })
   @ApiBody({ type: JwtRegisterRequestDto })
   @ApiOkResponse({
-    description: 'Registration succeeded (refresh in cookie only).',
-    type: JwtAuthResponseDto,
+    description: 'User created; invitation email sent.',
+    type: JwtRegisterInvitationResponseDto,
   })
   @ApiValidationBadRequest('Request body does not pass validation (email, non-empty fields).')
   @ApiHttpUnauthorized('Missing or invalid Bearer access token.')
   @ApiHttpForbidden('Authenticated user does not have the SUPER_ADMIN role.')
   @ApiHttpConflict('Email already registered.')
   @ApiHttpInternalServerError('JWT auth is unavailable for current backend mode.')
-  async register(
-    @Body() body: JwtRegisterRequestDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const session = await this.registerWithPassword.execute(
+  async register(@Body() body: JwtRegisterRequestDto) {
+    const result = await this.registerUserByAdmin.execute(
       toRegisterWithPasswordInput(body),
     );
-    attachHttpOnlyRefreshCookie(res, session.refreshToken);
-    return toJwtAuthAccessBody(session);
+    if (result.kind === 'session') {
+      return toJwtAuthAccessBody(result.session);
+    }
+    return { user: result.user, invitationSent: result.invitationSent };
   }
 
   @Post('login')

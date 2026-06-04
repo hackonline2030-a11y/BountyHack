@@ -213,16 +213,6 @@ export function LoginForm() {
           disabled={status === "loading" || step === "totp"}
         />
       </div>
-      {step === "credentials" ? (
-        <p className="text-right text-sm">
-          <Link
-            href={`${prefix}/forgot-password`}
-            className="text-white/90 underline-offset-2 hover:text-white hover:underline"
-          >
-            {t("loginForm.forgotPasswordLink")}
-          </Link>
-        </p>
-      ) : null}
       {step === "totp" ? (
         <div>
           <label htmlFor="login-code" className="block text-sm font-medium text-white mb-1">

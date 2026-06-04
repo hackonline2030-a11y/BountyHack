@@ -25,8 +25,8 @@ export function RegisterForm() {
   const prefix = localePrefixFromPathname(pathname);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [roleCode, setRoleCode] = useState<AppRoleCode>(AppRoleCode.HUNTER);
+  const locale = prefix.replace(/^\//, "");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -39,8 +39,8 @@ export function RegisterForm() {
       const res = await postAuthRegister({
         username,
         email,
-        password,
         roleCode,
+        locale,
       });
       let data: unknown;
       try {
@@ -56,7 +56,7 @@ export function RegisterForm() {
       }
 
       setStatus("success");
-      setMessage(t("registerForm.successRegister"));
+      setMessage(t("registerForm.successInvitation"));
       /**
        * The admin who registered the user stays on the admin surface — landing
        * on /administration where the new row is visible in the management table.
@@ -128,23 +128,7 @@ export function RegisterForm() {
           disabled={status === "loading"}
         />
       </div>
-      <div>
-        <label htmlFor="register-password" className="mb-1 block text-sm font-medium text-form-text">
-          {t("registerForm.passwordLabel")}
-        </label>
-        <input
-          id="register-password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className={inputBase}
-          placeholder={t("registerForm.passwordPlaceholder")}
-          required
-          minLength={8}
-          autoComplete="new-password"
-          disabled={status === "loading"}
-        />
-      </div>
+      <p className="text-sm text-slate-600">{t("registerForm.invitationHint")}</p>
 
       {message && (
         <p

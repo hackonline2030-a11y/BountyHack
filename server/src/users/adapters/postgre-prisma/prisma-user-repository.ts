@@ -9,7 +9,12 @@ import { hashPassword, verifyPassword } from '../../../auth/adapters/utils/passw
 import type { Prisma } from '../../../generated/prisma/client';
 import { ReportTeamMemberRole } from '../../../generated/prisma/enums';
 import { IUserRepository } from '../../ports/user-repository.interface';
-import { UserAdminSummary, UserRecord } from '../../models';
+import {
+  UserAdminActivation,
+  UserAdminSummary,
+  UserRecord,
+} from '../../models';
+import { deriveUserAccountStatus } from '../../models/user-account-status';
 import { CreateUserProfilePayload } from '../../payloads';
 import type { UpdateOwnProfilePayload } from '../../payloads/update-own-profile.payload';
 import { PrismaService } from '../../../core/infrastructure/database/prisma/prisma.service';
@@ -121,11 +126,18 @@ export class PrismaUserRepository implements IUserRepository {
     if (row === null) {
       return null;
     }
+    const activation = await this.findAdminActivationById(row.id);
     return {
       uid: row.id,
       username: row.username,
       email: row.email ?? null,
       roleCode: this.toAppRoleCode(row.role?.name ?? null),
+      accountStatus: activation
+        ? deriveUserAccountStatus(
+            activation.hasPasswordHash,
+            activation.latestTokenExpiresAt,
+          )
+        : 'valid',
     };
   }
 
@@ -136,41 +148,113 @@ export class PrismaUserRepository implements IUserRepository {
         id: true,
         username: true,
         email: true,
+        passwordHash: true,
         role: { select: { name: true } },
       },
       orderBy: { username: 'asc' },
     });
+    const pendingUserIds = rows
+      .filter((row) => !row.passwordHash)
+      .map((row) => row.id);
+    const latestTokenByUserId =
+      await this.loadLatestTokenExpiryByUserIds(pendingUserIds);
+
     return rows.map((row) => ({
       uid: row.id,
       username: row.username,
       email: row.email ?? null,
       roleCode: this.toAppRoleCode(row.role?.name ?? null),
+      accountStatus: deriveUserAccountStatus(
+        Boolean(row.passwordHash),
+        latestTokenByUserId.get(row.id) ?? null,
+      ),
     }));
   }
 
   async listAdminSummaries(): Promise<UserAdminSummary[]> {
-    /**
-     * Strictly selects the four fields needed by the admin table: any other column
-     * (`passwordHash`, `twoFactorEnabled`, refresh-token relations, …) would be a
-     * data-minimisation violation if the result ever leaks. The `role` relation is
-     * joined here so the controller does not need a second round-trip per row.
-     */
     const rows = await this.prisma.user.findMany({
       select: {
         id: true,
         username: true,
         email: true,
+        passwordHash: true,
         role: { select: { name: true } },
       },
       orderBy: { username: 'asc' },
     });
 
-    return rows.map((row) => ({
-      uid: row.id,
+    const pendingUserIds = rows
+      .filter((row) => !row.passwordHash)
+      .map((row) => row.id);
+    const latestTokenByUserId =
+      await this.loadLatestTokenExpiryByUserIds(pendingUserIds);
+
+    return rows.map((row) => {
+      const latestTokenExpiresAt = latestTokenByUserId.get(row.id) ?? null;
+      return {
+        uid: row.id,
+        username: row.username,
+        email: row.email ?? null,
+        roleCode: this.toAppRoleCode(row.role?.name ?? null),
+        accountStatus: deriveUserAccountStatus(
+          Boolean(row.passwordHash),
+          latestTokenExpiresAt,
+        ),
+      };
+    });
+  }
+
+  async findAdminActivationById(uid: string): Promise<UserAdminActivation | null> {
+    const row = await this.prisma.user.findUnique({
+      where: { id: uid },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        passwordHash: true,
+      },
+    });
+    if (!row) {
+      return null;
+    }
+    const latestTokenByUserId = await this.loadLatestTokenExpiryByUserIds([row.id]);
+    return {
+      userId: row.id,
       username: row.username,
       email: row.email ?? null,
-      roleCode: this.toAppRoleCode(row.role?.name ?? null),
-    }));
+      hasPasswordHash: Boolean(row.passwordHash),
+      latestTokenExpiresAt: latestTokenByUserId.get(row.id) ?? null,
+    };
+  }
+
+  async clearPasswordForAdminReset(uid: string): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: uid },
+        data: { passwordHash: null },
+      });
+      await tx.refreshToken.deleteMany({ where: { userId: uid } });
+    });
+  }
+
+  private async loadLatestTokenExpiryByUserIds(
+    userIds: string[],
+  ): Promise<Map<string, Date>> {
+    const map = new Map<string, Date>();
+    if (userIds.length === 0) {
+      return map;
+    }
+    const tokens = await this.prisma.passwordResetToken.findMany({
+      where: { userId: { in: userIds } },
+      select: { userId: true, expiresAt: true },
+      orderBy: { expiresAt: 'desc' },
+    });
+    for (const token of tokens) {
+      if (!map.has(token.userId)) {
+        map.set(token.userId, token.expiresAt);
+      }
+    }
+    return map;
   }
 
   /**

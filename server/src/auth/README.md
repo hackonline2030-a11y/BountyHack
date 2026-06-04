@@ -36,7 +36,7 @@ Notes:
 Mode recommande pour l'auth email/mot de passe locale.
 
 - `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/refresh` et `POST /api/auth/logout` sont exposes via `PassportJwtAuthController`.
-- **PostgreSQL + Prisma uniquement** : `POST /api/auth/password-reset/request` et `POST /api/auth/password-reset/confirm` via `PasswordResetController` (reinitialisation mot de passe oublie).
+- **PostgreSQL + Prisma uniquement** : `POST /api/auth/password-reset/confirm` via `PasswordResetController` (jeton e-mail super-admin : invitation ou renouvellement). Pas de demande publique « mot de passe oublié ».
 - Le login passe par `@UseGuards(AuthGuard('local'))` et `PassportJwtLocalStrategy`.
 - `POST /api/auth/login` accepte aussi un champ optionnel `code` (TOTP 6-8 chiffres) pour les comptes avec 2FA activée.
 - Les routes protegees (`@Auth()`) passent par `PassportJwtAuthGuard` (`AuthGuard('jwt')`) et `PassportJwtStrategy`.
@@ -114,23 +114,21 @@ Pourquoi ne pas garder les secrets refresh en JSON ?
 | `RefreshAccessTokenQuery` | use case utilise par le controller HTTP `/auth/refresh`. |
 | `LogoutSessionCommand` | revocation du refresh opaque pour le cookie courant (`POST /auth/logout`). |
 | `PassportJwtTokenService` | **uniquement** verification / emission du JWT **access**. |
-| `PASSWORD_RESET_REPOSITORY` / `IPasswordResetRepository` | jeton opaque « mot de passe oublié » (hash SHA-256), table **`password_reset_tokens`**, transaction avec `users` + `refresh_tokens`. **Uniquement si `DATABASE_NAME=POSTGRESQL_PRISMA`**. |
+| `PASSWORD_RESET_REPOSITORY` / `IPasswordResetRepository` | jeton opaque setup / reset admin (hash SHA-256), table **`password_reset_tokens`**, transaction avec `users` + `refresh_tokens`. **Prisma SQL** (`POSTGRESQL_PRISMA` / `MYSQL_PRISMA`). |
 | `TRANSACTIONAL_MAIL_PORT` / `ITransactionalMailPort` | envoi e-mail : un fournisseur actif via **`MAIL_PROVIDER`** (`console` \| `mailgun` \| `brevo` \| `smtp`) ; clé **`MAIL_TRANSACTIONAL_API_KEY`** pour Mailgun/Brevo ; **`SMTP_HOST`**, **`SMTP_USER`**, **`SMTP_PASSWORD`** pour SMTP (ex. LWS). |
-| `RequestPasswordResetCommand` | enregistre un jeton + envoie le lien (anti-énumération : pas de fuite d’existence du compte dans la réponse HTTP). |
+| `IssuePasswordSetupTokenService`, `RegisterUserByAdminCommand`, `ResendUserInvitationCommand`, `AdminForcePasswordResetCommand` | émission du jeton + lien e-mail (invitation `?flow=setup` ou renouvellement). |
 | `CompletePasswordResetCommand` | valide le jeton, met à jour le mot de passe, supprime **toutes** les lignes `refresh_tokens` de l’utilisateur. |
 
 Adaptateurs infra : sous `adapters/passport-jwt/repositories/*` (dont `*-refresh-token.repository.ts`, `*-passport-jwt.repository.ts`). Table Prisma **`refresh_tokens`** (migration dediee) + DDL bootstrap facultatif dans `PrismaService` pour DB legacy.
 
-### Reinitialisation mot de passe (Postgres Prisma uniquement)
+### Reinitialisation / activation mot de passe (Prisma SQL)
 
-Expose uniquement lorsque **`DATABASE_NAME=POSTGRESQL_PRISMA`** (`PasswordResetController`).
+- **Emission du lien** : super-admin uniquement (`RegisterUserByAdminCommand`, `ResendUserInvitationCommand`, `AdminForcePasswordResetCommand`) — pas d’endpoint public par e-mail.
+- **`POST /api/auth/password-reset/confirm`** (`PasswordResetController`) — corps `{ "token": "…", "password": "…" }` (mot de passe min. 8 caracteres). Transaction : jeton valide + non expire → suppression des jetons reset, mise à jour **`password_hash`** (scrypt), suppression des **`refresh_tokens`**.
 
-1. **`POST /api/auth/password-reset/request`** — corps `{ "email": "…", "locale"?: "en"|"fr" }`. Toujours **`202`** + `{ "acknowledged": true }` (meme si l’email n’existe pas : **anti-énumération**). Si un compte avec **`password_hash` non nul** existe : suppression des anciens jetons pending pour cet utilisateur, insertion d’un nouveau **hash SHA-256** du jeton opaque (TTL **`PASSWORD_RESET_TOKEN_TTL`**, defaut **15m**), envoi d’un e-mail avec lien **`CLIENT_PUBLIC_BASE_URL/{locale}/password-reset?token=…`**. Echec d’envoi → **503** (`Email delivery failed`) **uniquement** lorsqu’un mail aurait du partir.
-2. **`POST /api/auth/password-reset/confirm`** — corps `{ "token": "…", "password": "…" }` (mot de passe min. 8 caracteres). Transaction : jeton valide + non expire → suppression de **toutes** les lignes `password_reset_tokens` pour l’utilisateur, mise à jour **`password_hash`** (scrypt comme le reste de l’auth), suppression de **toutes** les lignes **`refresh_tokens`** pour forcer une reconnexion.
+Liens client : **`CLIENT_PUBLIC_BASE_URL/{locale}/password-reset?token=…`** (renouvellement) ou **`…&flow=setup`** (premier mot de passe).
 
-**Securite (resume)** : pas de `userId` dans le lien ; le jeton brut ne transite qu’en e-mail + corps HTTPS du client ; pas de lien dans la reponse JSON de la demande ; apres succes les sessions persistees (refresh) sont coupees.
-
-**Fichiers** : `controllers/password-reset.controller.ts`, `application/commands/request-password-reset.command.ts`, `application/commands/complete-password-reset.command.ts`, `adapters/postgre/prisma-password-reset.repository.ts`, `adapters/transactional-mail/*`, `dto/password-reset.dto.ts`, `config/password-reset-public-url.ts`, `adapters/utils/password-reset-token-expiry.util.ts`.
+**Fichiers** : `controllers/password-reset.controller.ts`, `application/commands/complete-password-reset.command.ts`, `application/commands/admin-force-password-reset.command.ts`, `application/commands/register-user-by-admin.command.ts`, `application/commands/resend-user-invitation.command.ts`, `application/services/issue-password-setup-token.service.ts`, `adapters/postgre/prisma-password-reset.repository.ts`, `config/password-reset-public-url.ts`, `config/account-setup-public-url.ts`.
 
 ### Configuration (auth + env serveur)
 

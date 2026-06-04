@@ -59,7 +59,24 @@ export default async function CreditsPage({ params }: PageProps) {
                       >
                         <p className="text-sm font-medium text-slate-900">{item.name}</p>
                         <div className="mt-1 space-y-1 text-xs text-slate-600">
-                          {item.author ? (
+                          {item.contributors && item.contributors.length > 0 ? (
+                            <p>
+                              {t("entry.contributors")}:{" "}
+                              {item.contributors.map((person, index) => (
+                                <span key={person.profileUrl}>
+                                  {index > 0 ? ", " : null}
+                                  <a
+                                    href={person.profileUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="underline underline-offset-2"
+                                  >
+                                    {person.name}
+                                  </a>
+                                </span>
+                              ))}
+                            </p>
+                          ) : item.author ? (
                             <p>
                               {t("entry.author")}: {item.author}
                             </p>

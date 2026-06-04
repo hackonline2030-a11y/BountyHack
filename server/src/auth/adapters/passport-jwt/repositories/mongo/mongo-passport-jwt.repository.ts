@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -94,6 +95,12 @@ export class MongoPassportJwtRepository
       user: { email, uid, username },
       require2FA: false,
     };
+  }
+
+  async registerPendingActivation(): Promise<never> {
+    throw new BadRequestException(
+      'Admin invitation is not supported with MONGODB',
+    );
   }
 
   async login(input: PassportJwtLoginInput): Promise<AuthenticatedSession> {

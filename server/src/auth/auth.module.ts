@@ -26,9 +26,12 @@ import { PrismaPasswordResetRepository } from './adapters/postgre/prisma-passwor
 import { createTransactionalMailPort } from './adapters/transactional-mail/transactional-mail.factory';
 
 import { RegisterWithPasswordCommand } from './application/commands/register-with-password.command';
+import { RegisterUserByAdminCommand } from './application/commands/register-user-by-admin.command';
+import { IssuePasswordSetupTokenService } from './application/services/issue-password-setup-token.service';
+import { ResendUserInvitationCommand } from './application/commands/resend-user-invitation.command';
+import { AdminForcePasswordResetCommand } from './application/commands/admin-force-password-reset.command';
 import { LogoutSessionCommand } from './application/commands/logout-session.command';
 import { CompletePasswordResetCommand } from './application/commands/complete-password-reset.command';
-import { RequestPasswordResetCommand } from './application/commands/request-password-reset.command';
 import { LoginWithPasswordCommand } from './application/commands/login-with-password.command';
 import { GetUserByUidQuery } from './application/queries/get-user-by-uid.query';
 import { GetUserFromTokenQuery } from './application/queries/get-user-from-token.query';
@@ -96,8 +99,8 @@ const prismaPasswordResetProviders = isPrismaSqlMode()
           provide: TRANSACTIONAL_MAIL_PORT,
           useFactory: () => createTransactionalMailPort(),
         },
-        RequestPasswordResetCommand,
         CompletePasswordResetCommand,
+        IssuePasswordSetupTokenService,
       ]
     : [];
 
@@ -121,6 +124,9 @@ const coreProviders = [
   MongoPassportJwtRepository,
   PostgrePrismaPassportJwtRepository,
   RegisterWithPasswordCommand,
+  RegisterUserByAdminCommand,
+  ResendUserInvitationCommand,
+  AdminForcePasswordResetCommand,
   LoginWithPasswordCommand,
   GetUserByUidQuery,
   GetUserFromTokenQuery,

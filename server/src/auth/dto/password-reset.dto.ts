@@ -1,26 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsIn, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
-
-/** Corps `POST …/auth/password-reset/request` — réponse HTTP neutre même si l’e-mail est inconnu. */
-export class PasswordResetRequestDto {
-  @ApiProperty({
-    example: 'utilisateur@example.com',
-    description: 'Adresse e-mail du compte à réinitialiser (normalisée en minuscules).',
-  })
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
-  @IsEmail()
-  email: string;
-
-  @ApiPropertyOptional({
-    enum: ['en', 'fr'],
-    description:
-      'Locale utilisée uniquement dans le chemin du lien e-mail (`/{lng}/password-reset`). Défaut : `en`.',
-  })
-  @IsOptional()
-  @IsIn(['en', 'fr'])
-  locale?: 'en' | 'fr';
-}
+import { IsString, MaxLength, MinLength } from 'class-validator';
 
 /** Corps `POST …/auth/password-reset/confirm`. */
 export class PasswordResetConfirmDto {

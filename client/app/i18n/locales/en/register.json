@@ -15,15 +15,15 @@
     },
     "usernameLabel": "Username",
     "emailLabel": "Email",
-    "passwordLabel": "Password",
     "usernamePlaceholder": "your_username",
     "emailPlaceholder": "you@example.com",
-    "passwordPlaceholder": "••••••••",
+    "invitationHint": "An activation email with a link to set the password will be sent to the address above.",
     "submit": "Create account",
     "submitting": "Creating account…",
     "haveAccount": "Already have an account?",
     "loginLink": "Log in",
     "errorRegister": "Registration failed",
-    "successRegister": "Account created successfully"
+    "successRegister": "Account created successfully",
+    "successInvitation": "Account created. An activation email was sent to the user."
   }
 }

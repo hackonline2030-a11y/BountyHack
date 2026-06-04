@@ -46,6 +46,7 @@ describe('DeleteOwnAccountCommand', () => {
       username: 'Junior',
       email: hunter.email ?? null,
       roleCode: AppRoleCode.HUNTER,
+      accountStatus: 'valid',
     });
 
     await command.execute(hunter, 'delete-token');
@@ -69,6 +70,7 @@ describe('DeleteOwnAccountCommand', () => {
       username: 'Lead',
       email: soleAdmin.email ?? null,
       roleCode: AppRoleCode.SUPER_ADMIN,
+      accountStatus: 'valid',
     });
     repository.listSummariesByRoleCode.mockResolvedValue([
       {

@@ -15,15 +15,15 @@
     },
     "usernameLabel": "Nom d’utilisateur",
     "emailLabel": "E-mail",
-    "passwordLabel": "Mot de passe",
     "usernamePlaceholder": "votre_pseudo",
     "emailPlaceholder": "vous@exemple.com",
-    "passwordPlaceholder": "••••••••",
+    "invitationHint": "Un e-mail d’activation avec un lien pour définir le mot de passe sera envoyé à l’adresse indiquée.",
     "submit": "Créer un compte",
     "submitting": "Création du compte…",
     "haveAccount": "Déjà un compte ?",
     "loginLink": "Se connecter",
     "errorRegister": "Échec de l'inscription",
-    "successRegister": "Compte créé avec succès"
+    "successRegister": "Compte créé avec succès",
+    "successInvitation": "Compte créé. Un e-mail d’activation a été envoyé à l’utilisateur."
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable, Optional } from '@nestjs/common';
 import { AppRoleCode } from '../../../shared/rbac/app-role.code';
 import { IUserRepository } from '../../ports/user-repository.interface';
-import { UserAdminSummary, UserRecord } from '../../models';
+import { UserAdminActivation, UserAdminSummary, UserRecord } from '../../models';
 import { CreateUserProfilePayload } from '../../payloads';
 import type { UpdateOwnProfilePayload } from '../../payloads/update-own-profile.payload';
 import { User } from '../../entities/user.entity';
@@ -43,6 +43,14 @@ export class InMemoryUserRepository implements IUserRepository {
     return [];
   }
 
+  async findAdminActivationById(_uid: string): Promise<UserAdminActivation | null> {
+    return null;
+  }
+
+  async clearPasswordForAdminReset(_uid: string): Promise<void> {
+    return;
+  }
+
   async findSummaryById(uid: string): Promise<UserAdminSummary | null> {
     const record = await this.findById(uid);
     if (record === null) {
@@ -53,6 +61,7 @@ export class InMemoryUserRepository implements IUserRepository {
       username: record.username,
       email: null,
       roleCode: AppRoleCode.HUNTER,
+      accountStatus: 'valid',
     };
   }
 
