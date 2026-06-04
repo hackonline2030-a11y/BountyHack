@@ -162,6 +162,7 @@ export class PostgrePrismaPassportJwtRepository
           email,
           passwordHash: null,
           roleId: role.id,
+          isFakeUser: input.isFakeUser === true,
         },
       });
     } catch (error: unknown) {

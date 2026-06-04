@@ -28,6 +28,8 @@ model User {
   twoFactorEnabled BigInt @default(0) @map("two_factor_enabled")
   /// Optional RBAC role (`roles.id`). Nullable for existing rows until backfill.
   roleId       Int?    @map("role_id")
+  /// True when created via super-admin fake-user flow (test account; no invitation email).
+  isFakeUser   Boolean @default(false) @map("is_fake_user")
 
   twoFactors TwoFactor[]
   refreshTokens RefreshToken[]

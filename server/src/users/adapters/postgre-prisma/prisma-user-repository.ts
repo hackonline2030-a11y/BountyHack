@@ -120,6 +120,7 @@ export class PrismaUserRepository implements IUserRepository {
         id: true,
         username: true,
         email: true,
+        isFakeUser: true,
         role: { select: { name: true } },
       },
     });
@@ -138,6 +139,7 @@ export class PrismaUserRepository implements IUserRepository {
             activation.latestTokenExpiresAt,
           )
         : 'valid',
+      isFakeUser: row.isFakeUser,
     };
   }
 
@@ -149,6 +151,7 @@ export class PrismaUserRepository implements IUserRepository {
         username: true,
         email: true,
         passwordHash: true,
+        isFakeUser: true,
         role: { select: { name: true } },
       },
       orderBy: { username: 'asc' },
@@ -168,6 +171,7 @@ export class PrismaUserRepository implements IUserRepository {
         Boolean(row.passwordHash),
         latestTokenByUserId.get(row.id) ?? null,
       ),
+      isFakeUser: row.isFakeUser,
     }));
   }
 
@@ -178,6 +182,7 @@ export class PrismaUserRepository implements IUserRepository {
         username: true,
         email: true,
         passwordHash: true,
+        isFakeUser: true,
         role: { select: { name: true } },
       },
       orderBy: { username: 'asc' },
@@ -200,6 +205,7 @@ export class PrismaUserRepository implements IUserRepository {
           Boolean(row.passwordHash),
           latestTokenExpiresAt,
         ),
+        isFakeUser: row.isFakeUser,
       };
     });
   }

@@ -18,12 +18,22 @@
     "usernamePlaceholder": "votre_pseudo",
     "emailPlaceholder": "vous@exemple.com",
     "invitationHint": "Un e-mail d’activation avec un lien pour définir le mot de passe sera envoyé à l’adresse indiquée.",
+    "fakeUserLabel": "Utilisateur factice",
+    "fakeUserHint": "Pas d’e-mail — afficher le lien de création de mot de passe ici (tests).",
+    "fakeUserInvitationHint": "Après création, un lien de définition du mot de passe s’affichera (même page que l’e-mail d’invitation). Ouvrez-le pour activer ce compte de test.",
+    "fakeUserModalTitle": "Utilisateur factice créé",
+    "fakeUserModalLead": "Ouvrez le lien ci-dessous pour définir le mot de passe (page d’activation). L’utilisateur pourra ensuite se connecter comme un compte normal.",
+    "fakeUserOpenLink": "Définir le mot de passe",
+    "fakeUserCopyLink": "Copier le lien",
+    "fakeUserCopied": "Lien copié",
+    "fakeUserModalClose": "Terminé — liste des utilisateurs",
     "submit": "Créer un compte",
     "submitting": "Création du compte…",
     "haveAccount": "Déjà un compte ?",
     "loginLink": "Se connecter",
     "errorRegister": "Échec de l'inscription",
     "successRegister": "Compte créé avec succès",
-    "successInvitation": "Compte créé. Un e-mail d’activation a été envoyé à l’utilisateur."
+    "successInvitation": "Compte créé. Un e-mail d’activation a été envoyé à l’utilisateur.",
+    "successFakeUser": "Utilisateur factice créé. Utilisez le lien dans la fenêtre pour définir le mot de passe."
   }
 }

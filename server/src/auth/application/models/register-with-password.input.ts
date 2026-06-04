@@ -10,4 +10,9 @@ export interface RegisterWithPasswordInput {
   roleCode?: AppRoleCode;
   /** Locale for invitation email link path (`en` | `fr`). */
   locale?: string;
+  /**
+   * When true, no invitation email is sent; the account-setup link is returned to the
+   * super-admin caller (fake / test accounts).
+   */
+  fakeUser?: boolean;
 }

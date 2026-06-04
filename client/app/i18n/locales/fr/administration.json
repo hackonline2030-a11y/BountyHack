@@ -24,6 +24,7 @@
       "pending": "En attente",
       "unvalid": "Invalide"
     },
+    "fakeUserBadge": "Factice",
     "resendTitle": "Renvoyer l’e-mail d’activation",
     "resendTooltip": "Renvoyer un e-mail d’activation avec un nouveau lien (lien précédent expiré ou invalide).",
     "resendAria": "Renvoyer l’e-mail d’activation à {{username}}",

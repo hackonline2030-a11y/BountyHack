@@ -55,6 +55,7 @@ export class MongoUserRepository implements IUserRepository {
       email: null,
       roleCode: AppRoleCode.HUNTER,
       accountStatus: 'valid',
+      isFakeUser: false,
     };
   }
 

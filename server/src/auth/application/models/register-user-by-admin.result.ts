@@ -7,6 +7,12 @@ export type RegisterUserByAdminInvitationResult = {
   invitationSent: true;
 };
 
+export type RegisterUserByAdminFakeUserResult = {
+  kind: 'fakeUser';
+  user: AuthenticatedUserProfile;
+  accountSetupLink: string;
+};
+
 export type RegisterUserByAdminSessionResult = {
   kind: 'session';
   session: AuthenticatedSession;
@@ -14,4 +20,5 @@ export type RegisterUserByAdminSessionResult = {
 
 export type RegisterUserByAdminResult =
   | RegisterUserByAdminInvitationResult
+  | RegisterUserByAdminFakeUserResult
   | RegisterUserByAdminSessionResult;

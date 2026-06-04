@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   Logger,
@@ -7,6 +8,7 @@ import {
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { isFakeUserRegistrationAllowed } from '../../../shared/fake-user.config';
 import { isPrismaSqlMode } from '../../../shared/database-mode';
 import type { AuthenticatedUserProfile } from '../models/authenticated-session';
 import type { RegisterWithPasswordInput } from '../models/register-with-password.input';
@@ -52,6 +54,31 @@ export class RegisterUserByAdminCommand {
         roleCode: input.roleCode,
       });
       return { kind: 'session', session };
+    }
+
+    if (input.fakeUser) {
+      if (!isFakeUserRegistrationAllowed()) {
+        throw new ForbiddenException(
+          'Fake user registration is disabled on this server (ALLOW_FAKE_USER_REGISTRATION=0 in server/.env)',
+        );
+      }
+      if (!isPrismaSqlMode() || !this.issueSetupToken) {
+        throw new BadRequestException(
+          'Fake user registration requires POSTGRESQL_PRISMA or MYSQL_PRISMA',
+        );
+      }
+
+      const user = await this.authRepository.registerPendingActivation({
+        email,
+        username,
+        roleCode: input.roleCode,
+        isFakeUser: true,
+      });
+
+      const locale = normalizeAccountSetupLocale(input.locale);
+      const { link } = await this.issueSetupToken.issueForUser(user.uid, locale);
+
+      return { kind: 'fakeUser', user, accountSetupLink: link };
     }
 
     if (!isPrismaSqlMode()) {

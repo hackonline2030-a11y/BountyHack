@@ -11,6 +11,7 @@ export type RegisterPendingActivationInput = {
   email: string;
   username: string;
   roleCode?: AppRoleCode;
+  isFakeUser?: boolean;
 };
 
 export const AuthRepository = Symbol('AuthRepository');

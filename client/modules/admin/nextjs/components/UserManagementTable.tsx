@@ -1,6 +1,7 @@
 import { getT } from "next-i18next/server";
 import type { AdminUserSummary } from "@modules/admin/core/model/admin-users.domain-model";
 import { UserAccountStatusBadge } from "@modules/admin/nextjs/components/UserAccountStatusBadge";
+import { UserFakeBadge } from "@modules/admin/nextjs/components/UserFakeBadge";
 import { UserDeleteButton } from "@modules/admin/nextjs/components/UserDeleteButton";
 import { UserForcePasswordResetButton } from "@modules/admin/nextjs/components/UserForcePasswordResetButton";
 import { UserResendInvitationButton } from "@modules/admin/nextjs/components/UserResendInvitationButton";
@@ -81,10 +82,15 @@ export async function UserManagementTable({ lng, users }: UserManagementTablePro
                 )}
               </td>
               <td className="px-4 py-2">
-                <UserAccountStatusBadge
-                  status={user.accountStatus}
-                  label={t(`userManagementTable.status.${user.accountStatus}`)}
-                />
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <UserAccountStatusBadge
+                    status={user.accountStatus}
+                    label={t(`userManagementTable.status.${user.accountStatus}`)}
+                  />
+                  {user.isFakeUser ? (
+                    <UserFakeBadge label={t("userManagementTable.fakeUserBadge")} />
+                  ) : null}
+                </div>
               </td>
               <td className="px-4 py-2 text-right">
                 <div className="flex flex-wrap items-center justify-end gap-1">
