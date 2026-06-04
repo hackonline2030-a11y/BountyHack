@@ -1,6 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsEnum, IsOptional, IsString, Matches, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+  Matches,
+  MinLength,
+} from 'class-validator';
 import { AppRoleCode } from '../../shared/rbac/app-role.code';
 
 /** HTTP body for `POST /api/auth/register`. */
@@ -42,6 +50,15 @@ export class JwtRegisterRequestDto {
   @IsOptional()
   @IsEnum(AppRoleCode)
   roleCode?: AppRoleCode;
+
+  @ApiPropertyOptional({
+    example: false,
+    description:
+      'When true, no invitation email is sent; the account-setup link is returned in the JSON response for super-admin use (fake / test users).',
+  })
+  @IsOptional()
+  @IsBoolean()
+  fakeUser?: boolean;
 }
 
 /** HTTP body for `POST /api/auth/login`. */
@@ -118,11 +135,26 @@ export class JwtAuthResponseDto {
   require2FA?: boolean;
 }
 
-/** JSON returned when super-admin registers a user without password (invitation email). */
+/** JSON returned when super-admin registers a user without password (invitation or fake user). */
 export class JwtRegisterInvitationResponseDto {
   @ApiProperty({ type: JwtAuthUserDto })
   user: JwtAuthUserDto;
 
-  @ApiProperty({ example: true })
-  invitationSent: true;
+  @ApiProperty({
+    example: true,
+    description: 'False when `fakeUser` was requested (no email sent).',
+  })
+  invitationSent: boolean;
+
+  @ApiPropertyOptional({
+    example: false,
+    description: 'True when the account-setup link is returned instead of sending email.',
+  })
+  fakeUser?: boolean;
+
+  @ApiPropertyOptional({
+    example: 'https://app.example/en/password-reset?token=…&flow=setup',
+    description: 'Present when `fakeUser` is true — open to set the password (same page as email invitation).',
+  })
+  accountSetupLink?: string;
 }

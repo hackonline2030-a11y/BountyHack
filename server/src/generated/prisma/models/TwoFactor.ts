@@ -410,10 +410,6 @@ export type EnumTwoFactorMethodFieldUpdateOperationsInput = {
   set?: $Enums.TwoFactorMethod
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type TwoFactorCreateNestedOneWithoutTotpInput = {
   create?: Prisma.XOR<Prisma.TwoFactorCreateWithoutTotpInput, Prisma.TwoFactorUncheckedCreateWithoutTotpInput>
   connectOrCreate?: Prisma.TwoFactorCreateOrConnectWithoutTotpInput

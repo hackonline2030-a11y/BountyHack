@@ -18,12 +18,22 @@
     "usernamePlaceholder": "your_username",
     "emailPlaceholder": "you@example.com",
     "invitationHint": "An activation email with a link to set the password will be sent to the address above.",
+    "fakeUserLabel": "Fake user",
+    "fakeUserHint": "No email — show the password-setup link here for quick testing.",
+    "fakeUserInvitationHint": "After creation, a password-setup link will appear (same page as the invitation email). Open it to set the password for this test account.",
+    "fakeUserModalTitle": "Fake user created",
+    "fakeUserModalLead": "Open the link below to set the password (account activation page). The user can then sign in like any other account.",
+    "fakeUserOpenLink": "Set password",
+    "fakeUserCopyLink": "Copy link",
+    "fakeUserCopied": "Link copied",
+    "fakeUserModalClose": "Done — back to user list",
     "submit": "Create account",
     "submitting": "Creating account…",
     "haveAccount": "Already have an account?",
     "loginLink": "Log in",
     "errorRegister": "Registration failed",
     "successRegister": "Account created successfully",
-    "successInvitation": "Account created. An activation email was sent to the user."
+    "successInvitation": "Account created. An activation email was sent to the user.",
+    "successFakeUser": "Fake user created. Use the link in the dialog to set the password."
   }
 }

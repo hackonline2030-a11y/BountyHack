@@ -74,6 +74,43 @@ describe('PassportJwtAuthController', () => {
     expect(result).toEqual({ user, invitationSent: true });
   });
 
+  it('returns account setup link when register command yields fake user', async () => {
+    const payload: JwtRegisterRequestDto = {
+      email: 'fake@example.local',
+      username: 'Fake User',
+      locale: 'en',
+      fakeUser: true,
+      roleCode: AppRoleCode.HUNTER,
+    };
+    const user = {
+      uid: 'uid-fake',
+      email: payload.email,
+      username: payload.username,
+    };
+    const link = 'https://app.test/en/password-reset?token=abc&flow=setup';
+    registerUserByAdmin.execute.mockResolvedValue({
+      kind: 'fakeUser',
+      user,
+      accountSetupLink: link,
+    });
+
+    const result = await controller.register(payload);
+
+    expect(registerUserByAdmin.execute).toHaveBeenCalledWith({
+      email: payload.email,
+      username: payload.username,
+      roleCode: AppRoleCode.HUNTER,
+      locale: 'en',
+      fakeUser: true,
+    });
+    expect(result).toEqual({
+      user,
+      invitationSent: false,
+      fakeUser: true,
+      accountSetupLink: link,
+    });
+  });
+
   it('returns JWT body when register command yields a session (legacy password path)', async () => {
     const payload: JwtRegisterRequestDto = {
       email: 'john@example.com',

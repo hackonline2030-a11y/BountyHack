@@ -27,6 +27,8 @@ export type UserAdminSummary = {
    * Never exposes the hash or token material.
    */
   accountStatus: UserAccountStatus;
+  /** True when the account was created via super-admin fake-user registration. */
+  isFakeUser: boolean;
 };
 
 /** Internal read model for admin invitation / force-reset commands. */

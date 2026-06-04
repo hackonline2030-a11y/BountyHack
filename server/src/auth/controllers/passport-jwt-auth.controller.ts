@@ -64,11 +64,12 @@ export class PassportJwtAuthController {
   @ApiOperation({
     summary: 'Register with Passport + JWT credentials',
     description:
-      'Creates a user (RBAC: **SUPER_ADMIN**). Sends a welcome email with an account-setup link; no password in the request body. Does not issue a session for the new user.',
+      'Creates a user (RBAC: **SUPER_ADMIN**). By default sends a welcome email with an account-setup link. With `fakeUser: true`, returns the link in JSON instead (no email). No password in the request body; does not issue a session for the new user.',
   })
   @ApiBody({ type: JwtRegisterRequestDto })
   @ApiOkResponse({
-    description: 'User created; invitation email sent.',
+    description:
+      'User created; invitation email sent, or `accountSetupLink` when `fakeUser` is true.',
     type: JwtRegisterInvitationResponseDto,
   })
   @ApiValidationBadRequest('Request body does not pass validation (email, non-empty fields).')
@@ -82,6 +83,14 @@ export class PassportJwtAuthController {
     );
     if (result.kind === 'session') {
       return toJwtAuthAccessBody(result.session);
+    }
+    if (result.kind === 'fakeUser') {
+      return {
+        user: result.user,
+        invitationSent: false,
+        fakeUser: true,
+        accountSetupLink: result.accountSetupLink,
+      };
     }
     return { user: result.user, invitationSent: result.invitationSent };
   }

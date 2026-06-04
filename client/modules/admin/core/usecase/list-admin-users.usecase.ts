@@ -59,6 +59,7 @@ function parseSummary(raw: unknown): AdminUserSummary | null {
     email: readNullableString(raw, "email"),
     roleCode: readRoleCode(raw),
     accountStatus: readAccountStatus(raw),
+    isFakeUser: raw["isFakeUser"] === true,
   };
 }
 
