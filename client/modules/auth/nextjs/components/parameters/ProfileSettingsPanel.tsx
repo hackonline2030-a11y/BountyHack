@@ -174,7 +174,7 @@ export function ProfileSettingsPanel({
 
       if (mustReLogin) {
         await fetch("/api/session", { method: "DELETE", credentials: "same-origin" });
-        router.replace(`${prefix}/login`);
+        router.replace(`${prefix}/`);
         router.refresh();
         return;
       }
