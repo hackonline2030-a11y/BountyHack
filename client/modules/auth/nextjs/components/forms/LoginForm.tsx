@@ -69,7 +69,7 @@ export function LoginForm() {
       setStatus("success");
       setMessage(t("loginForm.afterPasswordReset"));
     });
-    router.replace(`${prefix}/login`, { scroll: false });
+    router.replace(`${prefix}/`, { scroll: false });
   }, [searchParams, router, prefix, t]);
 
   async function handleSubmit(e: React.FormEvent) {

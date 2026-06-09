@@ -65,8 +65,8 @@ export function ResetPasswordForm({ tokenFromQuery, isAccountSetup = false }: Pr
       setStatus("success");
       router.replace(
         isAccountSetup
-          ? `${prefix}/login?accountSetup=success`
-          : `${prefix}/login?passwordReset=success`,
+          ? `${prefix}/?accountSetup=success`
+          : `${prefix}/?passwordReset=success`,
       );
     } catch {
       setStatus("error");
@@ -81,7 +81,7 @@ export function ResetPasswordForm({ tokenFromQuery, isAccountSetup = false }: Pr
           {t("resetPage.missingToken")}
         </p>
         <Link
-          href={`${prefix}/login`}
+          href={`${prefix}/`}
           className="text-sm text-white/90 underline-offset-2 hover:text-white hover:underline"
         >
           {t("resetForm.backToLogin")}
@@ -151,7 +151,7 @@ export function ResetPasswordForm({ tokenFromQuery, isAccountSetup = false }: Pr
       </PrimaryButton>
 
       <Link
-        href={`${prefix}/login`}
+        href={`${prefix}/`}
         className="text-center text-sm text-white/80 underline-offset-2 hover:text-white hover:underline"
       >
         {t("resetForm.backToLogin")}
