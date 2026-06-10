@@ -21,35 +21,7 @@ cp .env.example .env
 
 Puis édite **`server/.env`** en suivant les commentaires de **`.env.example`** (secrets, `DATABASE_NAME`, `DATABASE_URL`, CORS, etc.).
 
-## Prerequisites
-
-- **Node.js** 24+ and **pnpm** (see `server/package.json` → `engines`)
-- **Docker** and Docker Compose (**optional**, for **local dev** only — not the production target)
-
-### Installation simple sans Nx ni Docker
-
-## 🚀 Installation rapide (MySQL + Dump)
-
-### Prérequis
-- **Node.js** 24+ et **pnpm**
-- **MySQL Server** (local ou XAMPP)
-- **Git** pour cloner le projet
-
-### 1. Cloner et installer les dépendances
-```bash
-git clone https://github.com/hackonline2030-a11y/BountyHack.git
-cd bugbountyapp/server
-pnpm install
-```
-
-### 2. Configuration base de données MySQL
-
-#### Créer le fichier d'environnement
-```bash
-cp .env.example .env
-```
-
-#### Éditer le fichier `.env`
+#### Éditer le fichier `.env`, essentiels :
 ```env
 # Configuration MySQL
 DATABASE_NAME=MYSQL_PRISMA
@@ -74,7 +46,8 @@ node -e "console.log('JWT_SECRET=' + require('crypto').randomBytes(64).toString(
 # Option 2 : avec OpenSSL (Linux/macOS)
 openssl rand -hex 64
 ```
-### 3. Préparer la base de données
+
+## Installation rapide (MySQL + Dump)
 
 #### Créer la base de données
 ```bash
@@ -94,7 +67,7 @@ mysql -u root -p bugbountyapp < dump/dump.mysql.native.sql
 mysql -u root -p bugbountyapp -e "SHOW TABLES; SELECT COUNT(*) as users_count FROM users;"
 ```
 
-### 4. Démarrer l'API
+### Démarrer l'API
 
 #### Générer le client Prisma
 ```bash
@@ -110,14 +83,14 @@ pnpm run start
 node dist/main.js  # après build
 ```
 
-### 5. Vérification
+### Vérification
 
 L'API devrait être accessible sur :
 - **API** : http://localhost:3000
 - **Documentation Swagger** : http://localhost:3000/api
 - **Health check** : http://localhost:3000/health
 
-### 6. Utilisateurs de test disponibles
+### Utilisateurs de test disponibles
 
 Le dump contient plusieurs utilisateurs de test avec mot de passe `demo` :
 
@@ -134,7 +107,7 @@ Le dump contient plusieurs utilisateurs de test avec mot de passe `demo` :
 
 A partir du compte surper-admin vous pouvez créer vos propre user dans chaque catégorie.
 
-### 7. Commandes utiles
+### Commandes utiles
 
 ```bash
 # Reset complet de la base (avec migrations Prisma)
@@ -154,7 +127,7 @@ pnpm run create-super-admin
 pnpm run test
 ```
 
-### 8. Dépannage
+### Dépannage
 
 #### Erreur de connexion MySQL
 - Vérifier que MySQL fonctionne : `mysql -u root -p -e "SELECT 1;"`
@@ -178,6 +151,8 @@ PORT=3001
 # Ou tuer le processus
 lsof -ti:3000 | xargs kill -9
 ```
+
+## Installation avec Nx 
 
 ## Prérequis
 
