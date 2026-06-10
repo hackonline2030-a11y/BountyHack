@@ -59,13 +59,26 @@ mysql -u root -p -e "CREATE DATABASE bugbountyapp CHARACTER SET utf8mb4 COLLATE 
 ```
 
 #### Importer le dump avec les données de test
+
+**Important** : Ces commandes se connectent au serveur MySQL sur `localhost:3306`. Assurez-vous que :
+- XAMPP est démarré (si vous utilisez XAMPP)
+- Aucune autre instance MySQL n'est en conflit sur le port 3306
+
 ```bash
+# Vérifier quel serveur MySQL répond (doit montrer les bases XAMPP si vous utilisez XAMPP)
+mysql -u root -p -e "SHOW DATABASES;"
+
 # Import du dump complet (structure + données)
 mysql -u root -p bugbountyapp < dump/dump.mysql.native.sql
 
 # Vérifier l'import
 mysql -u root -p bugbountyapp -e "SHOW TABLES; SELECT COUNT(*) as users_count FROM users;"
 ```
+
+**Pour XAMPP spécifiquement** :
+- Mot de passe root par défaut : souvent vide (`""`)
+- Interface phpMyAdmin disponible : http://localhost/phpmyadmin/
+- Vérification XAMPP actif : les bases `information_schema`, `mysql`, `performance_schema`, `phpmyadmin` doivent être visibles
 
 ### Démarrer l'API
 

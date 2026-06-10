@@ -136,6 +136,22 @@ test_db_connection() {
     
     if [ $? -eq 0 ]; then
         log_success "Connexion à la base de données réussie"
+        
+        # Si c'est MySQL, afficher des info sur le serveur pour confirmer si c'est XAMPP
+        if [ "$DB_TYPE" = "mysql" ]; then
+            log_info "Vérification du type de serveur MySQL..."
+            if [ -z "$DB_PASS" ]; then
+                DATABASES=$(mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -e "SHOW DATABASES;" 2>/dev/null | grep -E "(phpmyadmin|xampp)" || echo "")
+            else
+                DATABASES=$(mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASS" -e "SHOW DATABASES;" 2>/dev/null | grep -E "(phpmyadmin|xampp)" || echo "")
+            fi
+            
+            if [ -n "$DATABASES" ]; then
+                log_success "Serveur XAMPP détecté (bases phpmyadmin trouvées)"
+            else
+                log_warning "Serveur MySQL standard (pas de bases XAMPP détectées)"
+            fi
+        fi
     else
         log_error "Impossible de se connecter à la base de données"
         log_info "Vérifiez vos paramètres de connexion:"
@@ -143,6 +159,15 @@ test_db_connection() {
         log_info "  - Port: $DB_PORT"
         log_info "  - Utilisateur: $DB_USER"
         log_info "  - Base: $DB_NAME"
+        
+        if [ "$DB_TYPE" = "mysql" ]; then
+            log_info ""
+            log_info "Pour XAMPP :"
+            log_info "  - Assurez-vous que XAMPP est démarré"
+            log_info "  - Le mot de passe root est souvent vide par défaut"
+            log_info "  - Testez avec: mysql -u root -p (puis entrée vide pour le mot de passe)"
+            log_info "  - Interface phpMyAdmin: http://localhost/phpmyadmin/"
+        fi
         exit 1
     fi
 }
