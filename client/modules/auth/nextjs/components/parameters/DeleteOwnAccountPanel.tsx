@@ -145,7 +145,7 @@ export function DeleteOwnAccountPanel({
       }
 
       await fetch("/api/session", { method: "DELETE", credentials: "same-origin" });
-      router.replace(`${prefix}/login`);
+      router.replace(`${prefix}/`);
       router.refresh();
     } catch {
       setError(t("parameters:deleteAccount.failed"));

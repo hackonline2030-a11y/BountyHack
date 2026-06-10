@@ -21,11 +21,138 @@ cp .env.example .env
 
 Puis édite **`server/.env`** en suivant les commentaires de **`.env.example`** (secrets, `DATABASE_NAME`, `DATABASE_URL`, CORS, etc.).
 
-## CI (GitHub Actions)
+#### Éditer le fichier `.env`, essentiels :
+```env
+# Configuration MySQL
+DATABASE_NAME=MYSQL_PRISMA
+DATABASE_URL="mysql://root:[votre-mot-de-passe]@localhost:3306/bugbountyapp?allowPublicKeyRetrieval=true"
 
-Workflow à la racine du monorepo : **[`../.github/workflows/server-ci.yml`](../.github/workflows/server-ci.yml)** — sur **push / PR** vers **`feature/test-ci`** uniquement (chemins `server/**`), plus **`workflow_dispatch`**. Étapes : `pnpm install --frozen-lockfile`, **`nx run web-api:lint`**, tests unitaires **`pnpm run test`**, **`pnpm run build`**, **Gitleaks** (action en `continue-on-error: true`). Pas de conteneur ni registre d’images, pas de Trivy ni SonarCloud.
+# Configuration API
+NODE_ENV=development
+JWT_SECRET=dev-secret-key-change-in-production
+CORS_ORIGIN=http://localhost:3001
+```
+JWT_SECRET doit être identique dans le .env de /server et celui de /client
 
----
+**Générer un JWT_SECRET sécurisé :**
+
+```bash
+# Option 1 : en ligne
+Aller sur (ce lien)[https://generate-secret.vercel.app/64]
+
+# Option 2 : avec Node.js
+node -e "console.log('JWT_SECRET=' + require('crypto').randomBytes(64).toString('hex'))"
+
+# Option 2 : avec OpenSSL (Linux/macOS)
+openssl rand -hex 64
+```
+
+## Installation rapide (MySQL + Dump)
+
+#### Créer la base de données
+```bash
+# Avec MySQL CLI
+mysql -u root -p -e "CREATE DATABASE bugbountyapp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# Ou avec XAMPP via phpMyAdmin : http://localhost/phpmyadmin/
+# Créer une nouvelle base "bugbountyapp" avec interclassement "utf8mb4_unicode_ci"
+```
+
+#### Importer le dump avec les données de test
+```bash
+# Import du dump complet (structure + données)
+mysql -u root -p bugbountyapp < dump/dump.mysql.native.sql
+
+# Vérifier l'import
+mysql -u root -p bugbountyapp -e "SHOW TABLES; SELECT COUNT(*) as users_count FROM users;"
+```
+
+### Démarrer l'API
+
+#### Générer le client Prisma
+```bash
+pnpm exec prisma generate
+```
+
+#### Démarrer en mode développement
+```bash
+# Sans Nx (commande simple)
+pnpm run start
+
+# Ou directement avec Node.js
+node dist/main.js  # après build
+```
+
+### Vérification
+
+L'API devrait être accessible sur :
+- **API** : http://localhost:3000
+- **Documentation Swagger** : http://localhost:3000/api
+- **Health check** : http://localhost:3000/health
+
+### Utilisateurs de test disponibles
+
+Le dump contient plusieurs utilisateurs de test avec mot de passe `demo` :
+
+| Email | Username | Rôle | Description |
+|-------|----------|------|-------------|
+| `demo-user@example.local` | `demo-user` | **SUPER_ADMIN** | Administrateur principal |
+| `coord@example.com` | `Corda` | **COORDINATOR** | Coordinateur d'équipe |
+| `mentor@example.com` | `mentor` | **MENTOR** | Mentor/Formateur |
+| `qc@example.com` | `Qualité` | **QUALITY_CHECKER** | Contrôleur qualité |
+
+**Connexion de test** :
+- Email : `demo-user@example.local`
+- Mot de passe : `password123` ou `demo` ou `password` (à vérifier l'un ou l'autre)
+
+A partir du compte surper-admin vous pouvez créer vos propre user dans chaque catégorie.
+
+### Commandes utiles
+
+```bash
+# Reset complet de la base (avec migrations Prisma)
+pnpm exec prisma migrate reset
+pnpm exec prisma db seed
+
+# Interface graphique pour la base
+pnpm exec prisma studio  # http://localhost:5555
+
+# Re-import du dump si nécessaire
+mysql -u root -p bugbountyapp < dump/dump.mysql.native.sql
+
+# Créer un super admin en production
+pnpm run create-super-admin
+
+# Tests
+pnpm run test
+```
+
+### Dépannage
+
+#### Erreur de connexion MySQL
+- Vérifier que MySQL fonctionne : `mysql -u root -p -e "SELECT 1;"`
+- Ajuster `DATABASE_URL` dans `.env`
+- Pour XAMPP, utiliser : `mysql://root:@localhost:3306/bugbountyapp`
+
+#### Erreur Prisma
+```bash
+# Régénérer le client
+DATABASE_NAME=MYSQL_PRISMA pnpm exec prisma generate
+
+# Vérifier la connexion
+pnpm exec prisma db pull
+```
+
+#### Port déjà utilisé
+```bash
+# Changer le port dans .env
+PORT=3001
+
+# Ou tuer le processus
+lsof -ti:3000 | xargs kill -9
+```
+
+## Installation avec Nx 
 
 ## Prérequis
 
