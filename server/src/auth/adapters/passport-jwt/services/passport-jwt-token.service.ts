@@ -3,7 +3,14 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtPayload, JsonWebTokenError, sign, verify, TokenExpiredError } from 'jsonwebtoken';
+import {
+  JwtPayload,
+  JsonWebTokenError,
+  sign,
+  type SignOptions,
+  verify,
+  TokenExpiredError,
+} from 'jsonwebtoken';
 import { Identity } from '../../../domain/models/identity';
 
 type SupportedAccessPayload = JwtPayload & {
@@ -45,10 +52,11 @@ export class PassportJwtTokenService {
       throw new InternalServerErrorException('JWT_SECRET is not configured');
     }
 
-    return sign({ user_id: uid, email, sub: uid }, secret, {
+    const options: SignOptions = {
       // Short-lived access; pair with opaque refresh (`JWT_REFRESH_EXPIRES_IN`).
-      expiresIn: process.env.JWT_EXPIRES_IN?.trim() || '10m',
-    });
+      expiresIn: (process.env.JWT_EXPIRES_IN?.trim() || '10m') as SignOptions['expiresIn'],
+    };
+    return sign({ user_id: uid, email, sub: uid }, secret, options);
   }
 
   private rethrowJwtError(e: unknown): never {
