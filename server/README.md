@@ -61,21 +61,7 @@ mysql -u root -p -e "CREATE DATABASE bugbountyapp CHARACTER SET utf8mb4 COLLATE 
 #### Exécute cette commande depuis le terminal pour créer un utilisateur bugbountyapp avec les bon droits :
 
 ```bash
-sudo mysql -u root -e "CREATE DATABASE bugbountyapp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; CREATE USER 'bugbountyapp'@'127.0.0.1' IDENTIFIED BY 'bugbountyapp'; GRANT ALL PRIVILEGES ON bugbountyapp.* TO 'bugbountyapp'@'127.0.0.1'; FLUSH PRIVILEGES;"
-```
-
-#### Vérifier la connexion
-
-```bash
-mysql -u bugbountyapp -p bugbountyapp bugbountyapp
-```
-
-#### Créer un utilisateur mysql "bugbountyapp" :
-
-Exécute cette commande depuis le terminal :
-
-```bash
-sudo mysql -u root -e "CREATE DATABASE bugbountyapp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; CREATE USER 'bugbountyapp'@'127.0.0.1' IDENTIFIED BY 'bugbountyapp'; GRANT ALL PRIVILEGES ON bugbountyapp.* TO 'bugbountyapp'@'127.0.0.1'; FLUSH PRIVILEGES;"
+sudo mysql -u root -e "CREATE USER 'bugbountyapp'@'127.0.0.1' IDENTIFIED BY 'bugbountyapp'; GRANT ALL PRIVILEGES ON bugbountyapp.* TO 'bugbountyapp'@'127.0.0.1'; FLUSH PRIVILEGES;"
 ```
 
 #### Vérifier la connexion
@@ -88,7 +74,7 @@ Monter la base de donnée :
 - VIA UN DUMP
 - VIA PRISMA
 
-#### Monter la base de donnée - VIA UN DUMP : Importer le dump avec les données de test
+### Monter la base de donnée - VIA UN DUMP : Importer le dump avec les données de test
 
 **Important** : Ces commandes se connectent au serveur MySQL sur `localhost:3306`. Assurez-vous que :
 - XAMPP est démarré (si vous utilisez XAMPP)
