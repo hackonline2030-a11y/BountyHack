@@ -585,3 +585,24 @@ model QualityCriterionCheck {
   @@index([distributionId])
   @@map("quality_criterion_checks")
 }
+
+/// IP whitelist (optional super-admin lockdown) and settings singleton.
+model IpAccessSettings {
+  id                 Int      @id @default(1)
+  ipWhitelistEnabled Boolean  @default(false) @map("ip_whitelist_enabled")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  updatedByUserId    String?  @map("updated_by_user_id")
+
+  @@map("ip_access_settings")
+}
+
+/// Canonical CIDR rows only (normalized before insert — e.g. host /32).
+model IpWhitelistEntry {
+  id              String   @id @default(uuid())
+  cidr            String   @unique
+  label           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  createdByUserId String   @map("created_by_user_id")
+
+  @@map("ip_whitelist_entries")
+}

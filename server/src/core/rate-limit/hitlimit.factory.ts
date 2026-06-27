@@ -1,26 +1,17 @@
 import type { ConfigService } from '@nestjs/config';
 import type { Request } from 'express';
+import { resolveClientIp } from '../../shared/http/client-ip.util';
+import { isPublicApiPath } from '../../shared/http/public-api-path.util';
 import { isRateLimitEnabled } from '../../shared/is-rate-limit-enabled';
 import type { HitLimitModuleOptions } from './hitlimit';
 import { redisStore } from './hitlimit';
-
-function clientIp(req: Request): string {
-  return req.ip || req.socket?.remoteAddress || 'unknown';
-}
 
 /** Paths that should not consume the global rate limit budget. */
 function shouldSkipRateLimit(req: Request): boolean {
   if (!isRateLimitEnabled()) {
     return true;
   }
-  const path = (req.path || req.url || '').split('?')[0];
-  if (path.endsWith('/ping')) {
-    return true;
-  }
-  if (path.includes('/docs')) {
-    return true;
-  }
-  return false;
+  return isPublicApiPath(req);
 }
 
 function resolveStore(config: ConfigService): HitLimitModuleOptions['store'] {
@@ -65,7 +56,7 @@ export function createHitLimitModuleOptions(
   return {
     limit: Number.isFinite(limit) && limit > 0 ? limit : 100,
     window,
-    key: (req) => clientIp(req),
+    key: (req) => resolveClientIp(req),
     skip: (req) => shouldSkipRateLimit(req),
     headers: {
       standard: true,

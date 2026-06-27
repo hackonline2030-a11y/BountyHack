@@ -181,3 +181,13 @@ export type QualityCriterionDistribution = Prisma.QualityCriterionDistributionMo
  * 
  */
 export type QualityCriterionCheck = Prisma.QualityCriterionCheckModel
+/**
+ * Model IpAccessSettings
+ * IP whitelist (optional super-admin lockdown) and settings singleton.
+ */
+export type IpAccessSettings = Prisma.IpAccessSettingsModel
+/**
+ * Model IpWhitelistEntry
+ * Canonical CIDR rows only (normalized before insert — e.g. host /32).
+ */
+export type IpWhitelistEntry = Prisma.IpWhitelistEntryModel

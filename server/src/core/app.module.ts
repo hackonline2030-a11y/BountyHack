@@ -5,6 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { HitLimitGuard, HitLimitModule } from './rate-limit/hitlimit';
 import { createHitLimitModuleOptions } from './rate-limit/hitlimit.factory';
+import { IpAccessModule } from '../ip-access/ip-access.module';
+import { IpAccessGuard } from '../ip-access/adapters/http/ip-access.guard';
 
 import { AppService } from './app.service';
 
@@ -67,6 +69,7 @@ const mongooseRoot =
 
 @Module({
   imports: [
+    IpAccessModule,
     HitLimitModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -79,6 +82,7 @@ const mongooseRoot =
   controllers: [AppController],
   providers: [
     AppService,
+    { provide: APP_GUARD, useClass: IpAccessGuard },
     { provide: APP_GUARD, useClass: HitLimitGuard },
   ],
 })

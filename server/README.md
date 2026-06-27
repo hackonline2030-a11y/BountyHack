@@ -49,6 +49,14 @@ openssl rand -hex 64
 
 ## Installation rapide (MySQL + Dump)
 
+#### Installer mysql sur votre système si c'est pas fait 
+
+Verifier depuis un terminal : 
+
+```sh
+mysql --version
+```
+
 #### Créer la base de données
 ```bash
 # Avec MySQL CLI
@@ -75,7 +83,7 @@ mysql -u bugbountyapp -p bugbountyapp bugbountyapp
 Exécute cette commande depuis le terminal :
 
 ```bash
-sudo mysql -u root -e "CREATE DATABASE bugbountyapp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; CREATE USER 'bugbountyapp'@'127.0.0.1' IDENTIFIED BY 'bugbountyapp'; GRANT ALL PRIVILEGES ON bugbountyapp.* TO 'bugbountyapp'@'127.0.0.1'; FLUSH PRIVILEGES;"
+sudo mysql -u root -e "CREATE USER 'bugbountyapp'@'127.0.0.1' IDENTIFIED BY 'bugbountyapp'; GRANT ALL PRIVILEGES ON bugbountyapp.* TO 'bugbountyapp'@'127.0.0.1'; FLUSH PRIVILEGES;"
 ```
 
 #### Vérifier la connexion

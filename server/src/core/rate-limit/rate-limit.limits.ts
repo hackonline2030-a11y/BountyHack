@@ -28,8 +28,8 @@ export const routeHitLimits = {
   login: routeLimit(
     'RATE_LIMIT_LOGIN',
     'RATE_LIMIT_LOGIN_WINDOW',
-    5,
-    '15m',
+    1,
+    '24h',
   ),
 
   refresh: routeLimit(

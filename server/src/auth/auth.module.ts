@@ -44,6 +44,8 @@ import { PassportJwtAuthGuard } from './adapters/passport-jwt/guards/passport-jw
 import { RolesGuard } from './rbac/roles.guard';
 import { TotpEnrollmentService } from './application/totp-enrollment.service';
 import { ProfileStepUpTokenService } from './application/profile-step-up-token.service';
+import { LoginAuthFailureFilter } from './adapters/http/login-auth-failure.filter';
+import { IpAccessModule } from '../ip-access/ip-access.module';
 
 const usesPersistedJwtStore =
   variables.database === DATABASE_MODES.MONGODB || isPrismaSqlMode();
@@ -74,6 +76,7 @@ function resolveRefreshTokenRepositoryClass() {
 }
 
 const authImports = [
+  forwardRef(() => IpAccessModule),
   PassportModule,
   ...(usesPersistedJwtStore ? [forwardRef(() => UserModule)] : []),
   ...mongoRefreshImports,
@@ -138,6 +141,7 @@ const coreProviders = [
   PassportJwtAuthGuard,
   RolesGuard,
   ProfileStepUpTokenService,
+  LoginAuthFailureFilter,
 ];
 
 const authExports = [

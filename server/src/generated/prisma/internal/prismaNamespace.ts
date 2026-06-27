@@ -411,7 +411,9 @@ export const ModelName = {
   QualityCriterion: 'QualityCriterion',
   QualityCriterionTargetTypeLink: 'QualityCriterionTargetTypeLink',
   QualityCriterionDistribution: 'QualityCriterionDistribution',
-  QualityCriterionCheck: 'QualityCriterionCheck'
+  QualityCriterionCheck: 'QualityCriterionCheck',
+  IpAccessSettings: 'IpAccessSettings',
+  IpWhitelistEntry: 'IpWhitelistEntry'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -427,7 +429,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "globalSubmission" | "globalReviewerComment" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "reportTeam" | "reportTeamMember" | "reportTeamJoinRequest" | "reportTeamLeaveRequest" | "qualityCriterionCategory" | "qualityCriterionTargetType" | "qualityCriterion" | "qualityCriterionTargetTypeLink" | "qualityCriterionDistribution" | "qualityCriterionCheck"
+    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "globalSubmission" | "globalReviewerComment" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "reportTeam" | "reportTeamMember" | "reportTeamJoinRequest" | "reportTeamLeaveRequest" | "qualityCriterionCategory" | "qualityCriterionTargetType" | "qualityCriterion" | "qualityCriterionTargetTypeLink" | "qualityCriterionDistribution" | "qualityCriterionCheck" | "ipAccessSettings" | "ipWhitelistEntry"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2279,6 +2281,138 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    IpAccessSettings: {
+      payload: Prisma.$IpAccessSettingsPayload<ExtArgs>
+      fields: Prisma.IpAccessSettingsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.IpAccessSettingsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpAccessSettingsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.IpAccessSettingsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpAccessSettingsPayload>
+        }
+        findFirst: {
+          args: Prisma.IpAccessSettingsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpAccessSettingsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.IpAccessSettingsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpAccessSettingsPayload>
+        }
+        findMany: {
+          args: Prisma.IpAccessSettingsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpAccessSettingsPayload>[]
+        }
+        create: {
+          args: Prisma.IpAccessSettingsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpAccessSettingsPayload>
+        }
+        createMany: {
+          args: Prisma.IpAccessSettingsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.IpAccessSettingsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpAccessSettingsPayload>
+        }
+        update: {
+          args: Prisma.IpAccessSettingsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpAccessSettingsPayload>
+        }
+        deleteMany: {
+          args: Prisma.IpAccessSettingsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.IpAccessSettingsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.IpAccessSettingsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpAccessSettingsPayload>
+        }
+        aggregate: {
+          args: Prisma.IpAccessSettingsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateIpAccessSettings>
+        }
+        groupBy: {
+          args: Prisma.IpAccessSettingsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IpAccessSettingsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.IpAccessSettingsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IpAccessSettingsCountAggregateOutputType> | number
+        }
+      }
+    }
+    IpWhitelistEntry: {
+      payload: Prisma.$IpWhitelistEntryPayload<ExtArgs>
+      fields: Prisma.IpWhitelistEntryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.IpWhitelistEntryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpWhitelistEntryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.IpWhitelistEntryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpWhitelistEntryPayload>
+        }
+        findFirst: {
+          args: Prisma.IpWhitelistEntryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpWhitelistEntryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.IpWhitelistEntryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpWhitelistEntryPayload>
+        }
+        findMany: {
+          args: Prisma.IpWhitelistEntryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpWhitelistEntryPayload>[]
+        }
+        create: {
+          args: Prisma.IpWhitelistEntryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpWhitelistEntryPayload>
+        }
+        createMany: {
+          args: Prisma.IpWhitelistEntryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.IpWhitelistEntryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpWhitelistEntryPayload>
+        }
+        update: {
+          args: Prisma.IpWhitelistEntryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpWhitelistEntryPayload>
+        }
+        deleteMany: {
+          args: Prisma.IpWhitelistEntryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.IpWhitelistEntryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.IpWhitelistEntryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpWhitelistEntryPayload>
+        }
+        aggregate: {
+          args: Prisma.IpWhitelistEntryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateIpWhitelistEntry>
+        }
+        groupBy: {
+          args: Prisma.IpWhitelistEntryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IpWhitelistEntryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.IpWhitelistEntryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IpWhitelistEntryCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2670,6 +2804,27 @@ export const QualityCriterionCheckScalarFieldEnum = {
 export type QualityCriterionCheckScalarFieldEnum = (typeof QualityCriterionCheckScalarFieldEnum)[keyof typeof QualityCriterionCheckScalarFieldEnum]
 
 
+export const IpAccessSettingsScalarFieldEnum = {
+  id: 'id',
+  ipWhitelistEnabled: 'ipWhitelistEnabled',
+  updatedAt: 'updatedAt',
+  updatedByUserId: 'updatedByUserId'
+} as const
+
+export type IpAccessSettingsScalarFieldEnum = (typeof IpAccessSettingsScalarFieldEnum)[keyof typeof IpAccessSettingsScalarFieldEnum]
+
+
+export const IpWhitelistEntryScalarFieldEnum = {
+  id: 'id',
+  cidr: 'cidr',
+  label: 'label',
+  createdAt: 'createdAt',
+  createdByUserId: 'createdByUserId'
+} as const
+
+export type IpWhitelistEntryScalarFieldEnum = (typeof IpWhitelistEntryScalarFieldEnum)[keyof typeof IpWhitelistEntryScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2976,6 +3131,23 @@ export const QualityCriterionCheckOrderByRelevanceFieldEnum = {
 export type QualityCriterionCheckOrderByRelevanceFieldEnum = (typeof QualityCriterionCheckOrderByRelevanceFieldEnum)[keyof typeof QualityCriterionCheckOrderByRelevanceFieldEnum]
 
 
+export const IpAccessSettingsOrderByRelevanceFieldEnum = {
+  updatedByUserId: 'updatedByUserId'
+} as const
+
+export type IpAccessSettingsOrderByRelevanceFieldEnum = (typeof IpAccessSettingsOrderByRelevanceFieldEnum)[keyof typeof IpAccessSettingsOrderByRelevanceFieldEnum]
+
+
+export const IpWhitelistEntryOrderByRelevanceFieldEnum = {
+  id: 'id',
+  cidr: 'cidr',
+  label: 'label',
+  createdByUserId: 'createdByUserId'
+} as const
+
+export type IpWhitelistEntryOrderByRelevanceFieldEnum = (typeof IpWhitelistEntryOrderByRelevanceFieldEnum)[keyof typeof IpWhitelistEntryOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -3245,6 +3417,8 @@ export type GlobalOmitConfig = {
   qualityCriterionTargetTypeLink?: Prisma.QualityCriterionTargetTypeLinkOmit
   qualityCriterionDistribution?: Prisma.QualityCriterionDistributionOmit
   qualityCriterionCheck?: Prisma.QualityCriterionCheckOmit
+  ipAccessSettings?: Prisma.IpAccessSettingsOmit
+  ipWhitelistEntry?: Prisma.IpWhitelistEntryOmit
 }
 
 /* Types for Logging */
