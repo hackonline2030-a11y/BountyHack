@@ -6,6 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import { shouldBlacklistIpOnLoginFailure } from '../../application/login-ip-blacklist.policy';
 import { BlacklistClientIpCommand } from '../../../ip-access/application/commands/blacklist-client-ip.command';
 import { resolveClientIp } from '../../../shared/http/client-ip.util';
 import { isIpAccessEnabled } from '../../../shared/is-ip-access-enabled';
@@ -30,7 +31,11 @@ export class LoginAuthFailureFilter implements ExceptionFilter {
     const req = ctx.getRequest<Request>();
     const res = ctx.getResponse<Response>();
 
-    if (isIpAccessEnabled() && isAuthLoginPost(req)) {
+    if (
+      isIpAccessEnabled() &&
+      isAuthLoginPost(req) &&
+      shouldBlacklistIpOnLoginFailure(exception)
+    ) {
       await this.blacklistClientIp.execute({
         clientIp: resolveClientIp(req),
         reason: 'login_failed',

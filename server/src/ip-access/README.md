@@ -8,9 +8,11 @@ Aligné sur `report-team` / `quality` : `application/commands|queries`, `ports/*
 
 ### Blacklist (login)
 
-1. `POST /api/auth/login` échoue (`401`) → `LoginAuthFailureFilter` (auth) appelle `BlacklistClientIpCommand`.
+1. `POST /api/auth/login` échoue avec un **échec réel** (`401`, hors challenge TOTP) → `LoginAuthFailureFilter` appelle `BlacklistClientIpCommand`.
 2. L’IP est stockée via `I_IP_BLACKLIST_STORE` (Redis si `REDIS_URL`, sinon mémoire process).
 3. `IpAccessGuard` (`APP_GUARD`, avant `HitLimitGuard`) bloque les requêtes suivantes (`403`).
+
+**TOTP (2-step)** : `401 TOTP code required` (mot de passe OK, code absent) **ne blackliste pas** — le client peut soumettre l’étape 2. Seuls les vrais échecs (`Invalid credentials`, `Invalid TOTP code`, etc.) déclenchent la blacklist.
 
 Désactivé en `development` / `test` sauf `IP_ACCESS_FORCE=1` (voir `shared/is-ip-access-enabled.ts`).
 
@@ -48,13 +50,13 @@ IP_ACCESS_REDIS_PREFIX=bb:sec:bl:
 IP_ACCESS_BLACKLIST_TTL_SECONDS=0
 IP_ACCESS_WHITELIST_CACHE_TTL_SEC=30
 RATE_LIMIT_TRUST_PROXY=1
-RATE_LIMIT_LOGIN=1
-RATE_LIMIT_LOGIN_WINDOW=24h
 ```
+
+La limite stricte « 1 tentative login » est appliquée via **blacklist IP** (pas `@HitLimit` sur `/auth/login`, incompatible avec le flux TOTP en 2 étapes).
 
 ## Fichiers liés auth
 
-- `auth/adapters/http/login-auth-failure.filter.ts` — hook login uniquement.
+- `auth/adapters/http/login-auth-failure.filter.ts` — hook login uniquement ; ignore `LoginTotpChallengeRequiredError`.
 - `shared/http/client-ip.util.ts` — IP client partagée avec `core/rate-limit`.
 - `shared/http/public-api-path.util.ts` — exclusions `/ping`, `/docs` (rate-limit + ip-access).
 

@@ -98,7 +98,6 @@ export class PassportJwtAuthController {
   }
 
   @Post('login')
-  @HitLimit(routeHitLimits.login)
   @UseFilters(LoginAuthFailureFilter)
   @UseGuards(PassportAuthGuard('local'))
   @ApiOperation({

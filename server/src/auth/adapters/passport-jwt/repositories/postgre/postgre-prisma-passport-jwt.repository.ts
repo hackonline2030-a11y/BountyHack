@@ -18,6 +18,7 @@ import type {
 import { Identity } from '../../../../domain/models/identity';
 import { verifyPassword, hashPassword } from '../../../utils/password.util';
 import { openTotpSecretFromStorage } from '../../../../adapters/totp/totp-secret-seal';
+import { LoginTotpChallengeRequiredError } from '../../../../application/errors/login-totp-challenge-required.error';
 import { TOTP_CONFIG } from '../../../../application/totp-config';
 import { PassportJwtTokenService } from '../../services/passport-jwt-token.service';
 import {
@@ -214,7 +215,7 @@ export class PostgrePrismaPassportJwtRepository
     if (requiresTotp) {
       const code = (input.code ?? '').replace(/\s/g, '');
       if (!/^\d{6,8}$/.test(code)) {
-        throw new UnauthorizedException('TOTP code required');
+        throw new LoginTotpChallengeRequiredError();
       }
 
       const active = row.twoFactors[0];
