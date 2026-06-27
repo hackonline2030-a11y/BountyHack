@@ -6,6 +6,7 @@ import enReportDraft from "@/app/i18n/locales/en/reportDraft.json";
 import enCredits from "@/app/i18n/locales/en/credits.json";
 import enLegal from "@/app/i18n/locales/en/legal.json";
 import enMyReports from "@/app/i18n/locales/en/myReports.json";
+import enIpAccess from "@/app/i18n/locales/en/ipAccess.json";
 import enQuality from "@/app/i18n/locales/en/quality.json";
 import enParameters from "@/app/i18n/locales/en/parameters.json";
 import enPasswordReset from "@/app/i18n/locales/en/passwordReset.json";
@@ -24,6 +25,7 @@ import frReportDraft from "@/app/i18n/locales/fr/reportDraft.json";
 import frCredits from "@/app/i18n/locales/fr/credits.json";
 import frLegal from "@/app/i18n/locales/fr/legal.json";
 import frMyReports from "@/app/i18n/locales/fr/myReports.json";
+import frIpAccess from "@/app/i18n/locales/fr/ipAccess.json";
 import frQuality from "@/app/i18n/locales/fr/quality.json";
 import frParameters from "@/app/i18n/locales/fr/parameters.json";
 import frPasswordReset from "@/app/i18n/locales/fr/passwordReset.json";
@@ -60,6 +62,7 @@ export const clientI18nNamespaces = [
   "myReports",
   "reportDraft",
   "quality",
+  "ipAccess",
 ] as const;
 
 export type ClientI18nNamespace = (typeof clientI18nNamespaces)[number];
@@ -84,6 +87,7 @@ export const clientI18nResources = {
     myReports: enMyReports,
     reportDraft: enReportDraft,
     quality: enQuality,
+    ipAccess: enIpAccess,
   },
   fr: {
     common: frCommon,
@@ -104,5 +108,6 @@ export const clientI18nResources = {
     myReports: frMyReports,
     reportDraft: frReportDraft,
     quality: frQuality,
+    ipAccess: frIpAccess,
   },
 } satisfies Resource;

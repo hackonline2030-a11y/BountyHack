@@ -1,6 +1,7 @@
-import type { IpWhitelistEntry } from '../../../generated/prisma/client';
+import type { IpReallowEntry, IpWhitelistEntry } from '../../../generated/prisma/client';
 import type {
   IpAccessSettingsWire,
+  IpReallowEntryWire,
   IpWhitelistEntryWire,
 } from '../../models/ip-access-api.types';
 
@@ -18,6 +19,16 @@ export class IpAccessPrismaMapper {
   }
 
   static entryToWire(row: IpWhitelistEntry): IpWhitelistEntryWire {
+    return {
+      id: row.id,
+      cidr: row.cidr,
+      label: row.label,
+      createdAt: row.createdAt.toISOString(),
+      createdByUserId: row.createdByUserId,
+    };
+  }
+
+  static reallowEntryToWire(row: IpReallowEntry): IpReallowEntryWire {
     return {
       id: row.id,
       cidr: row.cidr,

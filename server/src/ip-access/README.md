@@ -9,17 +9,39 @@ Aligné sur `report-team` / `quality` : `application/commands|queries`, `ports/*
 ### Blacklist (login)
 
 1. `POST /api/auth/login` échoue avec un **échec réel** (`401`, hors challenge TOTP) → `LoginAuthFailureFilter` appelle `BlacklistClientIpCommand`.
-2. L’IP est stockée via `I_IP_BLACKLIST_STORE` (Redis si `REDIS_URL`, sinon mémoire process).
-3. `IpAccessGuard` (`APP_GUARD`, avant `HitLimitGuard`) bloque les requêtes suivantes (`403`).
+2. L’IP est stockée via `I_IP_BLACKLIST_STORE` (Redis si `REDIS_URL`, sinon mémoire process) — **non persistée en BDD** (anti-DDoS sur volume de clés).
+3. `IpAccessGuard` bloque les requêtes suivantes (`403`) sauf si l’IP correspond à une entrée **réautorisée** (`ip_reallow_entries`).
 
-**TOTP (2-step)** : `401 TOTP code required` (mot de passe OK, code absent) **ne blackliste pas** — le client peut soumettre l’étape 2. Seuls les vrais échecs (`Invalid credentials`, `Invalid TOTP code`, etc.) déclenchent la blacklist.
+**Réautorisation (persistée)** : table `ip_reallow_entries` — bypass blacklist **indépendant** du mode whitelist-only.
+
+- **Pas de mutation HTTP** : `GET /api/ip-access/admin/reallow` (audit super-admin) uniquement. Aucun `POST`/`DELETE` — un session hijack ne peut pas réautoriser via l’API.
+- **Ajout hors app** : après vérification **orale** (téléphone), insérer en base (Adminer / psql). CIDR **canonique** (`203.0.113.10/32`).
+
+Exemple PostgreSQL :
+
+```sql
+INSERT INTO ip_reallow_entries (id, cidr, label, created_by_user_id)
+VALUES (gen_random_uuid()::text, '203.0.113.10/32', 'Hunter — appel 2026-06-24', '<super_admin_user_id>');
+```
+
+Exemple MySQL :
+
+```sql
+INSERT INTO ip_reallow_entries (id, cidr, label, created_by_user_id)
+VALUES (UUID(), '203.0.113.10/32', 'Hunter — appel 2026-06-24', '<super_admin_user_id>');
+```
+
+Le cache reallow se rafraîchit sous `IP_ACCESS_WHITELIST_CACHE_TTL_SEC` (partagé avec whitelist snapshot).
+
+**TOTP (2-step)** : `401 TOTP code required` **ne blackliste pas**.
 
 Désactivé en `development` / `test` sauf `IP_ACCESS_FORCE=1` (voir `shared/is-ip-access-enabled.ts`).
 
 ### Whitelist (optionnel, Prisma SQL)
 
 - Tables `ip_access_settings` (singleton) + `ip_whitelist_entries` (CIDR **canoniques**).
-- Admin : `GET|POST|DELETE /api/ip-access/admin/whitelist`, `PUT /api/ip-access/admin/whitelist/enabled` — **SUPER_ADMIN** via `@AuthRoles` (RBAC HTTP uniquement).
+- Admin : `GET /api/ip-access/admin/blacklist`, `GET /api/ip-access/admin/reallow` (lecture seule), `GET|POST|DELETE /api/ip-access/admin/whitelist`, `PUT /api/ip-access/admin/whitelist/enabled` — **SUPER_ADMIN** via `@AuthRoles`.
+- UI client : `/{lng}/administration/ip-access` (super-admin).
 - Quand `ipWhitelistEnabled = true`, seules les IP dans la whitelist atteignent l’API (hors `/ping`, `/docs`).
 - Snapshot whitelist en cache mémoire (`IpWhitelistSnapshotCache`, TTL configurable) ; invalidé à chaque mutation admin.
 

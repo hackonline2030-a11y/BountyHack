@@ -1,0 +1,57 @@
+{
+  "ipAccess": {
+    "metaTitle": "Accès IP — administration",
+    "backLink": "← Administration",
+    "title": "Blacklist, réautorisées & whitelist IP",
+    "subtitle": "Consultation des blocages et de la whitelist. Les réautorisations ne sont jamais modifiables depuis l'application web.",
+    "devNotice": "La politique d'accès IP est désactivée en développement sauf si IP_ACCESS_FORCE=1 est défini sur l'API.",
+    "loadFailed": "Impossible de charger les données d'accès IP.",
+    "actionFailed": "Action impossible.",
+    "emptyBlacklist": "Aucune adresse IP blacklistée.",
+    "emptyReallow": "Aucune IP réautorisée en base.",
+    "emptyWhitelist": "Aucune entrée dans la whitelist.",
+    "blacklist": {
+      "title": "IP blacklistées (éphémère, lecture seule)",
+      "description": "IP bloquées après un échec de connexion. Aucune action possible ici — pas de réautorisation depuis l'app.",
+      "columns": {
+        "ip": "Adresse IP",
+        "reason": "Motif",
+        "blacklistedAt": "Blacklistée le"
+      }
+    },
+    "reallow": {
+      "title": "IP réautorisées (persisté, lecture seule)",
+      "description": "Ces entrées contournent la blacklist login, même sans mode whitelist-only. Affichage d'audit uniquement.",
+      "oralOnlyNotice": "Ajout ou retrait uniquement hors application : après vérification orale (téléphone), insérez la ligne en base (Adminer, pgweb, psql). CIDR canonique requis, ex. 203.0.113.10/32. Voir server/src/ip-access/README.md.",
+      "columns": {
+        "cidr": "CIDR",
+        "label": "Libellé",
+        "createdAt": "Ajoutée le"
+      }
+    },
+    "whitelist": {
+      "title": "Whitelist (persisté, verrouillage optionnel)",
+      "description": "Lorsqu'elle est activée, seuls les CIDR listés peuvent accéder à l'API (sauf /ping et /docs).",
+      "enabledLabel": "Mode whitelist-only activé",
+      "disabledLabel": "Mode whitelist-only désactivé",
+      "toggleFailed": "Impossible de mettre à jour le mode whitelist.",
+      "addTitle": "Ajouter une entrée whitelist",
+      "cidrLabel": "IP ou CIDR",
+      "cidrPlaceholder": "203.0.113.10 ou 203.0.113.0/24",
+      "labelLabel": "Libellé (optionnel)",
+      "labelPlaceholder": "VPN bureau",
+      "addButton": "Ajouter",
+      "addFailed": "Impossible d'ajouter l'entrée.",
+      "columns": {
+        "cidr": "CIDR",
+        "label": "Libellé",
+        "createdAt": "Ajoutée le",
+        "actions": "Actions"
+      },
+      "remove": "Retirer",
+      "removeConfirmTitle": "Retirer de la whitelist",
+      "removeConfirmBody": "Retirer {{cidr}} de la whitelist ?",
+      "confirmRemove": "Retirer"
+    }
+  }
+}

@@ -3,6 +3,7 @@ import type { FC, SVGProps } from "react";
 import {
   CriteriaIcon,
   SettingsIcon,
+  ShieldIcon,
   TeamIcon,
   UserPlusIcon,
   UsersIcon,
@@ -14,6 +15,7 @@ export type AdminNavLabels = {
   register: string;
   teams: string;
   criteria: string;
+  ipAccess: string;
   settings: string;
 };
 
@@ -22,6 +24,7 @@ export type AdminNavHrefs = {
   register: string;
   teams: string;
   criteria: string;
+  ipAccess: string;
   settings: string;
 };
 
@@ -37,6 +40,7 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
   { key: "register", Icon: UserPlusIcon },
   { key: "teams", Icon: TeamIcon },
   { key: "criteria", Icon: CriteriaIcon },
+  { key: "ipAccess", Icon: ShieldIcon },
   { key: "settings", Icon: SettingsIcon },
 ];
 

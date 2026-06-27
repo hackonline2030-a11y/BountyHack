@@ -16,6 +16,9 @@ export type IpWhitelistEntryWire = {
   createdByUserId: string;
 };
 
+/** Same shape as whitelist row — persisted bypass for ephemeral blacklist. */
+export type IpReallowEntryWire = IpWhitelistEntryWire;
+
 export type IpAccessSettingsWire = {
   ipWhitelistEnabled: boolean;
   updatedAt: string;
@@ -28,6 +31,8 @@ export type CreateIpWhitelistEntryInput = {
   createdByUserId: string;
 };
 
+export type CreateIpReallowEntryInput = CreateIpWhitelistEntryInput;
+
 export type BlacklistClientIpMeta = {
   reason: string;
   at: Date;
@@ -36,6 +41,12 @@ export type BlacklistClientIpMeta = {
 export type BlacklistClientIpInput = {
   clientIp: string;
   reason: string;
+};
+
+export type IpBlacklistEntryWire = {
+  clientIp: string;
+  reason: string;
+  blacklistedAt: string;
 };
 
 export type SetIpWhitelistEnabledInput = {

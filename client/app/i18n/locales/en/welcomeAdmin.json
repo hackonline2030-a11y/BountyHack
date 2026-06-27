@@ -10,6 +10,7 @@
       "register": "Registration",
       "teams": "Report teams",
       "criteria": "Quality criteria",
+      "ipAccess": "IP access",
       "settings": "Settings"
     },
     "mission": {
@@ -49,6 +50,12 @@
         "subtitle": "Drafts ready for sign-off",
         "body": "Review all report drafts and validate those ready to submit to the program.",
         "cta": "Open validation queue"
+      },
+      "ipAccess": {
+        "title": "IP blacklist & whitelist",
+        "subtitle": "Network access control",
+        "body": "Review blocked IPs after failed logins, remove blocks, and manage the optional whitelist.",
+        "cta": "Manage IP access"
       }
     }
   }

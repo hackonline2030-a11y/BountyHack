@@ -5,7 +5,7 @@ import {
   getIpBlacklistRedisPrefix,
   getIpBlacklistTtlSeconds,
 } from '../../config/ip-access-env';
-import type { BlacklistClientIpMeta } from '../../models/ip-access-api.types';
+import type { BlacklistClientIpMeta, IpBlacklistEntryWire } from '../../models/ip-access-api.types';
 import type { IIpBlacklistStore } from '../../ports/ip-blacklist-store.interface';
 
 @Injectable()
@@ -55,6 +55,49 @@ export class RedisIpBlacklistStore implements IIpBlacklistStore, OnModuleDestroy
 
   async unblacklist(clientIp: string): Promise<void> {
     await this.redis.del(this.keyFor(clientIp));
+  }
+
+  async listEntries(): Promise<IpBlacklistEntryWire[]> {
+    const entries: IpBlacklistEntryWire[] = [];
+    let cursor = '0';
+    do {
+      const [next, keys] = await this.redis.scan(
+        cursor,
+        'MATCH',
+        `${this.prefix}*`,
+        'COUNT',
+        100,
+      );
+      cursor = next;
+      for (const key of keys) {
+        const clientIp = key.slice(this.prefix.length);
+        if (!clientIp) {
+          continue;
+        }
+        const raw = await this.redis.get(key);
+        if (!raw) {
+          continue;
+        }
+        try {
+          const parsed = JSON.parse(raw) as { reason?: string; at?: string };
+          entries.push({
+            clientIp,
+            reason: parsed.reason ?? 'unknown',
+            blacklistedAt: parsed.at ?? new Date().toISOString(),
+          });
+        } catch {
+          entries.push({
+            clientIp,
+            reason: 'unknown',
+            blacklistedAt: new Date().toISOString(),
+          });
+        }
+      }
+    } while (cursor !== '0');
+
+    return entries.sort((a, b) =>
+      b.blacklistedAt.localeCompare(a.blacklistedAt),
+    );
   }
 
   private keyFor(clientIp: string): string {

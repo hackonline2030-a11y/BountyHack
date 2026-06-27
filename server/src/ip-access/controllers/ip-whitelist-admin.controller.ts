@@ -25,6 +25,8 @@ import { toIpAccessActor } from '../adapters/http/map-ip-access-actor';
 import { AddIpWhitelistEntryCommand } from '../application/commands/add-ip-whitelist-entry.command';
 import { RemoveIpWhitelistEntryCommand } from '../application/commands/remove-ip-whitelist-entry.command';
 import { SetIpWhitelistEnabledCommand } from '../application/commands/set-ip-whitelist-enabled.command';
+import { ListIpBlacklistEntriesQuery } from '../application/queries/list-ip-blacklist-entries.query';
+import { ListIpReallowEntriesQuery } from '../application/queries/list-ip-reallow-entries.query';
 import { ListIpWhitelistEntriesQuery } from '../application/queries/list-ip-whitelist-entries.query';
 import {
   CreateIpWhitelistEntryDto,
@@ -36,11 +38,41 @@ import {
 @Controller('ip-access/admin')
 export class IpWhitelistAdminController {
   constructor(
+    private readonly listBlacklist: ListIpBlacklistEntriesQuery,
+    private readonly listReallow: ListIpReallowEntriesQuery,
     private readonly listWhitelist: ListIpWhitelistEntriesQuery,
     private readonly addEntry: AddIpWhitelistEntryCommand,
     private readonly removeEntry: RemoveIpWhitelistEntryCommand,
     private readonly setEnabled: SetIpWhitelistEnabledCommand,
   ) {}
+
+  @Get('blacklist')
+  @AuthRoles(AppRoleCode.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'List blacklisted client IPs',
+    description:
+      'SUPER_ADMIN only. Entries come from the ephemeral blacklist store (Redis or in-memory).',
+  })
+  @ApiOkResponse({ description: 'Blacklisted IPs with reason and timestamp.' })
+  @ApiHttpUnauthorized('Missing or invalid bearer token.')
+  @ApiHttpForbidden('Authenticated user is not SUPER_ADMIN.')
+  listBlacklisted() {
+    return this.listBlacklist.execute();
+  }
+
+  @Get('reallow')
+  @AuthRoles(AppRoleCode.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'List reallowed IPs (read-only, persisted blacklist bypass)',
+    description:
+      'SUPER_ADMIN read-only audit. Mutations are not exposed via HTTP — insert rows in `ip_reallow_entries` after oral verification (see module README).',
+  })
+  @ApiOkResponse({ description: 'Reallowed entries.' })
+  @ApiHttpUnauthorized('Missing or invalid bearer token.')
+  @ApiHttpForbidden('Authenticated user is not SUPER_ADMIN.')
+  listReallowed() {
+    return this.listReallow.execute();
+  }
 
   @Get('whitelist')
   @AuthRoles(AppRoleCode.SUPER_ADMIN)

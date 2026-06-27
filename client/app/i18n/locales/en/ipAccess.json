@@ -1,0 +1,57 @@
+{
+  "ipAccess": {
+    "metaTitle": "IP access — administration",
+    "backLink": "← Administration",
+    "title": "IP blacklist, reallow & whitelist",
+    "subtitle": "View blocks and manage whitelist. Reallow entries cannot be changed from the web app.",
+    "devNotice": "IP access policy is disabled in development unless IP_ACCESS_FORCE=1 is set on the API server.",
+    "loadFailed": "Unable to load IP access data.",
+    "actionFailed": "Action failed.",
+    "emptyBlacklist": "No blacklisted IP addresses.",
+    "emptyReallow": "No reallowed entries in the database.",
+    "emptyWhitelist": "No whitelist entries.",
+    "blacklist": {
+      "title": "Blacklisted IPs (ephemeral, read-only)",
+      "description": "IPs blocked after a failed login. No actions here — reallow is never done from the app.",
+      "columns": {
+        "ip": "IP address",
+        "reason": "Reason",
+        "blacklistedAt": "Blacklisted on"
+      }
+    },
+    "reallow": {
+      "title": "Reallowed IPs (persisted, read-only)",
+      "description": "These entries bypass the login blacklist even without whitelist-only mode. Audit view only.",
+      "oralOnlyNotice": "Add or remove only outside the app: after oral verification (phone), insert the row in the database (Adminer, pgweb, psql). Use canonical CIDR, e.g. 203.0.113.10/32. See server/src/ip-access/README.md.",
+      "columns": {
+        "cidr": "CIDR",
+        "label": "Label",
+        "createdAt": "Added on"
+      }
+    },
+    "whitelist": {
+      "title": "Whitelist (persisted, optional lockdown)",
+      "description": "When enabled, only listed CIDRs can reach the API (except /ping and /docs).",
+      "enabledLabel": "Whitelist-only mode enabled",
+      "disabledLabel": "Whitelist-only mode disabled",
+      "toggleFailed": "Unable to update whitelist mode.",
+      "addTitle": "Add a whitelist entry",
+      "cidrLabel": "IP or CIDR",
+      "cidrPlaceholder": "203.0.113.10 or 203.0.113.0/24",
+      "labelLabel": "Label (optional)",
+      "labelPlaceholder": "Office VPN",
+      "addButton": "Add",
+      "addFailed": "Unable to add entry.",
+      "columns": {
+        "cidr": "CIDR",
+        "label": "Label",
+        "createdAt": "Added on",
+        "actions": "Actions"
+      },
+      "remove": "Remove",
+      "removeConfirmTitle": "Remove whitelist entry",
+      "removeConfirmBody": "Remove {{cidr}} from the whitelist?",
+      "confirmRemove": "Remove"
+    }
+  }
+}

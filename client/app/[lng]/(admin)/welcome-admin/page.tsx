@@ -52,16 +52,19 @@ export default async function WelcomeAdminPage({ params }: PageProps) {
     register: t("welcomeAdmin.nav.register"),
     teams: t("welcomeAdmin.nav.teams"),
     criteria: t("welcomeAdmin.nav.criteria"),
+    ipAccess: t("welcomeAdmin.nav.ipAccess"),
     settings: t("welcomeAdmin.nav.settings"),
   };
 
   const finalValidationHref = `${prefix}/administration/final-validation`;
+  const ipAccessHref = `${prefix}/administration/ip-access`;
 
   const navHrefs: AdminNavHrefs = {
     users: `${prefix}/administration`,
     register: `${prefix}/administration/register`,
     teams: `${prefix}/administration/team-management`,
     criteria: `${prefix}/quality-criteria`,
+    ipAccess: ipAccessHref,
     settings: `${prefix}/parameters`,
   };
 
@@ -141,6 +144,19 @@ export default async function WelcomeAdminPage({ params }: PageProps) {
                     className="dashboard-card-cta mt-auto pt-4"
                   >
                     Ouvrir l&apos;inventaire →
+                  </Link>
+                </DashboardCard>
+
+                <DashboardCard
+                  titleId="card-ip-access"
+                  title={t("welcomeAdmin.cards.ipAccess.title")}
+                  subtitle={t("welcomeAdmin.cards.ipAccess.subtitle")}
+                >
+                  <p className="text-sm text-dashboard-text-muted">
+                    {t("welcomeAdmin.cards.ipAccess.body")}
+                  </p>
+                  <Link href={ipAccessHref} className="dashboard-card-cta mt-auto pt-4">
+                    {t("welcomeAdmin.cards.ipAccess.cta")} →
                   </Link>
                 </DashboardCard>
 

@@ -24,6 +24,7 @@ const i18nConfig: I18nConfig = {
     'myReports',
     'reportDraft',
     'quality',
+    'ipAccess',
   ],
   resourceLoader: (language, namespace) =>
     import(`./app/i18n/locales/${language}/${namespace}.json`),

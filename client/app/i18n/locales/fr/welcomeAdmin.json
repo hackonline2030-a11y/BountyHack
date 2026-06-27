@@ -10,6 +10,7 @@
       "register": "Inscription",
       "teams": "Équipes rapport",
       "criteria": "Critères qualité",
+      "ipAccess": "Accès IP",
       "settings": "Paramètres"
     },
     "mission": {
@@ -49,6 +50,12 @@
         "subtitle": "Brouillons prêts à valider",
         "body": "Consultez tous les brouillons de rapport et validez ceux prêts à soumettre au programme.",
         "cta": "Ouvrir la file de validation"
+      },
+      "ipAccess": {
+        "title": "Blacklist & whitelist IP",
+        "subtitle": "Contrôle d'accès réseau",
+        "body": "Consultez les IP bloquées après échec de connexion, levez un blocage et gérez la whitelist optionnelle.",
+        "cta": "Gérer les accès IP"
       }
     }
   }
