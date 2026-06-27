@@ -5,7 +5,7 @@ import { isPrismaSqlMode } from '../shared/database-mode';
 import { InMemoryIpBlacklistStore } from './adapters/in-memory/in-memory-ip-blacklist.store';
 import { InMemoryIpWhitelistRepository } from './adapters/in-memory/in-memory-ip-whitelist.repository';
 import { IpAccessGuard } from './adapters/http/ip-access.guard';
-import { PrismaIpWhitelistRepository } from './adapters/postgre-prisma/prisma-ip-whitelist.repository';
+import { PrismaIpWhitelistRepository } from './adapters/prisma-sql/prisma-ip-whitelist.repository';
 import { RedisIpBlacklistStore } from './adapters/redis/redis-ip-blacklist.store';
 import { AddIpWhitelistEntryCommand } from './application/commands/add-ip-whitelist-entry.command';
 import { BlacklistClientIpCommand } from './application/commands/blacklist-client-ip.command';

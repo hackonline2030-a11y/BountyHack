@@ -2,7 +2,7 @@
 
 Politique réseau transversale : **blacklist** après échec de login, **whitelist** optionnelle (super-admin, Prisma SQL).
 
-Aligné sur `report-team` / `quality` : `application/commands|queries`, `ports/*-repository.interface.ts`, `adapters/postgre-prisma/`.
+Aligné sur `report-team` / `quality` : `application/commands|queries`, `ports/*-repository.interface.ts`, `adapters/prisma-sql/` (PostgreSQL + MySQL via Prisma, voir `isPrismaSqlMode()`).
 
 ## Comportement
 
