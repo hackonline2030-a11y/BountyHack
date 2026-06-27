@@ -25,7 +25,7 @@ function routeLimit(
 
 /** Per-route limits — all tunable via `.env` (see `.env.example`). */
 export const routeHitLimits = {
-  /** Reserved — login uses ip-access blacklist (TOTP 2-step incompatible with @HitLimit). */
+  /** Login: limit 1 per IP per phase (`:password` / `:totp` via `loginRouteHitLimitKey`). */
   login: routeLimit(
     'RATE_LIMIT_LOGIN',
     'RATE_LIMIT_LOGIN_WINDOW',

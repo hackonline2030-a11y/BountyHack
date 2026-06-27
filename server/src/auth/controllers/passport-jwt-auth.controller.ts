@@ -44,6 +44,7 @@ import {
 import { HitLimit } from '../../core/rate-limit/hitlimit';
 import { routeHitLimits } from '../../core/rate-limit/rate-limit.limits';
 import { LoginAuthFailureFilter } from '../adapters/http/login-auth-failure.filter';
+import { loginRouteHitLimitKey } from '../adapters/http/login-route-hitlimit.util';
 import { AuthRoles } from '../rbac/roles.decorator';
 import { AppRoleCode } from '../../shared/rbac/app-role.code';
 
@@ -98,6 +99,7 @@ export class PassportJwtAuthController {
   }
 
   @Post('login')
+  @HitLimit({ ...routeHitLimits.login, key: loginRouteHitLimitKey })
   @UseFilters(LoginAuthFailureFilter)
   @UseGuards(PassportAuthGuard('local'))
   @ApiOperation({

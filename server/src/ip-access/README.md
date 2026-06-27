@@ -50,9 +50,11 @@ IP_ACCESS_REDIS_PREFIX=bb:sec:bl:
 IP_ACCESS_BLACKLIST_TTL_SECONDS=0
 IP_ACCESS_WHITELIST_CACHE_TTL_SEC=30
 RATE_LIMIT_TRUST_PROXY=1
+RATE_LIMIT_LOGIN=1
+RATE_LIMIT_LOGIN_WINDOW=24h
 ```
 
-La limite stricte « 1 tentative login » est appliquée via **blacklist IP** (pas `@HitLimit` sur `/auth/login`, incompatible avec le flux TOTP en 2 étapes).
+Login : `@HitLimit(1)` avec clés `{ip}:login:password` et `{ip}:login:totp` (voir `loginRouteHitLimitKey`). La blacklist IP complète la politique sur les vrais échecs.
 
 ## Fichiers liés auth
 

@@ -170,17 +170,17 @@ Quand `users.two_factor_enabled = 1` (Postgres Prisma), le login mot de passe se
 
 Pour les comptes sans TOTP (`two_factor_enabled = 0`), le login reste inchangé (email + password uniquement).
 
-**IP blacklist (module `ip-access`)** — politique « 1 échec réel » :
+**Rate limit + IP blacklist (login)** — 1 essai par phase :
 
-| Étape | Réponse | Blacklist IP |
-|-------|---------|--------------|
-| Sans TOTP, mauvais mot de passe | `401 Invalid credentials` | Oui |
-| Avec TOTP, mot de passe OK, code absent | `401 TOTP code required` | **Non** (challenge, pas un échec) |
-| Avec TOTP, mauvais code | `401 Invalid TOTP code` | Oui |
+| Phase | `@HitLimit` (clé) | Échec | Blacklist IP |
+|-------|-------------------|-------|--------------|
+| Mot de passe (sans code TOTP valide) | `{ip}:login:password` — limit 1 | `401 Invalid credentials` | Oui |
+| Mot de passe OK → challenge TOTP | `{ip}:login:password` consommé | `401 TOTP code required` | **Non** |
+| Code TOTP (6–8 chiffres) | `{ip}:login:totp` — limit 1 | `401 Invalid TOTP code` | Oui |
 
-Implémentation : `LoginTotpChallengeRequiredError` + `LoginAuthFailureFilter` + `shouldBlacklistIpOnLoginFailure()`. Le `@HitLimit` route login a été retiré : la limite stricte est portée par la blacklist (un `@HitLimit(1)` bloquait l’étape 2 TOTP).
+Deux buckets séparés (`loginRouteHitLimitKey`) : l’étape mot de passe ne bloque pas l’étape TOTP en `429`. Blacklist : `LoginTotpChallengeRequiredError` + `LoginAuthFailureFilter` + `shouldBlacklistIpOnLoginFailure()`.
 
-Fichiers principaux : `application/totp-enrollment.service.ts`, `application/totp-config.ts`, `adapters/totp/totp-secret-seal.ts`, `controllers/totp-enrollment.controller.ts`, `adapters/http/login-auth-failure.filter.ts`.
+Fichiers principaux : `application/totp-enrollment.service.ts`, `application/totp-config.ts`, `adapters/totp/totp-secret-seal.ts`, `controllers/totp-enrollment.controller.ts`, `adapters/http/login-auth-failure.filter.ts`, `adapters/http/login-route-hitlimit.util.ts`.
 
 Variables : **`TOTP_ISSUER`** (defaut `BugBountyApp`), **`TOTP_EPOCH_TOLERANCE`** pour `verify()` (defaut `30` secondes).
 
