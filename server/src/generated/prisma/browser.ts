@@ -167,3 +167,8 @@ export type IpAccessSettings = Prisma.IpAccessSettingsModel
  * Canonical CIDR rows only (normalized before insert — e.g. host /32).
  */
 export type IpWhitelistEntry = Prisma.IpWhitelistEntryModel
+/**
+ * Model IpReallowEntry
+ * Persisted bypass for ephemeral login blacklist (independent of whitelist-only mode).
+ */
+export type IpReallowEntry = Prisma.IpReallowEntryModel
