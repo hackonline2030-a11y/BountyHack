@@ -37,10 +37,6 @@ export class IpAccessGuard implements CanActivate {
       return true;
     }
 
-    if (decision.code === 'DENY_BLACKLISTED') {
-      throw new ForbiddenException('Client IP is blocked');
-    }
-
     throw new ForbiddenException('Client IP is not allowed');
   }
 }

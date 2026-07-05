@@ -1,5 +1,5 @@
 /**
- * IP access policy (blacklist / whitelist) is off in development/test unless forced.
+ * IP whitelist policy is off in development/test unless forced.
  * Override: IP_ACCESS_DISABLED=1 | IP_ACCESS_FORCE=1
  */
 export function isIpAccessEnabled(): boolean {

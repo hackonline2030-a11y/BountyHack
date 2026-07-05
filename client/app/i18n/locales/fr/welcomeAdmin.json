@@ -52,10 +52,10 @@
         "cta": "Ouvrir la file de validation"
       },
       "ipAccess": {
-        "title": "Blacklist & whitelist IP",
+        "title": "Whitelist IP",
         "subtitle": "Contrôle d'accès réseau",
-        "body": "Consultez les IP bloquées après échec de connexion, levez un blocage et gérez la whitelist optionnelle.",
-        "cta": "Gérer les accès IP"
+        "body": "Activez le mode whitelist-only et gérez les adresses ou plages CIDR autorisées.",
+        "cta": "Gérer la whitelist IP"
       }
     }
   }

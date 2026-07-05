@@ -52,10 +52,10 @@
         "cta": "Open validation queue"
       },
       "ipAccess": {
-        "title": "IP blacklist & whitelist",
+        "title": "IP whitelist",
         "subtitle": "Network access control",
-        "body": "Review blocked IPs after failed logins, remove blocks, and manage the optional whitelist.",
-        "cta": "Manage IP access"
+        "body": "Enable whitelist-only mode and manage allowed IP addresses or CIDR ranges.",
+        "cta": "Manage IP whitelist"
       }
     }
   }

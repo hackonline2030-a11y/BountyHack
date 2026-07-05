@@ -17,13 +17,6 @@ async function proxy(
   }
 
   const { path = [] } = await context.params;
-  if (path[0] === "reallow" && request.method !== "GET") {
-    return NextResponse.json(
-      { message: "Reallow mutations are not available via the web app." },
-      { status: 403 },
-    );
-  }
-
   const subPath = path.join("/");
   const query = request.nextUrl.search;
   const relative = subPath ? `${subPath}${query}` : query || "";

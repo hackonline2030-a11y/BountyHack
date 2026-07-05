@@ -618,14 +618,3 @@ model IpWhitelistEntry {
 
   @@map("ip_whitelist_entries")
 }
-
-/// Persisted bypass for ephemeral login blacklist (independent of whitelist-only mode).
-model IpReallowEntry {
-  id              String   @id @default(uuid())
-  cidr            String   @unique
-  label           String?
-  createdAt       DateTime @default(now()) @map("created_at")
-  createdByUserId String   @map("created_by_user_id")
-
-  @@map("ip_reallow_entries")
-}

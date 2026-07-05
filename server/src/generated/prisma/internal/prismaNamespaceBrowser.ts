@@ -80,8 +80,7 @@ export const ModelName = {
   QualityCriterionDistribution: 'QualityCriterionDistribution',
   QualityCriterionCheck: 'QualityCriterionCheck',
   IpAccessSettings: 'IpAccessSettings',
-  IpWhitelistEntry: 'IpWhitelistEntry',
-  IpReallowEntry: 'IpReallowEntry'
+  IpWhitelistEntry: 'IpWhitelistEntry'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -473,17 +472,6 @@ export const IpWhitelistEntryScalarFieldEnum = {
 export type IpWhitelistEntryScalarFieldEnum = (typeof IpWhitelistEntryScalarFieldEnum)[keyof typeof IpWhitelistEntryScalarFieldEnum]
 
 
-export const IpReallowEntryScalarFieldEnum = {
-  id: 'id',
-  cidr: 'cidr',
-  label: 'label',
-  createdAt: 'createdAt',
-  createdByUserId: 'createdByUserId'
-} as const
-
-export type IpReallowEntryScalarFieldEnum = (typeof IpReallowEntryScalarFieldEnum)[keyof typeof IpReallowEntryScalarFieldEnum]
-
-
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -805,14 +793,4 @@ export const IpWhitelistEntryOrderByRelevanceFieldEnum = {
 } as const
 
 export type IpWhitelistEntryOrderByRelevanceFieldEnum = (typeof IpWhitelistEntryOrderByRelevanceFieldEnum)[keyof typeof IpWhitelistEntryOrderByRelevanceFieldEnum]
-
-
-export const IpReallowEntryOrderByRelevanceFieldEnum = {
-  id: 'id',
-  cidr: 'cidr',
-  label: 'label',
-  createdByUserId: 'createdByUserId'
-} as const
-
-export type IpReallowEntryOrderByRelevanceFieldEnum = (typeof IpReallowEntryOrderByRelevanceFieldEnum)[keyof typeof IpReallowEntryOrderByRelevanceFieldEnum]
 

@@ -10,12 +10,6 @@ import { ConfirmDangerModal } from "@modules/app/nextjs/components/ConfirmDanger
 import { IconActionButton } from "@modules/app/nextjs/components/buttons/IconActionButton";
 import { TrashIcon } from "@modules/report-team/react/icons";
 
-export type IpBlacklistRow = {
-  clientIp: string;
-  reason: string;
-  blacklistedAt: string;
-};
-
 export type IpCidrEntryRow = {
   id: string;
   cidr: string;
@@ -52,8 +46,6 @@ function formatDateTime(iso: string, lng: string): string {
 
 export const IpAccessAdminPage: FC<Props> = ({ lng }) => {
   const { t } = useT(["ipAccess", "common"]);
-  const [blacklist, setBlacklist] = useState<IpBlacklistRow[]>([]);
-  const [reallow, setReallow] = useState<IpCidrEntryRow[]>([]);
   const [whitelistEnabled, setWhitelistEnabled] = useState(false);
   const [whitelist, setWhitelist] = useState<IpCidrEntryRow[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -65,23 +57,17 @@ export const IpAccessAdminPage: FC<Props> = ({ lng }) => {
 
   const load = useCallback(async () => {
     setLoadError(null);
-    const [blacklistRes, reallowRes, whitelistRes] = await Promise.all([
-      fetchBff("/api/ip-access/blacklist", { credentials: "include", cache: "no-store" }),
-      fetchBff("/api/ip-access/reallow", { credentials: "include", cache: "no-store" }),
-      fetchBff("/api/ip-access/whitelist", { credentials: "include", cache: "no-store" }),
-    ]);
+    const whitelistRes = await fetchBff("/api/ip-access/whitelist", {
+      credentials: "include",
+      cache: "no-store",
+    });
 
-    if (!blacklistRes.ok || !reallowRes.ok || !whitelistRes.ok) {
-      const failed = !blacklistRes.ok ? blacklistRes : !reallowRes.ok ? reallowRes : whitelistRes;
-      setLoadError(await readFriendlyHttpError(failed, t("ipAccess:loadFailed")));
+    if (!whitelistRes.ok) {
+      setLoadError(await readFriendlyHttpError(whitelistRes, t("ipAccess:loadFailed")));
       return;
     }
 
-    const blacklistData = (await blacklistRes.json()) as IpBlacklistRow[];
-    const reallowData = (await reallowRes.json()) as IpCidrEntryRow[];
     const whitelistData = (await whitelistRes.json()) as WhitelistPayload;
-    setBlacklist(Array.isArray(blacklistData) ? blacklistData : []);
-    setReallow(Array.isArray(reallowData) ? reallowData : []);
     setWhitelistEnabled(Boolean(whitelistData.settings?.ipWhitelistEnabled));
     setWhitelist(Array.isArray(whitelistData.entries) ? whitelistData.entries : []);
   }, [t]);
@@ -213,92 +199,6 @@ export const IpAccessAdminPage: FC<Props> = ({ lng }) => {
           {actionError}
         </p>
       ) : null}
-
-      <section className="dashboard-card overflow-x-auto">
-        <div className="border-b border-dashboard-divider px-6 py-4">
-          <h2 className="text-lg font-semibold text-dashboard-text">
-            {t("ipAccess:blacklist.title")}
-          </h2>
-          <p className="mt-1 text-sm text-dashboard-text-muted">
-            {t("ipAccess:blacklist.description")}
-          </p>
-        </div>
-        <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-dashboard-divider bg-dashboard-surface text-xs uppercase text-dashboard-text-muted">
-            <tr>
-              <th className="px-4 py-3">{t("ipAccess:blacklist.columns.ip")}</th>
-              <th className="px-4 py-3">{t("ipAccess:blacklist.columns.reason")}</th>
-              <th className="px-4 py-3">{t("ipAccess:blacklist.columns.blacklistedAt")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {blacklist.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="px-4 py-6 text-dashboard-text-muted">
-                  {t("ipAccess:emptyBlacklist")}
-                </td>
-              </tr>
-            ) : (
-              blacklist.map((row) => (
-                <tr key={row.clientIp} className="border-b border-dashboard-divider">
-                  <td className="px-4 py-3 font-mono text-dashboard-text">{row.clientIp}</td>
-                  <td className="px-4 py-3 text-dashboard-text-muted">{row.reason}</td>
-                  <td className="px-4 py-3 text-dashboard-text-muted">
-                    {formatDateTime(row.blacklistedAt, lng)}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </section>
-
-      <section className="dashboard-card flex flex-col gap-4 px-6 py-6">
-        <div>
-          <h2 className="text-lg font-semibold text-dashboard-text">
-            {t("ipAccess:reallow.title")}
-          </h2>
-          <p className="mt-1 text-sm text-dashboard-text-muted">
-            {t("ipAccess:reallow.description")}
-          </p>
-          <p className="mt-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-800">
-            {t("ipAccess:reallow.oralOnlyNotice")}
-          </p>
-        </div>
-
-        <div className="overflow-x-auto border-t border-dashboard-divider pt-4">
-          <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-dashboard-divider bg-dashboard-surface text-xs uppercase text-dashboard-text-muted">
-              <tr>
-                <th className="px-4 py-3">{t("ipAccess:reallow.columns.cidr")}</th>
-                <th className="px-4 py-3">{t("ipAccess:reallow.columns.label")}</th>
-                <th className="px-4 py-3">{t("ipAccess:reallow.columns.createdAt")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reallow.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="px-4 py-6 text-dashboard-text-muted">
-                    {t("ipAccess:emptyReallow")}
-                  </td>
-                </tr>
-              ) : (
-                reallow.map((row) => (
-                  <tr key={row.id} className="border-b border-dashboard-divider">
-                    <td className="px-4 py-3 font-mono text-dashboard-text">{row.cidr}</td>
-                    <td className="px-4 py-3 text-dashboard-text-muted">
-                      {row.label ?? "—"}
-                    </td>
-                    <td className="px-4 py-3 text-dashboard-text-muted">
-                      {formatDateTime(row.createdAt, lng)}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
 
       <section className="dashboard-card flex flex-col gap-6 px-6 py-6">
         <div>

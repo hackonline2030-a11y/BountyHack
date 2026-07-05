@@ -413,8 +413,7 @@ export const ModelName = {
   QualityCriterionDistribution: 'QualityCriterionDistribution',
   QualityCriterionCheck: 'QualityCriterionCheck',
   IpAccessSettings: 'IpAccessSettings',
-  IpWhitelistEntry: 'IpWhitelistEntry',
-  IpReallowEntry: 'IpReallowEntry'
+  IpWhitelistEntry: 'IpWhitelistEntry'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -430,7 +429,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "globalSubmission" | "globalReviewerComment" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "reportTeam" | "reportTeamMember" | "reportTeamJoinRequest" | "reportTeamLeaveRequest" | "qualityCriterionCategory" | "qualityCriterionTargetType" | "qualityCriterion" | "qualityCriterionTargetTypeLink" | "qualityCriterionDistribution" | "qualityCriterionCheck" | "ipAccessSettings" | "ipWhitelistEntry" | "ipReallowEntry"
+    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "globalSubmission" | "globalReviewerComment" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "reportTeam" | "reportTeamMember" | "reportTeamJoinRequest" | "reportTeamLeaveRequest" | "qualityCriterionCategory" | "qualityCriterionTargetType" | "qualityCriterion" | "qualityCriterionTargetTypeLink" | "qualityCriterionDistribution" | "qualityCriterionCheck" | "ipAccessSettings" | "ipWhitelistEntry"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2414,72 +2413,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    IpReallowEntry: {
-      payload: Prisma.$IpReallowEntryPayload<ExtArgs>
-      fields: Prisma.IpReallowEntryFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.IpReallowEntryFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpReallowEntryPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.IpReallowEntryFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpReallowEntryPayload>
-        }
-        findFirst: {
-          args: Prisma.IpReallowEntryFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpReallowEntryPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.IpReallowEntryFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpReallowEntryPayload>
-        }
-        findMany: {
-          args: Prisma.IpReallowEntryFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpReallowEntryPayload>[]
-        }
-        create: {
-          args: Prisma.IpReallowEntryCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpReallowEntryPayload>
-        }
-        createMany: {
-          args: Prisma.IpReallowEntryCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        delete: {
-          args: Prisma.IpReallowEntryDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpReallowEntryPayload>
-        }
-        update: {
-          args: Prisma.IpReallowEntryUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpReallowEntryPayload>
-        }
-        deleteMany: {
-          args: Prisma.IpReallowEntryDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.IpReallowEntryUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        upsert: {
-          args: Prisma.IpReallowEntryUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IpReallowEntryPayload>
-        }
-        aggregate: {
-          args: Prisma.IpReallowEntryAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateIpReallowEntry>
-        }
-        groupBy: {
-          args: Prisma.IpReallowEntryGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.IpReallowEntryGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.IpReallowEntryCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.IpReallowEntryCountAggregateOutputType> | number
-        }
-      }
-    }
   }
 } & {
   other: {
@@ -2892,17 +2825,6 @@ export const IpWhitelistEntryScalarFieldEnum = {
 export type IpWhitelistEntryScalarFieldEnum = (typeof IpWhitelistEntryScalarFieldEnum)[keyof typeof IpWhitelistEntryScalarFieldEnum]
 
 
-export const IpReallowEntryScalarFieldEnum = {
-  id: 'id',
-  cidr: 'cidr',
-  label: 'label',
-  createdAt: 'createdAt',
-  createdByUserId: 'createdByUserId'
-} as const
-
-export type IpReallowEntryScalarFieldEnum = (typeof IpReallowEntryScalarFieldEnum)[keyof typeof IpReallowEntryScalarFieldEnum]
-
-
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -3226,16 +3148,6 @@ export const IpWhitelistEntryOrderByRelevanceFieldEnum = {
 export type IpWhitelistEntryOrderByRelevanceFieldEnum = (typeof IpWhitelistEntryOrderByRelevanceFieldEnum)[keyof typeof IpWhitelistEntryOrderByRelevanceFieldEnum]
 
 
-export const IpReallowEntryOrderByRelevanceFieldEnum = {
-  id: 'id',
-  cidr: 'cidr',
-  label: 'label',
-  createdByUserId: 'createdByUserId'
-} as const
-
-export type IpReallowEntryOrderByRelevanceFieldEnum = (typeof IpReallowEntryOrderByRelevanceFieldEnum)[keyof typeof IpReallowEntryOrderByRelevanceFieldEnum]
-
-
 
 /**
  * Field references
@@ -3507,7 +3419,6 @@ export type GlobalOmitConfig = {
   qualityCriterionCheck?: Prisma.QualityCriterionCheckOmit
   ipAccessSettings?: Prisma.IpAccessSettingsOmit
   ipWhitelistEntry?: Prisma.IpWhitelistEntryOmit
-  ipReallowEntry?: Prisma.IpReallowEntryOmit
 }
 
 /* Types for Logging */
