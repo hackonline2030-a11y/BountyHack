@@ -12,7 +12,7 @@ type PageProps = { params: Promise<{ lng: string }> };
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { lng } = await params;
   const { t } = await getT("ipAccess", { lng });
-  return { title: t("ipAccess.metaTitle") };
+  return { title: t("metaTitle") };
 }
 
 export default async function AdministrationIpAccessPage({ params }: PageProps) {
