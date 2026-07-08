@@ -147,7 +147,13 @@ const authExports = [
   PassportJwtAuthGuard,
   ProfileStepUpTokenService,
   REFRESH_TOKEN_REPOSITORY,
-  ...(isPrismaSqlMode() ? [TotpEnrollmentService] : []),
+  ...(isPrismaSqlMode()
+    ? [
+        TotpEnrollmentService,
+        ResendUserInvitationCommand,
+        AdminForcePasswordResetCommand,
+      ]
+    : []),
 ];
 
 @Module({
