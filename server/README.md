@@ -1,10 +1,87 @@
-# Web API
+# Web API 
 
 API NestJS (auth, users, ping) — workspace [Nx](https://nx.dev).
 
 *English version : [Go to english version](./README.en.md)*
 
+1. Documentation sur ce repo & liens utiles
+   
+2. Démarrage api
+
+3. Installation
+- Variables d'environnements et authentification
+- Configurer la base de donnée : avec ou sans docker
+- Configurer Redis
+
+4. Post-installation
+- Seeder
+- Bruno/Postman
+- Commandes utiles
+  
+5. Installation via Nx : remarques
+6. TroubleShooting
+
+## Documentation 
+
+### Sur ce repository :
+
+- **Swagger (OpenAPI)** : interface interactive sur `/api/docs` (voir le tableau *URLs* ci-dessus selon ton port). Les routes **`auth/password-reset/*`** y figurent avec corps de requête, schémas de réponse et codes d’erreur lorsque **`DATABASE_NAME=POSTGRESQL_PRISMA`**.
+- **Notes HTTP** : [docs/api.md](./docs/api.md).
+- **Décisions d’architecture (ADR)** : [../docs/adr/architecture_server_adr.md](../docs/adr/architecture_server_adr.md) — inclut une section **Réinitialisation de mot de passe** (couches, périmètre Prisma, sécurité, Swagger).
+
+---
+
+### Liens utiles
+
+- [Documentation Nx — Node](https://nx.dev/nx-api/node)
+- [Nx et CI](https://nx.dev/ci/intro/ci-with-nx)  
+
+
+## Démarrage API 
+
+**Vous devez procéder à la partie installation avant si ce n'est pas déjà fait**
+
+### Démarrer l'API
+
+#### Démarrer en mode développement
+
+```bash
+pnpm start
+
+# Ou directement avec Node.js
+node dist/main.js  # après build
+```
+
+#### Vérifier que le build compile (pour la production) 
+
+```bash
+pnpm run build
+```
+
+#### Tests
+
+Chaque usecase a ses tests unitaires
+Les tests d'intégrations et e2e sont présent mais pas à 100%.
+
+```bash
+pnpm run test
+```
+
+**Tests e2e (HTTP)**
+
+Les specs sous `e2e/` envoient les requêtes vers l’URL dérivée de **`HOST`** et **`PORT`** (voir `e2e/src/constants.ts` et `e2e/src/support/test-setup.ts`), par défaut **`http://localhost:3000`**.
+
+```bash
+pnpm exec nx run e2e:e2e
+```
+
+#### Vérification
+
+L'API devrait être accessible sur : http://localhost:3000/api
+
 ## Installation
+
+### Variables d'environnements et authentification
 
 Crée le fichier **`server/.env`** à partir du modèle (tu peux rester à la **racine du monorepo**) :
 
@@ -21,7 +98,7 @@ cp .env.example .env
 
 Puis édite **`server/.env`** en suivant les commentaires de **`.env.example`** (secrets, `DATABASE_NAME`, `DATABASE_URL`, CORS, etc.).
 
-#### Éditer le fichier `.env`, essentiels :
+#### Éditer le fichier `.env`, voici les essentiels :
 ```env
 # Configuration MySQL
 DATABASE_NAME=MYSQL_PRISMA
@@ -47,149 +124,11 @@ node -e "console.log('JWT_SECRET=' + require('crypto').randomBytes(64).toString(
 openssl rand -hex 64
 ```
 
-## Installation rapide (MySQL + Dump)
-
-#### Créer la base de données
-```bash
-# Avec MySQL CLI
-mysql -u root -p -e "CREATE DATABASE bugbountyapp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-
-# Ou avec XAMPP via phpMyAdmin : http://localhost/phpmyadmin/
-# Créer une nouvelle base "bugbountyapp" avec interclassement "utf8mb4_unicode_ci"
-```
-
-#### Exécute cette commande depuis le terminal pour créer un utilisateur bugbountyapp avec les bon droits :
-
-```bash
-sudo mysql -u root -e "CREATE USER 'bugbountyapp'@'127.0.0.1' IDENTIFIED BY 'bugbountyapp'; GRANT ALL PRIVILEGES ON bugbountyapp.* TO 'bugbountyapp'@'127.0.0.1'; FLUSH PRIVILEGES;"
-```
-
-#### Vérifier la connexion
-
-```bash
-mysql -u bugbountyapp -p bugbountyapp bugbountyapp
-```
-
-Monter la base de donnée : 
-- VIA UN DUMP
-- VIA PRISMA
-
-### Monter la base de donnée - VIA UN DUMP : Importer le dump avec les données de test
-
-**Important** : Ces commandes se connectent au serveur MySQL sur `localhost:3306`. Assurez-vous que :
-- XAMPP est démarré (si vous utilisez XAMPP)
-- Aucune autre instance MySQL n'est en conflit sur le port 3306
-
-```bash
-# Vérifier quel serveur MySQL répond (doit montrer les bases XAMPP si vous utilisez XAMPP)
-mysql -u root -p -e "SHOW DATABASES;"
-
-# Import du dump complet (structure + données)
-mysql -u root -p bugbountyapp < dump/dump.mysql.native.sql
-
-# Vérifier l'import
-mysql -u root -p bugbountyapp -e "SHOW TABLES; SELECT COUNT(*) as users_count FROM users;"
-```
-
-**Pour XAMPP spécifiquement** :
-- Mot de passe root par défaut : souvent vide (`""`)
-- Interface phpMyAdmin disponible : http://localhost/phpmyadmin/
-- Vérification XAMPP actif : les bases `information_schema`, `mysql`, `performance_schema`, `phpmyadmin` doivent être visibles
-
-#### Monter les tables de la base de donnée : VIA PRISMA
-
-```sh
-pnpm exec prisma db push
-```
-
-### Démarrer l'API
-
-#### Générer le client Prisma
-```bash
-pnpm exec prisma generate
-```
-
-#### Démarrer en mode développement
-```bash
-# Sans Nx (commande simple)
-pnpm run start
-
-# Ou directement avec Node.js
-node dist/main.js  # après build
-```
-
-### Vérification
-
-L'API devrait être accessible sur :
-- **API** (sans interface) : http://localhost:3000
-- **Accés (doc swagger etc.)** : http://localhost:3000/api
-
-### Utilisateurs de test disponibles
-
-Le dump contient plusieurs utilisateurs de test (avec `password` ou `password123` ou `password1234` comme MDP) :
-
-| Email | Username | Rôle | Description |
-|-------|----------|------|-------------|
-| `demo-user@example.local` | `demo-user` | **SUPER_ADMIN** | Administrateur principal |
-| `coord@example.com` | `Corda` | **COORDINATOR** | Coordinateur d'équipe |
-| `mentor@example.com` | `mentor` | **MENTOR** | Mentor/Formateur |
-| `qc@example.com` | `Qualité` | **QUALITY_CHECKER** | Contrôleur qualité |
-
-**Connexion de test** :
-- Email : `demo-user@example.local`
-- Mot de passe : `password123` ou `password` (à vérifier l'un ou l'autre)
-
-A partir du compte surper-admin vous pouvez créer vos propre user dans chaque catégorie.
-
-### Commandes utiles
-
-```bash
-# Reset complet de la base (avec migrations Prisma)
-pnpm exec prisma migrate reset
-pnpm exec prisma db seed
-
-# Interface graphique pour la base
-pnpm exec prisma studio  # http://localhost:5555
-
-# Re-import du dump si nécessaire
-mysql -u root -p bugbountyapp < dump/dump.mysql.native.sql
-
-# Créer un super admin en production
-pnpm run create-super-admin
-
-# Tests
-pnpm run test
-```
-
-### Dépannage
-
-#### Erreur de connexion MySQL
-- Vérifier que MySQL fonctionne : `mysql -u root -p -e "SELECT 1;"`
-- Ajuster `DATABASE_URL` dans `.env`
-- Pour XAMPP, utiliser : `mysql://root:@localhost:3306/bugbountyapp`
-
-#### Erreur Prisma
-```bash
-# Régénérer le client
-DATABASE_NAME=MYSQL_PRISMA pnpm exec prisma generate (+ :mysql)
-
-# Vérifier la connexion
-pnpm exec prisma db pull
-```
-
-#### Port déjà utilisé
-```bash
-# Changer le port dans .env
-PORT=3001
-
-# Ou tuer le processus
-lsof -ti:3000 | xargs kill -9
-```
-
 ### Authentification et base de données
 
-Les variables **`AUTH_TYPE`** et **`DATABASE_NAME`** se combinent. Point important :
+Les variables **`AUTH_TYPE`** et **`DATABASE_NAME`** se combinent. 
 
+Points important :
 - L'architecture auth est extensible via `AUTH_TYPE`, mais l'implémentation active est **`PASSPORT_JWT`**.
 - Les options de base de donnees restent multiples via `DATABASE_NAME` (`MONGODB`, `MYSQL_PRISMA`, `POSTGRESQL_PRISMA`, `IN-MEMORY`).
 - Avec par exemple **`DATABASE_NAME=MONGODB`**, les utilisateurs (email, hash de mot de passe, profil) sont stockés dans la base Mongo définie par **`DATABASE_URL`**.
@@ -212,9 +151,79 @@ Valeur prise en charge pour **`AUTH_TYPE`** :
 
 Recommandation : toute nouvelle condition liee a la configuration d'authentification doit passer par **`auth-env.ts`** plutot que des checks directs sur `process.env.AUTH_TYPE`.
 
+
+## Installation de la base de donnée (avec ou sans docker)
+
+1. Soit Manuelle (XAMPP, Mysql + Aminer ou MySQL + Phpmyadmin sur un serveur Nginx ou Apache)
+2. Soit avec Docker (avec ou sans le script)
+
+### Manuelle (MySQL sur sa machine)
+
+#### Créer la base de données
+```bash
+# Avec MySQL CLI
+mysql -u root -p -e "CREATE DATABASE bugbountyapp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# Ou avec XAMPP via phpMyAdmin : http://localhost/phpmyadmin/
+# Créer une nouvelle base "bugbountyapp" avec interclassement "utf8mb4_unicode_ci"
+```
+
+#### Exécute cette commande depuis le terminal pour créer un utilisateur bugbountyapp avec les bon droits :
+
+```bash
+sudo mysql -u root -e "CREATE USER 'bugbountyapp'@'127.0.0.1' IDENTIFIED BY 'bugbountyapp'; GRANT ALL PRIVILEGES ON bugbountyapp.* TO 'bugbountyapp'@'127.0.0.1'; FLUSH PRIVILEGES;"
+```
+
+#### Vérifier la connexion
+
+```bash
+mysql -u bugbountyapp -p bugbountyapp bugbountyapp
+```
+
+#### Monter la base de donnée : 
+- VIA UN DUMP
+- VIA PRISMA
+
+##### VIA UN DUMP : Importer le dump avec les données de test
+
+**Important** : Ces commandes se connectent au serveur MySQL sur `localhost:3306`. Assurez-vous que :
+- XAMPP ou votre propre architecture est démarré 
+- Aucune autre instance MySQL n'est en conflit sur le port 3306 (si c'est le cas : voir à la fin dans commandes utiles)
+
+```bash
+# Vérifier quel serveur MySQL répond (doit montrer les bases XAMPP si vous utilisez XAMPP)
+mysql -u root -p -e "SHOW DATABASES;"
+
+# Import du dump complet (structure + données)
+mysql -u root -p bugbountyapp < dump/dump.mysql.native.sql
+
+# Vérifier l'import
+mysql -u root -p bugbountyapp -e "SHOW TABLES; SELECT COUNT(*) as users_count FROM users;"
+```
+
+**Pour XAMPP spécifiquement** :
+- Mot de passe root par défaut : souvent vide (`""`)
+- Interface phpMyAdmin disponible : http://localhost/phpmyadmin/
+- Vérification XAMPP actif : les bases `information_schema`, `mysql`, `performance_schema`, `phpmyadmin` doivent être visibles
+
+#####  VIA PRISMA
+
+#### Monter les tables de la base de donnée
+
+```sh
+pnpm exec prisma db push
+```
+
+#### Générer le client Prisma
+```bash
+pnpm exec prisma generate
+```
+
 ---
 
 ## Installer la DB MySQL avec docker
+
+Toutes les commandes **`docker compose`** ci-dessous s’exécutent depuis **`bugbountyapp/server/`** (chemins relatifs au fichier compose et au SQL).
 
 Pour itérer vite sur l'API, tu peux faire tourner :
 
@@ -227,71 +236,15 @@ Mais nous supprimerons ces commandes si MySQL se maintient comme choix en prod f
 
 Depuis `server/` :
 
-1. Démarrer :
-2. 
+1. Démarrer la bdd docker :
+
+Via pnpm (si tu a donné les droits root à docker) :
    ```sh
    pnpm run docker:mysql
    ```
+Sans pnpm (notamment si tu préfère ne pas donner à docker les droits root) :
 
-3. Configurer `server/.env` pour exécuter l'API **hors Docker** :
-
-   - `DATABASE_NAME=MYSQL_PRISMA`
-   - `DATABASE_URL=mysql://bugbountyapp:bugbountyapp@localhost:3306/bugbountyapp?allowPublicKeyRetrieval=true`
-
-   Important : en mode API locale, utilise `localhost` (pas `postgres`, qui est le hostname interne Docker).
-
-4. Appliquer Prisma depuis l'hôte (ajouter mysql à la fin) :
-
-**Attention** : sur les commandes prisma, sans "mysql" vous risquez d'appeler le schema réalisé pour postgre (c'était sur postgre avant un changement vers mysql et pourrait le redevenir).
-
-   ```sh
-   pnpm run prisma:generate:mysql
-   pnpm run prisma:migrate:deploy:mysql
-   ```
-
-5. Lancer l'API en local (indépendant de postgre/mysql) :
-
-   ```sh
-   pnpm run start
-   ```
-
-6. Ouvrir adminer :
-
-   - `http://localhost:8088`
-
-Arrêt de la stack PostgreSQL seule :
-
-```sh
-pnpm run docker:mysql:stop
-```
-
-Ou teardown complet (profil pg) :
-
-```sh
-pnpm run docker:mysql:down
-```
-
-### Seed et Watch mode
-
-Persistance **`users`** avec **Prisma** : **`DATABASE_NAME=MYSQL_PRISMA`**. Commandes depuis **`server/`** (après `pnpm install` à la racine du monorepo).
-
-| Contexte | Commandes |
-|----------|-----------|
-| **Docker — API en watch** (`web-api-watch` + Postgres) | `pnpm docker:watch`, puis `pnpm docker:prisma:generate:mysql`, `pnpm docker:prisma:deploy:mysql`, puis données : `pnpm docker:prisma:seed:mysql` (rôles + démo optionnelle). 
-
-Plus de détail : [`docker/README.md`](docker/README.md#prisma-migrations-et-démo), **`.env.example`**.
-
-**Démo login** : `demo-user@example.local` / `password123` (Postgres seed ou import Mongo).
-
-### MySQL, Prisma et seed report-draft (Docker)
-
-`DATABASE_NAME=MYSQL_PRISMA` dans **`server/.env`**. Détails Prisma : [`prisma/README.md`](prisma/README.md).
-
-**Accès Docker sans groupe `docker`** : si `permission denied` sur `/var/run/docker.sock`, préfixe les commandes ci-dessous par **`sudo`** (pas besoin d’ajouter ton utilisateur au groupe `docker` ni de passer root au quotidien).
-
-Toutes les commandes **`docker compose`** ci-dessous s’exécutent depuis **`bugbountyapp/server/`** (chemins relatifs au fichier compose et au SQL).
-
-**Démarrer MySQL + Adminer**
+Il est important de préciser le profil mysql car ce n'est pas le default (Cela va évoluer une fois la décision finale prise).
 
 ```sh
 docker compose -f docker/compose.dev.yaml --profile mysql up -d mysql adminer
@@ -299,7 +252,95 @@ docker compose -f docker/compose.dev.yaml --profile mysql up -d mysql adminer
 
 Adminer : http://localhost:8088 — serveur **`mysql`**, utilisateur / mot de passe **`bugbountyapp`**.
 
+3. Configurer `server/.env` pour exécuter l'API **hors Docker** :
+
+   - `DATABASE_NAME=MYSQL_PRISMA`
+   - `DATABASE_URL=mysql://bugbountyapp:bugbountyapp@localhost:3306/bugbountyapp?allowPublicKeyRetrieval=true`
+
+   Important : utilise `localhost` pour communiquer avec docker en restant sur ta machine sur le plan api.
+
+4. Appliquer Prisma (mysql) depuis l'hôte (ajouter mysql à la fin) :
+
+   ```sh
+   pnpm run prisma:generate:mysql
+   pnpm run prisma:migrate:deploy:mysql
+   ```
+
+5. Aprés avoir lancé sur votre machine l'api (voir section démarrage), ouvrir adminer :
+
+   - `http://localhost:8088`
+
+Arrêt :
+
+```sh
+pnpm run docker:mysql:stop
+```
+
+```sh
+sudo docker compose -f docker/compose.dev.yaml --profile mysql stop adminer mysql
+```
+
+Ou teardown complet :
+
+```sh
+pnpm run docker:mysql:down
+```
+
+```sh
+sudo docker compose -f docker/compose.dev.yaml --profile mysql down adminer mysql
+```
+
+## Seeder (user et report-draft)
+
+Nous avons des seeds prévu pour les user et les report-draft
+Cependant si installation via dump, les users sont déjà présent.
+
+Attention : bien vérifier `DATABASE_NAME=MYSQL_PRISMA` dans **`server/.env`**. 
+Détails Prisma : [`prisma/README.md`](prisma/README.md).
+
+### Utilisateurs de test disponibles (vérifier s'ils sont déjà là dans la table `users`)
+
+Le dump contient plusieurs utilisateurs de test (avec `password` ou `password123` ou `password1234` comme MDP) :
+
+| Email | Username | Rôle | Description |
+|-------|----------|------|-------------|
+| `demo-user@example.local` | `demo-user` | **SUPER_ADMIN** | Administrateur principal |
+| `coord@example.com` | `Corda` | **COORDINATOR** | Coordinateur d'équipe |
+| `mentor@example.com` | `mentor` | **MENTOR** | Mentor/Formateur |
+| `qc@example.com` | `Qualité` | **QUALITY_CHECKER** | Contrôleur qualité |
+
+**Connexion de test** :
+- Email : `demo-user@example.local`
+- Mot de passe : `password123` ou `password` (à vérifier l'un ou l'autre)
+
+Comptes créés par le seed dev-draft : 
+- `dev-hunter-1@example.local`,
+- `dev-qc-1@example.local`,
+- `dev-sa-1@example.local`, etc.
+Mot de passe identique à **`demo-user`** (`password123`).
+
+A partir du compte surper-admin vous pouvez créer vos propre user dans chaque catégorie.
+
+### Seed des users SANS DOCKER (Avec Prisma) : 
+
+**Prisma depuis la machine hôte** 
+- MySQL exposé sur `localhost:3306`), sans passer par le conteneur `mysql` pour le SQL
+
+```sh
+DATABASE_NAME=MYSQL_PRISMA DATABASE_URL=mysql://bugbountyapp:bugbountyapp@127.0.0.1:3306/bugbountyapp \
+  pnpm exec prisma db seed
+```
+
+### Seed des user via docker :
+- `pnpm docker:prisma:seed:mysql`
+
+Commande manuelle : voir le `package.json` au niveau de la commande ci-dessus.
+
+### Seed des rapports VIA DOCKER et prisma + mysql
+
 **Seed SQL cycle report-draft** (non destructif, ré-exécutable) — équivalent de `pnpm docker:prisma:seed:dev-draft` :
+
+Ajoutez `sudo` avant si vous n'avez pas donné à docker des droits root : 
 
 ```sh
 docker compose -f docker/compose.dev.yaml --profile mysql exec -T mysql \
@@ -307,150 +348,9 @@ docker compose -f docker/compose.dev.yaml --profile mysql exec -T mysql \
   < prisma/seed/dev-report-draft-bucket-vault.mysql.sql
 ```
 
-Avec `sudo` :
+Raccourcis pnpm (réécrivent `DATABASE_URL` depuis `.env`) :
+- `pnpm docker:prisma:seed:dev-draft`.
 
-```sh
-sudo docker compose -f docker/compose.dev.yaml --profile mysql exec -T mysql \
-  mysql -ubugbountyapp -pbugbountyapp bugbountyapp \
-  < prisma/seed/dev-report-draft-bucket-vault.mysql.sql
-```
-
-**Arrêter MySQL + Adminer**
-
-```sh
-docker compose -f docker/compose.dev.yaml --profile mysql stop adminer mysql
-```
-
-**Schéma + seed standard (rôles, demo-user)** : Prisma depuis la machine hôte (MySQL exposé sur `localhost:3306`), sans passer par le conteneur `mysql` pour le SQL :
-
-```sh
-DATABASE_NAME=MYSQL_PRISMA DATABASE_URL=mysql://bugbountyapp:bugbountyapp@127.0.0.1:3306/bugbountyapp \
-  pnpm exec prisma generate
-
-DATABASE_NAME=MYSQL_PRISMA DATABASE_URL=mysql://bugbountyapp:bugbountyapp@127.0.0.1:3306/bugbountyapp \
-  pnpm exec prisma migrate deploy
-
-DATABASE_NAME=MYSQL_PRISMA DATABASE_URL=mysql://bugbountyapp:bugbountyapp@127.0.0.1:3306/bugbountyapp \
-  pnpm exec prisma db seed
-```
-
-Raccourcis pnpm (réécrivent `DATABASE_URL` depuis `.env`) : `pnpm docker:mysql:up`, `pnpm docker:prisma:migrate:deploy:mysql`, `pnpm docker:prisma:seed:mysql`, `pnpm docker:prisma:seed:dev-draft`.
-
-Comptes créés par le seed dev-draft : `dev-hunter-1@example.local`, `dev-qc-1@example.local`, `dev-sa-1@example.local`, etc. — mot de passe identique à **`demo-user`** (`password123`).
-
-### Avec Docker
-
-Guide détaillé (installation Docker, `start.sh`, équivalents `docker compose` bruts) : [`docker/README.md`](docker/README.md).
-
-Construit et exécute toujours l’**API** à partir de `docker/Dockerfile`, via `docker/compose.dev.yaml`.
-
-**PostgreSQL + pgweb** sont démarrés si **`DATABASE_NAME=POSTGRESQL_PRISMA`** dans **`server/.env`** (voir `.env.example`). **MongoDB + mongo-express** le sont si `DATABASE_NAME=MONGODB`. Avec `IN-MEMORY`, les services de base Docker concernés ne sont pas lancés. Les **profils** Compose (`mongodb`, `pg`) séparent ces jeux de conteneurs.
-
-1. Fichier d’environnement : comme indiqué en **[Installation](#installation)** (`server/.env` depuis `server/.env.example`). Renseigne `DATABASE_NAME` selon ton backend (`MONGODB`, `POSTGRESQL_PRISMA`, `IN-MEMORY`, …), ainsi que `JWT_SECRET`, CORS, etc.
-
-   **`DATABASE_URL` :** `.env.example` part sur **PostgreSQL** (ex. `postgres://…@postgres:5432/…` pour l’API dans Docker). **API dans Docker** + profil **pg** : hôte **`postgres`** sur le réseau Compose (pas `localhost` depuis le conteneur). **API sur l’hôte** (`nx serve`) + Postgres dans Docker : URL vers **`localhost`** (ou `127.0.0.1`) et le port **`POSTGRES_HOST_PORT`**. Pour **Mongo** : voir `.env.example` ; dans Docker, hôte **`mongodb`** (ex. `mongodb://mongodb:27017/bugbountyapp`).
-
-2. Lancement :
-
-   ```sh
-   ./docker/start.sh
-   ```
-
-   Raccourci équivalent : `./docker/start` (même script).
-
-   **Arrêt :** `./docker/start.sh down` — arrête **tout** (API classique, **api-watch**, Mongo, mongo-express, Postgres, pgweb selon les profils utilisés), supprime le réseau et les orphelins (`--remove-orphans`). Avant, un `down` sans le profil `watch` pouvait laisser `web-api-watch` actif et le réseau « in use ». Volumes (Mongo, Postgres, `web_api_node_modules`, …) : `./docker/start.sh down -v`.
-
-   **Cycle rapide API (sans rebuild image) :**
-   - `./docker/start.sh api-restart` (ou `./docker/start.sh restart-api`) : redémarre l’API sans reconstruire l’image.
-   - `./docker/start.sh api-stop` (ou `./docker/start.sh stop-api`) : arrête l’API et, selon **`DATABASE_NAME`**, la base Docker associée (**MongoDB** si `MONGODB`, **Postgres + pgweb** si **`POSTGRESQL_PRISMA`**).
-   - Si `DATABASE_NAME=MONGODB`, le script applique le profil **`mongodb`** et cible `mongodb` + `api`.
-   - Si `DATABASE_NAME=POSTGRESQL_PRISMA`, le script applique le profil **`pg`** et enchaîne **`postgres`**, **`pgweb`** et **`api`** selon la commande (`api-restart` ne relance que **`postgres`** + **`api`** — voir `start.sh`).
-   - Sinon (`IN-MEMORY`, …), seules les opérations sur **`api`** sont concernées (pas de conteneur de base du compose).
-   - Après `./docker/start.sh` (`up`), le script suit directement les logs API en live dans le terminal (`logs -f api`).
-     - Quitter l’affichage live : `Ctrl+C` (les conteneurs continuent de tourner).
-     - Désactiver ce comportement : `API_FOLLOW_LOGS=0 ./docker/start.sh`.
-
-   **Mode watch (dev inside container, sans rebuild à chaque changement) :**
-   - `./docker/start.sh watch-up` (alias `dev-up`) : démarre `api-watch` avec bind mount du code (dépôt -> `/usr/src/app`) et watcher Nest/Nx dans le conteneur.
-   - Les `node_modules` du conteneur sont dans un **volume Docker** (séparés de l’hôte) : au **démarrage**, un `pnpm install` est lancé pour se caler sur le `package.json` / `pnpm-lock.yaml` montés depuis l’hôte. Le dépôt inclut **`.npmrc`** (`confirm-modules-purge=false`) pour éviter le prompt interactif de pnpm sans TTY (sinon l’install peut s’arrêter avant d’avoir écrit les paquets). Après un changement de dépendance sur l’hôte, **commite le lockfile**, puis **redémarre** le watch — inutile de supprimer le volume à chaque fois.
-   - Si le volume de deps semble corrompu : `watch-stop` puis `docker volume rm web-api-dev_web_api_node_modules` (ou le nom listé par `docker volume ls | grep web-api`), puis `watch-up`.
-   - Les modifications de code sur l’hôte sont prises en compte automatiquement dans le conteneur (hot reload).
-   - `./docker/start.sh watch-stop` (alias `dev-stop`) : stoppe le mode watch (et Mongo ou Postgres + pgweb si le profil correspondant est actif dans le script, comme pour `watch-up`).
-   - Le service `api-watch` tourne d’abord en **root** le temps du `pnpm install` (le volume `node_modules` appartient à root par défaut) puis **Nx** en utilisateur **`node`**. TTY : `docker exec -it web-api-watch sh` (root) ou `docker exec -it -u node web-api-watch sh` pour un shell en `node`.
-   - En mode watch, les logs `api-watch` sont suivis en live à la fin de la commande.
-
-   **Import utilisateurs de démo (Mongo) :**
-   - `./docker/start.sh dump-users` : importe `docker/dump/user.json` dans `bugbountyapp.users` avec `--jsonArray --drop` (écrase la collection avant import). Compte de démo : voir **[PostgreSQL et Prisma](#postgresql-et-prisma)** ci-dessus.
-   - Pour créer un autre utilisateur de dump, génère `passwordHash` avec la même logique que l'API (scrypt, format `salt:hash`) :
-   ```sh
-   node -e 'const crypto=require("crypto"); const salt=crypto.randomBytes(16).toString("hex"); const hash=crypto.scryptSync("password123",salt,64).toString("hex"); console.log(salt+":"+hash);'
-   ```
-   - Copie la sortie dans le champ `passwordHash` de `docker/dump/user.json` (le hash change à chaque exécution car le sel est aléatoire).
-
-   Le script lit **`server/.env`** et n’ajoute **`--profile mongodb`** ou **`--profile pg`** que lorsque `DATABASE_NAME` vaut **`MONGODB`** ou **`POSTGRESQL_PRISMA`** (y compris pour `down`, pour arrêter les bons services).
-
-   **Sans** le script — **Mongo** :
-
-   ```sh
-   docker compose -f docker/compose.dev.yaml --profile mongodb up --build -d
-   ```
-
-   **Sans** le script — **Postgres** :
-
-   ```sh
-   docker compose -f docker/compose.dev.yaml --profile pg up --build -d
-   ```
-
-   **Sans** base Docker Compose (ex. en mémoire) :
-
-   ```sh
-   docker compose -f docker/compose.dev.yaml up --build -d
-   ```
-
-3. **URLs**
-
-   | Service            | URL |
-   | ------------------ | --- |
-   | API (préfixe REST) | `http://localhost:3003/api` (port hôte par défaut **3003** ; surcharge avec **`API_HOST_PORT`** dans `server/.env`, utilisé par `compose.dev.yaml`) |
-   | OpenAPI (Swagger UI) | `http://localhost:3003/api/docs` (même port hôte) |
-   | mongo-express      | uniquement si `DATABASE_NAME=MONGODB` — `http://localhost:8086` |
-   | pgweb              | si profil **pg** (`POSTGRESQL_PRISMA`) — `http://localhost:8087` (surcharge **`PGWEB_HOST_PORT`**) |
-   | MongoDB (depuis l’hôte) | uniquement si `DATABASE_NAME=MONGODB` — `mongodb://localhost:27017` / base `bugbountyapp` |
-   | PostgreSQL (depuis l’hôte) | si profil **pg** — `localhost:5432` (surcharge **`POSTGRES_HOST_PORT`**) |
-
-   **mongo-express :** l’UI ne demande pas de mot de passe en dev (`ME_CONFIG_BASICAUTH=false` dans `compose.dev.yaml`). Sans cette option, l’image utilise souvent l’ancien couple **admin** / **pass** pour l’auth HTTP de l’interface — à éviter hors machine locale.
-
-En mode profil **Mongo**, vérifie que les ports **27017**, **3003** (ou **`API_HOST_PORT`**) et **8086** sont libres. En mode profil **Postgres**, vérifie **5432** (ou **`POSTGRES_HOST_PORT`**), **8087** (ou **`PGWEB_HOST_PORT`**) et le port API.
-
-**Journaux (mode Mongo) :** `cd docker && docker compose -f compose.dev.yaml --profile mongodb logs -f`
-
-**Journaux (mode Postgres) :** `cd docker && docker compose -f compose.dev.yaml --profile pg logs -f`
-
-**Journaux (API seule) :** `cd docker && docker compose -f compose.dev.yaml logs -f`
-
-[Exécuter des tâches avec Nx](https://nx.dev/features/run-tasks)
-
-### Tests e2e (HTTP)
-
-Les specs sous `e2e/` envoient les requêtes vers l’URL dérivée de **`HOST`** et **`PORT`** (voir `e2e/src/constants.ts` et `e2e/src/support/test-setup.ts`), par défaut **`http://localhost:3000`**.
-
-- L’**API en cours d’exécution** (souvent Docker : mappage hôte **`3003`**, via `API_HOST_PORT` dans le script `docker/`) : ne lance **pas** un second `npx nx serve` sur le **même** port. Pour cibler le conteneur, exporte le port hôte : par exemple `PORT=3003` (et `AUTH_TYPE=PASSPORT_JWT` si besoin) puis `pnpm exec nx run e2e:e2e` — sans autre processus sur ce port.
-- Pour un **`nx serve` local** en parallèle de Docker sur 3003, utilise un **autre** port libre (p.ex. `3000` ou `3010` dans ton `.env`) et la **même** valeur de `PORT` quand tu lances l’e2e.
-
----
-
-## Documentation API
-
-- **Swagger (OpenAPI)** : interface interactive sur `/api/docs` (voir le tableau *URLs* ci-dessus selon ton port). Les routes **`auth/password-reset/*`** y figurent avec corps de requête, schémas de réponse et codes d’erreur lorsque **`DATABASE_NAME=POSTGRESQL_PRISMA`**.
-- **Notes HTTP** : [docs/api.md](./docs/api.md).
-- **Décisions d’architecture (ADR)** : [../docs/adr/architecture_server_adr.md](../docs/adr/architecture_server_adr.md) — inclut une section **Réinitialisation de mot de passe** (couches, périmètre Prisma, sécurité, Swagger).
-
----
-
-## Liens utiles
-
-- [Documentation Nx — Node](https://nx.dev/nx-api/node)
-- [Nx et CI](https://nx.dev/ci/intro/ci-with-nx)
 
 ---
 
@@ -551,6 +451,52 @@ Exemple visuel de configuration jwt.io :
 
 Si tout est correct, la route répond sans `401`.
 
+## Commandes utiles
+
+### Si installation manuelle
+
+```bash
+# Reset complet de la base (avec migrations Prisma)
+pnpm exec prisma migrate reset
+pnpm exec prisma db seed
+
+# Interface graphique pour la base
+pnpm exec prisma studio  # http://localhost:5555
+
+# Re-import du dump si nécessaire
+mysql -u root -p bugbountyapp < dump/dump.mysql.native.sql
+
+# Créer un super admin en production
+pnpm run create-super-admin
+
+# Tests
+pnpm run test
+```
+
+## TroubleShooting (Dépannage)
+
+### Port déjà utilisé
+```bash
+# Changer le port dans .env
+PORT=3001
+
+# Ou tuer le processus
+lsof -ti:3000 | xargs kill -9
+```
+
+### Si installation manuelle - Erreur de connexion MySQL
+- Vérifier que MySQL fonctionne : `mysql -u root -p -e "SELECT 1;"`
+- Ajuster `DATABASE_URL` dans `.env`
+- Pour XAMPP, utiliser : `mysql://root:@localhost:3306/bugbountyapp`
+
+### Si installation manuelle - Erreur Prisma
+```bash
+# Régénérer le client
+DATABASE_NAME=MYSQL_PRISMA pnpm exec prisma generate
+
+# Vérifier la connexion
+pnpm exec prisma db pull
+```
 
 ## Installation avec Nx 
 
@@ -607,6 +553,7 @@ pnpm exec nx serve web-api
 pnpm exec nx build web-api
 pnpm exec nx test web-api
 ```
+
 
 En résumé : **IDE = confort visuel**, **console = contrôle explicite**.  
 Les deux utilisent la même source de vérité Nx du workspace.
