@@ -464,44 +464,6 @@ En mode profil **Mongo**, vérifie que les ports **27017**, **3003** (ou **`API_
 
 **Journaux (API seule) :** `cd docker && docker compose -f compose.dev.yaml logs -f`
 
-### 2. Installation manuelle (Node sur l’hôte)
-
-Sans conteneur **API**. Installe une base joignable depuis ta machine (**Postgres** et/ou **Mongo** selon `DATABASE_NAME`).
-
-1. **Dépendances** (racine du dépôt) :
-
-   ```sh
-   pnpm install
-   ```
-
-2. **`server/.env`** (voir **[Installation](#installation)**).
-
-   **PostgreSQL + Prisma** : `DATABASE_NAME=POSTGRESQL_PRISMA`, **`DATABASE_URL`** avec hôte **`localhost`** (ou `127.0.0.1`) vers ton Postgres. Puis applique le schéma : voir **[PostgreSQL et Prisma](#postgresql-et-prisma)** (`prisma generate`, `migrate deploy`, seed optionnel).
-
-   **MongoDB** : `DATABASE_URL=mongodb://localhost:27017/bugbountyapp` (les lignes `mongodb://mongodb…` du `.env.example` sont pour l’API **dans** Docker uniquement).
-
-   Dans tous les cas : `JWT_SECRET`, `PORT`, `CORS_ORIGIN`, etc.
-
-3. **API en dev** :
-
-   ```sh
-   npx nx serve web-api
-   ```
-
-   Port : **`PORT`** dans `.env` (défaut **3000** ; aligne les e2e si tu compares avec l’API Docker sur **3003**).
-
----
-
-## Autres commandes
-
-```sh
-npx nx build web-api
-```
-
-```sh
-npx nx show project web-api
-```
-
 [Exécuter des tâches avec Nx](https://nx.dev/features/run-tasks)
 
 ### Tests e2e (HTTP)
