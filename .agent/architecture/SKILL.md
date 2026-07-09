@@ -1,30 +1,261 @@
 ---
 name: clean-architecture
-description: Provides implementation patterns for Clean Architecture, Domain-Driven Design (DDD), and Hexagonal Architecture (Ports & Adapters) in NestJS/TypeScript applications. Use when structuring complex backend systems, designing domain layers with entities/value objects/aggregates, implementing ports and adapters, creating use cases, or refactoring from anemic models to rich domain models with dependency inversion.
+description: >-
+  Clean Architecture, DDD, and Hexagonal (Ports & Adapters) patterns for the
+  BountyHack NestJS API. Use when structuring server/src modules, placing logic
+  across layers, adding commands/queries/ports/adapters, or deciding when to
+  introduce richer domain models. Includes BountyHack conventions (primary) and
+  generic NestJS reference examples (appendix).
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+source: "Adapted for bugbountyapp/server; generic examples retained as reference"
 ---
 
-# Clean Architecture, DDD & Hexagonal Architecture for NestJS
+# Clean Architecture — BountyHack server (NestJS)
 
-## Overview
+This skill has **two parts**:
 
-This skill provides comprehensive guidance for implementing Clean Architecture, Domain-Driven Design (DDD), and Hexagonal Architecture patterns in NestJS/TypeScript applications. It covers the architectural layers, tactical patterns, and practical implementation examples for building maintainable, testable, and loosely-coupled backend systems.
+1. **Part A (primary)** — how **this repo** implements clean / hexagonal architecture under `server/src/`
+2. **Part B (appendix)** — generic NestJS clean architecture patterns (textbook examples you may evolve toward)
+
+**Always follow Part A first** when working on BountyHack. Use Part B when a feature genuinely needs richer DDD (value objects, aggregates, domain events) that the project does not have yet.
+
+Project references:
+- [`server/Agents.md`](../../server/Agents.md)
+- [`docs/adr/architecture_server_adr.md`](../../docs/adr/architecture_server_adr.md)
+- [`server/src/auth/README.md`](../../server/src/auth/README.md)
+- Related skill: [`.agent/cleancode/SKILL.md`](../cleancode/SKILL.md)
+
+---
 
 ## When to Use
 
-- Architecting complex NestJS applications with long-term maintainability
-- Refactoring from tightly-coupled MVC to layered architecture
-- Implementing rich domain models with business logic encapsulation
-- Designing testable systems with swappable infrastructure
-- Creating microservices with clear bounded contexts
-- Separating business rules from framework code
-- Implementing event-driven architectures with domain events
+- Adding or refactoring a server module (`auth`, `users`, `quality`, `report-draft`, …)
+- Unsure whether logic belongs in domain, application, adapter, or controller
+- Designing a new port + Prisma adapter
+- Reviewing dependency direction or module wiring
+- Deciding if a generic DDD pattern (aggregate, value object, domain event) is worth introducing
 
-## Instructions
+---
 
-### 1. Understand the Architectural Layers
+# Part A — BountyHack server architecture (follow this)
 
-Clean Architecture organizes code into concentric layers where dependencies flow inward. Inner layers have no knowledge of outer layers:
+## A.1 Philosophy: lightweight clean architecture
+
+BountyHack uses **feature-first clean architecture** (Screaming Architecture):
+
+- Each **bounded context** is a top-level folder under `server/src/` (`auth/`, `users/`, `quality/`, …)
+- Layers live **inside the feature**, not in global `domain/` / `application/` / `infrastructure/` folders
+- **Thin domain by default** — rich DDD only when business invariants justify it (see ADR)
+- **Pragmatism over purity** — small cross-module imports are allowed when documented (e.g. `users` → `auth` ports)
+
+Active development target: **`DATABASE_NAME=MYSQL_PRISMA`** — implement and test MySQL Prisma adapters under `adapters/postgre-prisma/` (historical folder name). Do not extend Mongo/Postgres adapters unless explicitly requested.
+
+## A.2 Top-level `server/src/` layout
+
+```
+server/src/
+├── auth/                 # JWT, refresh tokens, password reset, TOTP, RBAC
+├── users/                # Profiles, admin listing, account lifecycle
+├── quality/              # Quality criteria, distributions, checks
+├── report-draft/         # Report drafts, submissions, reviewer comments
+├── report-team/          # Report team membership
+├── document-rendering/   # PDF / HTML generation (Puppeteer, BullMQ)
+├── ping/                 # Health / version
+├── core/                 # AppModule, Prisma module, rate limiting, shared HTTP DTO helpers
+├── shared/               # Cross-cutting utils (database-mode, executable, RBAC enums)
+├── generated/prisma/     # Generated Prisma client (infrastructure)
+└── test/mocks/           # Jest stubs (e.g. Prisma client redirect)
+```
+
+## A.3 Feature module anatomy (real examples)
+
+### Full layering — `auth/`
+
+```
+auth/
+├── domain/models/identity.ts              # Thin: uid, email, optional roleCode
+├── ports/                                 # auth.repository.ts, refresh-token.repository.ts, …
+├── application/
+│   ├── commands/                          # register-with-password.command.ts, …
+│   ├── queries/                           # get-refresh-access-token.query.ts, …
+│   ├── models/                            # RegisterWithPasswordInput, AuthenticatedSession
+│   └── services/                          # issue-password-setup-token.service.ts
+├── adapters/
+│   ├── passport-jwt/                      # strategies, guards, JWT repo facade
+│   ├── postgre/                           # prisma-password-reset.repository.ts
+│   ├── postgre-prisma/                    # (in other modules) MySQL Prisma repos
+│   ├── transactional-mail/                # smtp, mailgun, brevo, console
+│   └── http/                              # map-jwt-register-body.ts, jwt-refresh-cookie.ts
+├── controllers/                           # passport-jwt-auth.controller.ts, …
+├── dto/                                   # jwt-auth.dto.ts (HTTP + OpenAPI only)
+├── rbac/                                  # roles.guard.ts, @AuthRoles
+├── config/auth-env.ts
+└── auth.module.ts
+```
+
+### Flatter application — `users/`
+
+```
+users/
+├── models/                                # user-record.model.ts, user-admin-summary.model.ts
+├── ports/user-repository.interface.ts     # I_USER_REPOSITORY symbol
+├── commands/                              # update-own-profile.command.ts (no application/ subfolder)
+├── queries/                               # list-users-admin-summaries.query.ts
+├── payloads/                              # update-own-profile.payload.ts
+├── adapters/postgre-prisma/               # prisma-user-repository.ts
+├── controllers/users.controller.ts
+├── dto/user.dto.ts, profile.dto.ts
+└── user.module.ts
+```
+
+Both styles are valid. Prefer **`application/`** subfolder when the module grows; flat `commands/` / `queries/` is fine for smaller modules.
+
+## A.4 Layer mapping and request flow
+
+**Dependency flow (inward):**
+
+```text
+controllers/  →  commands/ | queries/  →  ports/  ←  adapters/
+     ↓                    ↓
+   dto/              models/ | application/models/ | payloads/
+```
+
+**Real pipeline — `POST /api/auth/register`:**
+
+```text
+PassportJwtAuthController
+  → toRegisterWithPasswordInput(body)     [adapters/http/map-jwt-register-body.ts]
+  → RegisterWithPasswordCommand.execute() [application/commands]
+  → AuthRepository                        [port]
+  → PassportJwtAuthRepository             [adapter facade]
+  → PostgrePrismaPassportJwtRepository     [adapters/.../postgre-prisma, MYSQL_PRISMA]
+```
+
+## A.5 Dependency rules (non-negotiable)
+
+| Layer | May import | Must NOT import |
+|-------|------------|-----------------|
+| **Controller** | commands, queries, DTOs, HTTP mappers, guards, core DTO helpers | Prisma, concrete adapters, `generated/prisma` |
+| **Command / Query** | ports, models, policies, other ports (pragmatic) | controllers, Prisma, concrete adapters |
+| **Port** | domain / application types | adapters, HTTP DTOs with `@ApiProperty` |
+| **Adapter** | port implemented, `PrismaService`, mappers, utils | controllers |
+| **Domain / models** | shared enums (`AppRoleCode`) | infrastructure, Nest decorators (prefer plain TS) |
+
+**DI wiring** in `*.module.ts`:
+
+```typescript
+{ provide: I_USER_REPOSITORY, useClass: PrismaUserRepository }
+```
+
+**Module registration** uses `DATABASE_NAME` / `isPrismaSqlMode()` — only wire adapters and controllers valid for the current mode. Unsupported adapters throw `NotImplementedException`, not silent empty results.
+
+## A.6 HTTP vs application vs domain (ADR)
+
+| Concern | Location | Example |
+|---------|----------|---------|
+| HTTP contract (validation, Swagger) | `dto/` | `JwtLoginRequestDto` |
+| Use case input/output | `application/models/`, `payloads/` | `RegisterWithPasswordInput`, `AuthenticatedSession` |
+| Post-auth principal (minimal) | `domain/models/` | `Identity` (`uid`, `email`) |
+| Read projections | `models/` | `UserRecord` (self) vs `UserAdminSummary` (admin table) |
+| HTTP mapping | `adapters/http/` | `toRegisterWithPasswordInput()` |
+
+**Rules:**
+- Do **not** duplicate the same shape in `dto/` and `application/` without explicit mapping at the controller
+- Do **not** put `@ApiProperty` on ports
+- Enrich `domain/` only when a **reusable business invariant** exists — not to mirror DB columns
+
+## A.7 Naming conventions (this repo)
+
+| Artifact | Pattern | Example |
+|----------|---------|---------|
+| Command | `{verb}-{noun}.command.ts` | `register-with-password.command.ts` |
+| Query | `{verb}-{noun}.query.ts` | `list-users-admin-summaries.query.ts` |
+| Port | `{name}.repository.ts` or `{name}-repository.interface.ts` | `I_USER_REPOSITORY` |
+| Prisma adapter | `prisma-{feature}.repository.ts` | `prisma-user-repository.ts` |
+| Mapper | `{feature}-prisma.mapper.ts` | `quality-prisma.mapper.ts` |
+| HTTP DTO | `{feature}.dto.ts` | `jwt-auth.dto.ts` |
+| Application input | `{action}.input.ts` / `.payload.ts` | `login-with-password.input.ts` |
+| Read model | `{name}.model.ts` | `user-admin-summary.model.ts` |
+| Access policy | `{feature}-access.policy.ts` | `report-draft-access.policy.ts` |
+| Test | co-located `*.spec.ts` | `update-own-profile.command.spec.ts` |
+
+Commands/queries may implement `Executable<Request, Response>` from `shared/executable.ts`.
+
+## A.8 Where to put new code (decision tree)
+
+```
+New behavior needed?
+├── JSON contract / validation / OpenAPI?     → dto/ + controller
+├── Orchestration of ports?                   → command/ or query/
+├── Persistence contract?                       → ports/
+├── Prisma / mail / JWT / external API?       → adapters/
+├── Reusable business invariant?              → domain/models/ (rare — justify in ADR)
+├── Authorization rule for a feature?         → *-access.policy.ts or rbac/
+└── Env / TTL / URL config?                   → config/ or adapters/utils/
+```
+
+## A.9 Cross-cutting patterns in this repo
+
+- **RBAC at HTTP boundary**: `@AuthRoles(AppRoleCode.SUPER_ADMIN)` — not URL-prefix security
+- **Separate read models** when consumers differ (ADR: `UserRecord` vs `UserAdminSummary`)
+- **Access policies**: `quality-access.policy.ts`, `report-draft-access.policy.ts`
+- **Pragmatic cross-module deps**: e.g. `UpdateOwnProfileCommand` injects `auth` refresh-token port and step-up service — keep minimal and documented
+- **Opaque refresh tokens**: hash SHA-256 in DB, rotation on refresh (see `auth/README.md`)
+
+## A.10 Testing
+
+| Type | Location | Pattern |
+|------|----------|---------|
+| Unit | co-located `*.spec.ts` | Mock ports: `jest.Mocked<Pick<IUserRepository, 'updateOwnProfile'>>` |
+| Controller | `*.controller.spec.ts` | Mock commands/queries |
+| Adapter / mapper | `*.spec.ts` next to adapter | Prisma mocked or mapper pure logic |
+| E2E | `server/e2e/src/server/` | supertest against running API |
+
+Domain/application tests often need **no Nest testing module** — instantiate command with mocked ports directly.
+
+## A.11 When to introduce richer DDD (from generic patterns)
+
+The project **does not require** value objects, aggregates, or domain events by default. Consider them when:
+
+| Pattern | Introduce when… | Example in this codebase |
+|---------|-----------------|--------------------------|
+| **Value Object** | invariant + reuse across modules (email, money, token TTL rules as types) | Not used yet — candidates: sealed token types |
+| **Aggregate Root** | multi-entity consistency boundary with invariants | Not default — report-draft lifecycle may qualify later |
+| **Domain Event** | other bounded contexts must react to state changes async | Not used yet — PDF job completion could qualify |
+| **Domain Service** | logic spans entities without fitting one command | `issue-password-setup-token.service.ts` (application service today) |
+
+Default for CRUD or simple workflows: **models + command + port + Prisma adapter**.
+
+## A.12 Adding a new feature (checklist)
+
+1. Create or extend a bounded context folder under `server/src/<feature>/`
+2. Define port(s) in `ports/`
+3. Implement command/query in `application/` or flat `commands/` / `queries/`
+4. Add Prisma adapter under `adapters/postgre-prisma/` (MySQL)
+5. Add HTTP DTOs in `dto/` + mapper in `adapters/http/` if needed
+6. Thin controller — delegate to command/query
+7. Wire in `<feature>.module.ts` with `provide` / `useClass`
+8. Co-located unit test for command/query
+9. Update ADR if the decision is non-obvious
+
+## A.13 Enable this skill
+
+| Tool | Action |
+|------|--------|
+| **Cursor** | `cp -r .agent/architecture .cursor/skills/clean-architecture` |
+| **Claude** | Import this `SKILL.md` into project instructions |
+
+---
+
+# Part B — Generic Clean Architecture reference (textbook examples)
+
+> **Note:** These examples illustrate classic layer-first clean architecture with TypeORM.
+> BountyHack uses **feature-first folders + Prisma** (Part A). Use Part B as a **reference**
+> when evolving toward richer domain models — do not restructure the repo to match this layout.
+
+## B.1 Architectural layers (generic)
+
+Clean Architecture organizes code into concentric layers where dependencies flow inward:
 
 ```
 +-------------------------------------+
@@ -38,100 +269,58 @@ Clean Architecture organizes code into concentric layers where dependencies flow
 +-------------------------------------+
 ```
 
-The Hexagonal Architecture (Ports & Adapters) pattern complements this:
-- **Ports**: Interfaces defining what the application needs
-- **Adapters**: Concrete implementations of ports
-- **Domain Core**: Pure business logic with zero dependencies
+Hexagonal Architecture (Ports & Adapters):
+- **Ports**: interfaces defining what the application needs
+- **Adapters**: concrete implementations of ports
+- **Domain core**: pure business logic with zero framework dependencies
 
-### 2. Learn DDD Tactical Patterns
+## B.2 DDD tactical patterns (generic)
 
-Apply these patterns in your domain layer:
-- **Entities**: Objects with identity and lifecycle
-- **Value Objects**: Immutable, defined by attributes
-- **Aggregates**: Consistency boundaries with aggregate roots
-- **Domain Events**: Capture state changes
-- **Repositories**: Abstract data access for aggregates
+- **Entities**: objects with identity and lifecycle
+- **Value Objects**: immutable, defined by attributes
+- **Aggregates**: consistency boundaries with aggregate roots
+- **Domain Events**: capture state changes
+- **Repositories**: abstract data access for aggregates
 
-### 3. Organize Your Project Structure
-
-Structure your NestJS project following Clean Architecture principles:
+## B.3 Generic layer-first project structure
 
 ```
 src/
 +-- domain/                    # Inner layer - no external deps
-|   +-- entities/              # Domain entities
-|   +-- value-objects/         # Immutable value objects
-|   +-- aggregates/            # Aggregate roots
-|   +-- events/                # Domain events
+|   +-- entities/
+|   +-- value-objects/
+|   +-- aggregates/
+|   +-- events/
 |   +-- repositories/          # Repository interfaces (ports)
-|   +-- services/              # Domain services
-+-- application/               # Use cases - orchestration
-|   +-- use-cases/             # Individual use cases
-|   +-- ports/                 # Input/output ports
-|   +-- dto/                   # Application DTOs
-|   +-- services/              # Application services
-+-- infrastructure/            # External concerns
-|   +-- database/              # ORM config, migrations
-|   +-- http/                  # HTTP clients
-|   +-- messaging/             # Message queues
-+-- adapters/                  # Interface adapters
-    +-- http/                  # Controllers, presenters
+|   +-- services/
++-- application/
+|   +-- use-cases/
+|   +-- ports/
+|   +-- dto/
+|   +-- services/
++-- infrastructure/
+|   +-- database/
+|   +-- http/
+|   +-- messaging/
++-- adapters/
+    +-- http/                  # Controllers
     +-- persistence/           # Repository implementations
-    +-- external/              # External service adapters
+    +-- external/
 ```
 
-### 4. Implement the Domain Layer
+**BountyHack equivalent:** layers are **inside each feature folder** (Part A), not at `src/` root.
 
-Create pure domain objects with no external dependencies:
+## B.4 Generic implementation steps
 
-1. **Value Objects**: Immutable objects validated at construction
-2. **Entities**: Objects with identity containing business logic
-3. **Aggregates**: Consistency boundaries protecting invariants
-4. **Repository Ports**: Interfaces defining data access contracts
+1. **Domain**: value objects, entities, aggregates, repository port interfaces
+2. **Application**: use cases with `execute()`, inject ports, single responsibility
+3. **Adapters**: persistence (ORM mapping), HTTP (controllers), external services
+4. **DI**: register use cases; `provide: TOKEN, useClass: Adapter`
+5. **Best practices**: dependency rule, rich domain when justified, immutability for VOs, validate at boundaries, transactions in application layer
 
-### 5. Implement the Application Layer
-
-Create use cases that orchestrate business logic:
-
-1. Define input/output DTOs for each use case
-2. Inject repository ports via constructor
-3. Implement business workflows in the `execute` method
-4. Keep use cases focused on a single responsibility
-
-### 6. Implement Adapters
-
-Create concrete implementations of ports:
-
-1. **Persistence Adapters**: Map domain objects to/from ORM entities
-2. **HTTP Adapters**: Controllers that transform requests to use case inputs
-3. **External Service Adapters**: Integrate with third-party services
-
-### 7. Configure Dependency Injection
-
-Wire everything together in NestJS modules:
-
-1. Register use cases as providers
-2. Provide repository implementations using interface tokens
-3. Import required infrastructure modules (TypeORM, etc.)
-
-### 8. Apply Best Practices
-
-Follow these principles throughout implementation:
-
-1. **Dependency Rule**: Dependencies only point inward. Domain knows nothing about NestJS, TypeORM, or HTTP.
-2. **Rich Domain Models**: Put business logic in entities, not services. Avoid anemic domain models.
-3. **Immutability**: Value objects must be immutable. Create new instances instead of modifying.
-4. **Interface Segregation**: Keep repository interfaces small and focused.
-5. **Constructor Injection**: Use NestJS DI in outer layers only. Domain entities use plain constructors.
-6. **Validation**: Validate at boundaries (DTOs) and enforce invariants in domain.
-7. **Testing**: Domain layer tests require no NestJS testing module - pure unit tests.
-8. **Transactions**: Keep transactions in the application layer, not domain.
-
-## Examples
+## B.5 Generic examples
 
 ### Example 1: Value Objects
-
-Value objects are immutable and validated at construction:
 
 ```typescript
 // domain/value-objects/email.vo.ts
@@ -157,39 +346,12 @@ export class Email {
     return this.value === other.value;
   }
 }
-
-// domain/value-objects/money.vo.ts
-export class Money {
-  private constructor(
-    private readonly amount: number,
-    private readonly currency: string,
-  ) {}
-
-  static create(amount: number, currency: string): Money {
-    if (amount < 0) throw new Error('Amount cannot be negative');
-    return new Money(amount, currency);
-  }
-
-  add(other: Money): Money {
-    if (this.currency !== other.currency) {
-      throw new Error('Cannot add different currencies');
-    }
-    return new Money(this.amount + other.amount, this.currency);
-  }
-
-  getAmount(): number { return this.amount; }
-  getCurrency(): string { return this.currency; }
-}
 ```
 
-### Example 2: Entity with Business Logic
-
-Entities contain identity and encapsulate business rules:
+### Example 2: Entity with business logic
 
 ```typescript
 // domain/entities/order-item.entity.ts
-import { Money } from '../value-objects/money.vo';
-
 export class OrderItem {
   constructor(
     private readonly productId: string,
@@ -208,47 +370,19 @@ export class OrderItem {
 }
 ```
 
-### Example 3: Aggregate Root with Domain Events
-
-Aggregate roots protect invariants and emit domain events:
+### Example 3: Aggregate root with domain events
 
 ```typescript
 // domain/aggregates/order.aggregate.ts
-import { AggregateRoot } from '@nestjs/cqrs';
-import { OrderItem } from '../entities/order-item.entity';
-import { Money } from '../value-objects/money.vo';
-import { OrderCreatedEvent } from '../events/order-created.event';
-
-export enum OrderStatus {
-  PENDING = 'PENDING',
-  CONFIRMED = 'CONFIRMED',
-  SHIPPED = 'SHIPPED',
-  CANCELLED = 'CANCELLED',
-}
-
 export class Order extends AggregateRoot {
   private items: OrderItem[] = [];
   private status: OrderStatus = OrderStatus.PENDING;
-
-  constructor(
-    private readonly id: string,
-    private readonly customerId: string,
-  ) {
-    super();
-  }
 
   addItem(item: OrderItem): void {
     if (this.status !== OrderStatus.PENDING) {
       throw new Error('Cannot modify confirmed order');
     }
     this.items.push(item);
-  }
-
-  getTotal(): Money {
-    return this.items.reduce(
-      (sum, item) => sum.add(item.getSubtotal()),
-      Money.create(0, 'USD'),
-    );
   }
 
   confirm(): void {
@@ -258,60 +392,26 @@ export class Order extends AggregateRoot {
     this.status = OrderStatus.CONFIRMED;
     this.apply(new OrderCreatedEvent(this.id, this.customerId));
   }
-
-  getStatus(): OrderStatus {
-    return this.status;
-  }
 }
 ```
 
-### Example 4: Repository Port (Interface)
-
-Define repository contracts in the domain layer:
+### Example 4: Repository port
 
 ```typescript
 // domain/repositories/order-repository.port.ts
-import { Order } from '../aggregates/order.aggregate';
-
 export interface OrderRepositoryPort {
   findById(id: string): Promise<Order | null>;
-  findByCustomerId(customerId: string): Promise<Order[]>;
   save(order: Order): Promise<void>;
-  delete(id: string): Promise<void>;
 }
 
-// Token for dependency injection
 export const ORDER_REPOSITORY = Symbol('ORDER_REPOSITORY');
 ```
 
-### Example 5: Use Case (Application Layer)
+**BountyHack equivalent:** `auth/ports/auth.repository.ts`, `users/ports/user-repository.interface.ts`
 
-Use cases orchestrate business logic and infrastructure:
+### Example 5: Use case (application layer)
 
 ```typescript
-// application/use-cases/create-order.use-case.ts
-import { Injectable, Inject } from '@nestjs/common';
-import { Order } from '../../domain/aggregates/order.aggregate';
-import { OrderItem } from '../../domain/entities/order-item.entity';
-import { Money } from '../../domain/value-objects/money.vo';
-import { OrderRepositoryPort, ORDER_REPOSITORY } from '../../domain/repositories/order-repository.port';
-
-export interface CreateOrderInput {
-  customerId: string;
-  items: Array<{
-    productId: string;
-    quantity: number;
-    unitPrice: number;
-    currency: string;
-  }>;
-}
-
-export interface CreateOrderOutput {
-  orderId: string;
-  total: number;
-  currency: string;
-}
-
 @Injectable()
 export class CreateOrderUseCase {
   constructor(
@@ -320,40 +420,19 @@ export class CreateOrderUseCase {
   ) {}
 
   async execute(input: CreateOrderInput): Promise<CreateOrderOutput> {
-    const orderId = crypto.randomUUID();
-    const order = new Order(orderId, input.customerId);
-
-    for (const item of input.items) {
-      const money = Money.create(item.unitPrice, item.currency);
-      order.addItem(new OrderItem(item.productId, item.quantity, money));
-    }
-
-    order.confirm();
+    const order = new Order(crypto.randomUUID(), input.customerId);
+    // ... add items, confirm, save
     await this.orderRepository.save(order);
-
-    const total = order.getTotal();
-    return {
-      orderId,
-      total: total.getAmount(),
-      currency: total.getCurrency(),
-    };
+    return { orderId: order.getId(), total: order.getTotal().getAmount() };
   }
 }
 ```
 
-### Example 6: Repository Adapter (Infrastructure)
+**BountyHack equivalent:** `RegisterWithPasswordCommand`, `UpdateOwnProfileCommand`
 
-Implement repository interfaces in the infrastructure layer:
+### Example 6: Repository adapter (infrastructure)
 
 ```typescript
-// adapters/persistence/order.repository.ts
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { OrderRepositoryPort } from '../../domain/repositories/order-repository.port';
-import { Order } from '../../domain/aggregates/order.aggregate';
-import { OrderEntity } from '../../infrastructure/database/entities/order.entity';
-
 @Injectable()
 export class OrderRepository implements OrderRepositoryPort {
   constructor(
@@ -361,82 +440,20 @@ export class OrderRepository implements OrderRepositoryPort {
     private readonly repository: Repository<OrderEntity>,
   ) {}
 
-  async findById(id: string): Promise<Order | null> {
-    const entity = await this.repository.findOne({
-      where: { id },
-      relations: ['items'],
-    });
-    return entity ? this.toDomain(entity) : null;
-  }
-
-  async findByCustomerId(customerId: string): Promise<Order[]> {
-    const entities = await this.repository.find({
-      where: { customerId },
-      relations: ['items'],
-    });
-    return entities.map(e => this.toDomain(e));
-  }
-
   async save(order: Order): Promise<void> {
-    const entity = this.toEntity(order);
-    await this.repository.save(entity);
+    await this.repository.save(this.toEntity(order));
   }
 
-  async delete(id: string): Promise<void> {
-    await this.repository.delete(id);
-  }
-
-  private toDomain(entity: OrderEntity): Order {
-    // Map ORM entity to domain aggregate
-    const order = new Order(entity.id, entity.customerId);
-    // ... populate items, status
-    return order;
-  }
-
-  private toEntity(order: Order): OrderEntity {
-    // Map domain aggregate to ORM entity
-    const entity = new OrderEntity();
-    // ... mapping logic
-    return entity;
-  }
+  private toDomain(entity: OrderEntity): Order { /* mapping */ }
+  private toEntity(order: Order): OrderEntity { /* mapping */ }
 }
 ```
 
-### Example 7: Controller Adapter
+**BountyHack equivalent:** `prisma-user-repository.ts` + `quality-prisma.mapper.ts` (Prisma, not TypeORM)
 
-Controllers adapt HTTP requests to use case inputs:
+### Example 7: Controller adapter
 
 ```typescript
-// adapters/http/order.controller.ts
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
-import { CreateOrderUseCase, CreateOrderInput } from '../../application/use-cases/create-order.use-case';
-import { IsString, IsArray, ValidateNested, IsNumber } from 'class-validator';
-import { Type } from 'class-transformer';
-
-class OrderItemDto {
-  @IsString()
-  productId: string;
-
-  @IsNumber()
-  quantity: number;
-
-  @IsNumber()
-  unitPrice: number;
-
-  @IsString()
-  currency: string;
-}
-
-class CreateOrderDto implements CreateOrderInput {
-  @IsString()
-  customerId: string;
-
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => OrderItemDto)
-  items: OrderItemDto[];
-}
-
 @Controller('orders')
 export class OrderController {
   constructor(private readonly createOrderUseCase: CreateOrderUseCase) {}
@@ -448,72 +465,72 @@ export class OrderController {
 }
 ```
 
-### Example 8: Module Configuration
+**BountyHack equivalent:** map DTO → application input first (`toRegisterWithPasswordInput`), then call command.
 
-Wire dependencies together in NestJS modules:
+### Example 8: Module configuration
 
 ```typescript
-// orders.module.ts
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { OrderController } from './adapters/http/order.controller';
-import { CreateOrderUseCase } from './application/use-cases/create-order.use-case';
-import { OrderRepository } from './adapters/persistence/order.repository';
-import { ORDER_REPOSITORY } from './domain/repositories/order-repository.port';
-import { OrderEntity } from './infrastructure/database/entities/order.entity';
-
 @Module({
   imports: [TypeOrmModule.forFeature([OrderEntity])],
   controllers: [OrderController],
   providers: [
     CreateOrderUseCase,
-    {
-      provide: ORDER_REPOSITORY,
-      useClass: OrderRepository,
-    },
+    { provide: ORDER_REPOSITORY, useClass: OrderRepository },
   ],
 })
 export class OrdersModule {}
 ```
 
-## Best Practices
+**BountyHack equivalent:** `auth.module.ts`, `user.module.ts` — conditional providers based on `DATABASE_NAME`.
 
-1. **Dependency Rule**: Dependencies only point inward - domain knows nothing about NestJS, TypeORM, or HTTP
-2. **Rich Domain Models**: Put business logic in entities, not services - avoid anemic domain models
-3. **Immutability**: Value objects must be immutable - use private constructors with static factory methods
-4. **Interface Segregation**: Keep repository interfaces small and focused - one repository per aggregate
-5. **Constructor Injection**: Use NestJS DI in outer layers only - domain entities use plain constructors
-6. **Validation at Boundaries**: Validate DTOs at API boundary and enforce invariants in domain entities
-7. **Pure Domain Tests**: Domain layer tests require no NestJS testing module - fast pure unit tests
-8. **Transactions in Application**: Keep transaction management in application layer, not domain
-9. **Symbol Tokens**: Use Symbol() for DI tokens to avoid string coupling in NestJS modules
-10. **Aggregate Roots**: Protect invariants through aggregate roots - access entities only through aggregates
+## B.6 Generic best practices
 
-## Constraints and Warnings
+1. **Dependency rule**: dependencies point inward — domain knows nothing about NestJS or ORM
+2. **Rich domain models**: business logic in entities when invariants justify it — avoid anemic models **when complexity warrants it**
+3. **Immutability**: value objects use private constructors + static factories
+4. **Interface segregation**: small, focused repository ports
+5. **Constructor injection**: NestJS DI in outer layers; plain constructors in domain
+6. **Validation at boundaries**: DTOs at HTTP; invariants in domain
+7. **Pure domain tests**: no Nest testing module required
+8. **Transactions in application layer**, not domain
+9. **Symbol tokens** for DI (`Symbol('ORDER_REPOSITORY')`)
+10. **Aggregate roots** protect invariants — access entities through aggregates when using DDD aggregates
 
-### Architecture Constraints
+## B.7 Generic constraints and warnings
 
-- **Dependency Rule**: Never allow inner layers to depend on outer layers
-- **Domain Purity**: Domain layer must have zero dependencies on frameworks (NestJS, TypeORM, etc.)
-- **Interface Location**: Repository interfaces belong in the domain layer, implementations in adapters
-- **Immutability**: Value objects must be immutable - no setters allowed
+### Architecture constraints
 
-### Common Pitfalls to Avoid
+- Inner layers must not depend on outer layers
+- Domain layer: zero framework dependencies
+- Repository interfaces in domain/application; implementations in adapters
+- Value objects: immutable, no setters
 
-- **Leaky Abstractions**: ORM entities leaking into domain layer
-- **Anemic Domain**: Entities with only getters/setters, logic in services
-- **Wrong Layer**: Framework decorators in domain entities
-- **Missing Ports**: Direct dependency on concrete implementations instead of interfaces
-- **Over-Engineering**: Clean Architecture for simple CRUD operations is unnecessary overhead
+### Common pitfalls
 
-### Implementation Warnings
+- ORM entities leaking into domain
+- Anemic domain (logic only in services) **when the domain is actually complex**
+- Framework decorators in domain entities
+- Direct dependency on concrete implementations instead of ports
+- **Over-engineering**: full clean architecture for trivial CRUD
 
-- **Mapping Overhead**: Repository adapters require mapping between domain and ORM entities
-- **Learning Curve**: Team must understand DDD concepts before implementation
-- **Boilerplate**: More files and interfaces compared to traditional layered architecture
-- **Transaction Boundaries**: Transactions must be managed at the application layer, not domain
+### Implementation warnings
 
-## References
+- Mapping overhead between domain and persistence
+- Team must understand DDD before heavy adoption
+- More boilerplate than traditional layered MVC
+- Manage transactions at application layer
 
-- `references/typescript-clean-architecture.md` - TypeScript-specific patterns
-- `references/nestjs-implementation.md` - NestJS integration details
+## B.8 Mapping generic concepts → BountyHack
+
+| Generic concept | BountyHack location |
+|-----------------|---------------------|
+| Use case | `*.command.ts` / `*.query.ts` |
+| Application DTO | `application/models/*.input.ts`, `payloads/` |
+| HTTP DTO | `dto/` |
+| Repository port | `ports/` |
+| Repository adapter | `adapters/postgre-prisma/`, `adapters/postgre/` |
+| Controller | `controllers/` |
+| HTTP mapper | `adapters/http/` |
+| Domain entity | `domain/models/` (thin) or `models/` (read/write shapes) |
+| Module wiring | `<feature>.module.ts`, `core/app.module.ts` |
+| Infrastructure | `core/`, `generated/prisma/`, `adapters/` |
