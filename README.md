@@ -24,6 +24,51 @@ Documentation détaillée :
 
 Si tu développes sous **Windows**, pour lancer l’API avec les scripts bash (depuis **`server/`** : `./docker/start.sh`), privilégie **WSL2 + Docker Desktop** (intégration WSL activée).
 
+## Configurer son LLM
+
+Pour que les consignes projet soient bien prises en compte par un agent (LLM), ajoute une règle explicite dans ton outil et référence ces fichiers :
+- [`Agents.md`](Agents.md)
+- [`Claude.md`](Claude.md)
+- [`server/Agents.md`](server/Agents.md)
+- [`server/Claude.md`](server/Claude.md)
+- [`client/Agents.md`](client/Agents.md)
+- [`client/Claude.md`](client/Claude.md)
+
+Tu peux aussi ajouter tes skills personnalisés dans des dossiers **`.agent/`** :
+
+| Niveau | Emplacement | Quand l’utiliser |
+|--------|-------------|------------------|
+| **Monorepo** | `bugbountyapp/.agent/` | Règles transverses : Git, secrets, conventions communes |
+| **Zone** | `server/.agent/`, `client/.agent/` | Skills API ou front (Nx, Prisma MySQL, i18n, auth BFF…) |
+| **Module** (optionnel) | ex. `server/src/auth/.agent/` | Domaine complexe et autonome (auth, ip-access, pdf jobs) |
+
+**Bonnes pratiques pour les autres devs qui ajoutent des skills :**
+- **1 skill = 1 intention** (éviter un mega-skill « tout le server »).
+- **Racine pour le cadre**, sous-dossiers pour l’expertise locale.
+- **Ne pas dupliquer** les règles globales : les mettre une fois en racine, puis renvoyer vers [`Agents.md`](Agents.md) / [`Claude.md`](Claude.md) parent.
+- **Nommer explicitement** : ex. `server-prisma-mysql`, `client-i18n`, `auth-jwt-flow`.
+- **Structure** : un dossier par skill avec un `SKILL.md` (voir l’exemple [`.agent/bountyhack-onboarding/SKILL.md`](.agent/bountyhack-onboarding/SKILL.md)).
+
+### Lecture automatique ?
+
+**Non** — ni `Agents.md`, ni `Claude.md`, ni un skill dans `.agent/` ne sont lus automatiquement sans configuration.
+
+| Outil | Instructions (`Agents.md` / `Claude.md`) | Skills |
+|-------|------------------------------------------|--------|
+| **Cursor** | Règle projet (`.cursor/rules/`), User Rules, ou `@Agents.md` dans le prompt | Chemin natif Cursor : **`.cursor/skills/<nom-skill>/SKILL.md`** (découverte via la `description` du frontmatter). Les skills partagés du dépôt vivent dans **`.agent/`** : les **copier** ou **symlinker** vers `.cursor/skills/` pour les activer localement. |
+| **Claude** (Code, Desktop, etc.) | [`Claude.md`](Claude.md) + référence explicite dans les instructions projet | Reprendre le contenu des skills partagés dans **`.agent/`** (même `SKILL.md`) dans les instructions / project knowledge de Claude. Pas de lecture auto du dossier `.agent/` non plus. |
+
+**Cursor — mise en route rapide :**
+1. Lire [`Agents.md`](Agents.md) (règle ou `@`).
+2. Pour un skill partagé : `cp -r .agent/<nom-skill> .cursor/skills/<nom-skill>` (ou symlink).
+3. Les règles ciblées (ex. secrets `.env`) : déjà possibles via [`.cursor/rules/`](.cursor/rules/).
+
+**Claude — mise en route rapide :**
+1. Lire [`Claude.md`](Claude.md) (instructions projet).
+2. Réutiliser les skills de **`.agent/`** en les important ou en renvoyant vers leur `SKILL.md`.
+
+En pratique : **configurer explicitement** son agent ; le dépôt fournit les fichiers partagés, chaque dev les branche dans son outil.
+
 ## Mise en garde — assistants (Cursor, Claude, etc.) et fichiers `.env`
 
 Les outils d’IA qui analysent le dépôt ou le chat peuvent **inclure dans leur contexte** le contenu de fichiers locaux (indexation, lecture à la demande, pièce jointe). Un fichier **`.env`** réel contient des **secrets** : considère qu’il peut être **exposé** à ces services selon ta configuration et tes usages (ouverture du fichier, mention `@`, copier-coller dans une conversation).
