@@ -58,7 +58,23 @@ mysql -u root -p -e "CREATE DATABASE bugbountyapp CHARACTER SET utf8mb4 COLLATE 
 # Créer une nouvelle base "bugbountyapp" avec interclassement "utf8mb4_unicode_ci"
 ```
 
-#### Importer le dump avec les données de test
+#### Exécute cette commande depuis le terminal pour créer un utilisateur bugbountyapp avec les bon droits :
+
+```bash
+sudo mysql -u root -e "CREATE USER 'bugbountyapp'@'127.0.0.1' IDENTIFIED BY 'bugbountyapp'; GRANT ALL PRIVILEGES ON bugbountyapp.* TO 'bugbountyapp'@'127.0.0.1'; FLUSH PRIVILEGES;"
+```
+
+#### Vérifier la connexion
+
+```bash
+mysql -u bugbountyapp -p bugbountyapp bugbountyapp
+```
+
+Monter la base de donnée : 
+- VIA UN DUMP
+- VIA PRISMA
+
+### Monter la base de donnée - VIA UN DUMP : Importer le dump avec les données de test
 
 **Important** : Ces commandes se connectent au serveur MySQL sur `localhost:3306`. Assurez-vous que :
 - XAMPP est démarré (si vous utilisez XAMPP)
@@ -79,6 +95,12 @@ mysql -u root -p bugbountyapp -e "SHOW TABLES; SELECT COUNT(*) as users_count FR
 - Mot de passe root par défaut : souvent vide (`""`)
 - Interface phpMyAdmin disponible : http://localhost/phpmyadmin/
 - Vérification XAMPP actif : les bases `information_schema`, `mysql`, `performance_schema`, `phpmyadmin` doivent être visibles
+
+#### Monter les tables de la base de donnée : VIA PRISMA
+
+```sh
+pnpm exec prisma db push
+```
 
 ### Démarrer l'API
 

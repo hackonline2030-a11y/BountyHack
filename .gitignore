@@ -57,6 +57,7 @@ $RECYCLE.BIN/
 .env.local
 .env.production
 !.env.example
+!.env.example.production
 
 /localdocs/**
 
