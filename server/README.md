@@ -4,22 +4,23 @@ API NestJS (auth, users, ping) — workspace [Nx](https://nx.dev).
 
 *English version : [Go to english version](./README.en.md)*
 
-1. Documentation sur ce repo & liens utiles
+1. [Documentation sur ce repo & liens utiles](#documentation)
    
-2. Démarrage api
+2. [Démarrage api](#démarrage-api)
 
-3. Installation
-- Variables d'environnements et authentification
-- Configurer la base de donnée : avec ou sans docker
-- Configurer Redis
+3. [Installation](#installation)
+- [Variables d'environnements et authentification](#variables-denvironnements-et-authentification)
+- [Configurer la base de donnée : avec ou sans docker](#installation-de-la-base-de-donnée-avec-ou-sans-docker)
+- [Configurer Redis](#configurer-redis)
 
 4. Post-installation
-- Seeder
-- Bruno/Postman
-- Commandes utiles
+- [Seeder](#seeder-user-and-report-draft)
+- [Bruno/Postman](#test-auth-brunopostman-passport_jwt--in-memory)
+- [Commandes utiles](#commandes-utiles)
   
-5. Installation via Nx : remarques
-6. TroubleShooting
+5. [Installation via Nx : remarques](#installation-avec-nx)
+6. [TroubleShooting](#troubleshooting-dépannage)
+7. [Configurer son LLM](#configurer-son-llm)
 
 ## Documentation 
 
@@ -229,35 +230,42 @@ Pour itérer vite sur l'API, tu peux faire tourner :
 
 - l'API NestJS en local sur ta machine (hot reload plus rapide, debug IDE plus simple),
 - la base MySQL dans Docker,
-- adminer dans Docker pour visualiser les tables.
+- Redis dans Docker (rate limiting, jobs PDF),
+- Adminer et Redis Insight dans Docker pour visualiser MySQL et Redis.
 
 Nous pourrions brancher Postgre ou Mongo DB assez aisément plus tard : c'est pourquoi des commandes sont aussi prévu.<br> 
 Mais nous supprimerons ces commandes si MySQL se maintient comme choix en prod finale.
 
 Depuis `server/` :
 
-1. Démarrer la bdd docker :
+1. Démarrer MySQL + Redis (profils **`mysql`** et **`redis`**) :
 
 Via pnpm (si tu a donné les droits root à docker) :
-   ```sh
-   pnpm run docker:mysql
-   ```
-Sans pnpm (notamment si tu préfère ne pas donner à docker les droits root) :
-
-Il est important de préciser le profil mysql car ce n'est pas le default (Cela va évoluer une fois la décision finale prise).
 
 ```sh
-docker compose -f docker/compose.dev.yaml --profile mysql up -d mysql adminer
+pnpm run docker:mysql
 ```
 
-Adminer : http://localhost:8088 — serveur **`mysql`**, utilisateur / mot de passe **`bugbountyapp`**.
+Sans pnpm (notamment si tu préfères ne pas donner à docker les droits root) :
+
+Les profils **`mysql`** et **`redis`** ne sont pas le défaut du compose — il faut les préciser explicitement.
+
+```sh
+docker compose -f docker/compose.dev.yaml --profile mysql --profile redis up -d mysql adminer redis redisinsight
+```
+
+Interfaces :
+
+- **Adminer** (MySQL) : http://localhost:8088 — serveur **`mysql`**, utilisateur / mot de passe **`bugbountyapp`**
+- **Redis Insight** (Redis) : http://localhost:5540 — dans « Add database » : host **`redis`**, port **`6379`** (nom DNS Compose, pas `localhost`)
 
 3. Configurer `server/.env` pour exécuter l'API **hors Docker** :
 
    - `DATABASE_NAME=MYSQL_PRISMA`
    - `DATABASE_URL=mysql://bugbountyapp:bugbountyapp@localhost:3306/bugbountyapp?allowPublicKeyRetrieval=true`
+   - `REDIS_HOST=127.0.0.1`, `REDIS_PORT=6379`, `REDIS_URL=redis://127.0.0.1:6379`
 
-   Important : utilise `localhost` pour communiquer avec docker en restant sur ta machine sur le plan api.
+   Important : utilise `localhost` / `127.0.0.1` pour communiquer avec Docker depuis l’hôte (API hors conteneur).
 
 4. Appliquer Prisma (mysql) depuis l'hôte (ajouter mysql à la fin) :
 
@@ -266,9 +274,10 @@ Adminer : http://localhost:8088 — serveur **`mysql`**, utilisateur / mot de pa
    pnpm run prisma:migrate:deploy:mysql
    ```
 
-5. Aprés avoir lancé sur votre machine l'api (voir section démarrage), ouvrir adminer :
+5. Aprés avoir lancé sur votre machine l'api (voir section démarrage), ouvrir les interfaces :
 
-   - `http://localhost:8088`
+   - Adminer (MySQL) : `http://localhost:8088`
+   - Redis Insight : `http://localhost:5540`
 
 Arrêt :
 
@@ -277,7 +286,7 @@ pnpm run docker:mysql:stop
 ```
 
 ```sh
-sudo docker compose -f docker/compose.dev.yaml --profile mysql stop adminer mysql
+sudo docker compose -f docker/compose.dev.yaml --profile mysql --profile redis stop adminer mysql redis redisinsight
 ```
 
 Ou teardown complet :
@@ -287,8 +296,40 @@ pnpm run docker:mysql:down
 ```
 
 ```sh
-sudo docker compose -f docker/compose.dev.yaml --profile mysql down adminer mysql
+sudo docker compose -f docker/compose.dev.yaml --profile mysql --profile redis down
 ```
+
+## Configurer Redis
+
+Redis est utilisé par l’API (rate limiting, jobs PDF asynchrones, etc.). Variables dans **`server/.env`** : `REDIS_HOST`, `REDIS_PORT`, `REDIS_URL` (voir **`.env.example`**).
+
+### Redis avec Docker
+
+Avec la section [Installer la DB MySQL avec docker](#installer-la-db-mysql-avec-docker), Redis et Redis Insight sont démarrés en même temps que MySQL (`--profile mysql --profile redis`).
+
+Redis seul (sans MySQL) :
+
+```sh
+docker compose -f docker/compose.dev.yaml --profile redis up -d redis redisinsight
+```
+
+L’API hors conteneur utilise `REDIS_HOST=127.0.0.1` et `REDIS_PORT=6379` (port exposé sur l’hôte).
+
+### Redis en local
+
+Sans Docker, installe Redis directement sur ta machine :
+
+- **Installation Linux** : [Install Redis — redis.io](https://redis.io/docs/latest/operate/oss_and_stack/install/archive/install-redis/)
+- **Client GUI (lecture / édition des clés)** : [5 Best Free Redis GUI Clients in 2025 — DbGate](https://www.dbgate.io/news/2025-08-11-free-redis-clients/)
+
+Après installation, vérifie que le serveur répond :
+
+```bash
+redis-cli ping
+# PONG
+```
+
+Puis aligne **`server/.env`** sur ton instance locale (`REDIS_URL=redis://127.0.0.1:6379` par défaut).
 
 ## Seeder (user et report-draft)
 
@@ -557,3 +598,19 @@ pnpm exec nx test web-api
 
 En résumé : **IDE = confort visuel**, **console = contrôle explicite**.  
 Les deux utilisent la même source de vérité Nx du workspace.
+
+## Configurer son LLM
+
+Pour que les consignes projet soient bien prises en compte par un agent (LLM), ajoute une règle explicite dans ton outil et référence ces fichiers :
+- [`Agents.md`](./Agents.md)
+- [`Claude.md`](./Claude.md)
+
+Tu peux aussi ajouter tes skills dans **`.agent/`** — voir la section [Configurer son LLM](../README.md#configurer-son-llm) du README racine (hiérarchie, Cursor vs Claude, lecture non automatique).
+
+Pour l’API, privilégie :
+- **`server/.agent/`** — Nx, Prisma MySQL, Docker/Redis, conventions server
+- **`server/src/<module>/.agent/`** (optionnel) — skill métier d’un module précis
+
+**Cursor** : copier/symlink vers `.cursor/skills/` pour activer un skill partagé. **Claude** : reprendre le `SKILL.md` depuis `.agent/`.
+
+Rappel : 1 skill = 1 intention ; pas de duplication des règles déjà dans [`../Agents.md`](../Agents.md) ou [`Agents.md`](./Agents.md).

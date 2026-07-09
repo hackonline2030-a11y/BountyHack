@@ -53,7 +53,7 @@ Voir aussi [`../README.md`](../README.md#mysql-prisma-et-seed-report-draft-docke
 **Via pnpm** (depuis `server/`) :
 
 ```bash
-pnpm docker:mysql:up                      # MySQL + Adminer (http://localhost:8088)
+pnpm docker:mysql:up                      # MySQL + Redis + Adminer + Redis Insight
 pnpm docker:prisma:generate:mysql
 pnpm docker:prisma:migrate:deploy:mysql   # schéma
 pnpm docker:prisma:seed:mysql             # rôles + compte démo (non destructif)

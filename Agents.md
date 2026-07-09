@@ -4,11 +4,11 @@
 
 | Niveau | Rôle |
 |--------|------|
-| **Racine** (`Agent.md`, `CONVENTIONS.md`, `README.md`) | Règles **monorepo** communes : Git, scopes, secrets, déploiement. |
-| **`client/Agent.md`** ou **`server/Agent.md`** | Détails **quand tu travailles surtout dans ce dossier** : stack, commandes, pièges locaux — sans recopier toute la convention Git. |
+| **Racine** (`Agents.md`, `CONVENTIONS.md`, `README.md`) | Règles **monorepo** communes : Git, scopes, secrets, déploiement. |
+| **`client/Agents.md`** ou **`server/Agents.md`** | Détails **quand tu travailles surtout dans ce dossier** : stack, commandes, pièges locaux — sans recopier toute la convention Git. |
 | **Règles Cursor** (`.cursor/rules/`, `.cursorignore`) | Transversal ; des règles **ciblées** (`globs`) peuvent s’ajouter plus tard pour un sous-dossier. |
 
-**Ordre en cas de doute** : `CONVENTIONS.md` → `README.md` (racine) → `README.md` de la zone → `Agent.md` racine → `Agent.md` de la zone.
+**Ordre en cas de doute** : `CONVENTIONS.md` → `README.md` (racine) → `README.md` de la zone → `Agents.md` racine → `Agents.md` de la zone.
 
 Fichiers **à consulter avant un changement non trivial** (ne pas tout recopier ici — les lire) :
 
@@ -54,6 +54,6 @@ Viser une base **propre et maintenable** ; les principes se complètent et se **
 - **Préférer** : décrire ou proposer la commande ; n’appeler l’outil terminal **qu’après** un feu vert clair (« oui », « lance », « exécute ça », ou la demande formulée comme « run … » / « exécute … » pour une commande précise).
 - Exception implicite : la consigne courante est **directement** « exécute telle commande » ou « lance les tests » — dans ce cas, la commande demandée est autorisée ; le reste (commandes annexes, pushes, installs globaux) reste soumis à confirmation si non demandé.
 
-Quand la tâche est **centrée sur le front** ou **sur l’API**, lire aussi **[`client/Agent.md`](client/Agent.md)** ou **[`server/Agent.md`](server/Agent.md)** (contexte et commandes utiles pour cette zone).
+Quand la tâche est **centrée sur le front** ou **sur l’API**, lire aussi **[`client/Agents.md`](client/Agents.md)** ou **[`server/Agents.md`](server/Agents.md)** (contexte et commandes utiles pour cette zone).
 
 En cas de doute sur une règle d’équipe, **s’aligner sur `CONVENTIONS.md`** plutôt que d’inventer une convention locale.

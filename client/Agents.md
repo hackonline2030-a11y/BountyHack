@@ -1,6 +1,6 @@
 # Instructions agents — frontend (`client/`)
 
-**Règles monorepo communes** : **[`Agent.md`](../Agent.md)** à la racine (y compris **qualité logicielle** et **terminal / autorisation des commandes**) et **[`CONVENTIONS.md`](../CONVENTIONS.md)** (branches, commits, scopes **`client-<zone>`** pour tout ce qui vit ici).
+**Règles monorepo communes** : **[`Agents.md`](../Agents.md)** à la racine (y compris **qualité logicielle** et **terminal / autorisation des commandes**) et **[`CONVENTIONS.md`](../CONVENTIONS.md)** (branches, commits, scopes **`client-<zone>`** pour tout ce qui vit ici).
 
 ## Contexte technique
 
@@ -20,7 +20,7 @@ Voir les docs > adr pour plus d'information.
 
 ## Commandes utiles (depuis `client/`)
 
-Exemples **indicatifs** ; **n’exécuter** des commandes dans le terminal **qu’avec accord explicite** — voir **[`Agent.md`](../Agent.md)** (*Terminal et commandes*).
+Exemples **indicatifs** ; **n’exécuter** des commandes dans le terminal **qu’avec accord explicite** — voir **[`Agents.md`](../Agents.md)** (*Terminal et commandes*).
 
 ```bash
 pnpm install
