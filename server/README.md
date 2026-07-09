@@ -99,13 +99,12 @@ node dist/main.js  # après build
 ### Vérification
 
 L'API devrait être accessible sur :
-- **API** : http://localhost:3000
-- **Documentation Swagger** : http://localhost:3000/api
-- **Health check** : http://localhost:3000/health
+- **API** (sans interface) : http://localhost:3000
+- **Accés (doc swagger etc.)** : http://localhost:3000/api
 
 ### Utilisateurs de test disponibles
 
-Le dump contient plusieurs utilisateurs de test avec mot de passe `demo` :
+Le dump contient plusieurs utilisateurs de test (avec `password` ou `password123` ou `password1234` comme MDP) :
 
 | Email | Username | Rôle | Description |
 |-------|----------|------|-------------|
@@ -116,7 +115,7 @@ Le dump contient plusieurs utilisateurs de test avec mot de passe `demo` :
 
 **Connexion de test** :
 - Email : `demo-user@example.local`
-- Mot de passe : `password123` ou `demo` ou `password` (à vérifier l'un ou l'autre)
+- Mot de passe : `password123` ou `password` (à vérifier l'un ou l'autre)
 
 A partir du compte surper-admin vous pouvez créer vos propre user dans chaque catégorie.
 
@@ -150,7 +149,7 @@ pnpm run test
 #### Erreur Prisma
 ```bash
 # Régénérer le client
-DATABASE_NAME=MYSQL_PRISMA pnpm exec prisma generate
+DATABASE_NAME=MYSQL_PRISMA pnpm exec prisma generate (+ :mysql)
 
 # Vérifier la connexion
 pnpm exec prisma db pull
@@ -165,73 +164,16 @@ PORT=3001
 lsof -ti:3000 | xargs kill -9
 ```
 
-## Installation avec Nx 
-
-## Prérequis
-
-- **Node.js** 24+ et **pnpm** (voir `server/package.json` → `engines`)
-- **Docker** et Docker Compose (**optionnel**, uniquement pour le **dev local** décrit ci-dessous — pas la cible prod)
-
-### Workspace Nx : logique IDE et logique console
-
-Résumé rapide :
-- Certes, tu peux techniquement démarrer et travailler sur l'app sans utiliser Nx directement.
-- Mais pour du travail en équipe, il est fortement recommandé d'utiliser Nx comme point d'entrée commun (mêmes commandes, même logique, moins d'écarts entre devs/CI).
-- Sans Nx, ce n'est pas bloquant, mais le partage devient plus fragile ("ça marche chez moi", scripts exécutés différemment, oublis de cibles).
-
-Le dossier `server/` est un **workspace Nx**.  
-Un workspace Nx centralise :
-- les projets (ex: `web-api`, `e2e`)
-- leurs targets (`serve`, `build`, `test`, `lint`, ...)
-- leurs dépendances
-
-Conséquence : tu peux exécuter les mêmes actions soit depuis l'IDE, soit depuis la console.
-
-#### 1) Logique IDE (VS Code / Cursor / JetBrains)
-
-Pour piloter Nx visuellement, installe **Nx Console**.
-
-- **VS Code**
-  - Ouvre l'onglet Extensions.
-  - Installe **Nx Console** (éditeur : `Nrwl`).
-  - Recharge la fenêtre si demandé.
-
-- **Cursor**
-  - Cursor utilise les extensions VS Code.
-  - Installe **Nx Console** (éditeur : `Nrwl`) depuis le Marketplace.
-  - Recharge la fenêtre.
-
-- **JetBrains** (WebStorm / IntelliJ IDEA / PhpStorm)
-  - Ouvre `Settings > Plugins > Marketplace`.
-  - Installe **Nx Console**.
-  - Redémarre l'IDE.
-
-Dans l'IDE, tu verras les projets Nx et tu pourras lancer directement les targets (`serve`, `build`, `test`) sans écrire toute la commande.
-
-#### 2) Logique console (CLI Nx)
-
-Si tu préfères le terminal, tout se fait depuis `server/` :
-
-```sh
-pnpm exec nx --version
-pnpm exec nx show projects
-pnpm exec nx show project web-api
-pnpm exec nx serve web-api
-pnpm exec nx build web-api
-pnpm exec nx test web-api
-```
-
-En résumé : **IDE = confort visuel**, **console = contrôle explicite**.  
-Les deux utilisent la même source de vérité Nx du workspace.
-
 ### Authentification et base de données
 
 Les variables **`AUTH_TYPE`** et **`DATABASE_NAME`** se combinent. Point important :
 
 - L'architecture auth est extensible via `AUTH_TYPE`, mais l'implémentation active est **`PASSPORT_JWT`**.
-- Les options de base de donnees restent multiples via `DATABASE_NAME` (`MONGODB`, `POSTGRESQL_PRISMA`, `IN-MEMORY`).
-- Avec **`DATABASE_NAME=MONGODB`**, les utilisateurs (email, hash de mot de passe, profil) sont stockés dans la base Mongo définie par **`DATABASE_URL`**.
+- Les options de base de donnees restent multiples via `DATABASE_NAME` (`MONGODB`, `MYSQL_PRISMA`, `POSTGRESQL_PRISMA`, `IN-MEMORY`).
+- Avec par exemple **`DATABASE_NAME=MONGODB`**, les utilisateurs (email, hash de mot de passe, profil) sont stockés dans la base Mongo définie par **`DATABASE_URL`**.
 - **2FA (schema et prochaines fonctionnalites)** : le projet ne fait evoluer cette couche que sous **`DATABASE_NAME=POSTGRESQL_PRISMA`** (migrations Prisma sur la base PostgreSQL). Pas d'extension parallele sur Mongo ou in-memory pour la 2FA pour l'instant ; voir **`src/auth/README.md`**.
+
+**MAJ** - On utilisera MYSQL_PRISMA et IN-MEMORY (pour les tests)
 
 Voir aussi les commentaires dans **`.env.example`**.
 
@@ -250,70 +192,70 @@ Recommandation : toute nouvelle condition liee a la configuration d'authentifica
 
 ---
 
-## Démarrage
-
-Choisis **un** parcours : **Docker en local** (API et optionnellement Postgres + watch), ou **Node sur l’hôte** avec une base joignable (**PostgreSQL + Prisma**, MongoDB, etc. selon **`DATABASE_NAME`**). La **production** visée est **Node sur serveur sans Docker** (voir [`../README.md`](../README.md)). Le monorepo **ne prévoit pas** de build/push d’image serveur vers **GitHub Container Registry (GHCR)** ni vers un autre registre : `server/docker/` reste **local / lab** uniquement.
-
-### API locale + DB Docker (recommandé en dev)
+## Installer la DB MySQL avec docker
 
 Pour itérer vite sur l'API, tu peux faire tourner :
 
 - l'API NestJS en local sur ta machine (hot reload plus rapide, debug IDE plus simple),
-- la base PostgreSQL dans Docker,
-- pgweb dans Docker pour visualiser les tables.
+- la base MySQL dans Docker,
+- adminer dans Docker pour visualiser les tables.
+
+Nous pourrions brancher Postgre ou Mongo DB assez aisément plus tard : c'est pourquoi des commandes sont aussi prévu.<br> 
+Mais nous supprimerons ces commandes si MySQL se maintient comme choix en prod finale.
 
 Depuis `server/` :
 
-1. Démarrer uniquement PostgreSQL + pgweb :
-
+1. Démarrer :
+2. 
    ```sh
-   pnpm run docker:postgre
+   pnpm run docker:mysql
    ```
 
-2. Configurer `server/.env` pour exécuter l'API **hors Docker** :
+3. Configurer `server/.env` pour exécuter l'API **hors Docker** :
 
-   - `DATABASE_NAME=POSTGRESQL_PRISMA`
-   - `DATABASE_URL=postgres://bugbountyapp:bugbountyapp@localhost:5432/bugbountyapp`
+   - `DATABASE_NAME=MYSQL_PRISMA`
+   - `DATABASE_URL=mysql://bugbountyapp:bugbountyapp@localhost:3306/bugbountyapp?allowPublicKeyRetrieval=true`
 
    Important : en mode API locale, utilise `localhost` (pas `postgres`, qui est le hostname interne Docker).
 
-3. Appliquer Prisma depuis l'hôte :
+4. Appliquer Prisma depuis l'hôte (ajouter mysql à la fin) :
+
+**Attention** : sur les commandes prisma, sans "mysql" vous risquez d'appeler le schema réalisé pour postgre (c'était sur postgre avant un changement vers mysql et pourrait le redevenir).
 
    ```sh
-   pnpm run prisma:generate
-   pnpm run prisma:migrate:deploy
+   pnpm run prisma:generate:mysql
+   pnpm run prisma:migrate:deploy:mysql
    ```
 
-4. Lancer l'API en local :
+5. Lancer l'API en local (indépendant de postgre/mysql) :
 
    ```sh
    pnpm run start
    ```
 
-5. Ouvrir pgweb :
+6. Ouvrir adminer :
 
-   - `http://localhost:8087` (ou `PGWEB_HOST_PORT` si surchargé dans `.env`).
+   - `http://localhost:8088`
 
 Arrêt de la stack PostgreSQL seule :
 
 ```sh
-pnpm run docker:postgre:stop
+pnpm run docker:mysql:stop
 ```
 
 Ou teardown complet (profil pg) :
 
 ```sh
-pnpm run docker:postgre:down
+pnpm run docker:mysql:down
 ```
 
-### PostgreSQL et Prisma
+### Seed et Watch mode
 
-Persistance **`users`** avec **Prisma** : **`DATABASE_NAME=POSTGRESQL_PRISMA`**. Commandes depuis **`server/`** (après `pnpm install` à la racine du monorepo).
+Persistance **`users`** avec **Prisma** : **`DATABASE_NAME=MYSQL_PRISMA`**. Commandes depuis **`server/`** (après `pnpm install` à la racine du monorepo).
 
 | Contexte | Commandes |
 |----------|-----------|
-| **Docker — API en watch** (`web-api-watch` + Postgres) | `pnpm docker:watch`, puis `pnpm docker:prisma:generate`, `pnpm docker:prisma:deploy`, puis données : `pnpm docker:prisma:seed` (rôles + démo optionnelle). Équivalent : `./docker/start.sh watch-up` depuis **`server/docker/`**. |
-| **Node sur l’hôte — Postgres sur `localhost`** | `pnpm prisma generate`, `pnpm prisma migrate deploy`, puis `pnpm prisma:seed`. Si `DATABASE_URL` contient encore `@postgres` : `pnpm prisma:migrate:deploy:docker` puis `pnpm prisma:seed:docker`. Voir **`prisma/README.md`** (migrations = schéma ; seed = données). |
+| **Docker — API en watch** (`web-api-watch` + Postgres) | `pnpm docker:watch`, puis `pnpm docker:prisma:generate:mysql`, `pnpm docker:prisma:deploy:mysql`, puis données : `pnpm docker:prisma:seed:mysql` (rôles + démo optionnelle). 
 
 Plus de détail : [`docker/README.md`](docker/README.md#prisma-migrations-et-démo), **`.env.example`**.
 
@@ -374,7 +316,7 @@ Raccourcis pnpm (réécrivent `DATABASE_URL` depuis `.env`) : `pnpm docker:mysql
 
 Comptes créés par le seed dev-draft : `dev-hunter-1@example.local`, `dev-qc-1@example.local`, `dev-sa-1@example.local`, etc. — mot de passe identique à **`demo-user`** (`password123`).
 
-### 1. Avec Docker
+### Avec Docker
 
 Guide détaillé (installation Docker, `start.sh`, équivalents `docker compose` bruts) : [`docker/README.md`](docker/README.md).
 
@@ -586,3 +528,63 @@ Exemple visuel de configuration jwt.io :
   - `Authorization: Bearer <token>`
 
 Si tout est correct, la route répond sans `401`.
+
+
+## Installation avec Nx 
+
+## Prérequis
+
+- **Node.js** 24+ et **pnpm** (voir `server/package.json` → `engines`)
+- **Docker** et Docker Compose (**optionnel**, uniquement pour le **dev local** décrit ci-dessous — pas la cible prod)
+
+### Workspace Nx : logique IDE et logique console
+
+Résumé rapide :
+- Certes, tu peux techniquement démarrer et travailler sur l'app sans utiliser Nx directement.
+- Mais pour du travail en équipe, il est fortement recommandé d'utiliser Nx comme point d'entrée commun (mêmes commandes, même logique, moins d'écarts entre devs/CI).
+- Sans Nx, ce n'est pas bloquant, mais le partage devient plus fragile ("ça marche chez moi", scripts exécutés différemment, oublis de cibles).
+
+Le dossier `server/` est un **workspace Nx**.  
+Un workspace Nx centralise :
+- les projets (ex: `web-api`, `e2e`)
+- leurs targets (`serve`, `build`, `test`, `lint`, ...)
+- leurs dépendances
+
+Conséquence : tu peux exécuter les mêmes actions soit depuis l'IDE, soit depuis la console.
+
+#### 1) Logique IDE (VS Code / Cursor / JetBrains)
+
+Pour piloter Nx visuellement, installe **Nx Console**.
+
+- **VS Code**
+  - Ouvre l'onglet Extensions.
+  - Installe **Nx Console** (éditeur : `Nrwl`).
+  - Recharge la fenêtre si demandé.
+
+- **Cursor**
+  - Cursor utilise les extensions VS Code.
+  - Installe **Nx Console** (éditeur : `Nrwl`) depuis le Marketplace.
+  - Recharge la fenêtre.
+
+- **JetBrains** (WebStorm / IntelliJ IDEA / PhpStorm)
+  - Ouvre `Settings > Plugins > Marketplace`.
+  - Installe **Nx Console**.
+  - Redémarre l'IDE.
+
+Dans l'IDE, tu verras les projets Nx et tu pourras lancer directement les targets (`serve`, `build`, `test`) sans écrire toute la commande.
+
+#### 2) Logique console (CLI Nx)
+
+Si tu préfères le terminal, tout se fait depuis `server/` :
+
+```sh
+pnpm exec nx --version
+pnpm exec nx show projects
+pnpm exec nx show project web-api
+pnpm exec nx serve web-api
+pnpm exec nx build web-api
+pnpm exec nx test web-api
+```
+
+En résumé : **IDE = confort visuel**, **console = contrôle explicite**.  
+Les deux utilisent la même source de vérité Nx du workspace.
