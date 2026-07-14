@@ -4,24 +4,17 @@
  */
 
 import type { ReportTeamMemberWire } from '../../report-team/models/report-team-api.types';
+import type { AggregateStatusWire } from '../../report-shared/models/report-aggregate-status.wire';
+
+// Re-exported from the report-shared kernel so report-team can reference the draft
+// aggregate status without importing report-draft (avoids the dependency cycle).
+export type { AggregateStatusWire };
 
 /** Coordinator-chosen title + squad; server-only enrichment, not persisted from client PUT. */
 export interface ReportDraftTeamWire {
   label: string;
   members: ReportTeamMemberWire[];
 }
-
-export type AggregateStatusWire =
-  | 'draft'
-  | 'under-review'
-  | 'under-global-review'
-  | 'ready-to-program'
-  /** @deprecated Prefer `published`. */
-  | 'submitted-to-program'
-  /** Super-admin validated — source of truth for PDF generation. */
-  | 'published'
-  | 'given-up'
-  | 'rejected';
 
 export type StepStatusWire =
   | 'in-progress'

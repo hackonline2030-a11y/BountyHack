@@ -14,6 +14,10 @@ import type {
 } from '../../../generated/prisma/client';
 import { ReportTeamPrismaMapper } from '../../../report-team/adapters/postgre-prisma/report-team-prisma.mapper';
 import {
+  AGGREGATE_STATUS_FROM_WIRE,
+  AGGREGATE_STATUS_TO_WIRE,
+} from '../../../report-shared/adapters/report-aggregate-status.mapper';
+import {
   REPORT_DRAFT_STEP_STATE_KEYS,
   type AggregateStatusWire,
   type AttachmentWire,
@@ -65,34 +69,6 @@ const DRAFT_STEP_ORDER: DraftStep[] = [
   DraftStep.REMEDIATION,
   DraftStep.FINAL,
 ];
-
-const AGGREGATE_STATUS_TO_WIRE: Record<
-  ReportDraftAggregateStatus,
-  AggregateStatusWire
-> = {
-  [ReportDraftAggregateStatus.DRAFT]: 'draft',
-  [ReportDraftAggregateStatus.UNDER_REVIEW]: 'under-review',
-  [ReportDraftAggregateStatus.UNDER_GLOBAL_REVIEW]: 'under-global-review',
-  [ReportDraftAggregateStatus.READY_TO_PROGRAM]: 'ready-to-program',
-  [ReportDraftAggregateStatus.SUBMITTED_TO_PROGRAM]: 'submitted-to-program',
-  [ReportDraftAggregateStatus.PUBLISHED]: 'published',
-  [ReportDraftAggregateStatus.GIVEN_UP]: 'given-up',
-  [ReportDraftAggregateStatus.REJECTED]: 'rejected',
-};
-
-const AGGREGATE_STATUS_FROM_WIRE: Record<
-  AggregateStatusWire,
-  ReportDraftAggregateStatus
-> = {
-  draft: ReportDraftAggregateStatus.DRAFT,
-  'under-review': ReportDraftAggregateStatus.UNDER_REVIEW,
-  'under-global-review': ReportDraftAggregateStatus.UNDER_GLOBAL_REVIEW,
-  'ready-to-program': ReportDraftAggregateStatus.READY_TO_PROGRAM,
-  'submitted-to-program': ReportDraftAggregateStatus.SUBMITTED_TO_PROGRAM,
-  published: ReportDraftAggregateStatus.PUBLISHED,
-  'given-up': ReportDraftAggregateStatus.GIVEN_UP,
-  rejected: ReportDraftAggregateStatus.REJECTED,
-};
 
 const STEP_STATUS_TO_WIRE: Record<StepStatus, StepStatusWire> = {
   [StepStatus.IN_PROGRESS]: 'in-progress',

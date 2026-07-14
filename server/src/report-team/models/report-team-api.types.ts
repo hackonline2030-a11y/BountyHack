@@ -1,4 +1,4 @@
-import type { AggregateStatusWire } from '../../report-draft/models/report-draft-api.types';
+import type { AggregateStatusWire } from '../../report-shared/models/report-aggregate-status.wire';
 
 export type ReportTeamMemberRoleWire =
   | 'hunter'

@@ -6,7 +6,7 @@ import type {
   ReportTeamMember,
   User,
 } from '../../../generated/prisma/client';
-import { ReportDraftPrismaMapper } from '../../../report-draft/adapters/postgre-prisma/report-draft-prisma.mapper';
+import { aggregateStatusToWire } from '../../../report-shared/adapters/report-aggregate-status.mapper';
 import { computeTeamValidity } from '../../application/report-team-validity';
 import type {
   ReportTeamJoinRequestWire,
@@ -51,9 +51,7 @@ export class ReportTeamPrismaMapper {
       reportDraftId: row.reportDraftId,
       label: row.label,
       validity: computeTeamValidity(members.map((m) => m.role)),
-      draftAggregateStatus: ReportDraftPrismaMapper.aggregateStatusToWire(
-        row.reportDraft.aggregateStatus,
-      ),
+      draftAggregateStatus: aggregateStatusToWire(row.reportDraft.aggregateStatus),
       reportDraftOwnerUserId: row.reportDraft.hunterId,
       hunterWriterUserId: row.reportDraft.hunterWriterId,
       members,
