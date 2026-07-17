@@ -54,7 +54,7 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
 
   const prefix = localePrefixFromPathname(pathname);
   const localeHome = prefix;
-  const loginHref = `${prefix}/`;
+  const loginHref = `${prefix}/login`;
   const isLoginActive = isAuthHeaderLoginHighlightPath(pathname);
   const dashboardSegment = welcomeDashboardPathFromRoleCode(currentRoleCode);
   const dashboardHref =

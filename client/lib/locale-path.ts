@@ -6,12 +6,12 @@ export function localePrefixFromPathname(pathname: string): string {
 }
 
 export function isAuthLoginPath(pathname: string): boolean {
-  return /^\/(en|fr)\/?$/.test(pathname);
+  return /^\/(en|fr)\/login\/?$/.test(pathname);
 }
 
 /** Highlight header « Login » on login and password-reset flows (same nav group). */
 export function isAuthHeaderLoginHighlightPath(pathname: string): boolean {
-  return /^\/(en|fr)(\/(password-reset)|\/?)?$/.test(pathname);
+  return /^\/(en|fr)\/(login|password-reset)\/?$/.test(pathname);
 }
 
 export function isPasswordResetPath(pathname: string): boolean {
