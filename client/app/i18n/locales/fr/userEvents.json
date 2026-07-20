@@ -1,0 +1,14 @@
+{
+  "heading": "Événements utilisateurs",
+  "count": "{{n}} événement(s)",
+  "empty": "Aucun événement pour le moment.",
+  "delete": "Supprimer",
+  "deleting": "Suppression…",
+  "deleteFailed": "Impossible de supprimer cet événement.",
+  "loadError": "Impossible de charger les événements.",
+  "types": {
+    "usernameChanged": "a changé son identifiant",
+    "emailChanged": "a changé son e-mail",
+    "passwordChanged": "a changé son mot de passe"
+  }
+}

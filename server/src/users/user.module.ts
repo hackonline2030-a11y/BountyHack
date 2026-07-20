@@ -21,6 +21,7 @@ import { DeleteOwnAccountCommand } from './commands/delete-own-account.command';
 import { VerifyProfilePasswordCommand } from './commands/verify-profile-password.command';
 import { UpdateOwnProfileCommand } from './commands/update-own-profile.command';
 import { InMemoryUserRepository } from './adapters/in-memory/in-memory-user-repository';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 function resolveUserRepositoryClass() {
   switch (variables.database) {
@@ -52,6 +53,7 @@ const mongoFeatureImports =
   imports: [
     CommonModule,
     forwardRef(() => AuthModule),
+    NotificationsModule,
     ...mongoFeatureImports,
   ],
   controllers: [UsersController],

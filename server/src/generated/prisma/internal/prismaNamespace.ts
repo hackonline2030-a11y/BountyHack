@@ -411,7 +411,8 @@ export const ModelName = {
   QualityCriterion: 'QualityCriterion',
   QualityCriterionTargetTypeLink: 'QualityCriterionTargetTypeLink',
   QualityCriterionDistribution: 'QualityCriterionDistribution',
-  QualityCriterionCheck: 'QualityCriterionCheck'
+  QualityCriterionCheck: 'QualityCriterionCheck',
+  UserEvent: 'UserEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -427,7 +428,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "globalSubmission" | "globalReviewerComment" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "reportTeam" | "reportTeamMember" | "reportTeamJoinRequest" | "reportTeamLeaveRequest" | "qualityCriterionCategory" | "qualityCriterionTargetType" | "qualityCriterion" | "qualityCriterionTargetTypeLink" | "qualityCriterionDistribution" | "qualityCriterionCheck"
+    modelProps: "user" | "role" | "authzObject" | "permission" | "rolePermission" | "refreshToken" | "passwordResetToken" | "twoFactor" | "twoFactorTotp" | "reportDraft" | "globalSubmission" | "globalReviewerComment" | "reportDraftStep" | "reportDraftAttachment" | "submission" | "reviewerComment" | "submissionAttachmentSnapshot" | "submissionContentSnapshot" | "reportTeam" | "reportTeamMember" | "reportTeamJoinRequest" | "reportTeamLeaveRequest" | "qualityCriterionCategory" | "qualityCriterionTargetType" | "qualityCriterion" | "qualityCriterionTargetTypeLink" | "qualityCriterionDistribution" | "qualityCriterionCheck" | "userEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2279,6 +2280,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    UserEvent: {
+      payload: Prisma.$UserEventPayload<ExtArgs>
+      fields: Prisma.UserEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserEventPayload>
+        }
+        findFirst: {
+          args: Prisma.UserEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserEventPayload>
+        }
+        findMany: {
+          args: Prisma.UserEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserEventPayload>[]
+        }
+        create: {
+          args: Prisma.UserEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserEventPayload>
+        }
+        createMany: {
+          args: Prisma.UserEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.UserEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserEventPayload>
+        }
+        update: {
+          args: Prisma.UserEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.UserEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserEventPayload>
+        }
+        aggregate: {
+          args: Prisma.UserEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserEvent>
+        }
+        groupBy: {
+          args: Prisma.UserEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserEventCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2670,6 +2737,18 @@ export const QualityCriterionCheckScalarFieldEnum = {
 export type QualityCriterionCheckScalarFieldEnum = (typeof QualityCriterionCheckScalarFieldEnum)[keyof typeof QualityCriterionCheckScalarFieldEnum]
 
 
+export const UserEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  eventType: 'eventType',
+  oldValue: 'oldValue',
+  newValue: 'newValue',
+  createdAt: 'createdAt'
+} as const
+
+export type UserEventScalarFieldEnum = (typeof UserEventScalarFieldEnum)[keyof typeof UserEventScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2976,6 +3055,17 @@ export const QualityCriterionCheckOrderByRelevanceFieldEnum = {
 export type QualityCriterionCheckOrderByRelevanceFieldEnum = (typeof QualityCriterionCheckOrderByRelevanceFieldEnum)[keyof typeof QualityCriterionCheckOrderByRelevanceFieldEnum]
 
 
+export const UserEventOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  eventType: 'eventType',
+  oldValue: 'oldValue',
+  newValue: 'newValue'
+} as const
+
+export type UserEventOrderByRelevanceFieldEnum = (typeof UserEventOrderByRelevanceFieldEnum)[keyof typeof UserEventOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -3245,6 +3335,7 @@ export type GlobalOmitConfig = {
   qualityCriterionTargetTypeLink?: Prisma.QualityCriterionTargetTypeLinkOmit
   qualityCriterionDistribution?: Prisma.QualityCriterionDistributionOmit
   qualityCriterionCheck?: Prisma.QualityCriterionCheckOmit
+  userEvent?: Prisma.UserEventOmit
 }
 
 /* Types for Logging */

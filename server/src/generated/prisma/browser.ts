@@ -157,3 +157,8 @@ export type QualityCriterionDistribution = Prisma.QualityCriterionDistributionMo
  * 
  */
 export type QualityCriterionCheck = Prisma.QualityCriterionCheckModel
+/**
+ * Model UserEvent
+ * Audit events for user profile changes, visible to coordinators and super-admins.
+ */
+export type UserEvent = Prisma.UserEventModel

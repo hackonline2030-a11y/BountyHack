@@ -7,6 +7,8 @@ import { verifySessionForRoles } from "@/lib/dal/session";
 import { AppRoleCode } from "@/lib/app-role-code";
 import { isSupportedLanguage } from "@modules/auth/core/model/locale.policy";
 import { ReportTeamAdminBootstrap } from "@modules/report-team/react/ReportTeamAdminBootstrap";
+import { UserEventsPanel } from "@modules/notifications/react/UserEventsPanel";
+import { listUserEvents } from "@/lib/dal/user-events";
 
 type PageProps = { params: Promise<{ lng: string }> };
 
@@ -23,6 +25,7 @@ export default async function TeamManagementPage({ params }: PageProps) {
 
   const { t } = await getT("reportTeams", { lng });
   const prefix = `/${lng}`;
+  const userEventsResult = await listUserEvents(lng);
 
   return (
     <main className="flex w-full min-h-[calc(100vh-(var(--header-height)+var(--footer-height)))] flex-col">
@@ -45,6 +48,12 @@ export default async function TeamManagementPage({ params }: PageProps) {
             </header>
             <div className="border-t border-dashboard-divider pt-6">
               <ReportTeamAdminBootstrap />
+            </div>
+            <div className="border-t border-dashboard-divider pt-6">
+              <UserEventsPanel
+                initialEvents={userEventsResult.ok ? userEventsResult.items : []}
+                loadError={!userEventsResult.ok}
+              />
             </div>
           </div>
         </div>

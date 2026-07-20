@@ -45,6 +45,7 @@ model User {
   qualityCriteriaCreated            QualityCriterion[]             @relation("QualityCriterionCreator")
   qualityCriterionDistributions     QualityCriterionDistribution[] @relation("QualityDistributionCreator")
   qualityCriterionChecks            QualityCriterionCheck[]        @relation("QualityCheckUpdater")
+  userEvents                        UserEvent[]
 
   @@index([roleId])
   @@map("users")
@@ -596,4 +597,19 @@ model QualityCriterionCheck {
   @@unique([distributionId, context])
   @@index([distributionId])
   @@map("quality_criterion_checks")
+}
+
+/// Audit events for user profile changes, visible to coordinators and super-admins.
+model UserEvent {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventType String   @map("event_type")
+  oldValue  String?  @map("old_value")
+  newValue  String?  @map("new_value")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("user_events")
 }
