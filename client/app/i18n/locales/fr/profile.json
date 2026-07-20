@@ -1,0 +1,30 @@
+{
+  "metaTitle": "Mon profil",
+  "pageTitle": "Mon profil",
+  "profile": {
+    "heading": "Profil",
+    "lead": "Modifiez votre identifiant et e-mail. Vous devez d'abord confirmer votre mot de passe actuel ; seul vous pouvez modifier votre compte.",
+    "currentPasswordLabel": "Mot de passe actuel",
+    "verifyButton": "Continuer",
+    "verifying": "Vérification…",
+    "wrongPassword": "Mot de passe incorrect.",
+    "totpLabel": "Code d'authentification",
+    "totpHint": "Saisissez le code à 6 chiffres de votre appli d'authentification (obligatoire car la 2FA est activée).",
+    "invalidTotp": "Code invalide. Vérifiez votre appli et réessayez.",
+    "verifyFailed": "Impossible de vérifier votre mot de passe. Réessayez.",
+    "usernameLabel": "Identifiant",
+    "emailLabel": "E-mail",
+    "emailChangeHint": "Changer l'e-mail vous déconnecte sur tous les appareils.",
+    "newPasswordLabel": "Nouveau mot de passe (facultatif)",
+    "confirmPasswordLabel": "Confirmer le nouveau mot de passe",
+    "passwordChangeHint": "Changer le mot de passe vous déconnecte sur tous les appareils.",
+    "saveButton": "Enregistrer",
+    "saving": "Enregistrement…",
+    "cancelEdit": "Annuler",
+    "saveSuccess": "Profil mis à jour.",
+    "saveFailed": "Impossible de mettre à jour le profil.",
+    "nothingToSave": "Modifiez au moins un champ avant d'enregistrer.",
+    "passwordMismatch": "Les nouveaux mots de passe ne correspondent pas.",
+    "sessionExpired": "La vérification a expiré. Saisissez à nouveau votre mot de passe."
+  }
+}

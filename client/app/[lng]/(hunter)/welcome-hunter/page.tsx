@@ -58,6 +58,7 @@ export default async function WelcomeHunterPage({ params }: PageProps) {
     mentors: t("welcomeHunter.nav.mentors"),
     criteria: t("welcomeHunter.nav.criteria"),
     support: t("welcomeHunter.nav.support"),
+    profile: t("welcomeHunter.nav.profile"),
     settings: t("welcomeHunter.nav.settings"),
   };
 
@@ -75,6 +76,7 @@ export default async function WelcomeHunterPage({ params }: PageProps) {
     mentors: `${prefix}/mentors`,
     criteria: `${prefix}/quality-criteria`,
     support: `${prefix}/support`,
+    profile: `${prefix}/profile`,
     settings: `${prefix}/parameters`,
   };
 
