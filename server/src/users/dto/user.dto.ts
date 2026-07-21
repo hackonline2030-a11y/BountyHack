@@ -142,3 +142,38 @@ export class UserAdminSummaryListResponseDto {
   })
   items: UserAdminSummaryDto[];
 }
+
+/**
+ * Single row of the public user directory (annuaire). Exposes only publicly
+ * displayable fields: display name and RBAC role. Email, account status and
+ * any other personal data are intentionally omitted (RGPD).
+ */
+export class UserDirectoryEntryDto {
+  @Expose()
+  @ApiProperty({ example: 'user-42', description: 'User unique identifier.' })
+  uid: string;
+
+  @Expose()
+  @ApiProperty({ example: 'amaury', description: 'Public display name.' })
+  username: string;
+
+  @Expose()
+  @ApiProperty({
+    enum: AppRoleCode,
+    nullable: true,
+    example: AppRoleCode.HUNTER,
+    description: 'Public RBAC role; `null` when no role is attached.',
+  })
+  roleCode: AppRoleCode | null;
+}
+
+/** Envelope for `GET /api/users/directory`. */
+export class UserDirectoryListResponseDto {
+  @Expose()
+  @Type(() => UserDirectoryEntryDto)
+  @ApiProperty({
+    type: [UserDirectoryEntryDto],
+    description: 'Public user directory entries, sorted by `username`.',
+  })
+  items: UserDirectoryEntryDto[];
+}

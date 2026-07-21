@@ -78,7 +78,8 @@ export const ModelName = {
   QualityCriterion: 'QualityCriterion',
   QualityCriterionTargetTypeLink: 'QualityCriterionTargetTypeLink',
   QualityCriterionDistribution: 'QualityCriterionDistribution',
-  QualityCriterionCheck: 'QualityCriterionCheck'
+  QualityCriterionCheck: 'QualityCriterionCheck',
+  UserEvent: 'UserEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -449,6 +450,18 @@ export const QualityCriterionCheckScalarFieldEnum = {
 export type QualityCriterionCheckScalarFieldEnum = (typeof QualityCriterionCheckScalarFieldEnum)[keyof typeof QualityCriterionCheckScalarFieldEnum]
 
 
+export const UserEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  eventType: 'eventType',
+  oldValue: 'oldValue',
+  newValue: 'newValue',
+  createdAt: 'createdAt'
+} as const
+
+export type UserEventScalarFieldEnum = (typeof UserEventScalarFieldEnum)[keyof typeof UserEventScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -753,4 +766,15 @@ export const QualityCriterionCheckOrderByRelevanceFieldEnum = {
 } as const
 
 export type QualityCriterionCheckOrderByRelevanceFieldEnum = (typeof QualityCriterionCheckOrderByRelevanceFieldEnum)[keyof typeof QualityCriterionCheckOrderByRelevanceFieldEnum]
+
+
+export const UserEventOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  eventType: 'eventType',
+  oldValue: 'oldValue',
+  newValue: 'newValue'
+} as const
+
+export type UserEventOrderByRelevanceFieldEnum = (typeof UserEventOrderByRelevanceFieldEnum)[keyof typeof UserEventOrderByRelevanceFieldEnum]
 

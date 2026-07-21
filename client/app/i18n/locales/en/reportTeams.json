@@ -173,7 +173,7 @@
         "errorWriter": "Choose which hunter is the designated step writer."
       },
       "teamDetail": {
-        "metaTitle": "Report team | BugBountyApp",
+        "metaTitle": "Report team | HackTheBounty",
         "back": "Back to coordination",
         "loading": "Loading team…",
         "loadError": "Could not load this team.",

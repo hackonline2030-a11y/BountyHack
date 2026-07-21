@@ -5,6 +5,7 @@ import {
   EmailIcon,
   CriteriaIcon,
   MentorIcon,
+  ProfileIcon,
   ReportIcon,
   SettingsIcon,
   SupportIcon,
@@ -22,6 +23,7 @@ export type DashboardNavLabels = {
   mentors: string;
   criteria: string;
   support: string;
+  profile: string;
   settings: string;
 };
 
@@ -34,6 +36,7 @@ export type DashboardNavHrefs = {
   mentors: string;
   criteria: string;
   support: string;
+  profile: string;
   settings: string;
 };
 
@@ -58,6 +61,7 @@ const NAV_ITEMS: ReadonlyArray<NavItem> = [
   { key: "mentors", Icon: MentorIcon },
   { key: "criteria", Icon: CriteriaIcon },
   { key: "support", Icon: SupportIcon },
+  { key: "profile", Icon: ProfileIcon },
   { key: "settings", Icon: SettingsIcon },
 ];
 

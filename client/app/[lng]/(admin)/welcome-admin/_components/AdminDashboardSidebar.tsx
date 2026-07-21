@@ -11,6 +11,7 @@ import {
 export type AdminNavLabels = {
   label: string;
   users: string;
+  directory: string;
   register: string;
   teams: string;
   criteria: string;
@@ -19,6 +20,7 @@ export type AdminNavLabels = {
 
 export type AdminNavHrefs = {
   users: string;
+  directory: string;
   register: string;
   teams: string;
   criteria: string;
@@ -34,6 +36,7 @@ type NavItem = {
 
 const NAV_ITEMS: ReadonlyArray<NavItem> = [
   { key: "users", Icon: UsersIcon },
+  { key: "directory", Icon: UsersIcon },
   { key: "register", Icon: UserPlusIcon },
   { key: "teams", Icon: TeamIcon },
   { key: "criteria", Icon: CriteriaIcon },
@@ -61,7 +64,7 @@ export const AdminDashboardSidebar: FC<Props> = ({ labels, hrefs }) => (
               <item.Icon className="size-4 shrink-0" />
               <span>{labels[item.key]}</span>
             </Link>
-            {index === 1 && (
+            {index === 2 && (
               <hr
                 aria-hidden
                 className="my-1 hidden border-t border-dashboard-divider lg:block"

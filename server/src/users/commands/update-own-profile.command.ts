@@ -19,6 +19,7 @@ import {
   I_USER_REPOSITORY,
   IUserRepository,
 } from '../ports/user-repository.interface';
+import { CreateUserEventCommand } from '../../notifications/application/commands/create-user-event.command';
 
 @Injectable()
 export class UpdateOwnProfileCommand {
@@ -28,6 +29,7 @@ export class UpdateOwnProfileCommand {
     private readonly stepUpTokens: ProfileStepUpTokenService,
     @Inject(REFRESH_TOKEN_REPOSITORY)
     private readonly refreshTokens: IRefreshTokenRepository,
+    private readonly createUserEvent: CreateUserEventCommand,
   ) {}
 
   async execute(
@@ -79,12 +81,56 @@ export class UpdateOwnProfileCommand {
       throw new BadRequestException('At least one field must be provided');
     }
 
+    const previousRecord = await this.userRepository.findById(uid);
+    if (!previousRecord) {
+      throw new UnauthorizedException('Utilisateur non authentifie');
+    }
+
     const updated = await this.userRepository.updateOwnProfile(uid, normalized);
 
     if (normalized.newPassword !== undefined || normalized.email !== undefined) {
       await this.refreshTokens.revokeAllForUser(uid);
     }
 
+    await this.emitProfileEvents(updated, previousRecord, normalized);
+
     return updated;
+  }
+
+  private async emitProfileEvents(
+    updated: UserRecord,
+    previous: UserRecord,
+    normalized: UpdateOwnProfilePayload,
+  ): Promise<void> {
+    const userId = updated.uid ?? previous.uid;
+    const displayName = updated.username ?? previous.username ?? userId;
+
+    if (normalized.username !== undefined && previous.username !== updated.username) {
+      await this.createUserEvent.execute({
+        userId,
+        userDisplayName: displayName,
+        eventType: 'username_changed',
+        oldValue: previous.username,
+        newValue: updated.username,
+      });
+    }
+
+    if (normalized.email !== undefined && previous.email !== updated.email) {
+      await this.createUserEvent.execute({
+        userId,
+        userDisplayName: displayName,
+        eventType: 'email_changed',
+        oldValue: previous.email,
+        newValue: updated.email,
+      });
+    }
+
+    if (normalized.newPassword !== undefined) {
+      await this.createUserEvent.execute({
+        userId,
+        userDisplayName: displayName,
+        eventType: 'password_changed',
+      });
+    }
   }
 }

@@ -17,6 +17,9 @@ import enWelcomeHunter from "@/app/i18n/locales/en/welcomeHunter.json";
 import enWelcomeMentor from "@/app/i18n/locales/en/welcomeMentor.json";
 import enWelcomePlatformManager from "@/app/i18n/locales/en/welcomePlatformManager.json";
 import enWelcomeQualityChecker from "@/app/i18n/locales/en/welcomeQualityChecker.json";
+import enProfile from "@/app/i18n/locales/en/profile.json";
+import enUserEvents from "@/app/i18n/locales/en/userEvents.json";
+import enUsers from "@/app/i18n/locales/en/users.json";
 import frAdministration from "@/app/i18n/locales/fr/administration.json";
 import frCommon from "@/app/i18n/locales/fr/common.json";
 import frConnexion from "@/app/i18n/locales/fr/connexion.json";
@@ -35,6 +38,9 @@ import frWelcomeHunter from "@/app/i18n/locales/fr/welcomeHunter.json";
 import frWelcomeMentor from "@/app/i18n/locales/fr/welcomeMentor.json";
 import frWelcomePlatformManager from "@/app/i18n/locales/fr/welcomePlatformManager.json";
 import frWelcomeQualityChecker from "@/app/i18n/locales/fr/welcomeQualityChecker.json";
+import frProfile from "@/app/i18n/locales/fr/profile.json";
+import frUserEvents from "@/app/i18n/locales/fr/userEvents.json";
+import frUsers from "@/app/i18n/locales/fr/users.json";
 
 /**
  * Every namespace used by client components (`useT` from `next-i18next/client`)
@@ -60,6 +66,9 @@ export const clientI18nNamespaces = [
   "myReports",
   "reportDraft",
   "quality",
+  "profile",
+  "userEvents",
+  "users",
 ] as const;
 
 export type ClientI18nNamespace = (typeof clientI18nNamespaces)[number];
@@ -84,6 +93,9 @@ export const clientI18nResources = {
     myReports: enMyReports,
     reportDraft: enReportDraft,
     quality: enQuality,
+    profile: enProfile,
+    userEvents: enUserEvents,
+    users: enUsers,
   },
   fr: {
     common: frCommon,
@@ -104,5 +116,8 @@ export const clientI18nResources = {
     myReports: frMyReports,
     reportDraft: frReportDraft,
     quality: frQuality,
+    profile: frProfile,
+    userEvents: frUserEvents,
+    users: frUsers,
   },
 } satisfies Resource;

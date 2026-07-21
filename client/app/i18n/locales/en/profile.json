@@ -1,0 +1,30 @@
+{
+  "metaTitle": "My Profile",
+  "pageTitle": "My Profile",
+  "profile": {
+    "heading": "Profile",
+    "lead": "Modify your username and email. You must first confirm your current password; only you can修改 your account.",
+    "currentPasswordLabel": "Current password",
+    "verifyButton": "Continue",
+    "verifying": "Verifying…",
+    "wrongPassword": "Incorrect password.",
+    "totpLabel": "Authentication code",
+    "totpHint": "Enter the 6-digit code from your authenticator app (required because 2FA is enabled).",
+    "invalidTotp": "Invalid code. Check your app and try again.",
+    "verifyFailed": "Unable to verify your password. Please try again.",
+    "usernameLabel": "Username",
+    "emailLabel": "Email",
+    "emailChangeHint": "Changing email will log you out on all devices.",
+    "newPasswordLabel": "New password (optional)",
+    "confirmPasswordLabel": "Confirm new password",
+    "passwordChangeHint": "Changing password will log you out on all devices.",
+    "saveButton": "Save",
+    "saving": "Saving…",
+    "cancelEdit": "Cancel",
+    "saveSuccess": "Profile updated.",
+    "saveFailed": "Unable to update profile.",
+    "nothingToSave": "Modify at least one field before saving.",
+    "passwordMismatch": "New passwords do not match.",
+    "sessionExpired": "Verification expired. Please enter your password again."
+  }
+}

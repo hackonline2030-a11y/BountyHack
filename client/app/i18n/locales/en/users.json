@@ -1,0 +1,20 @@
+{
+  "metaTitle": "Users",
+  "pageTitle": "User directory",
+  "description": "Browse platform users and their public roles.",
+  "searchLabel": "Search users",
+  "searchPlaceholder": "Search by username or role",
+  "empty": "No users match your search.",
+  "noRole": "No role",
+  "count": "{{n}} user(s)",
+  "loadError": "Unable to load the user directory.",
+  "roles": {
+    "USER": "User",
+    "SUPER_ADMIN": "Super admin",
+    "HUNTER": "Hunter",
+    "MENTOR": "Mentor",
+    "QUALITY_CHECKER": "Quality checker",
+    "COORDINATOR": "Coordinator",
+    "QUALITY_CONTENT": "Quality content"
+  }
+}

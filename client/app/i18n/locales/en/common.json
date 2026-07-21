@@ -1,10 +1,10 @@
 {
-  "title": "BugBountyApp",
+  "title": "HackTheBounty",
   "description": "Bug bounty platform for web applications. Prepare and submit vulnerability reports with educational support for programs like YesWeHack and HackerOne.",
   "tagline": "Report vulnerabilities with structure and guidance.",
   "home": {
     "metaTitle": "Home",
-    "heroTitle": "BugBountyApp",
+    "heroTitle": "HackTheBounty",
     "heroLead": "Bug bounty platform for web applications.",
     "heroHint": "Prepare to integrate real bug bounty programs (YesWeHack, HackerOne, etc.) with our educational support.",
     "demoNotice": "This is a demonstration site. Please do not enter personal data — use fictional information instead, as the site is still under construction."
@@ -28,7 +28,7 @@
     "devMessage": "Detail (dev)"
   },
   "header": {
-    "brand": "BugBountyApp",
+    "brand": "HackTheBounty",
     "home": "Home",
     "dashboard": "Dashboard",
     "qualityCriteria": "Quality criteria",
@@ -42,7 +42,7 @@
     "register": "Register"
   },
   "footer": {
-    "copyright": "© 2026 BugBountyApp",
+    "copyright": "© 2026 HackTheBounty",
     "privacy": "Privacy policy",
     "notice": "Legal notice",
     "credits": "Credits"

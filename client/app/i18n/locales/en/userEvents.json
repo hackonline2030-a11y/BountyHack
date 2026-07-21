@@ -1,0 +1,14 @@
+{
+  "heading": "User events",
+  "count": "{{n}} event(s)",
+  "empty": "No events yet.",
+  "delete": "Delete",
+  "deleting": "Deleting…",
+  "deleteFailed": "Unable to delete this event.",
+  "loadError": "Unable to load events.",
+  "types": {
+    "usernameChanged": "changed their username",
+    "emailChanged": "changed their email",
+    "passwordChanged": "changed their password"
+  }
+}

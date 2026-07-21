@@ -2,17 +2,27 @@ import { ProfileStepUpTokenService } from '../../auth/application/profile-step-u
 import type { IRefreshTokenRepository } from '../../auth/ports/refresh-token.repository';
 import { UpdateOwnProfileCommand } from './update-own-profile.command';
 import type { IUserRepository } from '../ports/user-repository.interface';
+import type { CreateUserEventCommand } from '../../notifications/application/commands/create-user-event.command';
 
 describe('UpdateOwnProfileCommand', () => {
   const identity = { uid: 'user-1', email: 'a@example.com' };
 
-  let userRepository: jest.Mocked<Pick<IUserRepository, 'updateOwnProfile'>>;
+  let userRepository: jest.Mocked<
+    Pick<IUserRepository, 'updateOwnProfile' | 'findById'>
+  >;
   let stepUpTokens: jest.Mocked<Pick<ProfileStepUpTokenService, 'assertValid'>>;
   let refreshTokens: jest.Mocked<Pick<IRefreshTokenRepository, 'revokeAllForUser'>>;
+  let createUserEvent: jest.Mocked<Pick<CreateUserEventCommand, 'execute'>>;
   let command: UpdateOwnProfileCommand;
 
   beforeEach(() => {
     userRepository = {
+      findById: jest.fn().mockResolvedValue({
+        uid: 'user-1',
+        username: 'old-name',
+        email: 'a@example.com',
+        twoFactorEnabled: false,
+      }),
       updateOwnProfile: jest.fn().mockResolvedValue({
         uid: 'user-1',
         username: 'new-name',
@@ -26,10 +36,14 @@ describe('UpdateOwnProfileCommand', () => {
     refreshTokens = {
       revokeAllForUser: jest.fn(),
     };
+    createUserEvent = {
+      execute: jest.fn().mockResolvedValue(undefined),
+    };
     command = new UpdateOwnProfileCommand(
       userRepository as unknown as IUserRepository,
       stepUpTokens as unknown as ProfileStepUpTokenService,
       refreshTokens as unknown as IRefreshTokenRepository,
+      createUserEvent as unknown as CreateUserEventCommand,
     );
   });
 
@@ -61,5 +75,42 @@ describe('UpdateOwnProfileCommand', () => {
     });
 
     expect(refreshTokens.revokeAllForUser).toHaveBeenCalledWith('user-1');
+  });
+
+  it('emits a username_changed event when the username changes', async () => {
+    await command.execute(identity, 'token-1', { username: 'new-name' });
+
+    expect(createUserEvent.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'user-1',
+        eventType: 'username_changed',
+        oldValue: 'old-name',
+        newValue: 'new-name',
+      }),
+    );
+  });
+
+  it('emits an email_changed event when the email changes', async () => {
+    await command.execute(identity, 'token-1', { email: 'new@example.com' });
+
+    expect(createUserEvent.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'user-1',
+        eventType: 'email_changed',
+        oldValue: 'a@example.com',
+        newValue: 'new@example.com',
+      }),
+    );
+  });
+
+  it('emits a password_changed event when the password changes', async () => {
+    await command.execute(identity, 'token-1', { newPassword: 'NewSecret9!' });
+
+    expect(createUserEvent.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'user-1',
+        eventType: 'password_changed',
+      }),
+    );
   });
 });

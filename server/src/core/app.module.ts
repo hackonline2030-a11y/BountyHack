@@ -25,6 +25,7 @@ import { ReportDraftModule } from '../report-draft/report-draft.module';
 import { ReportDraftDevModule } from '../report-draft/dev/report-draft-dev.module';
 import { ReportTeamModule } from '../report-team/report-team.module';
 import { QualityModule } from '../quality/quality.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { isReportDraftDevRoutesEnabled } from '../shared/dev-routes.util';
 
 const prismaImports = isPrismaSqlMode() ? [PrismaModule] : [];
@@ -46,6 +47,7 @@ const baseImports = [
   UserModule,
   DocumentRenderingModule,
   CommonModule,
+  NotificationsModule,
   ...reportDraftImports,
   ...reportDraftDevImports,
   ...reportTeamImports,

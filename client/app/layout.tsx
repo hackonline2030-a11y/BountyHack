@@ -18,7 +18,7 @@ initServerI18next(i18nConfig);
 
 const LANG_HEADER = "x-i18next-current-language";
 
-const siteName = "BugBountyApp";
+const siteName = "HackTheBounty";
 const siteDescription =
   "Bug bounty platform for web applications. Prepare and submit vulnerability reports with educational support for programs like YesWeHack and HackerOne.";
 
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     template: `%s | ${siteName}`,
   },
   description: siteDescription,
-  applicationName: "BugBountyApp",
+  applicationName: "HackTheBounty",
   manifest: "/manifest.webmanifest",
   robots: {
     index: false,

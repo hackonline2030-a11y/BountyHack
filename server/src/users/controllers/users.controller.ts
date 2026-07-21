@@ -50,10 +50,12 @@ import { AdminUserActionBodyDto } from '../dto/admin-user-action.dto';
 import {
   CreateUserProfileBodyDto,
   UserAdminSummaryListResponseDto,
+  UserDirectoryListResponseDto,
   UserProfileResponseDto,
 } from '../dto/user.dto';
 import { GetUserByIdQuery } from '../queries/get-user-by-id';
 import { ListUsersAdminSummariesQuery } from '../queries/list-users-admin-summaries.query';
+import { ListUsersDirectoryQuery } from '../queries/list-users-directory.query';
 import { Identity } from '../../auth/domain/models/identity';
 
 @ApiTags('users')
@@ -64,6 +66,7 @@ export class UsersController {
     private readonly addUsername: AddUsername,
     private readonly getUserByIdQuery: GetUserByIdQuery,
     private readonly listUsersAdminSummariesQuery: ListUsersAdminSummariesQuery,
+    private readonly listUsersDirectoryQuery: ListUsersDirectoryQuery,
     private readonly deleteUserCompletely: DeleteUserCompletelyCommand,
     private readonly deleteOwnAccountCommand: DeleteOwnAccountCommand,
     private readonly verifyProfilePasswordCommand: VerifyProfilePasswordCommand,
@@ -303,6 +306,27 @@ export class UsersController {
       console.error('Error listing users:', error);
       throw error;
     }
+  }
+
+  @Get('directory')
+  @Auth()
+  @ApiOperation({
+    summary: 'List users in the public directory',
+    description:
+      'Returns display names and public roles for authenticated users. Email and account status are excluded.',
+  })
+  @ApiOkResponse({
+    description: 'Public directory returned.',
+    type: UserDirectoryListResponseDto,
+  })
+  @ApiHttpUnauthorized('Missing or invalid bearer token.')
+  async listDirectory(): Promise<UserDirectoryListResponseDto> {
+    const entries = await this.listUsersDirectoryQuery.execute();
+    return plainToInstance(
+      UserDirectoryListResponseDto,
+      { items: entries },
+      { excludeExtraneousValues: true },
+    );
   }
 
   @Post(':userId/resend-invitation')
