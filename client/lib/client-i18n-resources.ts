@@ -19,6 +19,7 @@ import enWelcomePlatformManager from "@/app/i18n/locales/en/welcomePlatformManag
 import enWelcomeQualityChecker from "@/app/i18n/locales/en/welcomeQualityChecker.json";
 import enProfile from "@/app/i18n/locales/en/profile.json";
 import enUserEvents from "@/app/i18n/locales/en/userEvents.json";
+import enUsers from "@/app/i18n/locales/en/users.json";
 import frAdministration from "@/app/i18n/locales/fr/administration.json";
 import frCommon from "@/app/i18n/locales/fr/common.json";
 import frConnexion from "@/app/i18n/locales/fr/connexion.json";
@@ -39,6 +40,7 @@ import frWelcomePlatformManager from "@/app/i18n/locales/fr/welcomePlatformManag
 import frWelcomeQualityChecker from "@/app/i18n/locales/fr/welcomeQualityChecker.json";
 import frProfile from "@/app/i18n/locales/fr/profile.json";
 import frUserEvents from "@/app/i18n/locales/fr/userEvents.json";
+import frUsers from "@/app/i18n/locales/fr/users.json";
 
 /**
  * Every namespace used by client components (`useT` from `next-i18next/client`)
@@ -66,6 +68,7 @@ export const clientI18nNamespaces = [
   "quality",
   "profile",
   "userEvents",
+  "users",
 ] as const;
 
 export type ClientI18nNamespace = (typeof clientI18nNamespaces)[number];
@@ -92,6 +95,7 @@ export const clientI18nResources = {
     quality: enQuality,
     profile: enProfile,
     userEvents: enUserEvents,
+    users: enUsers,
   },
   fr: {
     common: frCommon,
@@ -114,5 +118,6 @@ export const clientI18nResources = {
     quality: frQuality,
     profile: frProfile,
     userEvents: frUserEvents,
+    users: frUsers,
   },
 } satisfies Resource;

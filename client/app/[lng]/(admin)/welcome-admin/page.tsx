@@ -49,6 +49,7 @@ export default async function WelcomeAdminPage({ params }: PageProps) {
   const navLabels: AdminNavLabels = {
     label: t("welcomeAdmin.nav.label"),
     users: t("welcomeAdmin.nav.users"),
+    directory: t("welcomeAdmin.nav.directory"),
     register: t("welcomeAdmin.nav.register"),
     teams: t("welcomeAdmin.nav.teams"),
     criteria: t("welcomeAdmin.nav.criteria"),
@@ -59,6 +60,7 @@ export default async function WelcomeAdminPage({ params }: PageProps) {
 
   const navHrefs: AdminNavHrefs = {
     users: `${prefix}/administration`,
+    directory: `${prefix}/users`,
     register: `${prefix}/administration/register`,
     teams: `${prefix}/administration/team-management`,
     criteria: `${prefix}/quality-criteria`,

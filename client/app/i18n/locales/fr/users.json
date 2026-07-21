@@ -1,0 +1,20 @@
+{
+  "metaTitle": "Utilisateurs",
+  "pageTitle": "Annuaire des utilisateurs",
+  "description": "Consultez les utilisateurs de la plateforme et leurs rôles publics.",
+  "searchLabel": "Rechercher un utilisateur",
+  "searchPlaceholder": "Rechercher par pseudo ou rôle",
+  "empty": "Aucun utilisateur ne correspond à votre recherche.",
+  "noRole": "Aucun rôle",
+  "count": "{{n}} utilisateur(s)",
+  "loadError": "Impossible de charger l'annuaire des utilisateurs.",
+  "roles": {
+    "USER": "Utilisateur",
+    "SUPER_ADMIN": "Super administrateur",
+    "HUNTER": "Chasseur",
+    "MENTOR": "Mentor",
+    "QUALITY_CHECKER": "Contrôleur qualité",
+    "COORDINATOR": "Coordinateur",
+    "QUALITY_CONTENT": "Contenu qualité"
+  }
+}

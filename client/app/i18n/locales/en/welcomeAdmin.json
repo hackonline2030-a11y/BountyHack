@@ -7,6 +7,7 @@
     "nav": {
       "label": "Dashboard navigation",
       "users": "Users",
+      "directory": "User directory",
       "register": "Registration",
       "teams": "Report teams",
       "criteria": "Quality criteria",
