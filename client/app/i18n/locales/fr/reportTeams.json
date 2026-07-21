@@ -173,7 +173,7 @@
         "errorWriter": "Choisissez quel hunter est le rédacteur désigné."
       },
       "teamDetail": {
-        "metaTitle": "Équipe rapport | BugBountyApp",
+        "metaTitle": "Équipe rapport | HackTheBounty",
         "back": "Retour à la coordination",
         "loading": "Chargement de l’équipe…",
         "loadError": "Impossible de charger cette équipe.",
