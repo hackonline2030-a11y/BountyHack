@@ -1,42 +1,62 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import { getT } from "next-i18next/server";
-import { Section } from "@modules/app/nextjs/components/sections/Section";
-import { LoginForm } from "@/modules/auth/nextjs/components/forms/LoginForm";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { createRequireAppSessionDependencies } from "@modules/auth/core/auth.factory";
+import { requireAppSessionUseCase } from "@modules/auth/core/usecase/require-app-session.usecase";
+import { ACCESS_TOKEN_COOKIE_NAME } from "@modules/auth/core/model/session.constants";
+import { AppRoleCode } from "@/lib/app-role-code";
+import { nestInternalApiUrl } from "@/lib/server/nest-internal-url";
 
 type PageProps = {
   params: Promise<{ lng: string }>;
 };
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
-  const { lng } = await params;
-  const { t } = await getT("connexion", { lng });
-  return {
-    title: t("loginPage.metaTitle"),
-  };
-}
+/** Single place: locale root → role dashboard (existing welcome-* pages). */
+const DASHBOARD_BY_ROLE: Partial<Record<AppRoleCode, string>> = {
+  [AppRoleCode.SUPER_ADMIN]: "welcome-admin",
+  [AppRoleCode.HUNTER]: "welcome-hunter",
+  [AppRoleCode.QUALITY_CHECKER]: "welcome-quality-checker",
+  [AppRoleCode.MENTOR]: "welcome-mentor",
+  [AppRoleCode.COORDINATOR]: "welcome-coordinator",
+  [AppRoleCode.QUALITY_CONTENT]: "welcome-platform-manager",
+};
 
 export default async function Home({ params }: PageProps) {
   const { lng } = await params;
-  const { t } = await getT("connexion", { lng });
+  const login = `/${lng}/login`;
 
-  return (
-    <main className="flex w-full min-h-[calc(100vh-(var(--header-height)+var(--footer-height)))] flex-col">
-      <Section
-        fluid
-        classNames="flex min-h-0 flex-1 flex-col items-center justify-center bg-pattern"
-      >
-        <article className="flex w-full max-w-sm flex-col items-center gap-6 px-5 py-8 sm:px-6">
-          <h1 className="text-center text-3xl font-bold text-white">
-            {t("loginPage.heading")}
-          </h1>
-          <Suspense fallback={null}>
-            <LoginForm />
-          </Suspense>
-        </article>
-      </Section>
-    </main>
+  const session = await requireAppSessionUseCase(
+    createRequireAppSessionDependencies(),
   );
+  if (!session.ok) {
+    redirect(login);
+  }
+
+  const token = (await cookies()).get(ACCESS_TOKEN_COOKIE_NAME)?.value?.trim();
+  if (!token) {
+    redirect(login);
+  }
+
+  const res = await fetch(nestInternalApiUrl("users/me"), {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    redirect(login);
+  }
+
+  const data: unknown = await res.json().catch(() => null);
+  const roleCode =
+    data && typeof data === "object"
+      ? (data as Record<string, unknown>).roleCode
+      : null;
+  const segment =
+    typeof roleCode === "string"
+      ? DASHBOARD_BY_ROLE[roleCode as AppRoleCode]
+      : undefined;
+
+  redirect(segment ? `/${lng}/${segment}` : login);
 }

@@ -54,7 +54,7 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
 
   const prefix = localePrefixFromPathname(pathname);
   const localeHome = prefix;
-  const loginHref = `${prefix}/`;
+  const loginHref = `${prefix}/login`;
   const isLoginActive = isAuthHeaderLoginHighlightPath(pathname);
   const dashboardSegment = welcomeDashboardPathFromRoleCode(currentRoleCode);
   const dashboardHref =
@@ -224,9 +224,6 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
           </span>
         </button>
         <div className="hidden items-center gap-2 md:flex lg:gap-3">
-          <Link href={localeHome} className="header-nav-link">
-            {t("header.home")}
-          </Link>
           {dashboardHref ? (
             <Link
               href={dashboardHref}
@@ -263,13 +260,6 @@ export const Header: React.FC<{ className?: string }> = ({ className = "" }) => 
           className="border-t border-black/10 bg-white shadow-lg md:hidden"
         >
           <div className="header-container flex flex-col gap-2 py-3">
-            <Link
-              href={localeHome}
-              className="header-mobile-nav-link"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t("header.home")}
-            </Link>
             {dashboardHref ? (
               <Link
                 href={dashboardHref}
